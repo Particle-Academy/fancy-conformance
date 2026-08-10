@@ -1,0 +1,182 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/decimal",
+  "cases": [
+    {
+      "id": "0001-format-plain",
+      "title": "formatFloat leaves ordinary numbers alone",
+      "since": "0.1.0",
+      "tags": ["formatFloat", "regression"],
+      "fn": "formatFloat",
+      "input": { "value": 1.5 },
+      "expected": "1.5"
+    },
+    {
+      "id": "0002-format-integral",
+      "title": "formatFloat keeps trailing zeros in the integer part",
+      "since": "0.1.0",
+      "tags": ["formatFloat"],
+      "fn": "formatFloat",
+      "input": { "value": 1200 },
+      "expected": "1200",
+      "notes": "Only the FRACTION is trimmed. A blanket trailing-zero strip turns 1200 into 12."
+    },
+    {
+      "id": "0003-format-1e300",
+      "title": "formatFloat expands 1e300 exactly, never exponentially",
+      "since": "0.1.0",
+      "tags": ["formatFloat", "exponent", "hazard"],
+      "fn": "formatFloat",
+      "input": { "value": 1e300 },
+      "expected": "1000000000000000052504760255204420248704468581108159154915854115511802457988908195786371375080447864043704443832883878176942523235360430575644792184786706982848387200926575803737830233794788090059368953234970799945081119038967640880074652742780142494579258788820056842838115669472196386865459400540160",
+      "notes": "The severe one. toFixed goes exponential at 1e21, and a trailing-zero strip then eats the EXPONENT: (1e300).toFixed(14) is '1e+300', which strips to '1e+3'. 1e300 was written into spreadsheets as 1e3 — not a crash, not invalid XML, just a different number in a file someone opens later and believes. NOTE the golden is NOT 1 followed by 300 zeros: number_format prints the exact value of the double, and the nearest double to 1e300 is not 10^300."
+    },
+    {
+      "id": "0004-format-1e21-boundary",
+      "title": "formatFloat does not go exponential at the 1e21 boundary",
+      "since": "0.1.0",
+      "tags": ["formatFloat", "exponent", "hazard"],
+      "fn": "formatFloat",
+      "input": { "value": 1e21 },
+      "expected": "1000000000000000000000",
+      "notes": "1e21 is exactly where JS toFixed switches notation. `<v>1e+21</v>` is not valid cell content, so a reader may reject the whole sheet."
+    },
+    {
+      "id": "0005-format-negative-zero",
+      "title": "formatFloat collapses negative zero to 0",
+      "since": "0.1.0",
+      "tags": ["formatFloat", "edge"],
+      "fn": "formatFloat",
+      "input": { "value": -0.0 },
+      "expected": "0",
+      "notes": "Both engines already agreed here — this was listed as a divergence in the polyglot plan and checking proved it was not one. Kept because both sides drop the sign INCIDENTALLY (via number_format / toFixed) rather than by decision, so a faster hand-rolled formatter would reintroduce it."
+    },
+    {
+      "id": "0006-format-repeating",
+      "title": "formatFloat keeps 14 decimal places",
+      "since": "0.1.0",
+      "tags": ["formatFloat", "precision"],
+      "fn": "formatFloat",
+      "input": { "value": 0.3333333333333333 },
+      "expected": "0.33333333333333",
+      "notes": "14, not 15 or 17. The step where two implementations pick different precision is invisible until someone diffs two documents."
+    },
+    {
+      "id": "0007-format-negative",
+      "title": "formatFloat keeps the sign on a real negative",
+      "since": "0.1.0",
+      "tags": ["formatFloat", "regression"],
+      "fn": "formatFloat",
+      "input": { "value": -2.25 },
+      "expected": "-2.25"
+    },
+    {
+      "id": "0008-coerce-exponent",
+      "title": "numericStringToNumber reads exponent notation",
+      "since": "0.1.0",
+      "tags": ["numericStringToNumber", "exponent", "hazard"],
+      "fn": "numericStringToNumber",
+      "input": { "value": "1e5" },
+      "expected": 100000,
+      "notes": "parseInt stops at the first non-digit, so '1e5' became 1. PHP has read exponent notation in numeric strings since PHP 7, and the JS helper's own docstring claimed it mirrored PHP."
+    },
+    {
+      "id": "0009-coerce-negative-exponent",
+      "title": "numericStringToNumber reads a negative exponent",
+      "since": "0.1.0",
+      "tags": ["numericStringToNumber", "exponent"],
+      "fn": "numericStringToNumber",
+      "input": { "value": "2e-3" },
+      "expected": 0.002,
+      "notes": "PHP's dot-test-then-(int) path returned 0 for this — a value silently becoming zero is the worst failure mode in the table."
+    },
+    {
+      "id": "0010-coerce-int-overflow",
+      "title": "numericStringToNumber does not clamp at the platform integer max",
+      "since": "0.1.0",
+      "tags": ["numericStringToNumber", "overflow", "hazard"],
+      "fn": "numericStringToNumber",
+      "input": { "value": "1e21" },
+      "expected": 1e21,
+      "notes": "PHP's (int) '1e21' clamps to PHP_INT_MAX (9223372036854775807), which is not the number anyone wrote. Rust and Go have the same trap with i64."
+    },
+    {
+      "id": "0011-coerce-leading-zeros",
+      "title": "numericStringToNumber ignores leading zeros",
+      "since": "0.1.0",
+      "tags": ["numericStringToNumber", "regression"],
+      "fn": "numericStringToNumber",
+      "input": { "value": "007" },
+      "expected": 7,
+      "notes": "Must NOT be read as octal — a trap in several languages' parse routines."
+    },
+    {
+      "id": "0012-coerce-leading-dot",
+      "title": "numericStringToNumber accepts a leading dot",
+      "since": "0.1.0",
+      "tags": ["numericStringToNumber", "regression"],
+      "fn": "numericStringToNumber",
+      "input": { "value": ".5" },
+      "expected": 0.5
+    },
+    {
+      "id": "0013-round-positive-half",
+      "title": "roundMoney rounds a positive half away from zero",
+      "since": "0.1.0",
+      "tags": ["roundMoney", "money"],
+      "fn": "roundMoney",
+      "input": { "value": 2.5 },
+      "expected": 3,
+      "notes": "PHP round() and JS Math.round() agree here, which is exactly why the divergence below went unnoticed."
+    },
+    {
+      "id": "0014-round-negative-half",
+      "title": "roundMoney rounds a negative half away from zero",
+      "since": "0.1.0",
+      "tags": ["roundMoney", "money", "hazard", "live-divergence"],
+      "fn": "roundMoney",
+      "input": { "value": -2.5 },
+      "expected": -3,
+      "notes": "LIVE DIVERGENCE at the time this suite was written. PHP round(-2.5) is -3 (half away from zero); JS Math.round(-2.5) is -2 (half toward +Infinity). fancy-mlm-js's amountAsInt is documented as a mirror of fancy-mlm-php's and is not one. Reachable through configuration: levelFactors is `.map(Number)` off host config with no sign validation, so a negative factor produces a negative reward, and the two backends then pay different amounts for the same event."
+    },
+    {
+      "id": "0015-round-negative-half-small",
+      "title": "roundMoney rounds -0.5 to -1, not to zero",
+      "since": "0.1.0",
+      "tags": ["roundMoney", "money", "hazard", "live-divergence"],
+      "fn": "roundMoney",
+      "input": { "value": -0.5 },
+      "expected": -1,
+      "notes": "The starkest row: JS Math.round(-0.5) is -0, so a clawback of half a unit becomes NOTHING on one backend and a whole unit on the other."
+    },
+    {
+      "id": "0016-round-symmetry",
+      "title": "roundMoney is symmetric about zero",
+      "since": "0.1.0",
+      "tags": ["roundMoney", "money"],
+      "fn": "roundMoney",
+      "input": { "value": -1.5 },
+      "expected": -2,
+      "notes": "The property that matters for money: |round(-x)| == |round(x)|. A credit and its matching clawback must cancel exactly, or a ledger drifts by a unit per reversal."
+    },
+    {
+      "id": "0017-round-below-half",
+      "title": "roundMoney rounds below a half toward zero",
+      "since": "0.1.0",
+      "tags": ["roundMoney", "regression"],
+      "fn": "roundMoney",
+      "input": { "value": -2.4 },
+      "expected": -2,
+      "notes": "Both engines already agree. Present so an implementation switching to a blanket floor/ceil fails rather than passing the halves by luck."
+    },
+    {
+      "id": "0018-round-above-half",
+      "title": "roundMoney rounds above a half away from zero",
+      "since": "0.1.0",
+      "tags": ["roundMoney", "regression"],
+      "fn": "roundMoney",
+      "input": { "value": -2.6 },
+      "expected": -3
+    }
+  ]
+}

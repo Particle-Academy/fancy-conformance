@@ -1,0 +1,109 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      # `contents: write` because this workflow also creates the GitHub release
+      # and uploads the language-neutral tarball to it. The npm publish itself
+      # still needs nothing beyond `id-token: write` — there is no token.
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Release gate: a tag with no CHANGELOG entry fails HERE, before the
+      # package reaches the registry. A published version whose changes are
+      # undocumented cannot be fixed by editing the changelog afterwards — the
+      # tarball is already out, and whoever upgraded into it has no way to
+      # learn what changed.
+      - name: Changelog entry for this tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ ! -f CHANGELOG.md ]; then
+            echo "::error::No CHANGELOG.md. Every package keeps one."
+            exit 1
+          fi
+          if ! grep -qE "^## +\\[?v?${VERSION}\\]?" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md has no entry for ${VERSION}. Add one — say what a consumer must DO — then re-tag."
+            exit 1
+          fi
+          echo "Found changelog entry for ${VERSION}."
+
+      # The fixtures ARE the package. A tag whose VERSION file disagrees with
+      # package.json would publish a tarball whose self-reported suite version
+      # is a lie — and every runner prints that number into its CI log, so the
+      # lie would propagate into other repos' evidence.
+      - name: VERSION matches the tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          FILE_VERSION="$(cat VERSION | tr -d '[:space:]')"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$FILE_VERSION" != "$VERSION" ] || [ "$PKG_VERSION" != "$VERSION" ]; then
+            echo "::error::tag ${VERSION}, VERSION ${FILE_VERSION}, package.json ${PKG_VERSION} — all three must agree."
+            exit 1
+          fi
+          echo "Version ${VERSION} agrees across the tag, VERSION and package.json."
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+
+      - name: Install
+        run: |
+          npm install
+          composer install --no-interaction --prefer-dist
+
+      # Never publish fixtures that have not just been proven to load and agree
+      # in both languages. This is the one package where shipping a broken
+      # artifact silently weakens every consumer's CI rather than breaking it.
+      - name: Test
+        run: npm test
+
+      - name: PHP test
+        run: vendor/bin/pest
+
+      - name: Both loaders agree
+        run: npm run cross-check
+
+      - name: Build
+        run: npm run build
+
+      # Trusted Publishing (OIDC) — no token. npm pinned to 11.18.0:
+      # npm@latest (12.0.0) breaks --provenance ("Cannot find module 'sigstore'").
+      - name: Publish
+        run: npx -y npm@11.18.0 publish --provenance --access public
+
+      # The plain tarball is the artifact a Rust, Go or Python CI job fetches —
+      # no npm, no Composer, no JavaScript toolchain. Fixtures only.
+      - name: Build the language-neutral tarball
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          tar -czf "fancy-conformance-${VERSION}.tar.gz" VERSION suites schema parity runners LICENSE README.md
+          sha256sum "fancy-conformance-${VERSION}.tar.gz" > "fancy-conformance-${VERSION}.tar.gz.sha256"
+
+      - name: Attach it to the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes "Fixture set ${VERSION}. See CHANGELOG.md." \
+            "fancy-conformance-${VERSION}.tar.gz" \
+            "fancy-conformance-${VERSION}.tar.gz.sha256" \
+          || gh release upload "${GITHUB_REF_NAME}" \
+            "fancy-conformance-${VERSION}.tar.gz" \
+            "fancy-conformance-${VERSION}.tar.gz.sha256" --clobber

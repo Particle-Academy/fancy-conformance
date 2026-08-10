@@ -1,0 +1,147 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/satisfies-range",
+  "cases": [
+    {
+      "id": "0001-caret-pre-1.0-patch",
+      "title": "^0.15 accepts a patch bump",
+      "since": "0.1.0",
+      "tags": ["caret", "pre-1.0"],
+      "input": { "version": "0.15.1", "range": "^0.15" },
+      "expected": true
+    },
+    {
+      "id": "0002-caret-pre-1.0-minor",
+      "title": "^0.15 rejects a minor bump",
+      "since": "0.1.0",
+      "tags": ["caret", "pre-1.0"],
+      "input": { "version": "0.16.0", "range": "^0.15" },
+      "expected": false,
+      "notes": "Below 1.0.0 a minor bump is breaking, so ^0.15 means 0.15.x. This is the range every pre-1.0 package in the suite actually needs."
+    },
+    {
+      "id": "0003-caret-post-1.0-minor",
+      "title": "^1.0 accepts a minor bump",
+      "since": "0.1.0",
+      "tags": ["caret"],
+      "input": { "version": "1.2.0", "range": "^1.0" },
+      "expected": true
+    },
+    {
+      "id": "0004-caret-post-1.0-major",
+      "title": "^1.0 rejects a major bump",
+      "since": "0.1.0",
+      "tags": ["caret"],
+      "input": { "version": "2.0.0", "range": "^1.0" },
+      "expected": false
+    },
+    {
+      "id": "0005-gte-equal",
+      "title": ">=0.7 accepts the boundary itself",
+      "since": "0.1.0",
+      "tags": ["comparator"],
+      "input": { "version": "0.7.0", "range": ">=0.7" },
+      "expected": true
+    },
+    {
+      "id": "0006-gte-below",
+      "title": ">=0.7 rejects a lower version",
+      "since": "0.1.0",
+      "tags": ["comparator"],
+      "input": { "version": "0.5.0", "range": ">=0.7" },
+      "expected": false
+    },
+    {
+      "id": "0007-tilde-patch",
+      "title": "~0.7.1 accepts a higher patch",
+      "since": "0.1.0",
+      "tags": ["tilde"],
+      "input": { "version": "0.7.3", "range": "~0.7.1" },
+      "expected": true
+    },
+    {
+      "id": "0008-tilde-minor",
+      "title": "~0.7.1 rejects a minor bump",
+      "since": "0.1.0",
+      "tags": ["tilde"],
+      "input": { "version": "0.8.0", "range": "~0.7.1" },
+      "expected": false
+    },
+    {
+      "id": "0009-wildcard",
+      "title": "* accepts anything",
+      "since": "0.1.0",
+      "tags": ["wildcard"],
+      "input": { "version": "9.9.9", "range": "*" },
+      "expected": true
+    },
+    {
+      "id": "0010-union",
+      "title": "A || union accepts either side",
+      "since": "0.1.0",
+      "tags": ["union"],
+      "input": { "version": "0.7.0", "range": "^0.5 || ^0.7" },
+      "expected": true
+    },
+    {
+      "id": "0011-prerelease-included",
+      "title": "^1.2 accepts a prerelease of a matching version",
+      "since": "0.1.0",
+      "tags": ["caret", "prerelease", "non-standard"],
+      "input": { "version": "1.2.3-beta.1", "range": "^1.2" },
+      "expected": true,
+      "notes": "DIFFERS FROM STANDARD SEMVER, which returns false because prereleases are excluded from ranges unless the range itself carries one. Reaching for a stock semver library gives the wrong answer here: a node the host would accept is refused at load."
+    },
+    {
+      "id": "0012-caret-zero-zero",
+      "title": "^0.0.1 accepts a higher 0.0.x patch",
+      "since": "0.1.0",
+      "tags": ["caret", "pre-1.0", "non-standard"],
+      "input": { "version": "0.0.2", "range": "^0.0.1" },
+      "expected": true,
+      "notes": "DIFFERS FROM STANDARD SEMVER, where ^0.0.1 pins 0.0.1 exactly. Here the caret rule keys on the major being 0 and compares the MINOR, so 0.0.x is an open patch range. Wrong in the opposite direction from case 0011: a node loads that standard semver would have refused."
+    },
+    {
+      "id": "0013-empty-range",
+      "title": "An empty range accepts anything",
+      "since": "0.1.0",
+      "tags": ["wildcard", "edge"],
+      "input": { "version": "1.0.0", "range": "" },
+      "expected": true
+    },
+    {
+      "id": "0014-bare-version-exact",
+      "title": "A bare version is an exact match",
+      "since": "0.1.0",
+      "tags": ["exact"],
+      "input": { "version": "1.2.3", "range": "1.2.3" },
+      "expected": true
+    },
+    {
+      "id": "0015-whitespace-trimmed",
+      "title": "Surrounding whitespace is trimmed",
+      "since": "0.1.0",
+      "tags": ["edge"],
+      "input": { "version": "1.2.3", "range": " ^1.2 " },
+      "expected": true
+    },
+    {
+      "id": "0016-two-digit-major-union",
+      "title": "A union parses a two-digit major",
+      "since": "0.1.0",
+      "tags": ["union", "edge"],
+      "input": { "version": "10.0.0", "range": "^9 || ^10" },
+      "expected": true,
+      "notes": "Guards the naive single-digit regex. An implementation that matches \\d rather than \\d+ passes every other row in this table and fails only here."
+    },
+    {
+      "id": "0017-unparseable-fails-closed",
+      "title": "An unparseable range is unsatisfied, not waved through",
+      "since": "0.1.0",
+      "tags": ["edge", "fail-closed"],
+      "input": { "version": "1.0.0", "range": "not-a-range" },
+      "expected": false,
+      "notes": "Fails CLOSED. The tempting alternative — treat anything unrecognised as permissive — turns a typo in a manifest into a node that loads on hosts it was never checked against."
+    }
+  ]
+}

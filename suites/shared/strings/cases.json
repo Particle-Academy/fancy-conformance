@@ -1,0 +1,293 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/strings",
+  "cases": [
+    {
+      "id": "0001-ascii-baseline",
+      "title": "ASCII baseline — markers segment as expected",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "regression"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "plain **bold** and `code` end"
+      },
+      "expected": [
+        {
+          "text": "plain ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "bold",
+          "b": true,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": " and ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "code",
+          "b": false,
+          "i": false,
+          "code": true
+        },
+        {
+          "text": " end",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "The control. If this row fails, the implementation is broken generally rather than on Unicode specifically, and the rows below tell you nothing."
+    },
+    {
+      "id": "0002-cjk-heading-text",
+      "title": "CJK text around bold markers",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "cjk"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "CJK 日本語の見出し **強調** です"
+      },
+      "expected": [
+        {
+          "text": "CJK 日本語の見出し ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "強調",
+          "b": true,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": " です",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "Multi-byte in UTF-8, single code unit in UTF-16. A byte-indexing implementation is safe here only because UTF-8 is self-synchronising — no continuation byte can collide with an ASCII marker."
+    },
+    {
+      "id": "0003-accented-latin",
+      "title": "Accented Latin around bold and code",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "latin1-supplement"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "café **bold** and naïve `code`"
+      },
+      "expected": [
+        {
+          "text": "café ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "bold",
+          "b": true,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": " and naïve ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "code",
+          "b": false,
+          "i": false,
+          "code": true
+        }
+      ]
+    },
+    {
+      "id": "0004-emoji-surrogate",
+      "title": "Emoji (astral plane) around bold markers",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "emoji",
+        "surrogate"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "emoji 🎉 **bold** end"
+      },
+      "expected": [
+        {
+          "text": "emoji 🎉 ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "bold",
+          "b": true,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": " end",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "A surrogate PAIR in UTF-16, so the JS loop visits it as two separate iterations and reassembles it by appending both halves in order. Rust cannot inherit this: slicing &str at a non-char boundary panics rather than producing half a character."
+    },
+    {
+      "id": "0005-combining-mark",
+      "title": "Combining mark is not split from its base",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "combining"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "á combining **mark** here"
+      },
+      "expected": [
+        {
+          "text": "á combining ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "mark",
+          "b": true,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": " here",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "U+0301 is a separate scalar value from its base letter. An implementation that segments by grapheme cluster rather than scalar will produce the same TEXT here but must not reorder or drop the mark."
+    },
+    {
+      "id": "0006-marker-adjacent-cjk",
+      "title": "Bold markers directly adjacent to CJK, no spaces",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "cjk",
+        "edge"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "日本語**強調**日本語"
+      },
+      "expected": [
+        {
+          "text": "日本語",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "強調",
+          "b": true,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "日本語",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "No ASCII whitespace anywhere near the markers. This is the row that fails first if an implementation looks backward or forward one BYTE to decide whether a marker is word-adjacent."
+    },
+    {
+      "id": "0007-emoji-inside-code",
+      "title": "Emoji and accents inside a code span",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "emoji",
+        "code-span"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "x `🎉 café` y"
+      },
+      "expected": [
+        {
+          "text": "x ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "🎉 café",
+          "b": false,
+          "i": false,
+          "code": true
+        },
+        {
+          "text": " y",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "Code spans are copied out by index rather than scanned character by character, so this exercises the slice path instead of the append path."
+    },
+    {
+      "id": "0008-unclosed-code",
+      "title": "Unclosed code span swallows the rest, including non-ASCII",
+      "since": "0.1.0",
+      "tags": [
+        "tokenize",
+        "edge",
+        "fail-open"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "trailing `unclosed 日本語"
+      },
+      "expected": [
+        {
+          "text": "trailing ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "`unclosed 日本語",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "An unterminated backtick falls through as literal text rather than erroring. The remainder is taken as one slice to end-of-string, so a byte-indexed implementation must land on a char boundary."
+    }
+  ]
+}

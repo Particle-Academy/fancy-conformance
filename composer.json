@@ -1,0 +1,56 @@
+{
+    "name": "particle-academy/fancy-conformance",
+    "description": "Shared cross-language conformance fixtures for the Fancy suite. One contract, N implementations, and a single table that every implementation asserts in its own CI — so 'parity' is a test result rather than a claim. Ships the fixture data itself alongside a small PHP loader.",
+    "type": "library",
+    "keywords": [
+        "conformance",
+        "fixtures",
+        "parity",
+        "cross-language",
+        "polyglot",
+        "golden-files",
+        "contract-testing",
+        "particle-academy"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/Particle-Academy/fancy-conformance",
+    "support": {
+        "issues": "https://github.com/Particle-Academy/fancy-conformance/issues",
+        "source": "https://github.com/Particle-Academy/fancy-conformance"
+    },
+    "authors": [
+        {
+            "name": "Particle Academy",
+            "homepage": "https://github.com/Particle-Academy"
+        }
+    ],
+    "require": {
+        "php": "^8.4"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.26",
+        "pestphp/pest": "^3.0|^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ParticleAcademy\\Conformance\\": "php/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ParticleAcademy\\Conformance\\Tests\\": "php/tests/"
+        }
+    },
+    "scripts": {
+        "test": "pest",
+        "lint": "pint --test"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

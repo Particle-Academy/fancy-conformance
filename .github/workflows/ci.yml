@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install
+        run: npm install --no-audit --no-fund --legacy-peer-deps
+
+      - name: Lint
+        run: npm run lint
+
+      # NOT `npm test --if-present`. This repository's whole argument is that a
+      # green tick over an absent or skipped suite is worse than a red one, so
+      # the one job that must never silently no-op is its own.
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["8.4"]
+    steps:
+      - uses: actions/checkout@v4
+
+      # A missing toolchain is a FAILURE, not a skip. `skipIf(!HAS_PHP)`
+      # returning green is the specific mechanism that hid two-way drift for
+      # months in holy-sheet and dark-slide, which is why PHP is installed here
+      # rather than detected.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Install
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Test
+        run: vendor/bin/pest
+
+  cross-language:
+    runs-on: ubuntu-latest
+    needs: [node, php]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+
+      - name: Install
+        run: |
+          npm install --no-audit --no-fund --legacy-peer-deps
+          composer install --no-interaction --prefer-dist
+
+      # The claim this repository makes is that two loaders reading one fixture
+      # set produce the SAME verdicts. Asserting that inside either language's
+      # own suite would be asserting it against itself.
+      - name: Both loaders agree
+        run: npm run cross-check

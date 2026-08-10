@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.particle.academy/schemas/conformance-case-table.schema.json",
+  "title": "Fancy conformance case table",
+  "type": "object",
+  "required": ["suite", "cases"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "suite": { "type": "string", "minLength": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "case": {
+      "type": "object",
+      "required": ["id", "title", "since", "input", "expected"],
+      "properties": {
+        "id": {
+          "description": "Stable, ordered, unique within the suite. Never renumber — an id appears in changelogs and in other repos' skip lists.",
+          "type": "string",
+          "pattern": "^[0-9]{4}-[a-z0-9]+(?:[-.][a-z0-9]+)*$"
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "since": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "fn": {
+          "description": "Which of the suite's functions this case exercises. Required when the suite declares contract.functions.",
+          "type": "string",
+          "minLength": 1
+        },
+        "input": { "type": "object" },
+        "expected": {},
+        "skip": {
+          "description": "The ONLY sanctioned way not to run a case. Keyed by language; the value is a REASON and may not be empty. A runner prints every skip in its summary — a silent skip is what turned two existing parity suites into decoration.",
+          "type": "object",
+          "propertyNames": { "enum": ["php", "node", "rust", "python", "go"] },
+          "additionalProperties": { "type": "string", "minLength": 1 },
+          "minProperties": 1
+        },
+        "notes": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

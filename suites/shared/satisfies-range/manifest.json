@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/satisfies-range",
+  "title": "Minimal semver range matching",
+  "since": "0.1.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "satisfiesRange(version: string, range: string): boolean",
+    "summary": "Does a concrete version satisfy a manifest's declared range?",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-ui-cli", "symbol": "satisfiesRange" },
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "satisfiesRange" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "NodeManifest::satisfiesRange" }
+    ]
+  },
+  "notes": [
+    "This suite is the one promoted verbatim from code that already existed, because it is the proof the method works. Three independent implementations of this function have NOT drifted, and the only thing they do differently from the suite's other triplicated contracts is that each carries this identical table in its own CI.",
+    "Two rows deliberately disagree with standard semver. They are tagged `non-standard` and a fourth implementation reaching for a stock semver library will fail exactly those two. That is the intended outcome: the disagreement should be a red build, not a discovery."
+  ]
+}

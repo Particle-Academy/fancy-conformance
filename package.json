@@ -1,0 +1,79 @@
+{
+  "name": "@particle-academy/fancy-conformance",
+  "version": "0.1.0",
+  "description": "Shared cross-language conformance fixtures for the Fancy suite. One contract, N implementations, and a single table that every implementation asserts in its own CI — so 'parity' is a test result rather than a claim. Ships the fixture data itself, so a Rust, Go or Python runner can consume it without a JavaScript toolchain.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Particle-Academy/fancy-conformance.git"
+  },
+  "homepage": "https://github.com/Particle-Academy/fancy-conformance#readme",
+  "bugs": "https://github.com/Particle-Academy/fancy-conformance/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./suites/*": "./suites/*",
+    "./schema/*": "./schema/*",
+    "./parity/*": "./parity/*",
+    "./VERSION": "./VERSION",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "suites",
+    "schema",
+    "parity",
+    "runners",
+    "VERSION",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "cross-check": "node --import tsx scripts/cross-check.mjs",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "tsup"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "conformance",
+    "fixtures",
+    "parity",
+    "cross-language",
+    "polyglot",
+    "golden-files",
+    "contract-testing",
+    "fancy-ui",
+    "particle-academy"
+  ],
+  "license": "MIT",
+  "sideEffects": false,
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

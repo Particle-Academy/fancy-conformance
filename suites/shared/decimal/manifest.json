@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/decimal",
+  "title": "Number formatting, numeric-string coercion, and money rounding",
+  "since": "0.1.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "Three separate functions that every backend needs and that every backend has so far gotten subtly differently.",
+    "functions": {
+      "formatFloat": "formatFloat(v: float) -> string — a float as it is written into a document, plain decimal, never exponential",
+      "numericStringToNumber": "numericStringToNumber(s: string) -> number — coercion of a numeric STRING supplied by a host",
+      "roundMoney": "roundMoney(v: float) -> int — the rounding applied to a currency/points amount before it is paid out"
+    },
+    "reference": "php",
+    "referenceNote": "PHP is the reference for all three because the pair's contract is 'same result either backend' and PHP is what shipped first. formatFloat is `rtrim(rtrim(number_format((float) $v, 14, '.', ''), '0'), '.')`; roundMoney is `(int) round($v)`.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/holy-sheet", "symbol": "formatFloat, numericStringToNumber" },
+      { "language": "node", "package": "@particle-academy/holy-sheet-js", "symbol": "formatFloat, numericStringToNumber" },
+      { "language": "php", "package": "particle-academy/fancy-mlm-php", "symbol": "RewardComputation::amountAsInt" },
+      { "language": "node", "package": "@particle-academy/fancy-mlm-js", "symbol": "amountAsInt" }
+    ]
+  },
+  "notes": [
+    "Every formatFloat/numericStringToNumber case here was a live PHP-vs-JS disagreement in shipped packages, fixed in holy-sheet 2.0.1 / holy-sheet-js 2.1.0. They are pinned so a third language inherits the behaviour rather than the assumption.",
+    "The roundMoney cases are NOT historical. They were found by writing this suite on 2026-08-10 and are a live divergence at the time of writing: PHP round() is half-away-from-zero, JS Math.round() is half-toward-positive-infinity, and they disagree on every negative half.",
+    "Goldens are not what the value 'obviously' is. number_format prints the exact value of the double, and the nearest double to 1e300 is not 10^300 — see case 0003."
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.particle.academy/schemas/parity-ledger.schema.json",
+  "title": "Fancy capability release parity ledger",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "capabilities"],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/capability"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^v?[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"
+    },
+    "packageRelease": {
+      "type": "object",
+      "required": ["package", "version", "commit"],
+      "properties": {
+        "package": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "$ref": "#/$defs/version"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "mirror": {
+      "type": "object",
+      "required": [
+        "language",
+        "status",
+        "canonical_php_version",
+        "contract_version"
+      ],
+      "properties": {
+        "language": {
+          "enum": ["node", "rust", "python", "go"]
+        },
+        "status": {
+          "enum": ["current", "pending", "blocked", "unsupported", "deprecated"]
+        },
+        "canonical_php_version": {
+          "$ref": "#/$defs/version"
+        },
+        "contract_version": {
+          "$ref": "#/$defs/version"
+        },
+        "implementation": {
+          "$ref": "#/$defs/packageRelease"
+        },
+        "conformance_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attestation_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "tracking_issue": {
+          "type": "string",
+          "format": "uri"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "current"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "implementation",
+              "conformance_ref",
+              "attestation_url",
+              "owner",
+              "updated_at"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": ["blocked", "unsupported", "deprecated"]
+              }
+            }
+          },
+          "then": {
+            "required": ["reason", "owner", "updated_at"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "enum": ["pending", "blocked"]
+              }
+            }
+          },
+          "then": {
+            "required": ["tracking_issue"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "capability": {
+      "type": "object",
+      "required": [
+        "capability",
+        "contract_version",
+        "conformance_ref",
+        "canonical_php",
+        "mirrors"
+      ],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "contract_version": {
+          "$ref": "#/$defs/version"
+        },
+        "conformance_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_php": {
+          "$ref": "#/$defs/packageRelease"
+        },
+        "mirrors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mirror"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

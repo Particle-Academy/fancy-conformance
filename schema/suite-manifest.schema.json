@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ui.particle.academy/schemas/conformance-suite-manifest.schema.json",
+  "title": "Fancy conformance suite manifest",
+  "type": "object",
+  "required": ["suite", "title", "since", "caseFormat", "contract"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "suite": {
+      "description": "Path-shaped id, matching this file's directory under suites/.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "since": {
+      "description": "Suite version in which this suite first appeared.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "caseFormat": {
+      "description": "'table' — one cases.json whose rows are the cases; for pure functions. 'directory' — cases/<id>/ holding input + expected artifacts; for capabilities that emit files.",
+      "enum": ["table", "directory"]
+    },
+    "cases": {
+      "description": "For caseFormat=table, the file holding the rows. Defaults to cases.json.",
+      "type": "string"
+    },
+    "contract": {
+      "type": "object",
+      "required": ["summary", "implementations"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "function": { "type": "string" },
+        "functions": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "runShape": { "type": "object" },
+        "reference": {
+          "description": "Which language's behaviour the goldens were taken from. Goldens are never what a value 'obviously' is.",
+          "enum": ["php", "node", "rust", "python", "go"]
+        },
+        "referenceNote": { "type": "string" },
+        "implementations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["language", "package"],
+            "properties": {
+              "language": { "enum": ["php", "node", "rust", "python", "go"] },
+              "package": { "type": "string", "minLength": 1 },
+              "symbol": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "normalisation": {
+      "description": "For artifact suites only: which parts of an emitted document are ignored when comparing. Declared once per suite so a comparison never quietly loosens per case.",
+      "type": "object",
+      "properties": {
+        "ignoreAttributes": { "type": "array", "items": { "type": "string" } },
+        "orderInsensitive": { "type": "array", "items": { "type": "string" } },
+        "whitespace": { "enum": ["preserve", "collapse-between-elements"] },
+        "newline": { "enum": ["lf", "crlf", "preserve"] }
+      },
+      "additionalProperties": false
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
