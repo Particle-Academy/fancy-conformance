@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/expr",
+  "title": "{{ }} expression resolution for fancy-flow node config",
+  "since": "0.2.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "evaluateExpression(template: unknown, context: object): unknown  |  truthy(value: unknown): boolean",
+    "summary": "Resolve a dot-path template against an executor's inputs, and decide branch truthiness. Deliberately NOT a general expression language: dot-paths only, no arithmetic, comparisons or calls.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Nodes\\Support\\Expr" },
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "evaluateExpression / truthy" }
+    ]
+  },
+  "notes": [
+    "This suite exists because of what conformance could NOT catch. `Expr` shipped in PHP with no TypeScript twin at all, and a fixture table compares two implementations — it is structurally unable to report a MISSING one. The gap surfaced only when someone asked for editor autocomplete over a grammar and the grammar turned out to live on one side.",
+    "`truthy` is where the two languages disagree by default, so those rows carry the weight. `\"0\"`, `\"false\"` and `[]` are all truthy in JavaScript and falsy here; a branch node reading a form value or a JSON body hits every one of them. An implementation that forwards to native truthiness fails cases 0013-0015 and nothing else, which is exactly the signal wanted.",
+    "Case 0008 pins that a missing path interpolates to an empty string rather than the text \"null\" — the difference between a quietly-blank message and one that ships the word null to a customer.",
+    "fancy-flow's own `runFlow` does not call this. The PHP runtime resolves expressions inside its executors; the JS runtime hands config to the host's executor verbatim, and every host that uses `{{ }}` today already resolves it itself. Turning it on inside `runFlow` would interpolate a second time over values those hosts had already substituted. The TS side is therefore an opt-in export, and this suite pins its SEMANTICS, not where it is called from."
+  ]
+}

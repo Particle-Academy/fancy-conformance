@@ -10,6 +10,28 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-11
+
+### Added
+
+- **`shared/expr` - `{{ }}` expression resolution for fancy-flow node config.**
+  20 rows covering dot-path resolution, the `$json` / `$input` aliases, the
+  whole-string-keeps-its-type rule, interpolation stringifying, and branch
+  truthiness.
+
+  This suite exists because of what conformance could NOT catch, which is worth
+  recording. `FancyFlow\Nodes\Support\Expr` shipped in PHP with **no TypeScript
+  twin at all**. A fixture table compares two implementations - it is
+  structurally unable to report a MISSING one. The gap surfaced only when a
+  consumer asked for editor autocomplete over the grammar, and the grammar
+  turned out to live on exactly one side.
+
+  `truthy` carries the weight: `"0"`, `"false"` and `[]` are all truthy in
+  JavaScript and falsy in PHP, and a branch node reading a form value or a JSON
+  body hits every one. An implementation forwarding to native truthiness fails
+  cases 0013-0015 and nothing else.
+
+
 ## [0.1.0] - 2026-08-10
 
 First release. Fixtures, two loaders, and the CI shape that makes them mean

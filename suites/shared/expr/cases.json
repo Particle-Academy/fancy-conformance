@@ -1,0 +1,186 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/expr",
+  "cases": [
+    {
+      "id": "0001-whole-string-keeps-type",
+      "title": "A whole-string expression returns the resolved VALUE, not its text",
+      "since": "0.2.0",
+      "tags": ["evaluate", "types"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ $json.count }}", "context": { "in": { "count": 3 } } },
+      "expected": 3
+    },
+    {
+      "id": "0002-mixed-text-interpolates",
+      "title": "Anything other than a whole-string expression interpolates as text",
+      "since": "0.2.0",
+      "tags": ["evaluate"],
+      "fn": "evaluateExpression",
+      "input": { "template": "Hi {{ $json.name }}, you have {{ $json.count }}", "context": { "in": { "name": "Ada", "count": 3 } } },
+      "expected": "Hi Ada, you have 3"
+    },
+    {
+      "id": "0003-input-alias",
+      "title": "$input is an alias for $json",
+      "since": "0.2.0",
+      "tags": ["evaluate", "alias"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ $input.name }}", "context": { "in": { "name": "Ada" } } },
+      "expected": "Ada"
+    },
+    {
+      "id": "0004-alias-falls-back-to-whole-context",
+      "title": "With no `in` key, $json addresses the whole context",
+      "since": "0.2.0",
+      "tags": ["evaluate", "alias"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ $json.answer }}", "context": { "answer": "42" } },
+      "expected": "42"
+    },
+    {
+      "id": "0005-bare-top-level-key",
+      "title": "A bare path addresses the context, not the input",
+      "since": "0.2.0",
+      "tags": ["evaluate"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ answer }}", "context": { "answer": "yes", "in": { "answer": "no" } } },
+      "expected": "yes"
+    },
+    {
+      "id": "0006-nested-dot-path",
+      "title": "Dot-paths nest",
+      "since": "0.2.0",
+      "tags": ["evaluate"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ $json.user.email }}", "context": { "in": { "user": { "email": "a@b.c" } } } },
+      "expected": "a@b.c"
+    },
+    {
+      "id": "0007-missing-path-is-null",
+      "title": "An unresolvable path is null, not an error and not the literal text",
+      "since": "0.2.0",
+      "tags": ["evaluate", "regression"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ $json.nope }}", "context": { "in": { "yes": 1 } } },
+      "expected": null
+    },
+    {
+      "id": "0008-missing-path-interpolates-empty",
+      "title": "A missing path interpolates to empty, never to \"null\"",
+      "since": "0.2.0",
+      "tags": ["evaluate", "regression"],
+      "fn": "evaluateExpression",
+      "input": { "template": "[{{ $json.nope }}]", "context": { "in": {} } },
+      "expected": "[]"
+    },
+    {
+      "id": "0009-non-string-passes-through",
+      "title": "A non-string template is returned untouched",
+      "since": "0.2.0",
+      "tags": ["evaluate"],
+      "fn": "evaluateExpression",
+      "input": { "template": 7, "context": { "in": {} } },
+      "expected": 7
+    },
+    {
+      "id": "0010-plain-string-untouched",
+      "title": "A string with no braces is returned as-is",
+      "since": "0.2.0",
+      "tags": ["evaluate"],
+      "fn": "evaluateExpression",
+      "input": { "template": "just text", "context": { "in": {} } },
+      "expected": "just text"
+    },
+    {
+      "id": "0011-object-interpolates-as-json",
+      "title": "Interpolating an object stringifies it as JSON",
+      "since": "0.2.0",
+      "tags": ["evaluate", "stringify"],
+      "fn": "evaluateExpression",
+      "input": { "template": "payload: {{ $json.body }}", "context": { "in": { "body": { "a": 1 } } } },
+      "expected": "payload: {\"a\":1}"
+    },
+    {
+      "id": "0012-boolean-interpolates-lowercase",
+      "title": "Booleans interpolate as true/false, not 1/empty",
+      "since": "0.2.0",
+      "tags": ["evaluate", "stringify", "regression"],
+      "fn": "evaluateExpression",
+      "input": { "template": "ok={{ $json.ok }}", "context": { "in": { "ok": false } } },
+      "expected": "ok=false"
+    },
+    {
+      "id": "0013-truthy-string-false",
+      "title": "The string \"false\" is FALSY",
+      "since": "0.2.0",
+      "tags": ["truthy", "regression"],
+      "fn": "truthy",
+      "input": { "value": "false" },
+      "expected": false
+    },
+    {
+      "id": "0014-truthy-string-zero",
+      "title": "The string \"0\" is FALSY",
+      "since": "0.2.0",
+      "tags": ["truthy", "regression"],
+      "fn": "truthy",
+      "input": { "value": "0" },
+      "expected": false
+    },
+    {
+      "id": "0015-truthy-empty-array",
+      "title": "An empty array is FALSY",
+      "since": "0.2.0",
+      "tags": ["truthy", "regression"],
+      "fn": "truthy",
+      "input": { "value": [] },
+      "expected": false
+    },
+    {
+      "id": "0016-truthy-nonempty-array",
+      "title": "A non-empty array is truthy",
+      "since": "0.2.0",
+      "tags": ["truthy"],
+      "fn": "truthy",
+      "input": { "value": [0] },
+      "expected": true
+    },
+    {
+      "id": "0017-truthy-zero",
+      "title": "Zero is falsy",
+      "since": "0.2.0",
+      "tags": ["truthy"],
+      "fn": "truthy",
+      "input": { "value": 0 },
+      "expected": false
+    },
+    {
+      "id": "0018-truthy-null",
+      "title": "null is falsy",
+      "since": "0.2.0",
+      "tags": ["truthy"],
+      "fn": "truthy",
+      "input": { "value": null },
+      "expected": false
+    },
+    {
+      "id": "0019-truthy-off",
+      "title": "\"off\", \"no\" and \"null\" are falsy strings too",
+      "since": "0.2.0",
+      "tags": ["truthy"],
+      "fn": "truthy",
+      "input": { "value": "OFF" },
+      "expected": false
+    },
+    {
+      "id": "0020-truthy-ordinary-string",
+      "title": "Any other non-empty string is truthy",
+      "since": "0.2.0",
+      "tags": ["truthy"],
+      "fn": "truthy",
+      "input": { "value": "no thanks" },
+      "expected": true
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "@particle-academy/fancy-conformance",
-  "version": "0.1.0",
-  "description": "Shared cross-language conformance fixtures for the Fancy suite. One contract, N implementations, and a single table that every implementation asserts in its own CI — so 'parity' is a test result rather than a claim. Ships the fixture data itself, so a Rust, Go or Python runner can consume it without a JavaScript toolchain.",
+  "version": "0.2.0",
+  "description": "Shared cross-language conformance fixtures for the Fancy suite. One contract, N implementations, and a single table that every implementation asserts in its own CI \u2014 so 'parity' is a test result rather than a claim. Ships the fixture data itself, so a Rust, Go or Python runner can consume it without a JavaScript toolchain.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Particle-Academy/fancy-conformance.git"
