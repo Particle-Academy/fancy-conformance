@@ -10,6 +10,22 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-19
+
+### Added
+
+- **`shared/trading-pnl`** — 11 rows covering position, cost basis and P&L
+  across asset classes, including inverse contracts.
+
+  Every value in the fixture is a decimal **string**, not a JSON number. A JSON
+  number is parsed through a double, so a fixture written to check money
+  arithmetic could disagree with itself between runtimes — which is precisely
+  the class of bug this suite exists to catch.
+
+  Consumers pin the suite version deliberately, so this release moves the pin in
+  every port that carries one. Each was re-run before its pin moved.
+
+
 ## [0.4.0] - 2026-08-19
 
 ### Added
