@@ -1,0 +1,106 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fancy-conformance"
+version = "0.3.0"
+description = "Shared cross-language conformance fixtures for the Fancy suite, with the Python loader. One contract, N implementations, and a single table every implementation asserts in its own CI - so 'parity' is a test result rather than a claim."
+readme = "README.md"
+# 3.11, matching every other Fancy Python package: 3.10 reaches end of life on
+# 2026-10-31, and a floor that dies before the package's second release is not
+# a floor.
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Particle Academy" }]
+keywords = [
+    "conformance",
+    "fixtures",
+    "parity",
+    "cross-language",
+    "polyglot",
+    "golden-files",
+    "contract-testing",
+    "particle-academy",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
+]
+
+# ZERO runtime dependencies. A fixture loader that needs a framework booted is
+# a fixture loader that gets skipped, and this package is installed as a test
+# dependency of every Python implementation in the suite - anything taken here
+# is imposed on all of them.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Particle-Academy/fancy-conformance"
+Issues = "https://github.com/Particle-Academy/fancy-conformance/issues"
+Source = "https://github.com/Particle-Academy/fancy-conformance"
+
+[dependency-groups]
+test = ["pytest>=8.0"]
+lint = ["ruff>=0.16"]
+typecheck = ["mypy>=1.11"]
+dev = [{ include-group = "test" }, { include-group = "lint" }, { include-group = "typecheck" }]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fancy_conformance"]
+
+# The FIXTURES are the product; the loader only exists so consumers do not
+# hand-roll JSON reading. So the wheel carries the fixture tree with it and
+# `suites_root()` finds it there - an installed package must not require a
+# checkout of this repository beside it.
+[tool.hatch.build.targets.wheel.force-include]
+"../suites" = "fancy_conformance/_data/suites"
+"../schema" = "fancy_conformance/_data/schema"
+"../VERSION" = "fancy_conformance/_data/VERSION"
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/README.md", "/pyproject.toml"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"../suites" = "suites"
+"../schema" = "schema"
+"../VERSION" = "VERSION"
+"../LICENSE" = "LICENSE"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# `pythonpath` so the suite runs on a bare checkout with nothing but pytest,
+# the way `npm test` and `vendor/bin/pest` do for the two peer loaders.
+# `--import-mode=importlib` keeps test modules out of the implicit-namespace
+# guesswork the default mode does.
+pythonpath = ["src"]
+addopts = "--import-mode=importlib -ra"
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "N", "C4", "PT"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PT011", "PT018"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["fancy_conformance"]
+mypy_path = "src"
+strict = true
+# A fixture cell is JSON: `Any` is the honest type for a case's input and for
+# whatever an implementation returns.
+disallow_any_expr = false
+disallow_any_explicit = false

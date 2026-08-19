@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/money-minor-units",
+  "title": "Decimal money to integer minor units, and back",
+  "since": "0.4.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "The three operations every commerce backend performs on a price, and the one place a currency amount can silently become a float. Stripe stores money as an integer in the currency's minor unit; a human types a decimal string; the conversion between them is where the money is lost.",
+    "functions": {
+      "toMinorUnits": "toMinorUnits(amount: string, exponent: int) -> int - a plain decimal STRING to whole minor units. Never via a float.",
+      "formatMinorUnits": "formatMinorUnits(minor: int, exponent: int) -> string - the inverse, zero-padded, sign in front.",
+      "lineTotal": "lineTotal(unitAmount: int, quantity: int) -> int - exact integer multiplication."
+    },
+    "reference": "python",
+    "referenceNote": "Python is the reference only because it is the first runtime to implement these as functions: laravel-catalog and fancy-catalog-js both store unit_amount as an integer and never convert to or from a decimal string, so every consumer does the conversion by hand and gets it wrong on their own. The goldens are exact decimal arithmetic (Python's decimal.Decimal), not what any float happens to produce.",
+    "implementations": [
+      { "language": "python", "package": "fancy-catalog", "symbol": "fancy_catalog.money" }
+    ]
+  },
+  "notes": [
+    "The exponent is the ISO-4217 minor-unit exponent: 2 for USD/EUR, 0 for JPY, 3 for KWD/BHD/JOD. A hard-coded 100 is wrong for roughly a quarter of the world's currencies, and wrong in a direction that multiplies a Kuwaiti price by ten.",
+    "0001 is the whole reason this suite exists, and 0003 is why the fix is not a rounding tweak. int(19.99 * 100) is 1998 in every IEEE-754 language; round() rescues that case and NOT 0003. The reference converts through exact decimal arithmetic rather than through a float at all.",
+    "NOT COVERED, deliberately: amounts whose minor-unit value exceeds 2^53. A JavaScript implementation needs BigInt beyond it, but a golden for such a case could not survive JSON.parse either, so pinning one here would test the harness rather than the implementation. 0011 and 0019 sit just under the boundary to document where it is.",
+    "NOT COVERED: what happens when the input carries more precision than the currency has (toMinorUnits of '0.005' at exponent 2). The reference REFUSES it rather than rounding, because silently rounding a payment amount is how half a cent per transaction goes missing, and a raise has no representation in this table format. Each implementation asserts the refusal in its own suite.",
+    "PHP and Node do not implement these yet. That is a finding this suite records rather than an omission in it: laravel-catalog and fancy-catalog-js both receive unit_amount already converted, so the conversion happens in consumer code where nothing checks it."
+  ]
+}

@@ -6,7 +6,7 @@ live in the envelope's `AGENTS.md` and are deliberately not repeated here.
 
 ## What this repo is
 
-Data, plus two thin loaders for it. The fixtures are the product; the loaders
+Data, plus three thin loaders for it. The fixtures are the product; the loaders
 exist so a consumer does not have to hand-roll JSON reading in every repo.
 
 ```
@@ -18,15 +18,32 @@ parity/                  the release-parity ledger schema + procedure
 runners/README.md        how to write a runner; the subprocess CLI contract
 src/index.ts             Node loader
 php/src/Conformance.php  PHP loader — same API shape, deliberately
+python/src/fancy_conformance/  Python loader — same again; ships the fixtures in its wheel
 scripts/cross-check.mjs  runs BOTH loaders and requires identical verdicts
 ```
 
+**The Python loader was added because four consumers had already written it
+themselves and their copies had diverged.** `holy-sheet-py`, `dark-slide-py`,
+`last-word-py` and `fancy-flow-py` each carried a private `tests/conformance/loader.py`;
+two of them read a case's `skip` as a scalar instead of a map keyed by language,
+so a row skipped for PHP skipped on Python too and the log still read green.
+That is this repository's own thesis failing inside its own consumers. Delete
+those copies as each repo is next touched — the promoted loader is the one that
+gets fixed.
+
 ## Invariants
 
-**A skip must have a non-empty reason.** Enforced at LOAD time in both loaders,
-with matching messages, asserted positively and negatively on both sides. This
+**A skip must have a non-empty reason.** Enforced at LOAD time in every loader,
+with matching messages, asserted positively and negatively on every side. This
 is the repository's entire thesis; if it is ever relaxed, the package is
 decoration.
+
+**`skip` is a MAP keyed by language, never a scalar.** `{"php": "no PHP impl"}`
+skips PHP and nothing else. A loader reading it as a truthy value skips the row
+for *every* language and simultaneously makes the empty-reason guard unreachable,
+because a non-empty dict is never blank. Both effects are silent. Two shipped
+Python copies had exactly this bug; `python/tests/test_loader.py` now pins it
+from both directions.
 
 **A duplicate case id is a load error.** Ids appear in other repos' skip lists
 and in changelogs.
@@ -47,7 +64,8 @@ draft of the discrimination probe asserted the round number and was wrong.
 package replaces both hard-coded `../../holy-sheet/src/`, which is why they ran
 in exactly one directory layout and silently no-opped everywhere else.
 
-**Both loaders take an explicit root** (`loadSuiteFrom`, `Conformance::cases($suite, $root)`)
+**Every loader takes an explicit root** (`loadSuiteFrom`, `Conformance::cases($suite, $root)`,
+`cases(suite, root=...)`)
 so the guards above are tested through the real code rather than a copy. An
 earlier draft of both test files re-implemented the guard inside the test, which
 would have asserted nothing — the exact bug this repo exists to catch, nearly
@@ -90,8 +108,23 @@ out — an unset or wrong value still fails the run.
 ```bash
 npm test                                                   # Node loader + discrimination
 vendor/bin/pest                                            # PHP loader
-CONFORMANCE_PHP=<abs path to php.exe> npm run cross-check   # both, compared
+cd python && python -m pytest                              # Python loader
+CONFORMANCE_PHP=<abs path to php.exe> npm run cross-check   # Node + PHP, compared
 ```
 
-All three are required CI jobs. `npm test` is NOT run with `--if-present` here:
+All four are required CI jobs. `npm test` is NOT run with `--if-present` here:
 a green tick over an absent suite is the failure this package is about.
+
+**`cross-check.mjs` still compares only Node and PHP.** Extending it to the
+Python loader is open work; until it lands, the Python loader is asserted by its
+own suite rather than against a peer's verdict, which is weaker and is recorded
+here so nobody reads three green ticks as a three-way comparison.
+
+### The float-comparison divergence, in the loaders themselves
+
+`Conformance::equals` compares floats with a scaled `1e-12` epsilon; the
+TypeScript `deepEquals` uses exact `Object.is`. The Python loader follows PHP.
+So the three loaders do **not** agree on how a float golden is compared, in a
+repository whose product is agreement. No shipped case turns on it today
+(`shared/decimal`'s float rows round-trip identically through all three JSON
+parsers), which is why it has survived. Pick one and make the other two match.

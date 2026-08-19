@@ -1,0 +1,409 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/money-minor-units",
+  "cases": [
+    {
+      "id": "0001-to-minor-classic-float-trap",
+      "title": "toMinorUnits of '19.99' at exponent 2 is 1999, not 1998",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "hazard",
+        "float"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "19.99",
+        "exponent": 2
+      },
+      "expected": 1999,
+      "notes": "THE money bug. int(19.99 * 100) is 1998 in every IEEE-754 language: the nearest double to 19.99 is 19.98999999999999843..., and truncation takes the 1998. One cent, on every order."
+    },
+    {
+      "id": "0002-to-minor-round-rescues-this-one",
+      "title": "toMinorUnits of '0.07' at exponent 2 is 7",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "float",
+        "control"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "0.07",
+        "exponent": 2
+      },
+      "expected": 7,
+      "notes": "0.07 * 100 is 7.000000000000001 as a double, so truncation gives 7 here by luck. The control row: an implementation that fixes 0001 by swapping trunc for round still passes this and still fails 0003."
+    },
+    {
+      "id": "0003-to-minor-round-does-not-rescue-this-one",
+      "title": "toMinorUnits of '8.615' at exponent 3 is 8615",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "hazard",
+        "float"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "8.615",
+        "exponent": 3
+      },
+      "expected": 8615,
+      "notes": "8.615 * 1000 is 8614.999999999999 as a double, so BOTH truncation and a naive round give 8614. The only way through is not to use a float at all. This is the row that forces exact decimal arithmetic rather than a rounding tweak."
+    },
+    {
+      "id": "0004-to-minor-kuwaiti-dinar",
+      "title": "toMinorUnits of '1.005' at exponent 3 is 1005",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "exponent"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "1.005",
+        "exponent": 3
+      },
+      "expected": 1005,
+      "notes": "KWD, BHD and JOD have three minor digits. A hard-coded 100 turns 1.005 dinars into 100 fils and undercharges by a factor of ten."
+    },
+    {
+      "id": "0005-to-minor-yen",
+      "title": "toMinorUnits of '1000' at exponent 0 is 1000",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "exponent"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "1000",
+        "exponent": 0
+      },
+      "expected": 1000,
+      "notes": "JPY has no minor unit. A hard-coded 100 charges a hundred times the price."
+    },
+    {
+      "id": "0006-to-minor-negative",
+      "title": "toMinorUnits of '-19.99' at exponent 2 is -1999",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "sign"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "-19.99",
+        "exponent": 2
+      },
+      "expected": -1999,
+      "notes": "A refund line. abs(f(-x)) == abs(f(x)) is the property that matters for money, and it is the first thing to break when an implementation reaches for floor()."
+    },
+    {
+      "id": "0007-to-minor-zero",
+      "title": "toMinorUnits of '0' at exponent 2 is 0",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "0",
+        "exponent": 2
+      },
+      "expected": 0
+    },
+    {
+      "id": "0008-to-minor-one-decimal",
+      "title": "toMinorUnits of '0.1' at exponent 2 is 10",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "0.1",
+        "exponent": 2
+      },
+      "expected": 10,
+      "notes": "Fewer decimals than the currency has: the value is scaled, not padded as text."
+    },
+    {
+      "id": "0009-to-minor-trailing-zero",
+      "title": "toMinorUnits of '8.20' at exponent 2 is 820",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "parse"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "8.20",
+        "exponent": 2
+      },
+      "expected": 820,
+      "notes": "A trailing zero is significant to a text parser and irrelevant to the value. 82 is what a strip-the-dot-and-parse implementation returns."
+    },
+    {
+      "id": "0010-to-minor-leading-dot",
+      "title": "toMinorUnits of '.5' at exponent 2 is 50",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "parse"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": ".5",
+        "exponent": 2
+      },
+      "expected": 50,
+      "notes": "A leading dot is legal decimal notation and appears in hand-entered prices."
+    },
+    {
+      "id": "0011-to-minor-near-the-double-boundary",
+      "title": "toMinorUnits of '9007199254740.99' at exponent 2 is exact",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "precision"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "9007199254740.99",
+        "exponent": 2
+      },
+      "expected": 900719925474099,
+      "notes": "Just under 2^53. Beyond this a JavaScript implementation needs BigInt; this row marks where the boundary is rather than crossing it, because a golden past it could not survive JSON.parse either."
+    },
+    {
+      "id": "0012-to-minor-leading-zeros",
+      "title": "toMinorUnits of '007.50' at exponent 2 is 750",
+      "since": "0.4.0",
+      "tags": [
+        "toMinorUnits",
+        "parse"
+      ],
+      "fn": "toMinorUnits",
+      "input": {
+        "amount": "007.50",
+        "exponent": 2
+      },
+      "expected": 750,
+      "notes": "Must NOT be read as octal -- a trap in several languages' integer-parse routines."
+    },
+    {
+      "id": "0013-format-plain",
+      "title": "formatMinorUnits of 1999 at exponent 2 is '19.99'",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": 1999,
+        "exponent": 2
+      },
+      "expected": "19.99"
+    },
+    {
+      "id": "0014-format-negative",
+      "title": "formatMinorUnits of -1999 at exponent 2 is '-19.99'",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits",
+        "sign"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": -1999,
+        "exponent": 2
+      },
+      "expected": "-19.99"
+    },
+    {
+      "id": "0015-format-pads-the-fraction",
+      "title": "formatMinorUnits of 7 at exponent 2 is '0.07'",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits",
+        "hazard"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": 7,
+        "exponent": 2
+      },
+      "expected": "0.07",
+      "notes": "The commonest formatting bug: '0.7'. The fraction is zero-PADDED on the left to the currency's width, and the integer part is 0 rather than absent."
+    },
+    {
+      "id": "0016-format-negative-sub-unit",
+      "title": "formatMinorUnits of -7 at exponent 2 is '-0.07'",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits",
+        "sign",
+        "hazard"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": -7,
+        "exponent": 2
+      },
+      "expected": "-0.07",
+      "notes": "The sign belongs in front of the whole amount. Taking abs() to pad and forgetting to put it back gives '0.07'; applying it after the split gives '0.-07'."
+    },
+    {
+      "id": "0017-format-zero",
+      "title": "formatMinorUnits of 0 at exponent 2 is '0.00'",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": 0,
+        "exponent": 2
+      },
+      "expected": "0.00"
+    },
+    {
+      "id": "0018-format-yen",
+      "title": "formatMinorUnits of 1000 at exponent 0 is '1000'",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits",
+        "exponent"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": 1000,
+        "exponent": 0
+      },
+      "expected": "1000",
+      "notes": "Exponent 0 means no decimal separator at all -- not '1000.' and not '1000.0'."
+    },
+    {
+      "id": "0019-format-near-the-double-boundary",
+      "title": "formatMinorUnits inverts 0011 exactly",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits",
+        "precision"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": 900719925474099,
+        "exponent": 2
+      },
+      "expected": "9007199254740.99",
+      "notes": "The inverse of 0011. Together they pin the round trip at the largest amount every runtime can still represent exactly."
+    },
+    {
+      "id": "0020-format-kuwaiti-dinar",
+      "title": "formatMinorUnits of 1005 at exponent 3 is '1.005'",
+      "since": "0.4.0",
+      "tags": [
+        "formatMinorUnits",
+        "exponent"
+      ],
+      "fn": "formatMinorUnits",
+      "input": {
+        "minor": 1005,
+        "exponent": 3
+      },
+      "expected": "1.005"
+    },
+    {
+      "id": "0021-line-total-plain",
+      "title": "lineTotal of 1999 x 3 is 5997",
+      "since": "0.4.0",
+      "tags": [
+        "lineTotal"
+      ],
+      "fn": "lineTotal",
+      "input": {
+        "unitAmount": 1999,
+        "quantity": 3
+      },
+      "expected": 5997
+    },
+    {
+      "id": "0022-line-total-zero-quantity",
+      "title": "lineTotal of 1999 x 0 is 0",
+      "since": "0.4.0",
+      "tags": [
+        "lineTotal"
+      ],
+      "fn": "lineTotal",
+      "input": {
+        "unitAmount": 1999,
+        "quantity": 0
+      },
+      "expected": 0
+    },
+    {
+      "id": "0023-line-total-free-item",
+      "title": "lineTotal of 0 x 5 is 0",
+      "since": "0.4.0",
+      "tags": [
+        "lineTotal"
+      ],
+      "fn": "lineTotal",
+      "input": {
+        "unitAmount": 0,
+        "quantity": 5
+      },
+      "expected": 0
+    },
+    {
+      "id": "0024-line-total-large",
+      "title": "lineTotal of 2500 x 1000000 is exact",
+      "since": "0.4.0",
+      "tags": [
+        "lineTotal"
+      ],
+      "fn": "lineTotal",
+      "input": {
+        "unitAmount": 2500,
+        "quantity": 1000000
+      },
+      "expected": 2500000000
+    },
+    {
+      "id": "0025-line-total-refund-line",
+      "title": "lineTotal of -1999 x 2 is -3998",
+      "since": "0.4.0",
+      "tags": [
+        "lineTotal",
+        "sign"
+      ],
+      "fn": "lineTotal",
+      "input": {
+        "unitAmount": -1999,
+        "quantity": 2
+      },
+      "expected": -3998,
+      "notes": "A credit note is a negative line, and it must be the exact negation of the charge it reverses."
+    },
+    {
+      "id": "0026-line-total-zero-exponent-currency",
+      "title": "lineTotal of 150000000 x 100000 is exact",
+      "since": "0.4.0",
+      "tags": [
+        "lineTotal",
+        "precision"
+      ],
+      "fn": "lineTotal",
+      "input": {
+        "unitAmount": 150000000,
+        "quantity": 100000
+      },
+      "expected": 15000000000000,
+      "notes": "1.5e13 -- an ordinary invoice in a currency with no minor unit (IDR, VND). Well within a double, and a reminder that 'the numbers are small' is a USD assumption."
+    }
+  ]
+}
