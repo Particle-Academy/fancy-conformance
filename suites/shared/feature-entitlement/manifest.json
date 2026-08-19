@@ -1,0 +1,33 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/feature-entitlement",
+  "title": "Entitlement, quota ceilings and billable overage",
+  "since": "0.4.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "The five decisions a gating engine makes about a metered feature: is the subject entitled to it at all, how far may their usage go, does this particular request fit, how much of it is billable overage, and may they take it. Entitlement and quota are separate questions here on purpose -- they were the same question, answered differently depending on which layer the plan happened to be modelled in.",
+    "functions": {
+      "entitled": "entitled(enabled: bool, type: string, includedQuantity: int|null, used: int) -> bool - is the feature granted. Quota-blind BY CONTRACT: the quantity arguments are handed over so the answer can be required to ignore them.",
+      "consumptionCeiling": "consumptionCeiling(includedQuantity: int|null, overageLimit: int|null) -> int|null - the highest total usage permitted. null means unlimited.",
+      "allowsConsumption": "allowsConsumption(used: int, amount: int, ceiling: int|null) -> bool - does this request fit under the ceiling. All-or-nothing.",
+      "overageDelta": "overageDelta(used: int, amount: int, includedQuantity: int|null) -> int - the billable units this consumption adds. Signed: a negative amount (a refund) gives a negative delta.",
+      "canConsume": "canConsume(enabled: bool, includedQuantity: int|null, overageLimit: int|null, used: int, amount: int) -> bool - entitled AND it fits. The quota-aware read that canAccess used to answer for a source grant."
+    },
+    "reference": "php",
+    "referenceNote": "Two of these five are NEW contracts rather than ports of existing behaviour -- `canAccess` was quota-blind in one code path and quota-aware in another, and `overage_limit` was stored by all three runtimes and read by none -- so there was no prior implementation whose output could be the golden. The goldens are computed by scripts/build-feature-entitlement-cases.py from the ruling in .ai/plans/fancy-commerce-gating-rulings.md, and `php` is named as reference because laravel-fms is the package that ruling changes most. Every row that is not marked `control` exists to catch one specific wrong answer, named in its notes.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/laravel-fms", "symbol": "ParticleAcademy\\Fms\\Quota" },
+      { "language": "node", "package": "@particle-academy/fancy-features", "symbol": "quota" },
+      { "language": "python", "package": "fancy-features", "symbol": "fancy_features.quota" }
+    ]
+  },
+  "notes": [
+    "Every quantity here is a WHOLE UNIT and every value is an integer. A resource feature is counted, never measured, so there is no fractional unit, no rate and no proportional split anywhere in these rows.",
+    "Money is deliberately absent. It enters only when a host multiplies recorded overage units by a unit amount in minor units, which is `lineTotal` in shared/money-minor-units -- referenced rather than duplicated, because a golden that exists twice is a golden that can disagree with itself.",
+    "`entitled` receives includedQuantity and used and must IGNORE them. That is not a redundant signature: it is the assertion. A runtime that reintroduces the quota check into canAccess fails 0002 and 0004 and nothing else, which is the exact signal this suite exists to produce.",
+    "overage_limit is a CEILING on billable overage, not a soft alert. null means no overage at all, which is what every existing database row says, so this ruling is opt-in for anyone upgrading rather than a new unlimited spending authority.",
+    "NOT COVERED, deliberately: the atomicity of check-and-increment. A TOCTOU race between reading a quota and writing usage is a property of a store under concurrency and has no representation in a case table; each runtime asserts it against its own locking store.",
+    "NOT COVERED: what a runtime does when asked to consume a negative amount. All three refuse it (a negative consume walks past every ceiling), but a refusal has no representation in this format -- each implementation asserts the raise in its own suite."
+  ]
+}

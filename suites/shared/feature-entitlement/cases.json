@@ -1,0 +1,459 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/feature-entitlement",
+  "cases": [
+    {
+      "id": "0001-entitled-granted-with-quota-left",
+      "title": "an enabled resource grant with quota left is entitled",
+      "since": "0.4.0",
+      "tags": [
+        "entitled",
+        "control"
+      ],
+      "fn": "entitled",
+      "input": {
+        "enabled": true,
+        "type": "resource",
+        "includedQuantity": 100,
+        "used": 30
+      },
+      "expected": true,
+      "notes": "The control row. Without it the two hazard rows below prove nothing, because an implementation that always returns false would pass them."
+    },
+    {
+      "id": "0002-entitled-granted-with-quota-exhausted",
+      "title": "an enabled resource grant with ZERO quota left is still entitled",
+      "since": "0.4.0",
+      "tags": [
+        "entitled",
+        "hazard",
+        "ruling-1"
+      ],
+      "fn": "entitled",
+      "input": {
+        "enabled": true,
+        "type": "resource",
+        "includedQuantity": 100,
+        "used": 100
+      },
+      "expected": true,
+      "notes": "THE ruling. Both twins answered false here, because a grant-sourced resource feature was only 'on' while quota remained -- while the same feature defined in the registry was on regardless. One question, two answers, decided by which layer the plan happened to be modelled in. An implementation that reintroduces the quota check fails this row and 0004 and nothing else."
+    },
+    {
+      "id": "0003-entitled-not-granted",
+      "title": "a disabled grant is not entitled, whatever the quota says",
+      "since": "0.4.0",
+      "tags": [
+        "entitled"
+      ],
+      "fn": "entitled",
+      "input": {
+        "enabled": false,
+        "type": "resource",
+        "includedQuantity": 100,
+        "used": 0
+      },
+      "expected": false,
+      "notes": "The other half of the control: entitlement still tracks `enabled`. A runtime that hard-coded true to pass 0002 fails here."
+    },
+    {
+      "id": "0004-entitled-past-the-ceiling",
+      "title": "usage PAST the included quantity does not revoke entitlement",
+      "since": "0.4.0",
+      "tags": [
+        "entitled",
+        "hazard",
+        "ruling-1",
+        "overage"
+      ],
+      "fn": "entitled",
+      "input": {
+        "enabled": true,
+        "type": "resource",
+        "includedQuantity": 100,
+        "used": 140
+      },
+      "expected": true,
+      "notes": "A subject in billable overage is emphatically still entitled -- they are paying for the feature twice over. A settings page that hides it here is hiding it at the exact moment the customer is spending most."
+    },
+    {
+      "id": "0005-entitled-boolean-feature",
+      "title": "a boolean grant ignores quantity fields entirely",
+      "since": "0.4.0",
+      "tags": [
+        "entitled"
+      ],
+      "fn": "entitled",
+      "input": {
+        "enabled": true,
+        "type": "boolean",
+        "includedQuantity": null,
+        "used": 0
+      },
+      "expected": true
+    },
+    {
+      "id": "0006-ceiling-no-overage-configured",
+      "title": "a null overage limit means no overage: the ceiling is the included quantity",
+      "since": "0.4.0",
+      "tags": [
+        "consumptionCeiling",
+        "hazard",
+        "ruling-2"
+      ],
+      "fn": "consumptionCeiling",
+      "input": {
+        "includedQuantity": 100,
+        "overageLimit": null
+      },
+      "expected": 100,
+      "notes": "The row that keeps every existing install behaving as it does today. The column has been stored-and-ignored for the life of the package, so every untouched row is null -- reading null as 'unbounded' would turn each of them into an unlimited spending authority on upgrade."
+    },
+    {
+      "id": "0007-ceiling-explicit-zero",
+      "title": "an overage limit of 0 is the same as none, stated out loud",
+      "since": "0.4.0",
+      "tags": [
+        "consumptionCeiling"
+      ],
+      "fn": "consumptionCeiling",
+      "input": {
+        "includedQuantity": 100,
+        "overageLimit": 0
+      },
+      "expected": 100
+    },
+    {
+      "id": "0008-ceiling-with-overage",
+      "title": "an overage limit of 50 on 100 included gives a ceiling of 150",
+      "since": "0.4.0",
+      "tags": [
+        "consumptionCeiling",
+        "overage"
+      ],
+      "fn": "consumptionCeiling",
+      "input": {
+        "includedQuantity": 100,
+        "overageLimit": 50
+      },
+      "expected": 150,
+      "notes": "overage_limit is a ceiling on BILLABLE OVERAGE, not the total. 150, never 50."
+    },
+    {
+      "id": "0009-ceiling-unlimited-included",
+      "title": "an unlimited included quantity has no ceiling, and overage is meaningless",
+      "since": "0.4.0",
+      "tags": [
+        "consumptionCeiling",
+        "unlimited"
+      ],
+      "fn": "consumptionCeiling",
+      "input": {
+        "includedQuantity": null,
+        "overageLimit": 50
+      },
+      "expected": null,
+      "notes": "There is no included line to exceed, so there is nothing to bill as overage. The overage limit is ignored rather than added to something."
+    },
+    {
+      "id": "0010-ceiling-zero-included-with-overage",
+      "title": "zero included plus an overage allowance is a pay-as-you-go band",
+      "since": "0.4.0",
+      "tags": [
+        "consumptionCeiling",
+        "overage"
+      ],
+      "fn": "consumptionCeiling",
+      "input": {
+        "includedQuantity": 0,
+        "overageLimit": 500
+      },
+      "expected": 500,
+      "notes": "Nothing free, 500 billable. `includedQuantity: 0` and `includedQuantity: null` are opposite configurations and a runtime that conflates them charges nobody or everybody."
+    },
+    {
+      "id": "0011-allows-exactly-to-the-ceiling",
+      "title": "consuming exactly up to the ceiling is allowed",
+      "since": "0.4.0",
+      "tags": [
+        "allowsConsumption",
+        "hazard",
+        "boundary"
+      ],
+      "fn": "allowsConsumption",
+      "input": {
+        "used": 90,
+        "amount": 10,
+        "ceiling": 100
+      },
+      "expected": true,
+      "notes": "The off-by-one. `used + amount <= ceiling`, not `<`. A plan that says 100 must permit the hundredth unit."
+    },
+    {
+      "id": "0012-allows-one-past-the-ceiling",
+      "title": "consuming one past the ceiling is refused",
+      "since": "0.4.0",
+      "tags": [
+        "allowsConsumption",
+        "boundary"
+      ],
+      "fn": "allowsConsumption",
+      "input": {
+        "used": 90,
+        "amount": 11,
+        "ceiling": 100
+      },
+      "expected": false
+    },
+    {
+      "id": "0013-allows-all-or-nothing",
+      "title": "a request that only partly fits is refused entirely",
+      "since": "0.4.0",
+      "tags": [
+        "allowsConsumption",
+        "hazard"
+      ],
+      "fn": "allowsConsumption",
+      "input": {
+        "used": 0,
+        "amount": 150,
+        "ceiling": 100
+      },
+      "expected": false,
+      "notes": "No partial fill. A caller asking for 150 and silently getting 100 has no way to know, because the answer is a boolean -- and callers do not check quantities they did not ask to be told about."
+    },
+    {
+      "id": "0014-allows-unlimited",
+      "title": "a null ceiling permits any amount",
+      "since": "0.4.0",
+      "tags": [
+        "allowsConsumption",
+        "unlimited"
+      ],
+      "fn": "allowsConsumption",
+      "input": {
+        "used": 10000000,
+        "amount": 1,
+        "ceiling": null
+      },
+      "expected": true
+    },
+    {
+      "id": "0015-allows-zero-amount",
+      "title": "consuming nothing is always allowed, even at the ceiling",
+      "since": "0.4.0",
+      "tags": [
+        "allowsConsumption",
+        "boundary"
+      ],
+      "fn": "allowsConsumption",
+      "input": {
+        "used": 100,
+        "amount": 0,
+        "ceiling": 100
+      },
+      "expected": true
+    },
+    {
+      "id": "0016-overage-delta-wholly-inside-the-allowance",
+      "title": "consumption that stays under the included quantity bills nothing",
+      "since": "0.4.0",
+      "tags": [
+        "overageDelta",
+        "control"
+      ],
+      "fn": "overageDelta",
+      "input": {
+        "used": 10,
+        "amount": 20,
+        "includedQuantity": 100
+      },
+      "expected": 0
+    },
+    {
+      "id": "0017-overage-delta-straddling-the-line",
+      "title": "consumption that crosses the included line bills only the part above it",
+      "since": "0.4.0",
+      "tags": [
+        "overageDelta",
+        "hazard",
+        "overage"
+      ],
+      "fn": "overageDelta",
+      "input": {
+        "used": 90,
+        "amount": 30,
+        "includedQuantity": 100
+      },
+      "expected": 20,
+      "notes": "20, not 30 and not 0. An implementation that bills the whole amount once the line is crossed overcharges by the included remainder; one that bills nothing until the line is passed loses it."
+    },
+    {
+      "id": "0018-overage-delta-already-in-overage",
+      "title": "consumption that starts ABOVE the included line bills the whole amount",
+      "since": "0.4.0",
+      "tags": [
+        "overageDelta",
+        "hazard",
+        "overage"
+      ],
+      "fn": "overageDelta",
+      "input": {
+        "used": 140,
+        "amount": 10,
+        "includedQuantity": 100
+      },
+      "expected": 10,
+      "notes": "The row a naive `max(0, after - included)` gets wrong: it answers 50, re-billing the 40 units already recorded. Subtracting the overage that existed BEFORE the call is what makes the function composable over a period."
+    },
+    {
+      "id": "0019-overage-delta-refund",
+      "title": "a refund unwinds overage as a negative delta",
+      "since": "0.4.0",
+      "tags": [
+        "overageDelta",
+        "refund",
+        "sign"
+      ],
+      "fn": "overageDelta",
+      "input": {
+        "used": 140,
+        "amount": -10,
+        "includedQuantity": 100
+      },
+      "expected": -10,
+      "notes": "One signed function serves increment and decrement, so the two cannot drift apart. The stored total is clamped at zero by the caller, not here."
+    },
+    {
+      "id": "0020-overage-delta-refund-below-the-line",
+      "title": "a refund that drops usage below the included line unwinds only the billable part",
+      "since": "0.4.0",
+      "tags": [
+        "overageDelta",
+        "refund",
+        "hazard"
+      ],
+      "fn": "overageDelta",
+      "input": {
+        "used": 110,
+        "amount": -30,
+        "includedQuantity": 100
+      },
+      "expected": -10,
+      "notes": "-10, not -30. Refunding 30 units when only 10 of them were ever billable must not credit 20 units of overage that never existed."
+    },
+    {
+      "id": "0021-overage-delta-unlimited",
+      "title": "an unlimited allowance never accrues overage",
+      "since": "0.4.0",
+      "tags": [
+        "overageDelta",
+        "unlimited"
+      ],
+      "fn": "overageDelta",
+      "input": {
+        "used": 10000,
+        "amount": 500,
+        "includedQuantity": null
+      },
+      "expected": 0,
+      "notes": "Unlimited is not unmetered -- usage is still recorded -- but there is no included line, so nothing above it."
+    },
+    {
+      "id": "0022-can-consume-inside-the-included-quantity",
+      "title": "an entitled subject inside their allowance may consume",
+      "since": "0.4.0",
+      "tags": [
+        "canConsume",
+        "control"
+      ],
+      "fn": "canConsume",
+      "input": {
+        "enabled": true,
+        "includedQuantity": 100,
+        "overageLimit": null,
+        "used": 50,
+        "amount": 10
+      },
+      "expected": true
+    },
+    {
+      "id": "0023-can-consume-exhausted-without-overage",
+      "title": "an exhausted allowance with no overage refuses -- and this is what canAccess used to answer",
+      "since": "0.4.0",
+      "tags": [
+        "canConsume",
+        "ruling-1",
+        "hazard"
+      ],
+      "fn": "canConsume",
+      "input": {
+        "enabled": true,
+        "includedQuantity": 100,
+        "overageLimit": null,
+        "used": 100,
+        "amount": 1
+      },
+      "expected": false,
+      "notes": "The migration target. A caller who used canAccess as a consumption gate wants THIS answer, and canConsume is where it moved."
+    },
+    {
+      "id": "0024-can-consume-into-the-overage-band",
+      "title": "an exhausted allowance WITH an overage limit permits billable consumption",
+      "since": "0.4.0",
+      "tags": [
+        "canConsume",
+        "overage",
+        "hazard",
+        "ruling-2"
+      ],
+      "fn": "canConsume",
+      "input": {
+        "enabled": true,
+        "includedQuantity": 100,
+        "overageLimit": 50,
+        "used": 100,
+        "amount": 1
+      },
+      "expected": true,
+      "notes": "The behaviour change overage_limit buys. Before this ruling the column was stored by three runtimes and read by none, so this answered false everywhere."
+    },
+    {
+      "id": "0025-can-consume-past-the-overage-ceiling",
+      "title": "the overage band has an end, and it is enforced",
+      "since": "0.4.0",
+      "tags": [
+        "canConsume",
+        "overage",
+        "boundary"
+      ],
+      "fn": "canConsume",
+      "input": {
+        "enabled": true,
+        "includedQuantity": 100,
+        "overageLimit": 50,
+        "used": 150,
+        "amount": 1
+      },
+      "expected": false,
+      "notes": "overage_limit is a ceiling, not an alert. A field named *_limit that does not limit is the same defect in a new costume."
+    },
+    {
+      "id": "0026-can-consume-not-entitled",
+      "title": "no entitlement means no consumption, however much quota is configured",
+      "since": "0.4.0",
+      "tags": [
+        "canConsume"
+      ],
+      "fn": "canConsume",
+      "input": {
+        "enabled": false,
+        "includedQuantity": 1000,
+        "overageLimit": 1000,
+        "used": 0,
+        "amount": 1
+      },
+      "expected": false
+    }
+  ]
+}
