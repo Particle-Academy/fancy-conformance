@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/image-header",
+  "title": "Intrinsic image dimensions, sniffed from PNG and JPEG headers",
+  "since": "0.3.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "sniffImageSize(bytes) -> {width: int, height: int} | null",
+    "summary": "Read an image's intrinsic pixel dimensions straight from its header bytes, with no decoder. Every document writer in this org needs it, because a model that omits widthPx/heightPx has to be sized from the image itself - so a sniffer that returns null silently changes the size a picture is embedded at, and one that returns the WRONG numbers changes it and is believed.",
+    "runShape": {
+      "width": "int",
+      "height": "int"
+    },
+    "reference": "php",
+    "referenceNote": "particle-academy/last-word's Helpers\\ImageSize::sniff, which is the most explicit hand-rolled sniffer in the family. Case 0012 is the one exception and it is marked: there the reference is demonstrably reading entropy-coded data as a header, PHP's own getimagesizefromstring and the Node port both refuse, and the golden follows the two that agree while the reference carries a skip with the reason. Every golden in this file is still the output of RUNNING an implementation - never what the value obviously ought to be.",
+    "implementations": [
+      {
+        "language": "php",
+        "package": "particle-academy/last-word",
+        "symbol": "Helpers\\ImageSize::sniff"
+      },
+      {
+        "language": "node",
+        "package": "@particle-academy/last-word",
+        "symbol": "sniffImageSize"
+      },
+      {
+        "language": "php",
+        "package": "particle-academy/dark-slide",
+        "symbol": "Writer\\PptxWriter (getimagesizefromstring)"
+      },
+      {
+        "language": "node",
+        "package": "@particle-academy/dark-slide",
+        "symbol": "writer/pptx-writer.ts getImageSize"
+      },
+      {
+        "language": "python",
+        "package": "last-word",
+        "symbol": "helpers.image_size.sniff"
+      }
+    ]
+  },
+  "notes": [
+    "FOUR implementations of this one concern already exist inside this family - two hand-rolled sniffers, one call to PHP's platform library, and a fourth hand-rolled sniffer in dark-slide-js with different format coverage again. That is the duplication .ai/plans/polyglot/parity/documents.md \u00a70.3 nominates for a shared fancy-ooxml package, and this suite is what stops a fifth copy from inheriting a defect.",
+    "The two divergences here (0011, 0012) were found by writing this suite on 2026-08-18. They are live at the time of writing, and they run in OPPOSITE directions: the Node port is wrong about fill bytes, the PHP reference is wrong about the start-of-scan. Neither sniffer is a superset of the other, which is why 'just follow the reference' would have shipped one of the two defects into every new implementation.",
+    "Bytes are carried as base64 in `input.base64` because a JSON cell cannot hold a byte string. A runner decodes and passes raw bytes to the function under test.",
+    "GIF, WebP, BMP, TIFF and ICO are deliberately NOT in the contract. PHP's getimagesizefromstring knows them all and both hand-rolled sniffers know none of them; widening the contract is a decision for the pair owners, not something a fixture should smuggle in."
+  ]
+}

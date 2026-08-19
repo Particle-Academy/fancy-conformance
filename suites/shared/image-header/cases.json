@@ -1,0 +1,275 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/image-header",
+  "cases": [
+    {
+      "id": "0001-png-1x1",
+      "title": "PNG, the smallest possible image",
+      "since": "0.3.0",
+      "tags": [
+        "png"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAElFTkSuQmCC"
+      },
+      "expected": {
+        "width": 1,
+        "height": 1
+      },
+      "notes": "The floor. A 1x1 PNG is what every fixture elsewhere in this org uses as a stand-in image, so if this ever fails nothing else here is worth reading."
+    },
+    {
+      "id": "0002-png-300x200",
+      "title": "PNG, dimensions past a single byte",
+      "since": "0.3.0",
+      "tags": [
+        "png"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "iVBORw0KGgoAAAANSUhEUgAAASwAAADICAYAAABS39xVAAAAAElFTkSuQmCC"
+      },
+      "expected": {
+        "width": 300,
+        "height": 200
+      }
+    },
+    {
+      "id": "0003-png-large",
+      "title": "PNG, dimensions past 16 bits (uint32 IHDR fields)",
+      "since": "0.3.0",
+      "tags": [
+        "png",
+        "edge"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "iVBORw0KGgoAAAANSUhEUgABEXAAAAADCAYAAAC/i9xAAAAAAElFTkSuQmCC"
+      },
+      "expected": {
+        "width": 70000,
+        "height": 3
+      },
+      "notes": "IHDR width and height are uint32. A sniffer that reads them as uint16, or that sign-extends the high byte, gets this wrong and nothing smaller catches it."
+    },
+    {
+      "id": "0004-png-truncated",
+      "title": "PNG signature but fewer than 24 bytes",
+      "since": "0.3.0",
+      "tags": [
+        "png",
+        "edge",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "iVBORw0KGgoAAAANSUhEUgAAAAE="
+      },
+      "expected": null,
+      "notes": "Fewer than 24 bytes. The read of offsets 16..23 must be bounds-checked BEFORE it happens, not after."
+    },
+    {
+      "id": "0005-png-not-ihdr",
+      "title": "PNG signature, first chunk is not IHDR",
+      "since": "0.3.0",
+      "tags": [
+        "png",
+        "hazard",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "iVBORw0KGgoAAAANZ0FNQQAAAAQAAAAECAYAAAB3rFQUAAAAAElFTkSuQmCC"
+      },
+      "expected": null,
+      "notes": "PNG signature, first chunk is gAMA rather than IHDR, with plausible numbers where IHDR's would be. Both hand-rolled sniffers verify the chunk name and return null; PHP's getimagesizefromstring reads offsets 16/20 blindly and answers 4x4. Checking the chunk name is the difference between reading a header and reading whatever is at that offset."
+    },
+    {
+      "id": "0006-png-zero-width",
+      "title": "PNG whose IHDR declares width 0",
+      "since": "0.3.0",
+      "tags": [
+        "png",
+        "edge",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "iVBORw0KGgoAAAANSUhEUgAAAAAAAAAJCAYAAAAchC3aAAAAAElFTkSuQmCC"
+      },
+      "expected": null,
+      "notes": "A zero dimension is not a size. It divides by zero in any aspect-ratio fit, and the writers do exactly that when widthPx is omitted."
+    },
+    {
+      "id": "0007-png-bad-signature",
+      "title": "one byte of the PNG signature flipped",
+      "since": "0.3.0",
+      "tags": [
+        "png",
+        "edge",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "iVBOWA0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAAElFTkSuQmCC"
+      },
+      "expected": null
+    },
+    {
+      "id": "0008-jpeg-baseline",
+      "title": "JPEG, baseline SOF0",
+      "since": "0.3.0",
+      "tags": [
+        "jpeg"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "/9j/wAARCAHgAoADAAAAAAAAAAAA/9k="
+      },
+      "expected": {
+        "width": 640,
+        "height": 480
+      }
+    },
+    {
+      "id": "0009-jpeg-progressive",
+      "title": "JPEG, progressive SOF2",
+      "since": "0.3.0",
+      "tags": [
+        "jpeg",
+        "hazard"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "/9j/wgARCADwAUADAAAAAAAAAAAA/9k="
+      },
+      "expected": {
+        "width": 320,
+        "height": 240
+      },
+      "notes": "SOF2, not SOF0. A sniffer that only matches 0xC0 silently fails on every progressive JPEG, which is most photographs on the web."
+    },
+    {
+      "id": "0010-jpeg-exif-first",
+      "title": "JPEG with an APP1/Exif segment before the frame header",
+      "since": "0.3.0",
+      "tags": [
+        "jpeg"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "/9j/4QAcRXhpZgAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/wAARCAAyAGQDAAAAAAAAAAAA/9k="
+      },
+      "expected": {
+        "width": 100,
+        "height": 50
+      },
+      "notes": "An APP1/Exif segment before the frame header - the ordinary shape of a camera JPEG. Pins segment-length skipping."
+    },
+    {
+      "id": "0011-jpeg-fill-bytes",
+      "title": "JPEG with 0xFF fill bytes padding the frame marker",
+      "since": "0.3.0",
+      "tags": [
+        "jpeg",
+        "live-divergence",
+        "hazard"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "/9j/////wAARCABkAMgDAAAAAAAAAAAA/9k="
+      },
+      "expected": {
+        "width": 200,
+        "height": 100
+      },
+      "skip": {
+        "node": "@particle-academy/last-word's jpegSize advances by 2 on a 0xFF fill byte instead of 1, steps over the real frame marker and returns null. Fill bytes before a marker are legal per ITU T.81 B.1.1.2. Fix is a one-character change (i += 2 -> i++ on the marker === 0xff branch); until it ships this case is red there."
+      },
+      "notes": "THE FIRST DIVERGENCE. ITU T.81 B.1.1.2: 'any marker may optionally be preceded by any number of fill bytes, which are bytes assigned code X\"FF\"'. On seeing 0xFF as the marker byte, the PHP sniffer advances by ONE and re-syncs; the Node sniffer advances by TWO and steps over the real marker, so it returns null and the writer sizes the image from a fallback instead of its intrinsic dimensions. getimagesizefromstring agrees with PHP. Legal input, produced by real encoders, and the same JPEG therefore embeds at a different size depending on which backend wrote the document."
+    },
+    {
+      "id": "0012-jpeg-sos-before-sof",
+      "title": "JPEG whose scan starts before any frame header",
+      "since": "0.3.0",
+      "tags": [
+        "jpeg",
+        "live-divergence",
+        "hazard",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "/9j/2gAIAAEAAD8A/8AAEQgAFgALAwAAAAAAAAAAAP/Z"
+      },
+      "expected": null,
+      "skip": {
+        "php": "particle-academy/last-word's ImageSize::jpeg has no start-of-scan stop, so it keeps walking into entropy-coded data and reports dimensions read out of compressed bytes. Both the Node port and PHP's own getimagesizefromstring stop at 0xFFDA. Until last-word gains the SOS stop this case is red there.",
+        "python": "The Python port is a faithful mirror of the PHP reference and therefore inherits the same missing SOS stop -- verified, not assumed: it answers 11x22 here. Deliberately NOT fixed unilaterally. .ai/plans/polyglot/parity/documents.md 1.4 rules that a defect producing wrong output is fixed in every engine in one release train, because fixing it in one language alone breaks part-level parity, which is the suite's whole contract. This skip disappears the day last-word gains the stop."
+      },
+      "notes": "THE SECOND DIVERGENCE, and it runs the other way. After a start-of-scan the bytes are entropy-coded, so an 0xFF 0xCx sequence found there is compressed data, not a frame header. The Node sniffer stops at SOS; the PHP sniffer keeps walking and reports dimensions it read out of the scan. getimagesizefromstring also stops. The failure mode is worse than the first one: a null sniff falls back, a WRONG sniff is believed."
+    },
+    {
+      "id": "0013-jpeg-truncated",
+      "title": "JPEG SOI and nothing else",
+      "since": "0.3.0",
+      "tags": [
+        "jpeg",
+        "edge",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "/9g="
+      },
+      "expected": null
+    },
+    {
+      "id": "0014-gif-8x8",
+      "title": "a GIF, which one engine in this family knows and another does not",
+      "since": "0.3.0",
+      "tags": [
+        "other",
+        "hazard",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "R0lGODlhCAAIAPcAADs="
+      },
+      "expected": null,
+      "notes": "The family cannot agree whether GIF is a format it reads. last-word (both engines) says no; dark-slide's PHP calls getimagesizefromstring, which says 8x8, while dark-slide's Node port hand-rolls a GIF branch. The golden follows the reference. Recorded here because the polyglot plan lists the coverage gap and nothing tested it."
+    },
+    {
+      "id": "0015-not-an-image",
+      "title": "arbitrary bytes",
+      "since": "0.3.0",
+      "tags": [
+        "other",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": "dGhpcyBpcyBub3QgYW4gaW1hZ2UgYXQgYWxsLCBub3QgZXZlbiBzbGlnaHRseQ=="
+      },
+      "expected": null
+    },
+    {
+      "id": "0016-empty",
+      "title": "zero bytes",
+      "since": "0.3.0",
+      "tags": [
+        "other",
+        "edge",
+        "rejects"
+      ],
+      "fn": "sniffImageSize",
+      "input": {
+        "base64": ""
+      },
+      "expected": null,
+      "notes": "Zero bytes. Every length check must survive it."
+    }
+  ]
+}

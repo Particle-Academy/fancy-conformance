@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -19,13 +20,31 @@ test("discovers every suite that has a manifest", () => {
   assert.ok(suites.includes("shared/satisfies-range"));
   assert.ok(suites.includes("shared/decimal"));
   assert.ok(suites.includes("shared/strings"));
+  assert.ok(suites.includes("shared/image-header"));
 });
 
 test("reports the suite collection's own version", () => {
   // A runner prints this so "we're on an old fixture set" is visible rather
-  // than inferred. If VERSION and package.json ever disagree, the pin a
-  // consumer states in its README means nothing.
+  // than inferred.
   assert.match(suiteVersion(), /^\d+\.\d+\.\d+$/);
+});
+
+test("VERSION and package.json agree", () => {
+  // The comment above used to say "if VERSION and package.json ever disagree,
+  // the pin a consumer states in its README means nothing" -- and then asserted
+  // only the FORMAT, so the invariant it named was checked by nobody. Two files
+  // holding one number with nothing comparing them is the exact mechanism that
+  // left every package in the documents family misreporting its own version at
+  // runtime. It is one assertion.
+  const pkg = JSON.parse(
+    readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+  ) as { version: string };
+
+  assert.equal(
+    pkg.version,
+    suiteVersion(),
+    "package.json and VERSION disagree; a consumer pinning one is not pinning the other",
+  );
 });
 
 test("every case carries the metadata a failure needs to be actionable", () => {

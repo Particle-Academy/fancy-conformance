@@ -395,10 +395,157 @@ test("the strings table catches an ASCII-only run classifier", () => {
   );
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// shared/image-header
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface SniffOpts {
+  /** The live @particle-academy/last-word defect: advance 2 past a 0xFF fill byte. */
+  fillByteAdvancesTwo?: boolean;
+  /** The live particle-academy/last-word defect: keep walking past start-of-scan. */
+  noSosStop?: boolean;
+  /** Read the IHDR dimensions as uint16 instead of uint32. */
+  dimsAsUint16?: boolean;
+  /** Trust the PNG signature and read offsets 16/20 without checking the chunk name. */
+  skipChunkNameCheck?: boolean;
+  /** Accept a zero width or height as a size. */
+  allowZeroDimensions?: boolean;
+  /** Match only SOF0, missing every progressive JPEG. */
+  onlySof0?: boolean;
+}
+
+/**
+ * The shape all the image-header probes share; the flags are where each mutant
+ * differs. With no flags this is the behaviour the goldens were taken from.
+ */
+function sniffProbe(opts: SniffOpts = {}) {
+  return (c: ConformanceCase): unknown => {
+    const bytes = new Uint8Array(Buffer.from(String((c.input as { base64: string }).base64), "base64"));
+
+    const size = (w: number, h: number): unknown =>
+      !opts.allowZeroDimensions && (w < 1 || h < 1) ? null : { width: w, height: h };
+
+    // PNG
+    const sig = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+    if (bytes.length >= 24 && sig.every((b, i) => bytes[i] === b)) {
+      const isIhdr =
+        bytes[12] === 0x49 && bytes[13] === 0x48 && bytes[14] === 0x44 && bytes[15] === 0x52;
+      if (isIhdr || opts.skipChunkNameCheck) {
+        const be32 = (o: number) =>
+          ((bytes[o]! << 24) | (bytes[o + 1]! << 16) | (bytes[o + 2]! << 8) | bytes[o + 3]!) >>> 0;
+        const be16 = (o: number) => (bytes[o + 2]! << 8) | bytes[o + 3]!;
+        const read = opts.dimsAsUint16 ? be16 : be32;
+        return size(read(16), read(20));
+      }
+      return null;
+    }
+
+    // JPEG
+    if (bytes.length < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
+    let i = 2;
+    while (i + 4 <= bytes.length) {
+      if (bytes[i] !== 0xff) {
+        i++;
+        continue;
+      }
+      const marker = bytes[i + 1]!;
+      if (marker === 0xff) {
+        // A fill byte. Advancing by 2 steps over the byte that IS the marker.
+        i += opts.fillByteAdvancesTwo ? 2 : 1;
+        continue;
+      }
+      if (marker === 0xd8 || (marker >= 0xd0 && marker <= 0xd7) || marker === 0x01) {
+        i += 2;
+        continue;
+      }
+      if (marker === 0xd9) return null; // EOI
+      if (marker === 0xda && !opts.noSosStop) return null; // SOS: what follows is entropy-coded
+
+      const segLen = (bytes[i + 2]! << 8) | bytes[i + 3]!;
+      if (segLen < 2) return null;
+
+      const isSof = opts.onlySof0
+        ? marker === 0xc0
+        : marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
+      if (isSof) {
+        if (i + 9 > bytes.length) return null;
+        return size((bytes[i + 7]! << 8) | bytes[i + 8]!, (bytes[i + 5]! << 8) | bytes[i + 6]!);
+      }
+      i += 2 + segLen;
+    }
+    return null;
+  };
+}
+
+/**
+ * Run the probes as a language with no `skip` entries.
+ *
+ * Two cases here are skipped for `node` and `php` respectively, because those
+ * are the two live divergences the suite records. Running the mutants as either
+ * of those languages would silently drop the case that catches them, which is
+ * the exact failure this file exists to rule out.
+ */
+function imageIdsFailedBy(impl: (c: ConformanceCase) => unknown): string[] {
+  return runTable("shared/image-header", impl, { language: "rust" })
+    .results.filter((r) => r.status === "fail")
+    .map((r) => r.id)
+    .sort();
+}
+
+test("the image-header table is passed by a faithful sniffer (the control)", () => {
+  // Without this, every mutant below proves nothing: a table no implementation
+  // can pass fails everything and would look maximally discriminating.
+  assert.deepEqual(imageIdsFailedBy(sniffProbe()), []);
+});
+
+test("the image-header table catches a sniffer that advances 2 on a JPEG fill byte", () => {
+  // The live defect in @particle-academy/last-word. Fill bytes before a marker
+  // are legal (ITU T.81 B.1.1.2) and real encoders emit them.
+  assert.deepEqual(imageIdsFailedBy(sniffProbe({ fillByteAdvancesTwo: true })), [
+    "0011-jpeg-fill-bytes",
+  ]);
+});
+
+test("the image-header table catches a sniffer that walks past start-of-scan", () => {
+  // The live defect in particle-academy/last-word, and the worse of the two: a
+  // null sniff falls back to a default size, a WRONG sniff is believed.
+  assert.deepEqual(imageIdsFailedBy(sniffProbe({ noSosStop: true })), [
+    "0012-jpeg-sos-before-sof",
+  ]);
+});
+
+test("the image-header table catches uint16 PNG dimensions", () => {
+  assert.deepEqual(imageIdsFailedBy(sniffProbe({ dimsAsUint16: true })), ["0003-png-large"]);
+});
+
+test("the image-header table catches a sniffer that does not check the IHDR chunk name", () => {
+  // Reading offsets 16/20 off a PNG signature alone is reading whatever is at
+  // that offset, not reading a header.
+  assert.deepEqual(imageIdsFailedBy(sniffProbe({ skipChunkNameCheck: true })), [
+    "0005-png-not-ihdr",
+  ]);
+});
+
+test("the image-header table catches a sniffer that accepts a zero dimension", () => {
+  assert.deepEqual(imageIdsFailedBy(sniffProbe({ allowZeroDimensions: true })), [
+    "0006-png-zero-width",
+  ]);
+});
+
+test("the image-header table catches a sniffer that only matches SOF0", () => {
+  // Most photographs on the web are progressive JPEGs (SOF2).
+  assert.deepEqual(imageIdsFailedBy(sniffProbe({ onlySof0: true })), ["0009-jpeg-progressive"]);
+});
+
 test("every suite has at least one case tagged as a known hazard", () => {
   // Cheap structural guard: a suite of only happy paths is a suite that will
   // pass forever. Each of these tables exists because something already broke.
-  for (const id of ["shared/satisfies-range", "shared/decimal", "shared/strings"]) {
+  for (const id of [
+    "shared/satisfies-range",
+    "shared/decimal",
+    "shared/strings",
+    "shared/image-header",
+  ]) {
     const tagged = loadSuite(id).cases.filter(
       (c) => c.tags?.some((t) => ["hazard", "non-standard", "edge", "live-divergence"].includes(t)),
     );
