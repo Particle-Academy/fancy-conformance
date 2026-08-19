@@ -1,0 +1,46 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/trading-pnl",
+  "title": "Position, cost basis and P&L across asset classes",
+  "since": "0.5.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "How a sequence of fills becomes a position, and how that position becomes realised and unrealised P&L. Three things here are wrong in most implementations and each has a row that fails against the naive version: realised P&L depends on the COST BASIS and the bases genuinely disagree; a position FLIP is a close plus an open at the new price; and INVERSE (coin-margined) contracts are non-linear in price, so one formula cannot serve both.",
+    "functions": {
+      "realisedAndUnrealised": "realisedAndUnrealised(basis, contractType, multiplier, moneyExp, fills[], mark) -> {realised, unrealised, qty} - apply the fills in order under the given cost basis, then value the remainder at the mark. All values are decimal STRINGS.",
+      "closePnl": "closePnl(contractType, qty, entry, exit, multiplier, moneyExp) -> decimal string - P&L of closing qty units opened at entry and closed at exit, for a LONG. Dispatches on contractType: linear is (exit-entry)*qty*multiplier; inverse is qty*multiplier*(1/entry - 1/exit) and settles in the BASE currency."
+    },
+    "reference": "node",
+    "referenceNote": "Goldens are produced by @particle-academy/fancy-trading, but the headline rows were derived by hand FIRST and the implementation checked against them, not the other way round: the three-way 1500/1000/500 split, the flip leaving a short based at the sell price, and the inverse asymmetry (10000*(1/50000-1/55000) = 0.01818181..., 10000*(1/50000-1/45000) = -0.02222222...) are all arithmetic anyone can verify without running this code. Rows tagged `control` exist to catch an implementation that produces a plausible answer by the wrong route.",
+    "implementations": [
+      {
+        "language": "node",
+        "package": "@particle-academy/fancy-trading",
+        "symbol": "position"
+      },
+      {
+        "language": "php",
+        "package": "particle-academy/fancy-trading",
+        "symbol": "ParticleAcademy\\Trading\\Position"
+      },
+      {
+        "language": "python",
+        "package": "fancy-trading",
+        "symbol": "fancy_trading.position"
+      }
+    ]
+  },
+  "normalisation": {
+    "money": "Every price, quantity and P&L in this table is a decimal STRING. There is not a single float in the fixture file, deliberately: a golden stored as a JSON number would be parsed through a double and could disagree with itself between runtimes before any implementation was involved.",
+    "sign": "Quantity is SIGNED -- positive long, negative short. P&L is signed from the position holder's perspective."
+  },
+  "notes": [
+    "The three worked-example rows (0001-0003) are the same fills under three bases. Total economic P&L is $2,000 in all three; only the realised/unrealised SPLIT differs. That split is what tax, the daily blotter and any realised-P&L risk limit fire on, so a realised number without its stated basis is meaningless.",
+    "The flip rows (0004-0006) assert unrealised 0.00 at a mark equal to the sell price. That is the cheap way to prove the new short is based at the SELL price rather than at the old average -- an implementation that carries the old basis forward reports -500.00 and nothing else in the table catches it.",
+    "0009 is a CONTROL: the same numbers as the inverse rows, dispatched as linear. An implementation returning 50000000 for 0007 is not dispatching on contractType at all.",
+    "Money-to-minor-unit conversion is NOT duplicated here -- it lives in shared/money-minor-units and is referenced rather than copied, because a golden that exists twice is a golden that can disagree with itself.",
+    "NOT COVERED, deliberately: fee treatment. Whether a fee lands in the cost basis or on its own line is a policy choice a host makes once, and both answers are defensible; a fixture table cannot arbitrate it. Each implementation asserts its own convention.",
+    "NOT COVERED: wash-sale and tax-lot selection rules. Those are jurisdictional, they change, and they belong to a tax engine rather than to a position engine."
+  ]
+}

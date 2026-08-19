@@ -1,0 +1,364 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/trading-pnl",
+  "cases": [
+    {
+      "id": "0001-basis-fifo-worked-example",
+      "title": "fifo: buy 100@10, buy 100@20, sell 100@25, mark 25",
+      "since": "0.5.0",
+      "tags": [
+        "costBasis",
+        "fifo",
+        "headline"
+      ],
+      "fn": "realisedAndUnrealised",
+      "input": {
+        "basis": "fifo",
+        "contractType": "linear",
+        "multiplier": "1",
+        "moneyExp": 2,
+        "mark": "25.00",
+        "fills": [
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "10.00",
+            "at": 1
+          },
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "20.00",
+            "at": 2
+          },
+          {
+            "side": "sell",
+            "qty": "100",
+            "price": "25.00",
+            "at": 3
+          }
+        ]
+      },
+      "expected": {
+        "realised": "1500.00",
+        "unrealised": "500.00",
+        "qty": "100"
+      },
+      "notes": "Relieves the OLDEST lot: 100 @ $10 against $25 = $1,500 realised, leaving 100 @ $20. Total economic P&L is $2,000 under all three; only the realised/unrealised SPLIT differs, and that split is what tax, the blotter and a realised-P&L risk limit fire on."
+    },
+    {
+      "id": "0002-basis-average-worked-example",
+      "title": "average: buy 100@10, buy 100@20, sell 100@25, mark 25",
+      "since": "0.5.0",
+      "tags": [
+        "costBasis",
+        "average",
+        "headline"
+      ],
+      "fn": "realisedAndUnrealised",
+      "input": {
+        "basis": "average",
+        "contractType": "linear",
+        "multiplier": "1",
+        "moneyExp": 2,
+        "mark": "25.00",
+        "fills": [
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "10.00",
+            "at": 1
+          },
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "20.00",
+            "at": 2
+          },
+          {
+            "side": "sell",
+            "qty": "100",
+            "price": "25.00",
+            "at": 3
+          }
+        ]
+      },
+      "expected": {
+        "realised": "1000.00",
+        "unrealised": "1000.00",
+        "qty": "100"
+      },
+      "notes": "One basis at $15: 100 @ $15 against $25 = $1,000 realised, leaving 100 @ $15. Total economic P&L is $2,000 under all three; only the realised/unrealised SPLIT differs, and that split is what tax, the blotter and a realised-P&L risk limit fire on."
+    },
+    {
+      "id": "0003-basis-lifo-worked-example",
+      "title": "lifo: buy 100@10, buy 100@20, sell 100@25, mark 25",
+      "since": "0.5.0",
+      "tags": [
+        "costBasis",
+        "lifo",
+        "headline"
+      ],
+      "fn": "realisedAndUnrealised",
+      "input": {
+        "basis": "lifo",
+        "contractType": "linear",
+        "multiplier": "1",
+        "moneyExp": 2,
+        "mark": "25.00",
+        "fills": [
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "10.00",
+            "at": 1
+          },
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "20.00",
+            "at": 2
+          },
+          {
+            "side": "sell",
+            "qty": "100",
+            "price": "25.00",
+            "at": 3
+          }
+        ]
+      },
+      "expected": {
+        "realised": "500.00",
+        "unrealised": "1500.00",
+        "qty": "100"
+      },
+      "notes": "Relieves the NEWEST lot: 100 @ $20 against $25 = $500 realised, leaving 100 @ $10. Total economic P&L is $2,000 under all three; only the realised/unrealised SPLIT differs, and that split is what tax, the blotter and a realised-P&L risk limit fire on."
+    },
+    {
+      "id": "0004-flip-fifo",
+      "title": "fifo: buy 100@10 then sell 150@20 closes 100 and opens a NEW short of 50 at 20",
+      "since": "0.5.0",
+      "tags": [
+        "flip",
+        "fifo",
+        "hazard"
+      ],
+      "fn": "realisedAndUnrealised",
+      "input": {
+        "basis": "fifo",
+        "contractType": "linear",
+        "multiplier": "1",
+        "moneyExp": 2,
+        "mark": "20.00",
+        "fills": [
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "10.00",
+            "at": 1
+          },
+          {
+            "side": "sell",
+            "qty": "150",
+            "price": "20.00",
+            "at": 2
+          }
+        ]
+      },
+      "expected": {
+        "realised": "1000.00",
+        "unrealised": "0.00",
+        "qty": "-50"
+      },
+      "notes": "THE classic bug. The new short must be based at the SELL price, so at a mark of 20.00 it is flat (unrealised 0.00). An implementation that leaves it at the old 10.00 basis reports -500.00 here."
+    },
+    {
+      "id": "0005-flip-average",
+      "title": "average: buy 100@10 then sell 150@20 closes 100 and opens a NEW short of 50 at 20",
+      "since": "0.5.0",
+      "tags": [
+        "flip",
+        "average",
+        "hazard"
+      ],
+      "fn": "realisedAndUnrealised",
+      "input": {
+        "basis": "average",
+        "contractType": "linear",
+        "multiplier": "1",
+        "moneyExp": 2,
+        "mark": "20.00",
+        "fills": [
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "10.00",
+            "at": 1
+          },
+          {
+            "side": "sell",
+            "qty": "150",
+            "price": "20.00",
+            "at": 2
+          }
+        ]
+      },
+      "expected": {
+        "realised": "1000.00",
+        "unrealised": "0.00",
+        "qty": "-50"
+      },
+      "notes": "THE classic bug. The new short must be based at the SELL price, so at a mark of 20.00 it is flat (unrealised 0.00). An implementation that leaves it at the old 10.00 basis reports -500.00 here."
+    },
+    {
+      "id": "0006-flip-lifo",
+      "title": "lifo: buy 100@10 then sell 150@20 closes 100 and opens a NEW short of 50 at 20",
+      "since": "0.5.0",
+      "tags": [
+        "flip",
+        "lifo",
+        "hazard"
+      ],
+      "fn": "realisedAndUnrealised",
+      "input": {
+        "basis": "lifo",
+        "contractType": "linear",
+        "multiplier": "1",
+        "moneyExp": 2,
+        "mark": "20.00",
+        "fills": [
+          {
+            "side": "buy",
+            "qty": "100",
+            "price": "10.00",
+            "at": 1
+          },
+          {
+            "side": "sell",
+            "qty": "150",
+            "price": "20.00",
+            "at": 2
+          }
+        ]
+      },
+      "expected": {
+        "realised": "1000.00",
+        "unrealised": "0.00",
+        "qty": "-50"
+      },
+      "notes": "THE classic bug. The new short must be based at the SELL price, so at a mark of 20.00 it is flat (unrealised 0.00). An implementation that leaves it at the old 10.00 basis reports -500.00 here."
+    },
+    {
+      "id": "0007-inverse-up-5000",
+      "title": "inverse: 10000 contracts from 50000 to 55000",
+      "since": "0.5.0",
+      "tags": [
+        "inverse",
+        "nonlinear",
+        "headline"
+      ],
+      "fn": "closePnl",
+      "input": {
+        "contractType": "inverse",
+        "qty": "10000",
+        "entry": "50000",
+        "exit": "55000",
+        "multiplier": "1",
+        "moneyExp": 8
+      },
+      "expected": "0.01818182",
+      "notes": "Coin-margined: contracts * multiplier * (1/entry - 1/exit), settled in the BASE currency. Equal $5,000 moves up and down give UNEQUAL magnitudes -- that asymmetry is the assertion. A linear (exit-entry)*qty formula gives 50000000 here."
+    },
+    {
+      "id": "0008-inverse-down-5000",
+      "title": "inverse: 10000 contracts from 50000 to 45000",
+      "since": "0.5.0",
+      "tags": [
+        "inverse",
+        "nonlinear",
+        "headline"
+      ],
+      "fn": "closePnl",
+      "input": {
+        "contractType": "inverse",
+        "qty": "10000",
+        "entry": "50000",
+        "exit": "45000",
+        "multiplier": "1",
+        "moneyExp": 8
+      },
+      "expected": "-0.02222222",
+      "notes": "Coin-margined: contracts * multiplier * (1/entry - 1/exit), settled in the BASE currency. Equal $5,000 moves up and down give UNEQUAL magnitudes -- that asymmetry is the assertion. A linear (exit-entry)*qty formula gives 50000000 here."
+    },
+    {
+      "id": "0009-linear-control-same-inputs",
+      "title": "linear contract, same inputs -- the control that shows the formulas differ",
+      "since": "0.5.0",
+      "tags": [
+        "inverse",
+        "control"
+      ],
+      "fn": "closePnl",
+      "input": {
+        "contractType": "linear",
+        "qty": "10000",
+        "entry": "50000",
+        "exit": "55000",
+        "multiplier": "1",
+        "moneyExp": 8
+      },
+      "expected": "50000000.00000000",
+      "notes": "Same numbers, linear dispatch. If an implementation returns this value for the inverse rows, it is not dispatching on contractType at all."
+    },
+    {
+      "id": "0010-futures-multiplier",
+      "title": "ES: 2 contracts, 4 points, $50 multiplier = $400",
+      "since": "0.5.0",
+      "tags": [
+        "futures",
+        "multiplier"
+      ],
+      "fn": "closePnl",
+      "input": {
+        "contractType": "linear",
+        "qty": "2",
+        "entry": "4500.00",
+        "exit": "4504.00",
+        "multiplier": "50",
+        "moneyExp": 2
+      },
+      "expected": "400.00",
+      "notes": "tickValue = tickSize * multiplier is an invariant; a wrong multiplier silently corrupts every P&L and every risk-sized order."
+    },
+    {
+      "id": "0011-short-profits-as-price-falls",
+      "title": "short 10 @ 100, mark 90 -> +100 unrealised",
+      "since": "0.5.0",
+      "tags": [
+        "short"
+      ],
+      "fn": "realisedAndUnrealised",
+      "input": {
+        "basis": "average",
+        "contractType": "linear",
+        "multiplier": "1",
+        "moneyExp": 2,
+        "mark": "90.00",
+        "fills": [
+          {
+            "side": "sell",
+            "qty": "10",
+            "price": "100.00",
+            "at": 1
+          }
+        ]
+      },
+      "expected": {
+        "realised": "0.00",
+        "unrealised": "100.00",
+        "qty": "-10"
+      },
+      "notes": "Sign convention: a short position is a NEGATIVE quantity and profits as the mark falls."
+    }
+  ]
+}
