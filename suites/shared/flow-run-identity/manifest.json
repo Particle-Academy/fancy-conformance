@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/flow-run-identity",
+  "title": "Stable run/step identity for fancy-flow, and when a retry may reuse it",
+  "since": "0.4.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "A workflow node that WRITES to a third party needs an idempotency key that is the same on every retry of one logical step and different for every other execution of the same node. `stepKey` derives it from the run identity; `isReplaySafe` says whether a retry is still inside the provider's dedup window.",
+    "functions": {
+      "stepKey": "stepKey(runKey: string, path: string[], nodeId: string, occurrence: int|null) -> string",
+      "isReplaySafe": "isReplaySafe(attempt: int, firstAttemptAt: string, now: string, windowSeconds: number|null) -> bool"
+    },
+    "reference": "node",
+    "referenceNote": "The format was designed here rather than lifted from an implementation; `node` is recorded because the TypeScript RunIdentity was written first and the other two were made to match it.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "RunIdentity" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Runtime\\RunIdentity" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.runtime.RunIdentity" }
+    ]
+  },
+  "notes": [
+    "`attempt` is deliberately NOT part of the step key, and case 0011/0012 are the pair that proves it. An idempotency key that changes per attempt creates a second charge on every retry — which is the exact failure the key exists to prevent. `attempt` is carried on the identity for logging and for `isReplaySafe`, never for the key.",
+    "`(run, node)` alone is NOT sufficient identity and the suite says so structurally: `path` and `occurrence` exist because a node legitimately executes more than once in one run — once per subflow invocation, once per loop iteration. Cases 0004-0005 pin nesting, 0002-0003 pin repetition.",
+    "Segments are escaped (`%` -> `%25`, `/` -> `%2F`, `#` -> `%23`) so the composition is injective. Without it a node literally named `a/b` at the top level and a node `b` inside an invocation of `a` produce the same key — two different writes sharing an idempotency key, which the provider deduplicates into one. Cases 0006-0010 are that pair and its relatives. Escape `%` FIRST or the escaping is not reversible.",
+    "`isReplaySafe` returns TRUE on attempt 1 whatever the elapsed time, and that is the case that lets a run park on a human gate for a week: nothing was sent on a previous attempt, so there is nothing for the provider to have forgotten. Cases 0013 and 0018.",
+    "The window is INCLUSIVE at its boundary (0015) and clock skew clamps to zero rather than going negative (0022). A null window means the provider does not expire keys (0021).",
+    "A FALSE from `isReplaySafe` must become a loud failure at the call site, never a silently omitted key and never a fresh one: past the window the provider has forgotten the first attempt, so both alternatives write twice. Refusing converts a silent double-charge into a visible stuck run."
+  ]
+}

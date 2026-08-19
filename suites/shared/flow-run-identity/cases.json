@@ -1,0 +1,241 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/flow-run-identity",
+  "cases": [
+    {
+      "id": "0001-top-level-step",
+      "title": "A node at the top level of a run keys on the run and its own id",
+      "since": "0.4.0",
+      "tags": ["stepkey"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_9f2c1b0e77a4d310", "path": [], "nodeId": "pay", "occurrence": null, "attempt": 1 },
+      "expected": "run_9f2c1b0e77a4d310:pay"
+    },
+    {
+      "id": "0002-occurrence-zero-is-not-absent",
+      "title": "Occurrence 0 is a real occurrence and appears in the key",
+      "since": "0.4.0",
+      "tags": ["stepkey", "loop"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "pay", "occurrence": 0, "attempt": 1 },
+      "expected": "run_a:pay#0",
+      "notes": "A falsy-but-present occurrence is the classic place a language's truthiness quietly drops the segment, collapsing iteration 0 into the un-iterated key."
+    },
+    {
+      "id": "0003-occurrence-distinguishes-iterations",
+      "title": "A different loop iteration is a different logical step",
+      "since": "0.4.0",
+      "tags": ["stepkey", "loop"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "pay", "occurrence": 7, "attempt": 1 },
+      "expected": "run_a:pay#7"
+    },
+    {
+      "id": "0004-one-invocation-segment",
+      "title": "A node inside a subflow carries the invoking node as a path segment",
+      "since": "0.4.0",
+      "tags": ["stepkey", "subflow"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": ["billing"], "nodeId": "pay", "occurrence": null, "attempt": 1 },
+      "expected": "run_a:billing/pay"
+    },
+    {
+      "id": "0005-nested-invocations",
+      "title": "Nesting composes outermost-first",
+      "since": "0.4.0",
+      "tags": ["stepkey", "subflow"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": ["billing", "dunning#2"], "nodeId": "pay", "occurrence": null, "attempt": 1 },
+      "expected": "run_a:billing/dunning#2/pay",
+      "notes": "Path segments arrive already rendered - an invocation that repeats renders its own occurrence before it is pushed."
+    },
+    {
+      "id": "0006-node-id-slash-is-escaped",
+      "title": "A slash in a node id is escaped, never a separator",
+      "since": "0.4.0",
+      "tags": ["stepkey", "escaping"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "a/b", "occurrence": null, "attempt": 1 },
+      "expected": "run_a:a%2Fb"
+    },
+    {
+      "id": "0007-the-collision-escaping-prevents",
+      "title": "A node `b` inside an invocation of `a` is NOT the node named `a/b`",
+      "since": "0.4.0",
+      "tags": ["stepkey", "escaping"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": ["a"], "nodeId": "b", "occurrence": null, "attempt": 1 },
+      "expected": "run_a:a/b",
+      "notes": "Read together with 0006. Unescaped, both spell run_a:a/b - two unrelated writes sharing one idempotency key, which the provider collapses into a single charge."
+    },
+    {
+      "id": "0008-node-id-hash-is-escaped",
+      "title": "A hash in a node id is escaped, so # only ever means occurrence",
+      "since": "0.4.0",
+      "tags": ["stepkey", "escaping"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "a#2", "occurrence": null, "attempt": 1 },
+      "expected": "run_a:a%232"
+    },
+    {
+      "id": "0009-percent-is-escaped-first",
+      "title": "The escape character is itself escaped, and before everything else",
+      "since": "0.4.0",
+      "tags": ["stepkey", "escaping"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "a%2Fb", "occurrence": null, "attempt": 1 },
+      "expected": "run_a:a%252Fb",
+      "notes": "An implementation that escapes / before % turns a literal a%2Fb into the same text as the escaped a/b from 0006 - the collision, reintroduced by the fix for it."
+    },
+    {
+      "id": "0010-escaping-and-occurrence-compose",
+      "title": "Escaping applies to the id, the occurrence marker stays structural",
+      "since": "0.4.0",
+      "tags": ["stepkey", "escaping", "loop"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "a/b", "occurrence": 2, "attempt": 1 },
+      "expected": "run_a:a%2Fb#2"
+    },
+    {
+      "id": "0011-attempt-one-key",
+      "title": "The key on the first attempt",
+      "since": "0.4.0",
+      "tags": ["stepkey", "retry"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "pay", "occurrence": null, "attempt": 1 },
+      "expected": "run_a:pay"
+    },
+    {
+      "id": "0012-attempt-does-not-change-the-key",
+      "title": "The fifth attempt of the SAME step sends the SAME key",
+      "since": "0.4.0",
+      "tags": ["stepkey", "retry"],
+      "fn": "stepKey",
+      "input": { "runKey": "run_a", "path": [], "nodeId": "pay", "occurrence": null, "attempt": 5 },
+      "expected": "run_a:pay",
+      "notes": "The load-bearing row of the whole suite, and it only means anything read against 0011. An implementation that mixes attempt into the key passes every other case here and double-charges in production on the first timeout."
+    },
+    {
+      "id": "0013-first-attempt-is-always-replay-safe",
+      "title": "Attempt 1 is safe however long the run was parked - nothing was sent before",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "human-gate"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 1, "firstAttemptAt": "2026-08-01T00:00:00Z", "now": "2026-08-19T00:00:00Z", "windowSeconds": 86400 },
+      "expected": true,
+      "notes": "This is the human-gate case: a run parks on an approval for eighteen days, resumes, and the writing node executes for the first time. There is no earlier attempt for the provider to have forgotten."
+    },
+    {
+      "id": "0014-retry-inside-the-window",
+      "title": "A prompt retry is inside the provider dedup window",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "retry"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-19T00:00:00Z", "now": "2026-08-19T00:00:30Z", "windowSeconds": 86400 },
+      "expected": true
+    },
+    {
+      "id": "0015-the-boundary-is-inclusive",
+      "title": "Exactly at the window is still inside it",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "boundary"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-18T00:00:00Z", "now": "2026-08-19T00:00:00Z", "windowSeconds": 86400 },
+      "expected": true
+    },
+    {
+      "id": "0016-one-second-past-the-window",
+      "title": "One second past the window is outside it",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "boundary"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-18T00:00:00Z", "now": "2026-08-19T00:00:01Z", "windowSeconds": 86400 },
+      "expected": false
+    },
+    {
+      "id": "0017-stripe-twenty-five-hours",
+      "title": "A retry 25h after the first attempt is not protected by the Stripe 24h window",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "stripe"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 4, "firstAttemptAt": "2026-08-18T00:00:00Z", "now": "2026-08-19T01:00:00Z", "windowSeconds": 86400 },
+      "expected": false,
+      "notes": "Stripe forgets an idempotency key after 24 hours. Resending it creates a second charge, and sending a fresh one creates a second charge - so the only safe answer is to refuse and let a person reconcile."
+    },
+    {
+      "id": "0018-parked-a-week-then-first-write",
+      "title": "A week parked, then the node first attempt",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "human-gate"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 1, "firstAttemptAt": "2026-08-12T09:15:00Z", "now": "2026-08-19T09:15:00Z", "windowSeconds": 86400 },
+      "expected": true
+    },
+    {
+      "id": "0019-zero-window-permits-no-retry",
+      "title": "A zero window means only the first attempt may write",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "boundary"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-19T00:00:00Z", "now": "2026-08-19T00:00:00Z", "windowSeconds": 0 },
+      "expected": false,
+      "notes": "Zero is a window, not an absent one. An implementation treating 0 as null turns this provider does not dedupe into this provider dedupes forever."
+    },
+    {
+      "id": "0020-zero-window-first-attempt",
+      "title": "A zero window still permits the first attempt",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "boundary"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 1, "firstAttemptAt": "2026-08-19T00:00:00Z", "now": "2026-08-19T00:00:00Z", "windowSeconds": 0 },
+      "expected": true
+    },
+    {
+      "id": "0021-null-window-never-expires",
+      "title": "A provider that does not expire keys is always replay-safe",
+      "since": "0.4.0",
+      "tags": ["replaysafe"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 9, "firstAttemptAt": "2020-01-01T00:00:00Z", "now": "2026-08-19T00:00:00Z", "windowSeconds": null },
+      "expected": true
+    },
+    {
+      "id": "0022-clock-skew-clamps-to-zero",
+      "title": "A now earlier than the first attempt is treated as no elapsed time",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "clock"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-19T00:00:10Z", "now": "2026-08-19T00:00:00Z", "windowSeconds": 86400 },
+      "expected": true,
+      "notes": "Two workers with a few seconds of skew must not turn a legitimate retry into a refusal."
+    },
+    {
+      "id": "0023-offset-and-zulu-are-the-same-instant",
+      "title": "A +00:00 offset parses as the same instant as Z",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "clock"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-18T00:00:00+00:00", "now": "2026-08-19T00:00:01Z", "windowSeconds": 86400 },
+      "expected": false
+    },
+    {
+      "id": "0024-non-utc-offset-is-honoured",
+      "title": "A non-UTC offset is converted, not ignored",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "clock"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-19T02:00:00+02:00", "now": "2026-08-19T00:00:30Z", "windowSeconds": 60 },
+      "expected": true,
+      "notes": "02:00+02:00 is midnight UTC, so 30 seconds have elapsed. An implementation that drops the offset reads it as two hours and refuses."
+    },
+    {
+      "id": "0025-fractional-seconds-parse",
+      "title": "Fractional seconds do not break the comparison",
+      "since": "0.4.0",
+      "tags": ["replaysafe", "clock"],
+      "fn": "isReplaySafe",
+      "input": { "attempt": 2, "firstAttemptAt": "2026-08-18T00:00:00.500Z", "now": "2026-08-19T00:00:00.400Z", "windowSeconds": 86400 },
+      "expected": true
+    }
+  ]
+}

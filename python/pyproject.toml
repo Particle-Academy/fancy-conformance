@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fancy-conformance"
-version = "0.3.0"
+version = "0.4.0"
 description = "Shared cross-language conformance fixtures for the Fancy suite, with the Python loader. One contract, N implementations, and a single table every implementation asserts in its own CI - so 'parity' is a test result rather than a claim."
 readme = "README.md"
 # 3.11, matching every other Fancy Python package: 3.10 reaches end of life on

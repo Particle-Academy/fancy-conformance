@@ -61,7 +61,11 @@ verbatim.
 |---|---|---|
 | `shared/satisfies-range` | 17 | Minimal semver range matching, including **two rows that deliberately disagree with standard semver** |
 | `shared/decimal` | 18 | Float formatting, numeric-string coercion, and money rounding |
+| `shared/money-minor-units` | 26 | Minor-unit conversion across zero-decimal and three-decimal currencies |
 | `shared/strings` | 8 | Inline-markdown segmentation across CJK, emoji, combining marks and accented Latin |
+| `shared/expr` | 20 | `{{ }}` dot-path resolution and branch truthiness for fancy-flow node config |
+| `shared/image-header` | 16 | Image dimensions read from the header bytes, without an image library |
+| `shared/flow-run-identity` | 25 | fancy-flow's run/step identity: the idempotency key a retrying connector sends, and when a retry may still reuse it |
 
 Every case carries an `id`, a `title`, the suite version it arrived in, and —
 where it exists to catch something specific — a `notes` field saying what.

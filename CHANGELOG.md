@@ -10,7 +10,70 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-19
+
 ### Added
+
+- **`shared/flow-run-identity` (25 cases)** — the identity a fancy-flow node
+  derives an idempotency key from, and whether a retry may still reuse it.
+  Asserted by all three fancy-flow runtimes (TypeScript, PHP, Python).
+
+  Two pure functions. `stepKey(runKey, path, nodeId, occurrence)` composes the
+  key; `isReplaySafe(attempt, firstAttemptAt, now, windowSeconds)` says whether
+  the provider still remembers the first attempt.
+
+  The rows that carry the weight:
+
+  - **0011 + 0012** are a pair, and only mean something read together: the same
+    step on attempt 1 and attempt 5 produces the **same** key. An implementation
+    that folds `attempt` into the key passes every other case in the table and
+    creates a second charge on the first timeout in production.
+  - **0006 + 0007** are the other pair: a node named `a/b` at the top level and
+    a node `b` inside an invocation of `a` must not collide. Unescaped they
+    spell the same string, so two unrelated writes share an idempotency key and
+    the provider deduplicates them into one.
+  - **0009** pins that `%` is escaped *first*. Escaping `/` before `%` turns a
+    literal `a%2Fb` back into the escaped form of `a/b` — the collision,
+    reintroduced by its own fix.
+  - **0013 / 0018** are the human-gate rows: attempt 1 is replay-safe however
+    long the run was parked, because nothing was sent for the provider to
+    forget. Without them an implementation "helpfully" refuses the first write
+    of every long-running approval workflow.
+  - **0017** is Stripe's 24-hour window, stated as a test rather than as a
+    comment.
+
+  *No consumer action:* a new suite adds cases, it does not change existing
+  ones.
+
+- **`shared/feature-entitlement` (26 cases)** — the five decisions a gating
+  engine makes about a metered feature: is the subject entitled, how far may
+  usage go, does this request fit, how much of it is billable overage, and may
+  they take it. Asserted by `laravel-fms`,
+  `@particle-academy/fancy-features` and `fancy-features-py`.
+
+  It pins two rulings recorded in
+  `.ai/plans/fancy-commerce-gating-rulings.md`:
+
+  - **`canAccess` is entitlement only.** `entitled` receives
+    `includedQuantity` and `used` and must **ignore** them. That is the
+    assertion, not a redundant signature: a runtime that reintroduces the
+    quota check fails `0002` and `0004` and nothing else. Both twins used to
+    answer the question one way for a registry feature and the other way for a
+    catalog-sourced one.
+  - **`overage_limit` is a ceiling on billable overage**, stored by three
+    runtimes and read by none until now. `0006` pins that `null` means *no*
+    overage — every existing database row is null, and reading it as
+    "unbounded" would turn each of them into an unlimited spending authority.
+    `0018` is the row a naive `max(0, after - included)` gets wrong: it
+    re-bills overage already recorded.
+
+  Money is deliberately absent. It enters only when a host multiplies recorded
+  overage units by a unit amount, which is `lineTotal` in
+  `shared/money-minor-units` — referenced from the manifest rather than
+  duplicated, because a golden that exists twice can disagree with itself.
+
+  *No consumer action:* a new suite adds cases, it does not change existing
+  ones.
 
 - **A Python loader**, `python/src/fancy_conformance/`, published as the PyPI
   distribution `fancy-conformance`. Same API shape as the Node and PHP loaders
