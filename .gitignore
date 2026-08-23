@@ -4,3 +4,10 @@ vendor/
 .phpunit.cache/
 composer.lock
 package-lock.json
+
+# Python build artifacts. A compiled __pycache__/*.pyc was tracked until
+# 2026-08-23 -- it churns on every interpreter version and is not source.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/

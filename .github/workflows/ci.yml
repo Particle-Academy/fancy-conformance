@@ -77,9 +77,55 @@ jobs:
       - name: Test
         run: vendor/bin/pest
 
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # This job did not exist until 2026-08-23, while AGENTS.md said all four
+      # loaders were required CI jobs. The Python loader and its 27 tests ran
+      # nowhere. In the repository whose entire argument is that a claim about
+      # coverage must be a test result rather than a sentence.
+      # `dependency-groups` (PEP 735), not an extra — so it is `pip install
+      # --group`, not `.[dev]`. Getting this wrong installs the package without
+      # pytest and the next step fails for a reason unrelated to the loader.
+      # `--group` needs pip >= 25.1, so the upgrade is part of the step rather
+      # than an assumption about the runner image.
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ./python --group ./python/pyproject.toml:test
+
+      - name: Test
+        working-directory: python
+        run: python -m pytest -q
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Format
+        working-directory: rust
+        run: cargo fmt --check
+
+      - name: Clippy
+        working-directory: rust
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Test
+        working-directory: rust
+        run: cargo test
+
   cross-language:
     runs-on: ubuntu-latest
-    needs: [node, php]
+    needs: [node, php, python, rust]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

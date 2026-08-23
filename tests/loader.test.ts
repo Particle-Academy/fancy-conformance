@@ -47,6 +47,41 @@ test("VERSION and package.json agree", () => {
   );
 });
 
+test("every manifest that carries this version agrees with VERSION", () => {
+  // The assertion above covered TWO of the four places this number is written,
+  // and the two it missed had both drifted: python/pyproject.toml sat a minor
+  // behind VERSION and the Python loader's own `__version__` sat two behind.
+  // A Python consumer printing the pinned suite version -- rule 4 of
+  // runners/README.md, the one that exists so "we're on an old fixture set" is
+  // visible rather than inferred -- was printing a number no file agreed with.
+  //
+  // In the repository whose entire product is that unchecked duplicates drift.
+  // Every copy is compared here now; adding a fifth means adding it to this
+  // list, which is the point.
+  const read = (path: string) =>
+    readFileSync(new URL(path, import.meta.url), "utf8");
+
+  const pyproject = read("../python/pyproject.toml").match(
+    /^version\s*=\s*"([^"]+)"/m,
+  );
+  assert.ok(pyproject, "python/pyproject.toml declares no version");
+  assert.equal(
+    pyproject[1],
+    suiteVersion(),
+    "python/pyproject.toml and VERSION disagree",
+  );
+
+  const loader = read("../python/src/fancy_conformance/__init__.py").match(
+    /^__version__\s*=\s*"([^"]+)"/m,
+  );
+  assert.ok(loader, "the Python loader declares no __version__");
+  assert.equal(
+    loader[1],
+    suiteVersion(),
+    "the Python loader's __version__ and VERSION disagree",
+  );
+});
+
 test("every case carries the metadata a failure needs to be actionable", () => {
   for (const id of listSuites()) {
     const { cases } = loadSuite(id);

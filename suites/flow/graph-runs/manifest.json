@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/graph-runs",
+  "title": "Whole-graph execution: the same WorkflowSchema in, the same outputs out",
+  "since": "0.6.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "runGraph(schema: WorkflowSchema, initialInputs: object) -> { ok: true, outputs: object } | { ok: false, error: string }",
+    "summary": "Import a WorkflowSchema v1 document leniently against the built-in kind registry (including the structural kinds), run it through the engine with the built-in offline executors, and return the run's outputs. This is the end-to-end parity contract for the fancy-flow engine: Kahn topological order, the three port-activation conventions, branch routing, dead-edge handling at merge points, cycle detection, and the closed failure of an unregistered kind.",
+    "reference": "php",
+    "referenceNote": "The goldens were produced by running particle-academy/fancy-flow-php, where they lived as tests/Parity/fixtures/ before being promoted here. Two were CORRECTED rather than transliterated during the promotion; each says so in its own notes.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Engine\\FlowRunner" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.engine.FlowRunner" },
+      { "language": "rust", "package": "fancy-flow", "symbol": "fancy_flow::engine::FlowRunner" },
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "runFlow" }
+    ]
+  },
+  "notes": [
+    "These 23 cases spent their whole life as a COPY. They were fancy-flow-php's own test fixtures; fancy-flow-py duplicated the directory byte for byte and held the two together with a provenance test, and its fixtures/SOURCE.md said plainly that the real fix was to promote them here. A fourth runtime is what made a third copy indefensible.",
+    "The reference implementation asserting these rows is the PHP twin. `@particle-academy/fancy-flow` — the runtime whose run-flow.ts is the behavioural source of truth for all of them — did NOT run them at any point while they were private fixtures, so the goldens describing its behaviour had zero implementations checking them on its own side. Wiring the Node runner is the remaining half of this promotion.",
+    "The run is deliberately fully specified rather than left to the runner: LENIENT import, a LOCAL kind registry with the structural kinds registered, and the built-in offline executors. A runner that populates the SHARED kind registry instead gets different declared output ports for `for_each` and disagrees on a case nobody changed.",
+    "Two goldens were corrected on promotion. `0014` recorded PHP's ENCODING of an empty header map (`[]`) rather than its value; the shared golden is `{}`, which PHP still satisfies because its loader decodes to assoc arrays. `0021` and `0022` asserted a SUBSTRING (`errorContains`) and now assert the exact message — the substring is what hid a live divergence in which Python emitted an ASCII hyphen where PHP and TypeScript emit an em dash.",
+    "There is NO discrimination probe for this suite, and that is a real gap rather than an oversight. Every other suite here ships deliberately-wrong implementations that must fail an exact set of ids; the implementation under test here is an entire workflow engine, which this package does not carry and should not grow. Until a probe exists, these rows guard DRIFT between four runtimes but do not prove they discriminate — read the green tick as the weaker claim it is."
+  ]
+}

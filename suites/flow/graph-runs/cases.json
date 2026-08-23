@@ -1,0 +1,1855 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/graph-runs",
+  "cases": [
+    {
+      "id": "0001-manual-transform-output",
+      "title": "Manual trigger seeds a payload; transform extracts a field; output captures it.",
+      "since": "0.6.0",
+      "tags": [
+        "trigger",
+        "logic",
+        "output"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.user.name }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          },
+          "tf": "Ada",
+          "o": "Ada"
+        }
+      }
+    },
+    {
+      "id": "0002-webhook-branch-true-notify",
+      "title": "Webhook payload branches true and notifies; the merge point is the output.",
+      "since": "0.6.0",
+      "tags": [
+        "trigger",
+        "branch",
+        "merge",
+        "human"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "wh",
+                "kind": "webhook_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.vip }}"
+                }
+              },
+              {
+                "id": "nf",
+                "kind": "notify",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                },
+                "config": {
+                  "channel": "slack",
+                  "to": "#vips",
+                  "message": "VIP {{ $json.name }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 3,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "wh",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "nf",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "nf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "wh": {
+            "payload": {
+              "vip": true,
+              "name": "Ada"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "wh": {
+            "vip": true,
+            "name": "Ada"
+          },
+          "br": {
+            "branch": "true",
+            "value": {
+              "vip": true,
+              "name": "Ada"
+            }
+          },
+          "nf": {
+            "sent": true,
+            "channel": "slack",
+            "to": "#vips",
+            "message": "VIP Ada"
+          },
+          "o": {
+            "sent": true,
+            "channel": "slack",
+            "to": "#vips",
+            "message": "VIP Ada"
+          }
+        }
+      }
+    },
+    {
+      "id": "0003-branch-false-log",
+      "title": "A false condition routes to the log branch.",
+      "since": "0.6.0",
+      "tags": [
+        "branch",
+        "output"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.vip }}"
+                }
+              },
+              {
+                "id": "lg",
+                "kind": "log",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                },
+                "config": {
+                  "level": "info",
+                  "message": "regular {{ $json.name }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 3,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "lg",
+                "sourceHandle": "false"
+              },
+              {
+                "id": "e3",
+                "source": "lg",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "vip": false,
+            "name": "Bo"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "vip": false,
+            "name": "Bo"
+          },
+          "br": {
+            "branch": "false",
+            "value": {
+              "vip": false,
+              "name": "Bo"
+            }
+          },
+          "lg": {
+            "logged": "regular Bo",
+            "level": "info"
+          },
+          "o": {
+            "logged": "regular Bo",
+            "level": "info"
+          }
+        }
+      }
+    },
+    {
+      "id": "0004-switch-case",
+      "title": "Switch routes on a key to case_b.",
+      "since": "0.6.0",
+      "tags": [
+        "branch",
+        "ports"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "sw",
+                "kind": "switch_case",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "value": "{{ $json.kind }}",
+                  "cases": {
+                    "a": "case_a",
+                    "b": "case_b"
+                  }
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "sw"
+              },
+              {
+                "id": "e2",
+                "source": "sw",
+                "target": "o",
+                "sourceHandle": "case_b"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "kind": "b"
+          },
+          "sw": {
+            "__port": "case_b",
+            "value": {
+              "kind": "b"
+            }
+          },
+          "o": {
+            "kind": "b"
+          }
+        }
+      }
+    },
+    {
+      "id": "0005-merge-after-decision",
+      "title": "A decision routes down one branch; the merge point still runs (#1).",
+      "since": "0.6.0",
+      "tags": [
+        "branch",
+        "merge",
+        "hazard"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.ok }}"
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "A"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 2,
+                  "y": 1
+                },
+                "config": {
+                  "expression": "B"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "merge",
+                "position": {
+                  "x": 3,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "merge"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 4,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "a",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "b",
+                "sourceHandle": "false"
+              },
+              {
+                "id": "e4",
+                "source": "a",
+                "target": "m",
+                "targetHandle": "a"
+              },
+              {
+                "id": "e5",
+                "source": "b",
+                "target": "m",
+                "targetHandle": "b"
+              },
+              {
+                "id": "e6",
+                "source": "m",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "ok": true
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "ok": true
+          },
+          "br": {
+            "branch": "true",
+            "value": {
+              "ok": true
+            }
+          },
+          "a": "A",
+          "m": {
+            "a": "A"
+          },
+          "o": {
+            "a": "A"
+          }
+        }
+      },
+      "notes": "The merge-after-decision case (#1). A node runs when AT LEAST ONE incoming edge is active, never when all are: a Decision leaves the untaken branch's edge dead forever, so an `every`-style check skips the shared continuation and halts the run after the first branch. An implementation requiring all incoming edges fails exactly this case and 0002."
+    },
+    {
+      "id": "0006-merge-concat",
+      "title": "Two lists concatenated.",
+      "since": "0.6.0",
+      "tags": [
+        "merge"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "a",
+                "kind": "variable",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "name": "a",
+                  "value": "{{ $json.left }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "variable",
+                "position": {
+                  "x": 0,
+                  "y": 1
+                },
+                "config": {
+                  "name": "b",
+                  "value": "{{ $json.right }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "merge",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "concat"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "m",
+                "targetHandle": "a"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "m",
+                "targetHandle": "b"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "a": {
+            "left": [
+              1,
+              2
+            ]
+          },
+          "b": {
+            "right": [
+              3
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "a": [
+            1,
+            2
+          ],
+          "b": [
+            3
+          ],
+          "m": [
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    },
+    {
+      "id": "0007-for-each",
+      "title": "Resolve a list from the payload.",
+      "since": "0.6.0",
+      "tags": [
+        "logic"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "fe",
+                "kind": "for_each",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "source": "{{ $json.items }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "fe"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "items": [
+              "x",
+              "y",
+              "z"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "items": [
+              "x",
+              "y",
+              "z"
+            ]
+          },
+          "fe": {
+            "items": [
+              "x",
+              "y",
+              "z"
+            ],
+            "count": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "0008-memory-store",
+      "title": "Write to memory then read it back.",
+      "since": "0.6.0",
+      "tags": [
+        "data"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "w",
+                "kind": "memory_store",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "operation": "write",
+                  "key": "pref",
+                  "value": "{{ $json.pref }}"
+                }
+              },
+              {
+                "id": "r",
+                "kind": "memory_store",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                },
+                "config": {
+                  "operation": "read",
+                  "key": "pref"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "w"
+              },
+              {
+                "id": "e2",
+                "source": "w",
+                "target": "r"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "pref": "dark"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "pref": "dark"
+          },
+          "w": "dark",
+          "r": "dark"
+        }
+      }
+    },
+    {
+      "id": "0009-data-store",
+      "title": "Set a row then query the table.",
+      "since": "0.6.0",
+      "tags": [
+        "data"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "s",
+                "kind": "data_store",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "operation": "set",
+                  "table": "users",
+                  "key": "1",
+                  "value": "{{ $json.row }}"
+                }
+              },
+              {
+                "id": "q",
+                "kind": "data_store",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                },
+                "config": {
+                  "operation": "list",
+                  "table": "users"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "s"
+              },
+              {
+                "id": "e2",
+                "source": "s",
+                "target": "q"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "row": {
+              "name": "A"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "row": {
+              "name": "A"
+            }
+          },
+          "s": {
+            "name": "A"
+          },
+          "q": {
+            "1": {
+              "name": "A"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0010-variable-transform",
+      "title": "A variable feeds a transform.",
+      "since": "0.6.0",
+      "tags": [
+        "data",
+        "logic"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "v",
+                "kind": "variable",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "name": "who",
+                  "value": "{{ $json.who }}"
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "Hello {{ $json }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "v",
+                "target": "tf"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "v": {
+            "who": "world"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "v": "world",
+          "tf": "Hello world"
+        }
+      }
+    },
+    {
+      "id": "0011-llm-call",
+      "title": "Deterministic echo LLM completion.",
+      "since": "0.6.0",
+      "tags": [
+        "ai"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "llm",
+                "kind": "llm_call",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "model": "claude-sonnet-4-5",
+                  "prompt": "{{ $json.q }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "llm"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "q": "why is the sky blue"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "q": "why is the sky blue"
+          },
+          "llm": {
+            "text": "[claude-sonnet-4-5] why is the sky blue",
+            "usage": {
+              "input_tokens": 5,
+              "output_tokens": 5
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0012-tool-use",
+      "title": "Invoke a named tool with resolved args.",
+      "since": "0.6.0",
+      "tags": [
+        "ai"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tu",
+                "kind": "tool_use",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "tool": "search_index",
+                  "args": "{{ $json }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tu"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "query": "flows"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "query": "flows"
+          },
+          "tu": {
+            "tool": "search_index",
+            "args": {
+              "query": "flows"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0013-embed-search",
+      "title": "Embed a query against an empty vector store.",
+      "since": "0.6.0",
+      "tags": [
+        "ai"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "es",
+                "kind": "embed_search",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "query": "{{ $json.q }}",
+                  "topK": 3
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "es"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "q": "onboarding"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "q": "onboarding"
+          },
+          "es": {
+            "query": "onboarding",
+            "matches": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0014-api-request",
+      "title": "HTTP GET with an interpolated URL (echo client).",
+      "since": "0.6.0",
+      "tags": [
+        "io"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "api",
+                "kind": "api_request",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "method": "GET",
+                  "url": "https://api.example.com/users/{{ $json.id }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "api"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "id": 42
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "id": 42
+          },
+          "api": {
+            "status": 200,
+            "headers": {},
+            "body": {
+              "echoed": {
+                "method": "GET",
+                "url": "https://api.example.com/users/42",
+                "body": null
+              }
+            }
+          }
+        }
+      },
+      "notes": "`headers` is an empty MAP, not an empty list. The PHP golden this was promoted from baked `[]` because PHP cannot distinguish the two when encoding; that recorded the encoding rather than the value, and cost the Python port a normaliser."
+    },
+    {
+      "id": "0015-webhook-out",
+      "title": "POST a payload to a URL (echo client).",
+      "since": "0.6.0",
+      "tags": [
+        "io"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "wo",
+                "kind": "webhook_out",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "url": "https://hooks.example.com/x",
+                  "payload": "{{ $json }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "wo"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "event": "signup"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "event": "signup"
+          },
+          "wo": {
+            "sent": true,
+            "status": 200,
+            "response": {
+              "echoed": {
+                "method": "POST",
+                "url": "https://hooks.example.com/x",
+                "body": {
+                  "event": "signup"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0016-schedule-trigger",
+      "title": "A cron-scheduled entry point.",
+      "since": "0.6.0",
+      "tags": [
+        "trigger"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "s",
+                "kind": "schedule_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "cron": "*/5 * * * *",
+                  "timezone": "UTC"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "s",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "s": {
+            "tick": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "s": {
+            "cron": "*/5 * * * *",
+            "timezone": "UTC",
+            "tick": 1
+          },
+          "o": {
+            "cron": "*/5 * * * *",
+            "timezone": "UTC",
+            "tick": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "0017-user-input",
+      "title": "User input surfaces submitted values.",
+      "since": "0.6.0",
+      "tags": [
+        "human"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "u",
+                "kind": "user_input",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "title": "Confirm"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "u",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "u": {
+            "values": {
+              "answer": "yes"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "u": {
+            "answer": "yes"
+          },
+          "o": {
+            "answer": "yes"
+          }
+        }
+      }
+    },
+    {
+      "id": "0018-human-approval",
+      "title": "Approval routes to the approved branch.",
+      "since": "0.6.0",
+      "tags": [
+        "human",
+        "branch"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "ap",
+                "kind": "human_approval",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "title": "Ship it?"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "ap"
+              },
+              {
+                "id": "e2",
+                "source": "ap",
+                "target": "o",
+                "sourceHandle": "approved"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "approved": true,
+            "in": {
+              "release": "1.0"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "approved": true,
+            "in": {
+              "release": "1.0"
+            }
+          },
+          "ap": {
+            "branch": "approved",
+            "value": {
+              "approved": true,
+              "in": {
+                "release": "1.0"
+              }
+            }
+          },
+          "o": {
+            "approved": true,
+            "in": {
+              "release": "1.0"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0019-wait",
+      "title": "Wait passes through without sleeping (framework-free).",
+      "since": "0.6.0",
+      "tags": [
+        "logic"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "w",
+                "kind": "wait",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "duration",
+                  "duration": "10s"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "w"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "job": 7
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "job": 7
+          },
+          "w": {
+            "waited": "duration",
+            "duration": "10s",
+            "input": {
+              "job": 7
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0020-subgraph",
+      "title": "A subgraph runs a nested transform → output.",
+      "since": "0.6.0",
+      "tags": [
+        "structural"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "sg",
+                "kind": "subgraph",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "graph": {
+                    "$schema": "https://particle.academy/schemas/workflow/v1.json",
+                    "version": 1,
+                    "graph": {
+                      "nodes": [
+                        {
+                          "id": "itf",
+                          "kind": "transform",
+                          "position": {
+                            "x": 0,
+                            "y": 0
+                          },
+                          "config": {
+                            "expression": "{{ $json.n }}"
+                          }
+                        },
+                        {
+                          "id": "io",
+                          "kind": "output",
+                          "position": {
+                            "x": 1,
+                            "y": 0
+                          }
+                        }
+                      ],
+                      "edges": [
+                        {
+                          "id": "ie",
+                          "source": "itf",
+                          "target": "io"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "sg"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "n": 99
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "n": 99
+          },
+          "sg": {
+            "itf": 99,
+            "io": 99
+          }
+        }
+      }
+    },
+    {
+      "id": "0021-cycle",
+      "title": "A cyclic graph aborts.",
+      "since": "0.6.0",
+      "tags": [
+        "error",
+        "topology"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "x"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "y"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "a"
+              }
+            ]
+          }
+        },
+        "initialInputs": {}
+      },
+      "expected": {
+        "ok": false,
+        "error": "Cycle detected in flow graph — aborting."
+      },
+      "notes": "The exact message matters and is why this case is not `errorContains`. PHP and TypeScript emit an EM DASH; the Python port emitted an ASCII hyphen and nothing reported it for two releases, because the substring assertion this replaces stopped before the character they disagreed on."
+    },
+    {
+      "id": "0022-unknown-kind",
+      "title": "An unregistered kind has no executor and errors at run time.",
+      "since": "0.6.0",
+      "tags": [
+        "error",
+        "executors"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "x",
+                "kind": "no_such_kind",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": []
+          }
+        },
+        "initialInputs": {}
+      },
+      "expected": {
+        "ok": false,
+        "error": "No executor registered for kind=no_such_kind"
+      },
+      "notes": "An unregistered kind fails CLOSED — no executor, no outputs, and the run stops. That silence is the right default and is exactly what made a kind-keyed registry lookup miss go unnoticed in the TypeScript engine until 0.48.1."
+    },
+    {
+      "id": "0023-merge-same-handle",
+      "title": "Two mutually-exclusive branches rejoin on the SAME target handle. 05 covers the merge-node shape, where each branch lands on its own handle and so cannot collide; this covers the shape that can: the dead branch must not clobber the live one's value with nothing. Ordering the dead edge LAST is what makes it bite.",
+      "since": "0.6.0",
+      "tags": [
+        "branch",
+        "merge",
+        "hazard"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.ok }}"
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "A"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 2,
+                  "y": 1
+                },
+                "config": {
+                  "expression": "B"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 3,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "a",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "b",
+                "sourceHandle": "false"
+              },
+              {
+                "id": "e4",
+                "source": "a",
+                "target": "o"
+              },
+              {
+                "id": "e5",
+                "source": "b",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "ok": true
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "ok": true
+          },
+          "br": {
+            "branch": "true",
+            "value": {
+              "ok": true
+            }
+          },
+          "a": "A",
+          "o": "A"
+        }
+      },
+      "notes": "Two mutually-exclusive branches rejoin on the SAME target handle. `collectInputs` must read only ACTIVE edges: assigning unconditionally lets the dead branch's absent value clobber the live one whenever it happens to come last, emptying the merge point while the run still reports success. TypeScript implemented the code and PHP the documented contract; they disagreed silently until fancy-flow 0.27.1."
+    }
+  ]
+}

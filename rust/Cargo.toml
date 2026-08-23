@@ -1,0 +1,19 @@
+[package]
+name = "fancy-conformance"
+version = "0.6.0"
+edition = "2021"
+rust-version = "1.85"
+description = "Rust loader for the shared fancy-conformance fixture tables. One contract, N implementations, one table asserted by every one of them."
+license = "MIT"
+repository = "https://github.com/Particle-Academy/fancy-conformance"
+homepage = "https://ui.particle.academy"
+keywords = ["conformance", "fixtures", "testing", "parity"]
+categories = ["development-tools::testing"]
+readme = "README.md"
+
+# The loader reads JSON, so it needs a JSON reader. `fancy-json` is
+# first-party and has no dependencies of its own, so this tree is two crates
+# and no third-party code at all -- which is what lets a consuming repo run the
+# tables without an approval conversation.
+[dependencies]
+fancy-json = { version = "0.1", git = "https://github.com/Particle-Academy/fancy-json-rs", branch = "main" }

@@ -6,7 +6,7 @@ live in the envelope's `AGENTS.md` and are deliberately not repeated here.
 
 ## What this repo is
 
-Data, plus three thin loaders for it. The fixtures are the product; the loaders
+Data, plus four thin loaders for it. The fixtures are the product; the loaders
 exist so a consumer does not have to hand-roll JSON reading in every repo.
 
 ```
@@ -19,8 +19,15 @@ runners/README.md        how to write a runner; the subprocess CLI contract
 src/index.ts             Node loader
 php/src/Conformance.php  PHP loader — same API shape, deliberately
 python/src/fancy_conformance/  Python loader — same again; ships the fixtures in its wheel
+rust/src/lib.rs          Rust loader — same again; reads JSON through first-party `fancy-json`
 scripts/cross-check.mjs  runs BOTH loaders and requires identical verdicts
 ```
+
+**The Rust loader was added with `fancy-flow-rs`, for the same reason the Python
+one was.** Writing a private copy in the repo under test would have been the
+fifth time, in the repository that exists to stop exactly that. Its only
+dependency is first-party `fancy-json`, which has none of its own — so a Rust
+consumer runs the tables without a third-party approval conversation.
 
 **The Python loader was added because four consumers had already written it
 themselves and their copies had diverged.** `holy-sheet-py`, `dark-slide-py`,
@@ -98,6 +105,13 @@ out — an unset or wrong value still fails the run.
 3. Add discrimination tests: a faithful probe that passes everything (the
    control — without it the mutants prove nothing), plus one mutant per hazard
    asserting the **exact** set of ids it fails.
+
+   **`flow/graph-runs` has none, and that is a known gap rather than an
+   oversight.** The implementation under test there is an entire workflow
+   engine, which this package does not carry and should not grow. Its rows
+   therefore guard DRIFT between four runtimes but do not prove they
+   discriminate; the manifest's `notes` says so, so nobody reads its green tick
+   as the stronger claim.
 4. If the suite emits documents rather than values, use `caseFormat: "directory"`
    and declare the normalisation in the manifest. Never byte-compare a zip
    container as shipped — PHP writes DEFLATE with real mtimes, the JS ports
@@ -109,11 +123,19 @@ out — an unset or wrong value still fails the run.
 npm test                                                   # Node loader + discrimination
 vendor/bin/pest                                            # PHP loader
 cd python && python -m pytest                              # Python loader
+cd rust && cargo test                                      # Rust loader
 CONFORMANCE_PHP=<abs path to php.exe> npm run cross-check   # Node + PHP, compared
 ```
 
-All four are required CI jobs. `npm test` is NOT run with `--if-present` here:
+All five are required CI jobs. `npm test` is NOT run with `--if-present` here:
 a green tick over an absent suite is the failure this package is about.
+
+**This section said "all four are required CI jobs" while `ci.yml` had only
+`node`, `php` and `cross-language`.** The Python loader and its 27 tests ran
+NOWHERE — a claim about coverage, in the repository whose entire argument is
+that such a claim must be a test result rather than a sentence. Both the
+`python` and `rust` jobs were added on 2026-08-23. If you add a sixth loader,
+the job is part of adding it.
 
 **`cross-check.mjs` still compares only Node and PHP.** Extending it to the
 Python loader is open work; until it lands, the Python loader is asserted by its
@@ -123,8 +145,12 @@ here so nobody reads three green ticks as a three-way comparison.
 ### The float-comparison divergence, in the loaders themselves
 
 `Conformance::equals` compares floats with a scaled `1e-12` epsilon; the
-TypeScript `deepEquals` uses exact `Object.is`. The Python loader follows PHP.
-So the three loaders do **not** agree on how a float golden is compared, in a
-repository whose product is agreement. No shipped case turns on it today
-(`shared/decimal`'s float rows round-trip identically through all three JSON
-parsers), which is why it has survived. Pick one and make the other two match.
+TypeScript `deepEquals` uses exact `Object.is`. The Python **and Rust** loaders
+follow PHP. So the four loaders do **not** agree on how a float golden is
+compared, in a repository whose product is agreement. No shipped case turns on
+it today (`shared/decimal`'s float rows round-trip identically through every
+JSON parser involved), which is why it has survived.
+
+The Rust loader joined the MAJORITY rather than inventing a third behaviour,
+which is the only defensible move for a new loader but does not fix anything —
+it makes the score 3-1. Pick one and make the other three match.

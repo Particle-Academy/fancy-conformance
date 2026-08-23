@@ -10,6 +10,73 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- **A Rust loader** (`rust/`), the fourth, same API shape as the Node, PHP and
+  Python ones. Added with `fancy-flow-rs`, for the same reason the Python one
+  was: a private copy in the repo under test would have been the fifth, in the
+  repository that exists to stop exactly that.
+
+  Its only dependency is first-party `fancy-json`, which has none of its own —
+  so a Rust consumer runs the tables without a third-party approval
+  conversation. It follows PHP and Python on the float epsilon rather than
+  inventing a third comparison; that makes the loaders' known divergence 3-1
+  instead of 2-2, which is not a fix and is recorded in `AGENTS.md` as such.
+
+- **`flow/graph-runs` (23 cases)** — whole-graph execution. The same
+  `WorkflowSchema` document in, the same `RunResult.outputs` out: Kahn
+  topological order, the three port-activation conventions, branch routing,
+  dead-edge handling at merge points, cycle detection, and the closed failure of
+  an unregistered kind.
+
+  These rows are not new. They spent their whole life as **fancy-flow-php's
+  private test fixtures**, which `fancy-flow-py` then duplicated byte for byte
+  and held together with a provenance test. That port's own `SOURCE.md` said
+  plainly that a copy is a defect and that promoting them here was the fix. A
+  fourth runtime (`fancy-flow-rs`) is what made a third copy indefensible.
+
+  **Consumers must state the run precisely**, because the manifest does: lenient
+  import, a LOCAL kind registry with the structural kinds registered, and the
+  built-in offline executors. A runner that populates the SHARED kind registry
+  instead gets different declared output ports for `for_each` and disagrees on a
+  case nobody changed.
+
+### Fixed
+
+- **Two `flow/graph-runs` goldens were corrected on promotion, and one of them
+  had been hiding a live divergence.**
+
+  Cases `0021` and `0022` previously asserted `errorContains` — a **substring**.
+  They now assert the exact message. The substring is what hid it: PHP and
+  TypeScript emit `Cycle detected in flow graph — aborting.` with an EM DASH,
+  the Python port emits an ASCII hyphen, and `errorContains: "Cycle detected"`
+  stops before the character they disagree on. Both reference implementations
+  were re-run to capture the exact strings rather than transcribed.
+
+  Case `0014` recorded PHP's *encoding* of an empty header map (`[]`) rather
+  than its value, because PHP cannot distinguish an empty array from an empty
+  map. The golden is now `{}`. PHP still satisfies it — its loader decodes JSON
+  to assoc arrays, where the two are the same value — and the Python port's
+  normaliser for this one case can go.
+
+- **The Python loader had no CI job at all.** `AGENTS.md` said "all four are
+  required CI jobs"; `ci.yml` had `node`, `php` and `cross-language`. The Python
+  loader and its 27 tests ran nowhere, so the sentence was the only thing
+  asserting them — in the repository whose entire argument is that such a claim
+  must be a test result. `python` and `rust` jobs added, and `cross-language`
+  now waits on all four.
+
+- **This package's own version was written in four places and only two were
+  compared.** `VERSION` and `package.json` agreed at 0.5.0;
+  `python/pyproject.toml` sat at 0.4.0 and the Python loader's `__version__` at
+  0.3.0. So a Python consumer honouring rule 4 of `runners/README.md` — print
+  the pinned suite version, so an old fixture set is visible rather than
+  inferred — was printing a number no other file agreed with.
+
+  In the repository whose entire product is the claim that unchecked duplicates
+  drift. All four now agree and all four are asserted; adding a fifth means
+  adding it to that assertion, which is the point.
+
 ## [0.5.0] - 2026-08-19
 
 ### Added

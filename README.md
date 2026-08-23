@@ -66,6 +66,7 @@ verbatim.
 | `shared/expr` | 20 | `{{ }}` dot-path resolution and branch truthiness for fancy-flow node config |
 | `shared/image-header` | 16 | Image dimensions read from the header bytes, without an image library |
 | `shared/flow-run-identity` | 25 | fancy-flow's run/step identity: the idempotency key a retrying connector sends, and when a retry may still reuse it |
+| `flow/graph-runs` | 23 | Whole-graph execution: the same `WorkflowSchema` in, the same `RunResult.outputs` out |
 
 Every case carries an `id`, a `title`, the suite version it arrived in, and —
 where it exists to catch something specific — a `notes` field saying what.
@@ -133,7 +134,7 @@ suites into decoration, so it is not representable here.
 
 ## This repository holds itself to the same standard
 
-It ships two loaders for one fixture format, which is itself a duplicated
+It ships four loaders for one fixture format, which is itself a duplicated
 contract. So:
 
 - Each language's test suite proves that language reads the fixtures correctly.
