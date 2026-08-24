@@ -1,0 +1,38 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "last-word/docx-constructs",
+  "title": "Which WordprocessingML constructs the LastWord document model can express, and the exact XML each one emits",
+  "since": "0.7.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "LastWord's three engines (PHP, Node, Python) turn one JSON document model into .docx. This suite pins the MAPPING: for a given model fragment, which property elements land in word/document.xml, with which attributes, in which order — and whether the reader gives the model back. It exists because the model was far narrower than the XML the writers emit: font size, font family, small caps, letter spacing, per-cell shading, borders, padding, vertical alignment and both merge directions were emitted from hardcoded blocks or styles.xml and were unreachable from the model. An agent could emit them, the validator returned no errors, and all three engines silently dropped them.",
+    "functions": {
+      "runProps": "write the doc, unzip, parse word/document.xml, and return every <w:r> in body order as {text, rPr} where rPr is the ordered normalisation of that run's properties.",
+      "paragraphProps": "…every <w:p> in body order as the ordered normalisation of its <w:pPr> (an empty array when absent).",
+      "tableProps": "…every <w:tbl> in body order as {tblPr, grid} — tblPr ordered-normalised, grid the list of <w:gridCol w:w> values as strings.",
+      "cellProps": "…every <w:tc> in document order as the ordered normalisation of its <w:tcPr>.",
+      "sectionProps": "…the body's <w:sectPr>, ordered-normalised.",
+      "readBack": "read(toBytes(doc)) — the document model recovered from the bytes just written.",
+      "roundTripFixpoint": "{\"fixpoint\": read(toBytes(doc)) == doc}. Proves the reader is complete for every construct the writer emits, without a golden the size of the document."
+    },
+    "runShape": {
+      "normalisedProps": "An ORDERED array of [localName, value] pairs, one per child element of the property container. value is `true` for an empty element, an object of attribute-localName -> string for an element with attributes, and a nested ordered array for an element with element children. Attribute values are ALWAYS strings, so no language's number parsing can enter the comparison."
+    },
+    "reference": "php",
+    "referenceNote": "particle-academy/last-word is the reference: it shipped first and the pair's contract is 'same document either backend'. Two exceptions are recorded in `notes` — the header-cell grey and the table property block — where the reference was reconciled TOWARD the Node port rather than the other way, because the port's value was the considered one. Every golden here is the output of running an engine after that reconciliation, never what the XML 'obviously' ought to be; the unit arithmetic (points to half-points, points to twentieths, points to eighths) is stated in the notes so a reader can check a row rather than trust it.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/last-word", "symbol": "src/Writer/DocxWriter.php" },
+      { "language": "node", "package": "@particle-academy/last-word", "symbol": "writer/docx-writer.ts DocxWriter" },
+      { "language": "python", "package": "last-word", "symbol": "writer.docx_writer.DocxWriter" }
+    ]
+  },
+  "notes": [
+    "ORDER IS THE POINT. WordprocessingML fixes the child order of every property container (CT_RPr, CT_PPr, CT_TcPr, CT_TblPr, CT_SectPr are xsd:sequence, not xsd:all), so a normalisation to an unordered map would let two engines emit different XML and still pass. The goldens are ordered arrays for that reason, and three rows exist only to pin an insertion point - 0006, 0014, 0031. Attribute order WITHIN an element is deliberately NOT pinned, because attributes are unordered in XML; pinning it is a byte-level parts comparison, which is the binary suite's job rather than this one's.",
+    "UNIT ARITHMETIC, stated once so every row is checkable rather than believable. Font size: points -> HALF-points (w:sz = pt*2). Letter spacing, paragraph spacing, indents and cell margins: points -> TWENTIETHS of a point (twips, = pt*20). Border width: points -> EIGHTHS of a point (w:sz = pt*8, clamped to OOXML's 2..96). Table width: percent -> FIFTIETHS of a percent (w:w = pct*50, w:type=pct). Line height: a multiple -> w:line = mult*240 with w:lineRule=auto. Column widths are relative WEIGHTS normalised over the section's content width, so [30,40,30] and [3,4,3] are the same table.",
+    "THE GRID DEPENDS ON THE PAGE. Column widths are computed against page width minus the two side margins, so a document that narrows its margins gets a wider grid. Case 0032 pins that link; before this suite the content width was the constant 9360 in all three engines and a custom margin silently produced a table narrower or wider than its own page.",
+    "RECONCILED, NOT DISCOVERED. Three divergences between the engines were live when this suite was written and are fixed by the same change that adds these rows, so the goldens are what all three now emit: (a) Node referenced a shared <w:tblStyle w:val=\"LastWordTable\"/> while PHP and Python inlined <w:tblBorders> — a named style cannot vary per table instance, so per-table borders forced inlining everywhere; (b) header cells were E7E7E7 in PHP and Python but F2F2F2 in Node — two greys for one input; (c) PHP and Python wrote <w:b/> onto header runs while Node got bold from <w:tblStylePr w:type=\"firstRow\">, so the same file read back to two different models depending on which engine wrote it. Node moved to the majority on (b) and (c); all three moved to Node's more generous default cell margins when its style was inlined.",
+    "NO ROW ASSERTS A COLOUR IS PRETTY. Every golden here is a mapping fact. Whether a document built from these constructs LOOKS like anything is not a fixture's business, and is checked by rendering the reference document in case 0039 and looking at it.",
+    "Case 0039 carries a whole business one-pager as its input — a KPI band, a dark full-bleed callout, a bordered grid with one tinted cell, a card row, a definition table with a tinted label column and a two-tint closing pair. It is the acceptance artifact for the capability, reduced here to the one claim a fixture can make about it: everything the writer emitted, the reader gave back. Its content is neutral and invented; it reproduces the STRUCTURE of a real client document and none of its text, names or branding."
+  ]
+}

@@ -1,0 +1,5785 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "last-word/docx-constructs",
+  "cases": [
+    {
+      "id": "0001-run-marks-baseline",
+      "title": "Every inline mark reachable before this suite, in CT_RPr order",
+      "since": "0.7.0",
+      "fn": "runProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a",
+                  "bold": true
+                },
+                {
+                  "text": "b",
+                  "italic": true
+                },
+                {
+                  "text": "c",
+                  "underline": true
+                },
+                {
+                  "text": "d",
+                  "strike": true
+                },
+                {
+                  "text": "e",
+                  "color": "#FF0000"
+                },
+                {
+                  "text": "f",
+                  "highlight": "#FFFF00"
+                },
+                {
+                  "text": "g"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "text": "a",
+          "rPr": [
+            [
+              "b",
+              true
+            ]
+          ]
+        },
+        {
+          "text": "b",
+          "rPr": [
+            [
+              "i",
+              true
+            ]
+          ]
+        },
+        {
+          "text": "c",
+          "rPr": [
+            [
+              "u",
+              {
+                "val": "single"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "d",
+          "rPr": [
+            [
+              "strike",
+              true
+            ]
+          ]
+        },
+        {
+          "text": "e",
+          "rPr": [
+            [
+              "color",
+              {
+                "val": "FF0000"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "f",
+          "rPr": [
+            [
+              "shd",
+              {
+                "val": "clear",
+                "color": "auto",
+                "fill": "FFFF00"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "g",
+          "rPr": []
+        }
+      ],
+      "tags": [
+        "run",
+        "baseline"
+      ],
+      "notes": "The floor. These seven were the ENTIRE reachable run vocabulary before this suite; if any moves, every later row is measuring against a shifted baseline. Also pins that an unstyled run emits no w:rPr at all rather than an empty one."
+    },
+    {
+      "id": "0002-run-size",
+      "title": "size is points; w:sz is HALF-points, and w:szCs moves with it",
+      "since": "0.7.0",
+      "fn": "runProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "size": 11
+                },
+                {
+                  "text": "y",
+                  "size": 7.5
+                },
+                {
+                  "text": "z",
+                  "size": 20
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "text": "x",
+          "rPr": [
+            [
+              "sz",
+              {
+                "val": "22"
+              }
+            ],
+            [
+              "szCs",
+              {
+                "val": "22"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "y",
+          "rPr": [
+            [
+              "sz",
+              {
+                "val": "15"
+              }
+            ],
+            [
+              "szCs",
+              {
+                "val": "15"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "z",
+          "rPr": [
+            [
+              "sz",
+              {
+                "val": "40"
+              }
+            ],
+            [
+              "szCs",
+              {
+                "val": "40"
+              }
+            ]
+          ]
+        }
+      ],
+      "tags": [
+        "run",
+        "size"
+      ],
+      "notes": "7.5pt -> 15 is the row that matters: half-points are the unit, so a half-point size is exactly representable and must not round to 14 or 16. szCs is not decoration - omit it and a complex-script run silently keeps the default size."
+    },
+    {
+      "id": "0003-run-font",
+      "title": "font sets ascii, hAnsi and cs together",
+      "since": "0.7.0",
+      "fn": "runProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "font": "Segoe UI"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "text": "x",
+          "rPr": [
+            [
+              "rFonts",
+              {
+                "ascii": "Segoe UI",
+                "hAnsi": "Segoe UI",
+                "cs": "Segoe UI"
+              }
+            ]
+          ]
+        }
+      ],
+      "tags": [
+        "run",
+        "font"
+      ],
+      "notes": "Three attributes, not one. Setting only w:ascii leaves Word free to pick a different face for anything it classes as high-ANSI or complex-script, which is how one run renders in two fonts."
+    },
+    {
+      "id": "0004-run-small-caps",
+      "title": "smallCaps",
+      "since": "0.7.0",
+      "fn": "runProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Example Analytics",
+                  "smallCaps": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "text": "Example Analytics",
+          "rPr": [
+            [
+              "smallCaps",
+              true
+            ]
+          ]
+        }
+      ],
+      "tags": [
+        "run",
+        "smallCaps"
+      ]
+    },
+    {
+      "id": "0005-run-letter-spacing",
+      "title": "letterSpacing is points; w:spacing is TWENTIETHS of a point, and may be negative",
+      "since": "0.7.0",
+      "fn": "runProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "letterSpacing": 1.2
+                },
+                {
+                  "text": "y",
+                  "letterSpacing": -0.5
+                },
+                {
+                  "text": "z",
+                  "letterSpacing": 0
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "text": "x",
+          "rPr": [
+            [
+              "spacing",
+              {
+                "val": "24"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "y",
+          "rPr": [
+            [
+              "spacing",
+              {
+                "val": "-10"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "z",
+          "rPr": []
+        }
+      ],
+      "tags": [
+        "run",
+        "letterSpacing"
+      ],
+      "notes": "Zero is ABSENT, not w:val=0 - tracking of zero is already the default, and emitting it would make every untracked run differ from the same run written before this feature existed. Negative tracking is legal and is how a large display size gets tightened."
+    },
+    {
+      "id": "0006-run-props-order",
+      "title": "The full CT_RPr sequence, and where each new property inserts",
+      "since": "0.7.0",
+      "fn": "runProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "font": "Arial",
+                  "bold": true,
+                  "italic": true,
+                  "smallCaps": true,
+                  "strike": true,
+                  "color": "#123456",
+                  "letterSpacing": 0.5,
+                  "size": 12,
+                  "underline": true,
+                  "highlight": "#ABCDEF"
+                },
+                {
+                  "text": "c",
+                  "code": true,
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "text": "x",
+          "rPr": [
+            [
+              "rFonts",
+              {
+                "ascii": "Arial",
+                "hAnsi": "Arial",
+                "cs": "Arial"
+              }
+            ],
+            [
+              "b",
+              true
+            ],
+            [
+              "i",
+              true
+            ],
+            [
+              "smallCaps",
+              true
+            ],
+            [
+              "strike",
+              true
+            ],
+            [
+              "color",
+              {
+                "val": "123456"
+              }
+            ],
+            [
+              "spacing",
+              {
+                "val": "10"
+              }
+            ],
+            [
+              "sz",
+              {
+                "val": "24"
+              }
+            ],
+            [
+              "szCs",
+              {
+                "val": "24"
+              }
+            ],
+            [
+              "u",
+              {
+                "val": "single"
+              }
+            ],
+            [
+              "shd",
+              {
+                "val": "clear",
+                "color": "auto",
+                "fill": "ABCDEF"
+              }
+            ]
+          ]
+        },
+        {
+          "text": "c",
+          "rPr": [
+            [
+              "rStyle",
+              {
+                "val": "InlineCode"
+              }
+            ],
+            [
+              "rFonts",
+              {
+                "ascii": "Consolas",
+                "hAnsi": "Consolas",
+                "cs": "Consolas"
+              }
+            ],
+            [
+              "b",
+              true
+            ]
+          ]
+        }
+      ],
+      "tags": [
+        "run",
+        "order"
+      ],
+      "notes": "CT_RPr is an xsd:sequence, so this order is the schema's and not a preference: rStyle, rFonts, b, i, smallCaps, strike, color, spacing, sz, szCs, u, shd. The second run pins that `code` keeps Consolas even when the run also asks for a font - code is the more specific request."
+    },
+    {
+      "id": "0007-paragraph-align-baseline",
+      "title": "align, including the two values that are not identity mappings",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "align": "center"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ],
+              "align": "justify"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "c"
+                }
+              ],
+              "align": "left"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "d"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "jc",
+            {
+              "val": "center"
+            }
+          ]
+        ],
+        [
+          [
+            "jc",
+            {
+              "val": "both"
+            }
+          ]
+        ],
+        [],
+        []
+      ],
+      "tags": [
+        "paragraph",
+        "baseline"
+      ],
+      "notes": "justify is w:val=both in WordprocessingML, and left is the default so it emits nothing - an explicit left and an absent align must produce the same paragraph, or a round-trip invents a property that was never asked for."
+    },
+    {
+      "id": "0008-paragraph-space",
+      "title": "spaceBefore / spaceAfter are points; w:spacing is twentieths",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "spaceBefore": 6,
+              "spaceAfter": 3
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ],
+              "spaceAfter": 0
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "spacing",
+            {
+              "before": "120",
+              "after": "60"
+            }
+          ]
+        ],
+        [
+          [
+            "spacing",
+            {
+              "after": "0"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "paragraph",
+        "spacing"
+      ],
+      "notes": "spaceAfter: 0 must EMIT w:after=0. Unlike letterSpacing, zero here is not the default - the document defaults put 160 twips after every paragraph, so an omitted zero leaves 8pt of air under a line that asked for none. The single most load-bearing row for dense layout."
+    },
+    {
+      "id": "0009-paragraph-line-height",
+      "title": "lineHeight is a multiple; w:line is 240ths with lineRule auto",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "lineHeight": 1.5
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ],
+              "lineHeight": 1.15,
+              "spaceAfter": 3
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "spacing",
+            {
+              "line": "360",
+              "lineRule": "auto"
+            }
+          ]
+        ],
+        [
+          [
+            "spacing",
+            {
+              "after": "60",
+              "line": "276",
+              "lineRule": "auto"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "paragraph",
+        "spacing"
+      ],
+      "notes": "One w:spacing element carries before, after, line and lineRule together - emitting two would be invalid. w:lineRule=auto is what makes w:line a multiple of single spacing rather than an exact height."
+    },
+    {
+      "id": "0010-paragraph-indent",
+      "title": "indentLeft / indentRight in points",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "indentLeft": 18,
+              "indentRight": 9
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "ind",
+            {
+              "left": "360",
+              "right": "180"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "paragraph",
+        "indent"
+      ]
+    },
+    {
+      "id": "0011-paragraph-keep-next",
+      "title": "keepNext",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "keepNext": true
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ],
+              "keepNext": false
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "keepNext",
+            true
+          ]
+        ],
+        []
+      ],
+      "tags": [
+        "paragraph"
+      ],
+      "notes": "keepNext: false emits nothing rather than w:keepNext w:val=0. Both are legal OOXML and they differ only when a style already set it; the model has no style inheritance to override, so the simpler emission is the honest one."
+    },
+    {
+      "id": "0012-paragraph-shading",
+      "title": "shading fills the paragraph band",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "shading": "#f4f7f9"
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "F4F7F9"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "paragraph",
+        "shading"
+      ],
+      "notes": "Lower-case hex in, upper-case hex out. Word accepts either; the engines must agree on one or two of them emit different bytes for the same document."
+    },
+    {
+      "id": "0013-paragraph-borders",
+      "title": "borders, including an explicit none",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "borders": {
+                "top": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "bottom": {
+                  "style": "none"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "pBdr",
+            [
+              [
+                "top",
+                {
+                  "val": "single",
+                  "sz": "6",
+                  "space": "0",
+                  "color": "D7DEE4"
+                }
+              ],
+              [
+                "bottom",
+                {
+                  "val": "nil"
+                }
+              ]
+            ]
+          ]
+        ]
+      ],
+      "tags": [
+        "paragraph",
+        "borders"
+      ],
+      "notes": "0.75pt -> w:sz 6, because border width is in EIGHTHS of a point while every other length here is twentieths. style: none becomes w:val=nil with no width and no colour - a nil border is the only way to remove one, and a zero width is not it."
+    },
+    {
+      "id": "0014-paragraph-props-order",
+      "title": "The full CT_PPr sequence",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "keepNext": true,
+              "borders": {
+                "top": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                }
+              },
+              "shading": "#EEEEEE",
+              "spaceBefore": 6,
+              "spaceAfter": 3,
+              "lineHeight": 1.15,
+              "indentLeft": 18,
+              "align": "center"
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "keepNext",
+            true
+          ],
+          [
+            "pBdr",
+            [
+              [
+                "top",
+                {
+                  "val": "single",
+                  "sz": "6",
+                  "space": "0",
+                  "color": "D7DEE4"
+                }
+              ]
+            ]
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "EEEEEE"
+            }
+          ],
+          [
+            "spacing",
+            {
+              "before": "120",
+              "after": "60",
+              "line": "276",
+              "lineRule": "auto"
+            }
+          ],
+          [
+            "ind",
+            {
+              "left": "360"
+            }
+          ],
+          [
+            "jc",
+            {
+              "val": "center"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "paragraph",
+        "order"
+      ],
+      "notes": "CT_PPr order: pStyle, keepNext, numPr, pBdr, shd, spacing, ind, jc, outlineLvl. w:jc coming AFTER w:ind and w:spacing is the one most likely to be got wrong by emitting properties in the order the model happens to list them."
+    },
+    {
+      "id": "0015-heading-takes-paragraph-props",
+      "title": "A heading is a paragraph and takes the same properties, after its pStyle",
+      "since": "0.7.0",
+      "fn": "paragraphProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Section"
+                }
+              ],
+              "keepNext": true,
+              "shading": "#EEEEEE",
+              "spaceAfter": 4,
+              "align": "center"
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "pStyle",
+            {
+              "val": "Heading2"
+            }
+          ],
+          [
+            "keepNext",
+            true
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "EEEEEE"
+            }
+          ],
+          [
+            "spacing",
+            {
+              "after": "80"
+            }
+          ],
+          [
+            "jc",
+            {
+              "val": "center"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "paragraph",
+        "heading"
+      ],
+      "notes": "Headings could not be aligned or spaced at all before this suite, so every section label in a real layout had to be a bold paragraph impersonating a heading - and therefore appeared in no navigation pane and no table of contents."
+    },
+    {
+      "id": "0016-table-default",
+      "title": "A table with no options - the reconciled default all three engines now emit",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "0",
+                "type": "auto"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "4680",
+            "4680"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "baseline",
+        "reconciled"
+      ],
+      "notes": "THE RECONCILIATION ROW. Node referenced a shared w:tblStyle LastWordTable plus a w:tblLook, taking borders and cell margins from styles.xml; PHP and Python inlined w:tblBorders and set no cell margins at all. A named style cannot vary per table instance, so per-table borders forced everything inline - and the style's more generous 60/108 cell margins became the shared default rather than being dropped on the floor."
+    },
+    {
+      "id": "0017-table-widths",
+      "title": "widths are relative weights over the section's content width",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "widths": [
+                30,
+                40,
+                30
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "0",
+                "type": "auto"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblLayout",
+              {
+                "type": "fixed"
+              }
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "2808",
+            "3744",
+            "2808"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "widths"
+      ],
+      "notes": "Weights, not percentages and not points: [30,40,30] and [3,4,3] are the same table. w:tblLayout fixed appears only when widths are given - without it Word re-fits columns to their content and the requested proportions are advisory. The grid must sum to the content width EXACTLY, so any rounding remainder goes to the last column."
+    },
+    {
+      "id": "0018-table-widths-remainder",
+      "title": "The grid sums to the content width exactly, remainder on the last column",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "widths": [
+                1,
+                1,
+                1
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "0",
+                "type": "auto"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblLayout",
+              {
+                "type": "fixed"
+              }
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "3120",
+            "3120",
+            "3120"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "widths"
+      ],
+      "notes": "9360 divides by three exactly, so this row proves the equal case; 0017 and the reference document cover uneven ones. The rule is pinned because three engines rounding independently is how one language ends up with a table a twip narrower than the other two."
+    },
+    {
+      "id": "0019-table-width-percent",
+      "title": "width is a percentage of the content width; w:tblW pct is FIFTIETHS of a percent",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "width": 50,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "2500",
+                "type": "pct"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "2340",
+            "2340"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "width"
+      ],
+      "notes": "The grid narrows with the table. Emitting w:tblW pct while leaving the grid at full width hands Word two contradictory answers, and which one wins differs between Word and every other renderer."
+    },
+    {
+      "id": "0020-table-align",
+      "title": "align on a table is w:jc in tblPr, between tblW and tblBorders",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "width": 50,
+              "align": "center",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "2500",
+                "type": "pct"
+              }
+            ],
+            [
+              "jc",
+              {
+                "val": "center"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "2340",
+            "2340"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "align"
+      ],
+      "notes": "Only meaningful on a table narrower than the text column, which is why this row sets width too."
+    },
+    {
+      "id": "0021-table-borders",
+      "title": "Per-table borders, including inside edges and explicit none",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "borders": {
+                "top": {
+                  "width": 1,
+                  "color": "#12263A"
+                },
+                "bottom": {
+                  "style": "none"
+                },
+                "left": {
+                  "style": "none"
+                },
+                "right": {
+                  "style": "none"
+                },
+                "insideH": {
+                  "style": "none"
+                },
+                "insideV": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                }
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "0",
+                "type": "auto"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "8",
+                    "space": "0",
+                    "color": "12263A"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "nil"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "nil"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "nil"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "nil"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "6",
+                    "space": "0",
+                    "color": "D7DEE4"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "4680",
+            "4680"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "borders"
+      ],
+      "notes": "A rule across the top and hairline dividers between columns, with nothing else - the KPI band construct. CT_TblBorders order is top, left, bottom, right, insideH, insideV."
+    },
+    {
+      "id": "0022-table-cell-padding",
+      "title": "cellPadding sets w:tblCellMar for every cell at once",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "cellPadding": {
+                "top": 6,
+                "left": 8,
+                "bottom": 6,
+                "right": 8
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "0",
+                "type": "auto"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "120",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "160",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "120",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "160",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "9360"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "padding"
+      ]
+    },
+    {
+      "id": "0023-cell-default",
+      "title": "A cell with no options emits its width and nothing else",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "baseline"
+      ]
+    },
+    {
+      "id": "0024-cell-header-row",
+      "title": "A header row shades its cells - one grey, in all three engines",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "header": true,
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "d"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "E7E7E7"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "E7E7E7"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "reconciled"
+      ],
+      "notes": "E7E7E7 was PHP's and Python's; Node shaded the same row F2F2F2 and took its header bold from a table style instead of a w:b run, so one input produced two different greys AND two different models on read-back. Node moved to the majority. Changing this row again is a decision about all three engines at once."
+    },
+    {
+      "id": "0025-cell-shading",
+      "title": "Per-cell shading",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ],
+                      "shading": "#E9F5F1"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "E9F5F1"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "shading"
+      ],
+      "notes": "One tinted cell inside an otherwise plain grid was the construct that could not be built at all: shading existed only as the hardcoded header grey keyed off row.header, so tinting a single cell meant tinting its whole row."
+    },
+    {
+      "id": "0026-cell-borders",
+      "title": "Per-cell borders",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ],
+                      "borders": {
+                        "top": {
+                          "width": 2,
+                          "color": "#0F7B6C"
+                        },
+                        "bottom": {
+                          "style": "none"
+                        },
+                        "left": {
+                          "style": "none"
+                        },
+                        "right": {
+                          "style": "none"
+                        }
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ],
+          [
+            "tcBorders",
+            [
+              [
+                "top",
+                {
+                  "val": "single",
+                  "sz": "16",
+                  "space": "0",
+                  "color": "0F7B6C"
+                }
+              ],
+              [
+                "left",
+                {
+                  "val": "nil"
+                }
+              ],
+              [
+                "bottom",
+                {
+                  "val": "nil"
+                }
+              ],
+              [
+                "right",
+                {
+                  "val": "nil"
+                }
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "borders"
+      ],
+      "notes": "A 2pt accent rule over one card and nothing over its neighbours. CT_TcBorders order is top, left, bottom, right."
+    },
+    {
+      "id": "0027-cell-padding",
+      "title": "Per-cell padding overrides the table's",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "cellPadding": {
+                "top": 3,
+                "left": 5.4,
+                "bottom": 3,
+                "right": 5.4
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ],
+                      "padding": {
+                        "top": 10,
+                        "left": 12,
+                        "bottom": 10,
+                        "right": 12
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ],
+          [
+            "tcMar",
+            [
+              [
+                "top",
+                {
+                  "w": "200",
+                  "type": "dxa"
+                }
+              ],
+              [
+                "left",
+                {
+                  "w": "240",
+                  "type": "dxa"
+                }
+              ],
+              [
+                "bottom",
+                {
+                  "w": "200",
+                  "type": "dxa"
+                }
+              ],
+              [
+                "right",
+                {
+                  "w": "240",
+                  "type": "dxa"
+                }
+              ]
+            ]
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "padding"
+      ],
+      "notes": "5.4pt -> 108 twips is the value Word itself uses for default side margins, and is why the shared default reads as an odd number rather than a round one."
+    },
+    {
+      "id": "0028-cell-valign",
+      "title": "valign",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ],
+                      "valign": "center"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ],
+                      "valign": "bottom"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ],
+                      "valign": "top"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ],
+          [
+            "vAlign",
+            {
+              "val": "center"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ],
+          [
+            "vAlign",
+            {
+              "val": "bottom"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ],
+          [
+            "vAlign",
+            {
+              "val": "top"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "valign"
+      ],
+      "notes": "top is emitted explicitly even though it is Word's default, because unlike align:left it costs nothing to state and a cell that says top is a cell whose author decided."
+    },
+    {
+      "id": "0029-cell-col-span",
+      "title": "colSpan is w:gridSpan, and the cell takes the width of every column it covers",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "wide"
+                            }
+                          ]
+                        }
+                      ],
+                      "colSpan": 2
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "6240",
+              "type": "dxa"
+            }
+          ],
+          [
+            "gridSpan",
+            {
+              "val": "2"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "merge"
+      ],
+      "notes": "The grid is three columns because a row's WIDTH is the sum of its cells' spans, not its cell count. Getting that wrong gives a table whose first row is short by a column and whose borders do not line up with the rows below it."
+    },
+    {
+      "id": "0030-cell-row-span",
+      "title": "rowSpan is w:vMerge restart plus a synthesised continuation in each following row",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "tall"
+                            }
+                          ]
+                        }
+                      ],
+                      "rowSpan": 2,
+                      "shading": "#E9F5F1"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "d"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ],
+          [
+            "vMerge",
+            {
+              "val": "restart"
+            }
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "E9F5F1"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ],
+          [
+            "vMerge",
+            true
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "E9F5F1"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "4680",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "merge"
+      ],
+      "notes": "The author writes ONE cell and the next row lists only its own remaining cell, HTML-style. The writer synthesises the continuation, because a row missing a cell is a malformed table and Word repairs it by shifting everything left. The continuation carries the origin's shading and nothing else: without the fill the merged block renders striped, and with the origin's borders it would draw a rule straight through its own middle."
+    },
+    {
+      "id": "0031-cell-props-order",
+      "title": "The full CT_TcPr sequence",
+      "since": "0.7.0",
+      "fn": "cellProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ],
+                      "colSpan": 2,
+                      "rowSpan": 2,
+                      "borders": {
+                        "top": {
+                          "width": 0.75,
+                          "color": "#D7DEE4"
+                        }
+                      },
+                      "shading": "#EEEEEE",
+                      "padding": {
+                        "top": 6
+                      },
+                      "valign": "center"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          [
+            "tcW",
+            {
+              "w": "6240",
+              "type": "dxa"
+            }
+          ],
+          [
+            "gridSpan",
+            {
+              "val": "2"
+            }
+          ],
+          [
+            "vMerge",
+            {
+              "val": "restart"
+            }
+          ],
+          [
+            "tcBorders",
+            [
+              [
+                "top",
+                {
+                  "val": "single",
+                  "sz": "6",
+                  "space": "0",
+                  "color": "D7DEE4"
+                }
+              ]
+            ]
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "EEEEEE"
+            }
+          ],
+          [
+            "tcMar",
+            [
+              [
+                "top",
+                {
+                  "w": "120",
+                  "type": "dxa"
+                }
+              ]
+            ]
+          ],
+          [
+            "vAlign",
+            {
+              "val": "center"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "6240",
+              "type": "dxa"
+            }
+          ],
+          [
+            "gridSpan",
+            {
+              "val": "2"
+            }
+          ],
+          [
+            "vMerge",
+            true
+          ],
+          [
+            "shd",
+            {
+              "val": "clear",
+              "color": "auto",
+              "fill": "EEEEEE"
+            }
+          ]
+        ],
+        [
+          [
+            "tcW",
+            {
+              "w": "3120",
+              "type": "dxa"
+            }
+          ]
+        ]
+      ],
+      "tags": [
+        "cell",
+        "order",
+        "merge"
+      ],
+      "notes": "CT_TcPr order: tcW, gridSpan, vMerge, tcBorders, shd, tcMar, vAlign. Also pins that a cell can span both directions at once and that the continuation inherits the gridSpan - a continuation of a different width is the other way to make Word repair the table."
+    },
+    {
+      "id": "0032-section-default",
+      "title": "The default page, unchanged",
+      "since": "0.7.0",
+      "fn": "sectionProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          "pgSz",
+          {
+            "w": "12240",
+            "h": "15840"
+          }
+        ],
+        [
+          "pgMar",
+          {
+            "top": "1440",
+            "right": "1440",
+            "bottom": "1440",
+            "left": "1440",
+            "header": "720",
+            "footer": "720",
+            "gutter": "0"
+          }
+        ]
+      ],
+      "tags": [
+        "page",
+        "baseline"
+      ],
+      "notes": "US Letter with one-inch margins. Pinned so that the next row is visibly a change rather than a guess."
+    },
+    {
+      "id": "0033-section-margins",
+      "title": "page.margins in points",
+      "since": "0.7.0",
+      "fn": "sectionProps",
+      "input": {
+        "doc": {
+          "page": {
+            "margins": {
+              "top": 36,
+              "right": 36,
+              "bottom": 36,
+              "left": 36
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          "pgSz",
+          {
+            "w": "12240",
+            "h": "15840"
+          }
+        ],
+        [
+          "pgMar",
+          {
+            "top": "720",
+            "right": "720",
+            "bottom": "720",
+            "left": "720",
+            "header": "720",
+            "footer": "720",
+            "gutter": "0"
+          }
+        ]
+      ],
+      "tags": [
+        "page"
+      ],
+      "notes": "A one-page business document does not fit inside one-inch margins, which is why the page block exists at all rather than being deferred as cosmetic."
+    },
+    {
+      "id": "0034-section-a4-landscape",
+      "title": "page.size and orientation; landscape swaps the axes AND sets w:orient",
+      "since": "0.7.0",
+      "fn": "sectionProps",
+      "input": {
+        "doc": {
+          "page": {
+            "size": "a4",
+            "orientation": "landscape"
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          "pgSz",
+          {
+            "w": "16838",
+            "h": "11906",
+            "orient": "landscape"
+          }
+        ],
+        [
+          "pgMar",
+          {
+            "top": "1440",
+            "right": "1440",
+            "bottom": "1440",
+            "left": "1440",
+            "header": "720",
+            "footer": "720",
+            "gutter": "0"
+          }
+        ]
+      ],
+      "tags": [
+        "page"
+      ],
+      "notes": "Swapping w and h without w:orient gives a page that is the right shape and prints portrait. Both are required."
+    },
+    {
+      "id": "0035-grid-follows-the-page",
+      "title": "Narrower margins make a WIDER table - the grid comes from the section, not a constant",
+      "since": "0.7.0",
+      "fn": "tableProps",
+      "input": {
+        "doc": {
+          "page": {
+            "margins": {
+              "top": 36,
+              "right": 36,
+              "bottom": 36,
+              "left": 36
+            }
+          },
+          "blocks": [
+            {
+              "type": "table",
+              "widths": [
+                30,
+                40,
+                30
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "tblPr": [
+            [
+              "tblW",
+              {
+                "w": "0",
+                "type": "auto"
+              }
+            ],
+            [
+              "tblBorders",
+              [
+                [
+                  "top",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideH",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ],
+                [
+                  "insideV",
+                  {
+                    "val": "single",
+                    "sz": "4",
+                    "space": "0",
+                    "color": "auto"
+                  }
+                ]
+              ]
+            ],
+            [
+              "tblLayout",
+              {
+                "type": "fixed"
+              }
+            ],
+            [
+              "tblCellMar",
+              [
+                [
+                  "top",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "left",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "bottom",
+                  {
+                    "w": "60",
+                    "type": "dxa"
+                  }
+                ],
+                [
+                  "right",
+                  {
+                    "w": "108",
+                    "type": "dxa"
+                  }
+                ]
+              ]
+            ]
+          ],
+          "grid": [
+            "3240",
+            "4320",
+            "3240"
+          ]
+        }
+      ],
+      "tags": [
+        "table",
+        "page"
+      ],
+      "notes": "12240 - 720 - 720 = 10800 twips of content, against 9360 at the default margins. All three engines carried 9360 as a literal, so before this row a document that narrowed its margins got a table that no longer matched its own page - too narrow, and silently so."
+    },
+    {
+      "id": "0036-read-back-run-props",
+      "title": "Every run property survives a write and a read",
+      "since": "0.7.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "bold": true,
+                  "italic": true,
+                  "underline": true,
+                  "strike": true,
+                  "color": "#FF0000",
+                  "highlight": "#FFFF00",
+                  "size": 12,
+                  "font": "Arial",
+                  "smallCaps": true,
+                  "letterSpacing": 0.5
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "x",
+                "bold": true,
+                "italic": true,
+                "underline": true,
+                "strike": true,
+                "color": "#FF0000",
+                "highlight": "#FFFF00",
+                "size": 12,
+                "font": "Arial",
+                "smallCaps": true,
+                "letterSpacing": 0.5
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "reader",
+        "run"
+      ],
+      "notes": "Colours come back upper-case because that is what was written; the model is case-insensitive on the way in and canonical on the way out."
+    },
+    {
+      "id": "0037-read-back-paragraph-props",
+      "title": "Every paragraph property survives",
+      "since": "0.7.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ],
+              "keepNext": true,
+              "borders": {
+                "top": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                }
+              },
+              "shading": "#F4F7F9",
+              "spaceBefore": 6,
+              "spaceAfter": 3,
+              "lineHeight": 1.15,
+              "indentLeft": 18,
+              "indentRight": 9,
+              "align": "center"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "a"
+              }
+            ],
+            "keepNext": true,
+            "borders": {
+              "top": {
+                "width": 0.75,
+                "color": "#D7DEE4"
+              }
+            },
+            "shading": "#F4F7F9",
+            "spaceBefore": 6,
+            "spaceAfter": 3,
+            "lineHeight": 1.15,
+            "indentLeft": 18,
+            "indentRight": 9,
+            "align": "center"
+          }
+        ]
+      },
+      "tags": [
+        "reader",
+        "paragraph"
+      ],
+      "notes": "A border with no explicit style reads back with no explicit style. The reader omits style when it is single, colour when it is auto and space when it is zero, because otherwise reading a document written from a model would return a bigger model than went in - and a second write would then differ from the first."
+    },
+    {
+      "id": "0038-read-back-default-table",
+      "title": "A default table surfaces NO options - defaults are not invented on read",
+      "since": "0.7.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "a"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "b"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "reader",
+        "table"
+      ],
+      "notes": "The writer emits borders, cell margins and a w:tcW for every cell whether or not the model asked. If the reader reported those back, every document written before this feature existed would come back carrying options nobody set - and the equal-column grid would come back as explicit widths. The rule is: a value the writer would have produced anyway is not surfaced, and the equal-split grid is compared against the split the writer computes rather than tested for exact equality, so a three-column table whose width does not divide by three is still recognised as equal."
+    },
+    {
+      "id": "0039-read-back-table-and-cell-props",
+      "title": "Table and cell properties survive",
+      "since": "0.7.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "widths": [
+                25,
+                25,
+                50
+              ],
+              "borders": {
+                "top": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "bottom": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "left": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "right": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "insideH": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "insideV": {
+                  "style": "none"
+                }
+              },
+              "cellPadding": {
+                "top": 4,
+                "left": 6,
+                "bottom": 4,
+                "right": 6
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ],
+                      "shading": "#E9F5F1",
+                      "valign": "center"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ],
+                      "borders": {
+                        "top": {
+                          "width": 2,
+                          "color": "#0F7B6C"
+                        }
+                      },
+                      "padding": {
+                        "top": 10,
+                        "bottom": 10
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "table",
+            "widths": [
+              25,
+              25,
+              50
+            ],
+            "borders": {
+              "top": {
+                "width": 0.75,
+                "color": "#D7DEE4"
+              },
+              "bottom": {
+                "width": 0.75,
+                "color": "#D7DEE4"
+              },
+              "left": {
+                "width": 0.75,
+                "color": "#D7DEE4"
+              },
+              "right": {
+                "width": 0.75,
+                "color": "#D7DEE4"
+              },
+              "insideH": {
+                "width": 0.75,
+                "color": "#D7DEE4"
+              },
+              "insideV": {
+                "style": "none"
+              }
+            },
+            "cellPadding": {
+              "top": 4,
+              "left": 6,
+              "bottom": 4,
+              "right": 6
+            },
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "a"
+                          }
+                        ]
+                      }
+                    ],
+                    "shading": "#E9F5F1",
+                    "valign": "center"
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "b"
+                          }
+                        ]
+                      }
+                    ],
+                    "borders": {
+                      "top": {
+                        "width": 2,
+                        "color": "#0F7B6C"
+                      }
+                    },
+                    "padding": {
+                      "top": 10,
+                      "bottom": 10
+                    }
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "c"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "reader",
+        "table",
+        "cell"
+      ],
+      "notes": "Widths come back as the weights that produced them: 25/25/50 of 9360 is 2340/2340/4680, which divides back exactly. Partial padding stays partial - a cell that set only top and bottom does not acquire left and right."
+    },
+    {
+      "id": "0040-read-back-merges",
+      "title": "Both merges survive, and the synthesised continuation cells disappear again",
+      "since": "0.7.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "tall"
+                            }
+                          ]
+                        }
+                      ],
+                      "rowSpan": 2
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "d"
+                            }
+                          ]
+                        }
+                      ],
+                      "colSpan": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "tall"
+                          }
+                        ]
+                      }
+                    ],
+                    "rowSpan": 2
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "b"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "c"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "d"
+                          }
+                        ]
+                      }
+                    ],
+                    "colSpan": 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "reader",
+        "merge"
+      ],
+      "notes": "The hard direction. The file contains three cells in the second row - the vMerge continuation the writer synthesised, plus the authored spanning cell - and the reader has to drop the continuation and put the rowSpan back on the cell two rows up. A reader that returns the continuation gives a model that writes to a DIFFERENT file than the one it just read."
+    },
+    {
+      "id": "0041-read-back-page-and-defaults",
+      "title": "page and the document defaults survive",
+      "since": "0.7.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "page": {
+            "size": "a4",
+            "orientation": "landscape",
+            "margins": {
+              "top": 36,
+              "right": 36,
+              "bottom": 36,
+              "left": 36
+            }
+          },
+          "defaultFont": "Segoe UI",
+          "defaultSize": 9,
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "page": {
+          "size": "a4",
+          "orientation": "landscape",
+          "margins": {
+            "top": 36,
+            "right": 36,
+            "bottom": 36,
+            "left": 36
+          }
+        },
+        "defaultFont": "Segoe UI",
+        "defaultSize": 9,
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "a"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "reader",
+        "page"
+      ],
+      "notes": "Defaults are omitted on read here too: a Letter portrait page with one-inch margins surfaces no `page` key at all, and Calibri at 11pt surfaces no defaults - see 0032, which is the same document with none of them set."
+    },
+    {
+      "id": "0042-read-back-header-row-is-lossy",
+      "title": "A header row does NOT round-trip, and this is the shape of the loss",
+      "since": "0.7.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "header": true,
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Name"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Qty"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Widget"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "3"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "header": true,
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Name",
+                            "bold": true
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Qty",
+                            "bold": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Widget"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "3"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "reader",
+        "table",
+        "lossy"
+      ],
+      "notes": "KNOWN AND DELIBERATE. `header: true` makes the writer bold the row's runs, and the reader honestly reports the bold it finds - so the model that comes out is not the model that went in. The alternative was to stop bolding header rows, which changes every existing consumer's output, or to have the reader strip bold from header rows, which would discard bold an author really did ask for. The asymmetry is pinned here so it is a documented property rather than a surprise; the shading is NOT surfaced, because that one the reader can attribute to `header` unambiguously."
+    },
+    {
+      "id": "0043-fixpoint-reference-one-pager",
+      "title": "The reference document: a business one-pager, read back to exactly the model that wrote it",
+      "since": "0.7.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "title": "Example Analytics — Business Case",
+          "defaultFont": "Segoe UI",
+          "defaultSize": 9,
+          "page": {
+            "margins": {
+              "top": 34,
+              "right": 40,
+              "bottom": 30,
+              "left": 40
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "EXAMPLE ANALYTICS",
+                  "size": 8,
+                  "bold": true,
+                  "color": "#0F7B6C",
+                  "letterSpacing": 1.4
+                }
+              ],
+              "spaceAfter": 2,
+              "spaceBefore": 0,
+              "keepNext": true
+            },
+            {
+              "type": "heading",
+              "level": 1,
+              "runs": [
+                {
+                  "text": "Close the $3.4M Annual Reconciliation Gap",
+                  "size": 21,
+                  "color": "#12263A"
+                }
+              ],
+              "spaceBefore": 0,
+              "spaceAfter": 2,
+              "keepNext": true
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Sample Client Ltd (SCL)  |  Business Case  |  15 January 2026",
+                  "size": 8.5,
+                  "color": "#5B6B7C"
+                }
+              ],
+              "spaceAfter": 9
+            },
+            {
+              "type": "table",
+              "borders": {
+                "top": {
+                  "width": 1,
+                  "color": "#12263A"
+                },
+                "bottom": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "left": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "right": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "insideH": {
+                  "style": "none"
+                },
+                "insideV": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                }
+              },
+              "cellPadding": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "$5.1M",
+                              "size": 19,
+                              "bold": true,
+                              "color": "#1B6CA8"
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "CONFIRMED OVERPAYMENT",
+                              "size": 7,
+                              "bold": true,
+                              "color": "#12263A",
+                              "letterSpacing": 0.6
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 1
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "24-month audit",
+                              "size": 7,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 7,
+                        "bottom": 7,
+                        "left": 6,
+                        "right": 6
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "~$3.4M",
+                              "size": 19,
+                              "bold": true,
+                              "color": "#1B6CA8"
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "ANNUALISED EXPOSURE",
+                              "size": 7,
+                              "bold": true,
+                              "color": "#12263A",
+                              "letterSpacing": 0.6
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 1
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "based on audit",
+                              "size": 7,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 7,
+                        "bottom": 7,
+                        "left": 6,
+                        "right": 6
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "18,000",
+                              "size": 19,
+                              "bold": true,
+                              "color": "#1B6CA8"
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "DOCUMENTS / MONTH",
+                              "size": 7,
+                              "bold": true,
+                              "color": "#12263A",
+                              "letterSpacing": 0.6
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 7,
+                        "bottom": 7,
+                        "left": 6,
+                        "right": 6
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "420",
+                              "size": 19,
+                              "bold": true,
+                              "color": "#1B6CA8"
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "ACTIVE SITES",
+                              "size": 7,
+                              "bold": true,
+                              "color": "#12263A",
+                              "letterSpacing": 0.6
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 7,
+                        "bottom": 7,
+                        "left": 6,
+                        "right": 6
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "borders": {
+                "top": {
+                  "style": "none"
+                },
+                "bottom": {
+                  "style": "none"
+                },
+                "left": {
+                  "style": "none"
+                },
+                "right": {
+                  "style": "none"
+                },
+                "insideH": {
+                  "style": "none"
+                },
+                "insideV": {
+                  "style": "none"
+                }
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "The problem is not record matching.",
+                              "size": 9.5,
+                              "bold": true,
+                              "color": "#FFFFFF"
+                            }
+                          ],
+                          "spaceAfter": 2,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "SCL's overpayments passed the standard three-way match. The gap sits upstream: validating whether the ",
+                              "size": 8.5,
+                              "color": "#DCE6EE"
+                            },
+                            {
+                              "text": "source document itself complies with the agreement",
+                              "size": 8.5,
+                              "bold": true,
+                              "color": "#FFFFFF"
+                            },
+                            {
+                              "text": " before payment.",
+                              "size": 8.5,
+                              "color": "#DCE6EE"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "lineHeight": 1.2
+                        }
+                      ],
+                      "shading": "#12263A",
+                      "padding": {
+                        "top": 9,
+                        "bottom": 9,
+                        "left": 11,
+                        "right": 11
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "THE COMPLIANCE GAP",
+                  "size": 9,
+                  "color": "#12263A",
+                  "letterSpacing": 1
+                }
+              ],
+              "keepNext": true,
+              "spaceBefore": 11,
+              "spaceAfter": 4
+            },
+            {
+              "type": "table",
+              "widths": [
+                30,
+                40,
+                30
+              ],
+              "borders": {
+                "top": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "bottom": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "left": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "right": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "insideH": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "insideV": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                }
+              },
+              "cellPadding": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Agreement",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Commercial terms",
+                              "size": 7.5,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "padding": {
+                        "top": 6,
+                        "bottom": 6,
+                        "left": 8,
+                        "right": 8
+                      },
+                      "valign": "top"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Source Document",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "What was approved",
+                              "size": 7.5,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "padding": {
+                        "top": 6,
+                        "bottom": 6,
+                        "left": 8,
+                        "right": 8
+                      },
+                      "valign": "top"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Invoice",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "What gets paid",
+                              "size": 7.5,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "padding": {
+                        "top": 6,
+                        "bottom": 6,
+                        "left": 8,
+                        "right": 8
+                      },
+                      "valign": "top"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Contracts team",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "padding": {
+                        "top": 6,
+                        "bottom": 6,
+                        "left": 8,
+                        "right": 8
+                      },
+                      "valign": "center"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "EXAMPLE ANALYTICS",
+                              "size": 8.5,
+                              "bold": true,
+                              "color": "#0F7B6C",
+                              "letterSpacing": 0.6
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 1,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "validates authorisation + compliance",
+                              "size": 8,
+                              "color": "#0F7B6C"
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 0
+                        }
+                      ],
+                      "rowSpan": 2,
+                      "shading": "#E9F5F1",
+                      "valign": "center",
+                      "padding": {
+                        "top": 8,
+                        "bottom": 8,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "ERP / AP system",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "padding": {
+                        "top": 6,
+                        "bottom": 6,
+                        "left": 8,
+                        "right": 8
+                      },
+                      "valign": "center"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Rates, charge types, conditions",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "padding": {
+                        "top": 6,
+                        "bottom": 6,
+                        "left": 8,
+                        "right": 8
+                      },
+                      "valign": "center"
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Approved lines only",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "padding": {
+                        "top": 6,
+                        "bottom": 6,
+                        "left": 8,
+                        "right": 8
+                      },
+                      "valign": "center"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "agreement → quote → authorisation → source document → invoice",
+                              "size": 7.5,
+                              "color": "#5B6B7C",
+                              "letterSpacing": 0.4
+                            }
+                          ],
+                          "align": "center",
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "colSpan": 3,
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "WHY EXAMPLE ANALYTICS",
+                  "size": 9,
+                  "color": "#12263A",
+                  "letterSpacing": 1
+                }
+              ],
+              "keepNext": true,
+              "spaceBefore": 11,
+              "spaceAfter": 4
+            },
+            {
+              "type": "table",
+              "borders": {
+                "top": {
+                  "style": "none"
+                },
+                "bottom": {
+                  "style": "none"
+                },
+                "left": {
+                  "style": "none"
+                },
+                "right": {
+                  "style": "none"
+                },
+                "insideH": {
+                  "style": "none"
+                },
+                "insideV": {
+                  "width": 3,
+                  "color": "#FFFFFF"
+                }
+              },
+              "cellPadding": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "1   Document-level compliance",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 2,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Reads agreements, amendments and statements of work, then validates every source document against contractual rates, charge types and conditions before approval.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "lineHeight": 1.2
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "top",
+                      "padding": {
+                        "top": 8,
+                        "bottom": 8,
+                        "left": 9,
+                        "right": 9
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "2   Full document-chain reasoning",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 2,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Traverses agreement, quote, authorisation, source document and invoice to determine whether a charge was commercially authorised, not merely matched.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "lineHeight": 1.2
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "top",
+                      "padding": {
+                        "top": 8,
+                        "bottom": 8,
+                        "left": 9,
+                        "right": 9
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "3   Temporal exception memory",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 2,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Detects one-time approvals that quietly recur across sites and months, surfacing the exception creep that transaction-by-transaction systems miss.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "lineHeight": 1.2
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "top",
+                      "padding": {
+                        "top": 8,
+                        "bottom": 8,
+                        "left": 9,
+                        "right": 9
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "THE ECONOMIC CASE",
+                  "size": 9,
+                  "color": "#12263A",
+                  "letterSpacing": 1
+                }
+              ],
+              "keepNext": true,
+              "spaceBefore": 11,
+              "spaceAfter": 4
+            },
+            {
+              "type": "table",
+              "widths": [
+                25,
+                25,
+                50
+              ],
+              "borders": {
+                "top": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "bottom": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "left": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "right": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "insideH": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                },
+                "insideV": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                }
+              },
+              "cellPadding": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Confirmed audit finding",
+                              "size": 8.5,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "$5.1M over 24 months",
+                              "size": 8.5,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Overpayments already identified, not modelled exposure.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0,
+                          "lineHeight": 1.15
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Annualised run rate",
+                              "size": 8.5,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "~$3.4M / year",
+                              "size": 8.5,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Simple annualisation of the confirmed audit finding.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0,
+                          "lineHeight": 1.15
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Surcharge blind spot",
+                              "size": 8.5,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "~95% unmonitored",
+                              "size": 8.5,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Only ~5% is currently spot-checked; ~40% of service contracts carry variable surcharges.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0,
+                          "lineHeight": 1.15
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Single-vendor proof point",
+                              "size": 8.5,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "shading": "#F4F7F9",
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "~$260K",
+                              "size": 8.5,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Ten months billed at $4.20 / unit while the index price fell to $3.40.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "spaceBefore": 0,
+                          "lineHeight": 1.15
+                        }
+                      ],
+                      "valign": "center",
+                      "padding": {
+                        "top": 5,
+                        "bottom": 5,
+                        "left": 8,
+                        "right": 8
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "POSITIONING + NEXT MOVE",
+                  "size": 9,
+                  "color": "#12263A",
+                  "letterSpacing": 1
+                }
+              ],
+              "keepNext": true,
+              "spaceBefore": 11,
+              "spaceAfter": 4
+            },
+            {
+              "type": "table",
+              "borders": {
+                "top": {
+                  "style": "none"
+                },
+                "bottom": {
+                  "style": "none"
+                },
+                "left": {
+                  "style": "none"
+                },
+                "right": {
+                  "style": "none"
+                },
+                "insideH": {
+                  "style": "none"
+                },
+                "insideV": {
+                  "width": 3,
+                  "color": "#FFFFFF"
+                }
+              },
+              "cellPadding": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              },
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Complement the ERP, don't replace it.",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 2,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "The ERP can continue handling supplier transactions and invoice-to-document matching. Example Analytics becomes the upstream intelligence layer that determines whether the source document should have been approved in the first place.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "lineHeight": 1.2
+                        }
+                      ],
+                      "shading": "#EDF3F9",
+                      "valign": "top",
+                      "padding": {
+                        "top": 9,
+                        "bottom": 9,
+                        "left": 10,
+                        "right": 10
+                      }
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Recommended next step",
+                              "size": 9,
+                              "bold": true,
+                              "color": "#12263A"
+                            }
+                          ],
+                          "spaceAfter": 2,
+                          "spaceBefore": 0
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Run a tailored validation against SCL's own audit fact patterns: standby-rate compliance, recurring one-off charges, and surcharge validation. Confirm total surcharge spend to complete the ROI model.",
+                              "size": 8,
+                              "color": "#5B6B7C"
+                            }
+                          ],
+                          "spaceAfter": 0,
+                          "lineHeight": 1.2
+                        }
+                      ],
+                      "shading": "#E9F5F1",
+                      "valign": "top",
+                      "padding": {
+                        "top": 9,
+                        "bottom": 9,
+                        "left": 10,
+                        "right": 10
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Prepared for the Finance and Accounts Payable leads  |  Prepared by Example Analytics",
+                  "size": 7.5,
+                  "color": "#5B6B7C"
+                }
+              ],
+              "borders": {
+                "top": {
+                  "width": 0.75,
+                  "color": "#D7DEE4"
+                }
+              },
+              "spaceBefore": 9,
+              "spaceAfter": 0
+            }
+          ]
+        }
+      },
+      "expected": {
+        "fixpoint": true
+      },
+      "tags": [
+        "acceptance",
+        "reference"
+      ],
+      "notes": "THE ACCEPTANCE ARTIFACT, reduced to the one claim a fixture can make about it. It exercises a KPI stat band, a dark full-bleed callout, a bordered three-column grid with one tinted cell and both merge directions, a three-card row with white gutters cut by a 3pt inside border, a definition table with a tinted label column, a two-tint closing pair and a footer rule - roughly forty distinct property emissions in one document. Whether it LOOKS right is not a fixture's business and is checked by rendering it; what this row proves is that nothing the writer emitted is invisible to the reader. Its content is invented and neutral: it reproduces the structure of a real client one-pager and none of its text, names, figures or branding."
+    },
+    {
+      "id": "0044-fixpoint-discriminates",
+      "title": "The fixpoint check is capable of returning false",
+      "since": "0.7.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "header": true,
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Name"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "fixpoint": false
+      },
+      "tags": [
+        "acceptance",
+        "control"
+      ],
+      "notes": "The control for 0043. Without it, an implementation of roundTripFixpoint that returns a hardcoded true passes the acceptance row and the suite reports success over nothing. 0042 is the same document, spelled out."
+    }
+  ]
+}

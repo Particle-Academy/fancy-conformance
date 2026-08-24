@@ -10,6 +10,71 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-23
+
+*For consumers: **nothing to do.*** A new suite adds cases, it does not change
+existing ones, and no shipped row was touched. `last-word/docx-constructs` is
+opt-in — an engine picks it up when it wires a runner for it.
+
+### Added
+
+- **`suites/last-word/docx-constructs`** — 44 cases pinning which
+  WordprocessingML constructs the LastWord document model can express, and the
+  exact XML each one emits. Six extraction functions (`runProps`,
+  `paragraphProps`, `tableProps`, `cellProps`, `sectionProps`, `readBack`,
+  `roundTripFixpoint`) across three engines: PHP `particle-academy/last-word`,
+  Node `@particle-academy/last-word`, Python `last-word`.
+
+  It exists because the model was far narrower than the XML the writers already
+  emitted. Font size, font family, small caps, letter spacing, per-cell
+  shading, borders, padding, vertical alignment and both merge directions were
+  produced from hardcoded blocks or from `styles.xml` and were **unreachable
+  from the model**. An agent could emit `size`, `colSpan` or `shading`, the
+  validator returned no errors, and all three engines silently dropped every
+  one of them.
+
+- **Goldens are ORDERED.** `CT_RPr`, `CT_PPr`, `CT_TcPr`, `CT_TblPr` and
+  `CT_SectPr` are `xsd:sequence`, so child order is the schema's and not a
+  preference. A normalisation to an unordered map would let two engines emit
+  different XML and still pass, so the shape is an ordered array of
+  `[localName, value]` pairs. Attribute order within an element is *not*
+  pinned — attributes are unordered in XML — and three rows (`0006`, `0014`,
+  `0031`) exist only to fix an insertion point.
+
+- **A control for the acceptance row.** `0044` asserts `roundTripFixpoint`
+  returns `false` for a document that genuinely is not one. Without it, an
+  implementation that returns a hardcoded `true` passes `0043` and the suite
+  reports success over nothing.
+
+### Notes
+
+- **Three live divergences between the engines are recorded in this suite's
+  goldens rather than in prose**, because the change that adds the rows is the
+  change that reconciles them:
+
+  | | was | now |
+  |---|---|---|
+  | table properties | Node referenced `<w:tblStyle w:val="LastWordTable"/>`; PHP and Python inlined `<w:tblBorders>` | inline in all three — a named style cannot vary per table instance, so per-table borders forced it |
+  | header cell fill | `E7E7E7` in PHP and Python, `F2F2F2` in Node | `E7E7E7` — the majority |
+  | header cell bold | `<w:b/>` on the runs in PHP and Python; a `<w:tblStylePr w:type="firstRow">` in Node | `<w:b/>` in all three, so the same file no longer reads back to two different models |
+
+- **`0042` pins a loss rather than a guarantee.** A `header: true` row is not a
+  round-trip fixpoint: the writer bolds the row's runs and the reader honestly
+  reports the bold it finds, so the model that comes out is not the model that
+  went in. The alternatives were to stop bolding header rows (changing every
+  existing consumer's output) or to have the reader strip bold from header rows
+  (discarding bold an author really did ask for). Written down so it is a
+  documented property instead of a surprise.
+
+- **This is not the binary suite `.ai/plans/polyglot/parity/documents.md` §5.4
+  plans.** That one is `caseFormat: "directory"` with a per-engine runner CLI
+  and a two-tier zip comparison — and **all four loaders currently reject
+  anything that is not `caseFormat: "table"`**, so `directory` is declared in
+  the JSON Schema and implemented nowhere. This suite asserts the model→XML
+  mapping through the existing loaders today; it is a step toward §5.4, not a
+  competitor to it, and the round-trip, markdown and reader-tolerance vectors
+  §5.4 lists are still open.
+
 ## [0.6.0] - 2026-08-23
 
 *For consumers: **nothing to do.*** A new suite adds cases, it does not change
