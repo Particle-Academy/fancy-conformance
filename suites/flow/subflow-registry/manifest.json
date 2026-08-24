@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/subflow-registry",
+  "title": "What executors a subflow's child runs against",
+  "since": "0.8.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "childRegistry(parent: object, injected: object|null, graphConfig: object|null) -> object",
+    "summary": "Compose the executor registry a `subflow` node runs its CHILD graph against. `parent` is the registry the parent run is executing with, keyed by kind id, whose values stand in for executors. `injected` is a registry handed to the subflow executor at construction, or null. `graphConfig` is the registry the graph itself declares on the subflow node's `config.executors`, or null. The result is the registry the child must resolve against, keyed by kind id.",
+    "reference": "node",
+    "referenceNote": "Designed here rather than lifted from an implementation, because at the time this suite was written all four runtimes were WRONG in the same way and none could serve as the reference. `node` is recorded as the reference because @particle-academy/fancy-flow's run-flow.ts is the behavioural source of truth for the engine generally.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "subflowExecutor" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Nodes\\Structural\\SubflowExecutor" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.nodes.structural.SubflowExecutor" },
+      { "language": "rust", "package": "fancy-flow", "symbol": "fancy_flow::nodes::structural::SubflowExecutor" }
+    ]
+  },
+  "notes": [
+    "This table exists because ALL FOUR runtimes had the same defect at once, and each of the three that were fixed carried its own hand-written test for it. Three copies of an assertion agree right up until someone changes one of them, and nothing anywhere reports the divergence — which is the same shape as the bug the table describes.",
+    "Reported against the PHP twin as fancy-flow-php#7 by a consumer running a real graph: a child containing a host-registered kind failed with `No executor registered for kind=<host-kind>`, while the identical graph run at top level succeeded. Same workflow, two behaviours depending on nesting depth.",
+    "The TypeScript engine had it with a WORSE default. Its child ran against `config.executors ?? {}` — an EMPTY registry unless the graph happened to carry one — so nesting a graph did not merely lose the host's kinds, it lost everything. PHP and Python fell back to the bare builtins. None of the three warned, because an unregistered kind fails closed with no outputs, which is the correct default and exactly what makes this silent.",
+    "The costly case is not a MISSING kind but a REPLACED one. A host that overrides `llm_call` to add tenancy, budgeting or token accounting gets its own version in the parent and the package's version in the child: the same graph billing two different ways depending on where it was invoked from, with nothing failing. Case 0003 is that case.",
+    "The contract is deliberately a function over REGISTRIES rather than a graph run. `flow/graph-runs` cannot ship a discrimination probe because the implementation under test there is an entire workflow engine, which this package does not carry and should not grow. Registry composition is a pure function over maps, so this suite CAN be probed — and is, in tests/discrimination.test.ts, by the exact mutant that shipped in production: a child that sees only the builtins.",
+    "Values in these maps are marker strings, not executors. `builtin`, `host` and `child-specific` stand for whichever callable a runtime would bind; what the table pins is WHICH one survives into the child, not what it does."
+  ]
+}

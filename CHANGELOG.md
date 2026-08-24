@@ -10,6 +10,39 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-08-24
+
+### Added
+
+- **`flow/subflow-registry` (9 cases)** — what executors a `subflow` runs its
+  CHILD graph against.
+
+  This table exists because **all four runtimes had the same defect at once**,
+  and each of the three that were fixed carried its own hand-written test for
+  it. Three copies of an assertion agree right up until someone changes one of
+  them, and nothing reports the divergence — the same shape as the bug the
+  table describes.
+
+  Reported against the PHP twin as `fancy-flow-php#7`: a child containing a
+  host-registered kind failed with `No executor registered`, while the
+  identical graph run at top level succeeded. PHP and Python fell back to the
+  bare builtins; **TypeScript was worse**, running the child against
+  `config.executors ?? {}` — an EMPTY registry unless the graph carried one.
+  None warned, because an unregistered kind fails closed with no outputs.
+
+  The costly case is a REPLACED kind rather than a missing one: a host that
+  overrides `llm_call` for tenancy or budgeting got its own version in the
+  parent and the package's in the child, billing two ways by nesting depth.
+
+- **Discrimination probes for it**, and unlike `flow/graph-runs` this suite
+  actually has them. The contract is a function over REGISTRIES rather than a
+  graph run, so it can be probed without this package growing a workflow
+  engine. Five mutants, three of which shipped in production: bare-builtins
+  (PHP/Python), config-only (TypeScript), always-inherit (the plausible
+  over-correction, which discards a deliberately injected registry), a
+  precedence inversion, and the correct implementation as a control.
+
+
 ## [0.7.0] - 2026-08-23
 
 *For consumers: **nothing to do.*** A new suite adds cases, it does not change

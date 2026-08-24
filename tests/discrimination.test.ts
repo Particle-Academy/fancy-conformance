@@ -537,6 +537,97 @@ test("the image-header table catches a sniffer that only matches SOF0", () => {
   assert.deepEqual(imageIdsFailedBy(sniffProbe({ onlySof0: true })), ["0009-jpeg-progressive"]);
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// flow/subflow-registry
+//
+// The mutants here are not hypothetical. Each one SHIPPED: every runtime got
+// this wrong at the same time, in one of the two ways below, and the table was
+// written afterwards precisely so a fourth runtime could not repeat it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Registry = Record<string, string>;
+type ChildInput = { parent: Registry; injected: Registry | null; graphConfig: Registry | null };
+
+const registryIdsFailedBy = (impl: (i: ChildInput) => Registry) =>
+  idsFailedBy("flow/subflow-registry", (c) => impl(c.input as ChildInput));
+
+/** Correct: inherit unless replaced by injection, then layer the graph's own. */
+const correct = ({ parent, injected, graphConfig }: ChildInput): Registry => ({
+  ...(injected ?? parent),
+  ...(graphConfig ?? {}),
+});
+
+test("the subflow-registry table passes a correct composition", () => {
+  // The control. A table its own reference implementation fails is a broken
+  // table, and every assertion below would then be meaningless.
+  assert.deepEqual(registryIdsFailedBy(correct), []);
+});
+
+test("the table catches the PHP and Python mutant: the child sees only the builtins", () => {
+  // What `$this->executors ?? Builtin::executors($deps)` did. Everything the
+  // host added is gone; the builtins the parent happened to share survive, so
+  // a graph made only of builtins works and hides it.
+  const bareBuiltins = ({ parent, injected, graphConfig }: ChildInput): Registry => {
+    const builtins = Object.fromEntries(
+      Object.entries(parent).filter(([, v]) => v === "builtin"),
+    );
+    return { ...(injected ?? builtins), ...(graphConfig ?? {}) };
+  };
+
+  assert.deepEqual(registryIdsFailedBy(bareBuiltins), [
+    "0001-host-kind-survives-nesting",
+    "0002-bare-builtins-are-not-enough",
+    "0003-host-override-of-a-builtin-reaches-the-child",
+    "0004-graph-config-adds-to-the-inherited-set",
+    "0008-an-empty-graph-config-changes-nothing",
+  ]);
+});
+
+test("the table catches the TypeScript mutant: the child sees ONLY what the graph declared", () => {
+  // What `config.executors ?? {}` did — the worse default of the two. Nesting a
+  // graph lost not merely the host's kinds but everything, so any child with a
+  // node in it failed closed with no outputs and no message.
+  const configOnly = ({ graphConfig }: ChildInput): Registry => ({ ...(graphConfig ?? {}) });
+
+  assert.deepEqual(registryIdsFailedBy(configOnly), [
+    "0001-host-kind-survives-nesting",
+    "0002-bare-builtins-are-not-enough",
+    "0003-host-override-of-a-builtin-reaches-the-child",
+    "0004-graph-config-adds-to-the-inherited-set",
+    "0005-graph-config-wins-on-a-conflict",
+    "0006-an-injected-registry-replaces-the-inherited-one",
+    "0007-graph-config-still-layers-over-an-injected-registry",
+    "0008-an-empty-graph-config-changes-nothing",
+  ]);
+});
+
+test("the table catches an over-correction that ignores an injected registry", () => {
+  // The plausible mistake in the OTHER direction: having been told to inherit,
+  // always inherit — which silently discards a registry a caller deliberately
+  // constructed the executor with, e.g. to sandbox a child.
+  const alwaysInherit = ({ parent, graphConfig }: ChildInput): Registry => ({
+    ...parent,
+    ...(graphConfig ?? {}),
+  });
+
+  assert.deepEqual(registryIdsFailedBy(alwaysInherit), [
+    "0006-an-injected-registry-replaces-the-inherited-one",
+    "0007-graph-config-still-layers-over-an-injected-registry",
+  ]);
+});
+
+test("the table catches a precedence inversion between inherited and graph config", () => {
+  // Merging the other way round: the inherited registry wins over the one the
+  // graph named for its child. Passes everything except the case that exists
+  // to pin the order.
+  const wrongOrder = ({ parent, injected, graphConfig }: ChildInput): Registry => ({
+    ...(graphConfig ?? {}),
+    ...(injected ?? parent),
+  });
+
+  assert.deepEqual(registryIdsFailedBy(wrongOrder), ["0005-graph-config-wins-on-a-conflict"]);
+});
+
 test("every suite has at least one case tagged as a known hazard", () => {
   // Cheap structural guard: a suite of only happy paths is a suite that will
   // pass forever. Each of these tables exists because something already broke.
@@ -545,6 +636,7 @@ test("every suite has at least one case tagged as a known hazard", () => {
     "shared/decimal",
     "shared/strings",
     "shared/image-header",
+    "flow/subflow-registry",
   ]) {
     const tagged = loadSuite(id).cases.filter(
       (c) => c.tags?.some((t) => ["hazard", "non-standard", "edge", "live-divergence"].includes(t)),

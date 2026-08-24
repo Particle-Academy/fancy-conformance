@@ -1,0 +1,126 @@
+{
+  "$schema": "../../../schema/cases.schema.json",
+  "suite": "flow/subflow-registry",
+  "cases": [
+    {
+      "id": "0001-host-kind-survives-nesting",
+      "title": "A kind the HOST registered is still resolvable inside the child.",
+      "since": "0.8.0",
+      "tags": ["inheritance", "regression"],
+      "input": {
+        "parent": { "@particle-academy/output": "builtin", "host_kind": "host" },
+        "injected": null,
+        "graphConfig": null
+      },
+      "expected": { "@particle-academy/output": "builtin", "host_kind": "host" }
+    },
+    {
+      "id": "0002-bare-builtins-are-not-enough",
+      "title": "A parent carrying several host kinds passes all of them down, not just the builtins.",
+      "since": "0.8.0",
+      "tags": ["inheritance", "regression"],
+      "input": {
+        "parent": {
+          "@particle-academy/output": "builtin",
+          "@particle-academy/transform": "builtin",
+          "agent": "host",
+          "invoice_lookup": "host",
+          "tenant_notify": "host"
+        },
+        "injected": null,
+        "graphConfig": null
+      },
+      "expected": {
+        "@particle-academy/output": "builtin",
+        "@particle-academy/transform": "builtin",
+        "agent": "host",
+        "invoice_lookup": "host",
+        "tenant_notify": "host"
+      }
+    },
+    {
+      "id": "0003-host-override-of-a-builtin-reaches-the-child",
+      "title": "A host that REPLACED a builtin keeps its own version inside the child.",
+      "since": "0.8.0",
+      "tags": ["inheritance", "override", "regression"],
+      "input": {
+        "parent": { "@particle-academy/llm_call": "host", "@particle-academy/output": "builtin" },
+        "injected": null,
+        "graphConfig": null
+      },
+      "expected": { "@particle-academy/llm_call": "host", "@particle-academy/output": "builtin" }
+    },
+    {
+      "id": "0004-graph-config-adds-to-the-inherited-set",
+      "title": "A registry the graph declares on the node is layered ON TOP of the inherited one.",
+      "since": "0.8.0",
+      "tags": ["config"],
+      "input": {
+        "parent": { "@particle-academy/output": "builtin", "host_kind": "host" },
+        "injected": null,
+        "graphConfig": { "child_only": "child-specific" }
+      },
+      "expected": {
+        "@particle-academy/output": "builtin",
+        "host_kind": "host",
+        "child_only": "child-specific"
+      }
+    },
+    {
+      "id": "0005-graph-config-wins-on-a-conflict",
+      "title": "An executor the graph names for its child beats the inherited one of the same kind.",
+      "since": "0.8.0",
+      "tags": ["config", "precedence"],
+      "input": {
+        "parent": { "@particle-academy/output": "builtin", "host_kind": "host" },
+        "injected": null,
+        "graphConfig": { "host_kind": "child-specific" }
+      },
+      "expected": { "@particle-academy/output": "builtin", "host_kind": "child-specific" }
+    },
+    {
+      "id": "0006-an-injected-registry-replaces-the-inherited-one",
+      "title": "A registry handed to the executor at construction is used INSTEAD of the parent's.",
+      "since": "0.8.0",
+      "tags": ["injection", "precedence"],
+      "input": {
+        "parent": { "@particle-academy/output": "builtin", "host_kind": "host" },
+        "injected": { "@particle-academy/output": "builtin", "sandboxed_kind": "host" },
+        "graphConfig": null
+      },
+      "expected": { "@particle-academy/output": "builtin", "sandboxed_kind": "host" }
+    },
+    {
+      "id": "0007-graph-config-still-layers-over-an-injected-registry",
+      "title": "Injection replaces the inherited registry; the graph's own still layers on top of that.",
+      "since": "0.8.0",
+      "tags": ["injection", "config", "precedence"],
+      "input": {
+        "parent": { "host_kind": "host" },
+        "injected": { "@particle-academy/output": "builtin" },
+        "graphConfig": { "child_only": "child-specific" }
+      },
+      "expected": { "@particle-academy/output": "builtin", "child_only": "child-specific" }
+    },
+    {
+      "id": "0008-an-empty-graph-config-changes-nothing",
+      "title": "An empty config registry is not the same as an absent one, and neither empties the child.",
+      "since": "0.8.0",
+      "tags": ["config", "edge"],
+      "input": {
+        "parent": { "@particle-academy/output": "builtin", "host_kind": "host" },
+        "injected": null,
+        "graphConfig": {}
+      },
+      "expected": { "@particle-academy/output": "builtin", "host_kind": "host" }
+    },
+    {
+      "id": "0009-an-empty-parent-yields-an-empty-child",
+      "title": "Inheritance copies what is there; it never invents builtins the parent did not have.",
+      "since": "0.8.0",
+      "tags": ["edge"],
+      "input": { "parent": {}, "injected": null, "graphConfig": null },
+      "expected": {}
+    }
+  ]
+}
