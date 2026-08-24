@@ -10,6 +10,18 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-23
+
+*For consumers: **nothing to do.*** A new suite adds cases, it does not change
+existing ones, and no shipped row was touched. Adopting `flow/graph-runs` is
+opt-in — a runtime picks it up when it wires a runner for it. The two corrected
+goldens belong to the new suite and were never published.
+
+**Worth knowing if you pin:** raise your pin to see `flow/graph-runs` at all.
+`fancy-flow-php` currently resolves fixture set **0.4.0** from its installed
+vendor copy — two minors back, asserting an older table than its log implies,
+which is precisely what rule 4 of `runners/README.md` exists to make visible.
+
 ### Added
 
 - **A Rust loader** (`rust/`), the fourth, same API shape as the Node, PHP and
