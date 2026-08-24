@@ -1,0 +1,1912 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "dark-slide/table-cell-model",
+    "cases": [
+        {
+            "id": "0001-defaults-header-cell",
+            "title": "A table that styles nothing: the header cell's every default",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "notes": "The floor. If a port disagrees here it disagrees everywhere, and every later row's diff would be noise on top of this one.",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1",
+                            "b": "2"
+                        }
+                    ]
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "A",
+                "bold": "1",
+                "italic": "0",
+                "underline": "0",
+                "color": "FFFFFF",
+                "fill": "8B5CF6",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0002-defaults-body-cell",
+            "title": "A table that styles nothing: the first body cell, which is never striped",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "notes": "Striping counts over BODY rows and starts unstriped. Counting over the emitted grid instead shifts every stripe by one when a header is present.",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        },
+                        {
+                            "a": "2"
+                        }
+                    ]
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0003-second-body-row-is-striped",
+            "title": "The second body row takes the stripe fill",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        },
+                        {
+                            "a": "2"
+                        }
+                    ]
+                },
+                "theme": [],
+                "row": 2,
+                "col": 0
+            },
+            "expected": {
+                "text": "2",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": "F8FAFC",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0004-header-fill-comes-from-the-theme-accent",
+            "title": "The header fill is the theme accent, not a constant",
+            "since": "0.7.0",
+            "notes": "Every engine hardcoded 8B5CF6 here. That happens to be the DEFAULT accent, so a port that kept the constant passes case 0001 and fails only this one.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ]
+                },
+                "theme": {
+                    "colors": {
+                        "accent": "#1B3A5C"
+                    }
+                },
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "A",
+                "bold": "1",
+                "italic": "0",
+                "underline": "0",
+                "color": "FFFFFF",
+                "fill": "1B3A5C",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0005-borders-false-turns-every-side-off",
+            "title": "`borders: false` at table level stops the chain for all four sides",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "borders": false
+                    }
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": null,
+                    "right": null,
+                    "top": null,
+                    "bottom": null
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0006-one-side-off-leaves-the-others-on",
+            "title": "`{all: …, left: false}` keeps three sides and drops one",
+            "since": "0.7.0",
+            "notes": "A port using truthiness rather than key PRESENCE reads `left: false` as absent and leaves the border on.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "borders": {
+                            "all": {
+                                "width": 1,
+                                "color": "#D8E0E8"
+                            },
+                            "left": false
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": null,
+                    "right": {
+                        "widthEmu": "12700",
+                        "color": "D8E0E8",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "12700",
+                        "color": "D8E0E8",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "12700",
+                        "color": "D8E0E8",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0007-outer-and-inner-resolve-by-position-top-left",
+            "title": "outer/inner: the top-left cell takes outer on left+top, inner on right+bottom",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1",
+                            "b": "2"
+                        }
+                    ],
+                    "style": {
+                        "borders": {
+                            "outer": {
+                                "width": 2,
+                                "color": "#1B3A5C"
+                            },
+                            "inner": {
+                                "width": 0.5,
+                                "color": "#D8E0E8"
+                            }
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "A",
+                "bold": "1",
+                "italic": "0",
+                "underline": "0",
+                "color": "FFFFFF",
+                "fill": "8B5CF6",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "25400",
+                        "color": "1B3A5C",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "6350",
+                        "color": "D8E0E8",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "25400",
+                        "color": "1B3A5C",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "6350",
+                        "color": "D8E0E8",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0008-outer-and-inner-resolve-by-position-bottom-right",
+            "title": "outer/inner: the bottom-right cell is the mirror of 0007",
+            "since": "0.7.0",
+            "notes": "Both corners are pinned because a port that gets `isOuter` from the row only, or the column only, passes one and fails the other.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1",
+                            "b": "2"
+                        }
+                    ],
+                    "style": {
+                        "borders": {
+                            "outer": {
+                                "width": 2,
+                                "color": "#1B3A5C"
+                            },
+                            "inner": {
+                                "width": 0.5,
+                                "color": "#D8E0E8"
+                            }
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 1,
+                "col": 1
+            },
+            "expected": {
+                "text": "2",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "6350",
+                        "color": "D8E0E8",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "25400",
+                        "color": "1B3A5C",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "6350",
+                        "color": "D8E0E8",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "25400",
+                        "color": "1B3A5C",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0009-precedence-table-layer",
+            "title": "Precedence 1 of 5: a table-level colour reaches a body cell",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "color": "#111111"
+                    }
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "111111",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0010-precedence-band-beats-table",
+            "title": "Precedence 2 of 5: the header band beats the table layer",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "color": "#111111",
+                        "header": {
+                            "color": "#222222"
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "A",
+                "bold": "1",
+                "italic": "0",
+                "underline": "0",
+                "color": "222222",
+                "fill": "8B5CF6",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0011-precedence-column-beats-band",
+            "title": "Precedence 3 of 5: a column's alignment beats the band's",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A",
+                            "align": "right"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "align": "left",
+                        "header": {
+                            "align": "center"
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "A",
+                "bold": "1",
+                "italic": "0",
+                "underline": "0",
+                "color": "FFFFFF",
+                "fill": "8B5CF6",
+                "align": "right",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0012-precedence-row-beats-column",
+            "title": "Precedence 4 of 5: the row beats the column",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A",
+                            "align": "right"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "cells": {
+                                "a": "1"
+                            },
+                            "align": "center"
+                        }
+                    ],
+                    "style": []
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "center",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0013-precedence-cell-beats-row",
+            "title": "Precedence 5 of 5: the cell beats the row",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "cells": {
+                                "a": {
+                                    "text": "1",
+                                    "color": "#B91C1C"
+                                }
+                            },
+                            "color": "#334155"
+                        }
+                    ],
+                    "style": []
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "B91C1C",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0014-a-total-row-in-its-own-fill",
+            "title": "The highlighted total row: row-level fill, colour and weight together",
+            "since": "0.7.0",
+            "notes": "The construct the whole capability was built for. It is one row-level layer, not a special case anywhere in the engine.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1",
+                            "b": "2"
+                        },
+                        {
+                            "cells": {
+                                "a": "Total",
+                                "b": "$51,000"
+                            },
+                            "fill": "#0E7C86",
+                            "color": "#FFFFFF",
+                            "bold": true,
+                            "letterSpacing": 0.6
+                        }
+                    ],
+                    "style": {
+                        "stripe": {
+                            "fill": "#F1F5F9"
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 2,
+                "col": 0
+            },
+            "expected": {
+                "text": "Total",
+                "bold": "1",
+                "italic": "0",
+                "underline": "0",
+                "color": "FFFFFF",
+                "fill": "0E7C86",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "60",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0015-padding-scalar-and-per-side",
+            "title": "Per-side padding overrides only the sides it names",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "padding": {
+                            "left": 12,
+                            "top": 3
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "152400",
+                    "right": "91440",
+                    "top": "38100",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0016-a-row-turns-one-border-off-against-a-live-table-spec",
+            "title": "A row drops its bottom rule while the table still asks for one",
+            "since": "0.7.0",
+            "notes": "This is how a KPI figure and its caption become one visual cell. If a port merges border specs instead of REPLACING at each layer, the bottom rule survives and the band grows a line through the middle.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "cells": {
+                                "a": "1"
+                            },
+                            "borders": {
+                                "inner": {
+                                    "width": 0.75,
+                                    "color": "#D9DEE4"
+                                },
+                                "outer": {
+                                    "width": 0.75,
+                                    "color": "#D9DEE4"
+                                },
+                                "bottom": false
+                            }
+                        }
+                    ],
+                    "style": {
+                        "header": false,
+                        "borders": {
+                            "all": {
+                                "width": 2,
+                                "color": "#000000"
+                            }
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": null
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0017-grid-widths-as-weights",
+            "title": "Column widths given as weights, summing to the table exactly",
+            "since": "0.7.0",
+            "fn": "gridWidthsEmu",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A",
+                            "width": 2.4
+                        },
+                        {
+                            "key": "b",
+                            "label": "B",
+                            "width": 1.3
+                        },
+                        {
+                            "key": "c",
+                            "label": "C",
+                            "width": 1.6
+                        },
+                        {
+                            "key": "d",
+                            "label": "D",
+                            "width": 1.3
+                        }
+                    ],
+                    "rows": []
+                },
+                "theme": [],
+                "totalEmu": 8229600
+            },
+            "expected": [
+                "2992582",
+                "1620982",
+                "1995054",
+                "1620982"
+            ]
+        },
+        {
+            "id": "0018-grid-widths-as-fractions-with-a-remainder",
+            "title": "Widths <= 1 are fractions; undeclared columns share what is left",
+            "since": "0.7.0",
+            "notes": "The mode boundary is at exactly 1.0, so this row's 0.5 stays in fraction mode while 0017's 2.4 does not.",
+            "fn": "gridWidthsEmu",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A",
+                            "width": 0.5
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        },
+                        {
+                            "key": "c",
+                            "label": "C"
+                        }
+                    ],
+                    "rows": []
+                },
+                "theme": [],
+                "totalEmu": 8229600
+            },
+            "expected": [
+                "4114800",
+                "2057400",
+                "2057400"
+            ]
+        },
+        {
+            "id": "0019-grid-widths-that-independent-rounding-gets-wrong",
+            "title": "Three equal columns over a total that does not divide by three",
+            "since": "0.7.0",
+            "notes": "8229601 / 3 rounded independently gives three columns that do not sum to the total. Accumulating and differencing does. The golden is the accumulated answer; if a port matches every other width row and fails this one, that is the bug.",
+            "fn": "gridWidthsEmu",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        },
+                        {
+                            "key": "c",
+                            "label": "C"
+                        }
+                    ],
+                    "rows": []
+                },
+                "theme": [],
+                "totalEmu": 8229601
+            },
+            "expected": [
+                "2743200",
+                "2743201",
+                "2743200"
+            ]
+        },
+        {
+            "id": "0020-colspan-is-clamped-to-the-grid",
+            "title": "A colSpan wider than the table is clamped, not emitted",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "cells": {
+                                "a": {
+                                    "text": "wide",
+                                    "colSpan": 99
+                                }
+                            }
+                        }
+                    ],
+                    "style": {
+                        "header": false
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "wide",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "2",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0021-the-cell-a-colspan-swallows-is-still-emitted",
+            "title": "The covered cell carries `merged` and an empty text, and is not dropped",
+            "since": "0.7.0",
+            "notes": "A row with fewer cells than the grid declares is a corrupt file, not a narrow table.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "cells": {
+                                "a": {
+                                    "text": "wide",
+                                    "colSpan": 2
+                                },
+                                "b": "swallowed"
+                            }
+                        }
+                    ],
+                    "style": {
+                        "header": false
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 1
+            },
+            "expected": {
+                "text": "",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "horizontal"
+            }
+        },
+        {
+            "id": "0022-rowspan-marks-the-cell-below",
+            "title": "A rowSpan marks the cell beneath it as a vertical continuation",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        },
+                        {
+                            "key": "b",
+                            "label": "B"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "cells": {
+                                "a": {
+                                    "text": "tall",
+                                    "rowSpan": 2
+                                },
+                                "b": "1"
+                            }
+                        },
+                        {
+                            "b": "2"
+                        }
+                    ],
+                    "style": {
+                        "header": false
+                    }
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": "F8FAFC",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "vertical"
+            }
+        },
+        {
+            "id": "0023-letter-spacing-and-small-caps",
+            "title": "Letter spacing and capitalisation reach a cell run",
+            "since": "0.7.0",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "Prepared by"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "header": {
+                            "letterSpacing": 1.2,
+                            "caps": "small"
+                        }
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "Prepared by",
+                "bold": "1",
+                "italic": "0",
+                "underline": "0",
+                "color": "FFFFFF",
+                "fill": "8B5CF6",
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "120",
+                "caps": "small",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0024-an-object-cell-without-spec-keys-is-still-json",
+            "title": "A nested value an agent meant to DISPLAY is not silently emptied",
+            "since": "0.7.0",
+            "notes": "Object cells used to be JSON-encoded into the text. Reading every object as a cell spec would turn a genuine nested value into a blank cell, so only objects carrying a spec key are treated as one.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": {
+                                "nested": "value"
+                            }
+                        }
+                    ],
+                    "style": {
+                        "header": false
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "{\"nested\":\"value\"}",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0025-header-false-makes-row-zero-data",
+            "title": "With no header, grid row 0 is the first DATA row",
+            "since": "0.7.0",
+            "notes": "Every metadataGrid and kpiBand is a header-less table, so this is the common case rather than a corner.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "Ignored"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "first"
+                        }
+                    ],
+                    "style": {
+                        "header": false
+                    }
+                },
+                "theme": [],
+                "row": 0,
+                "col": 0
+            },
+            "expected": {
+                "text": "first",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1400",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0026-font-size-is-halved-into-points",
+            "title": "A table's fontSize is halved into points, as it is everywhere else in the schema",
+            "since": "0.7.0",
+            "notes": "The halving is a schema-wide convention (fancy-slides designs against a 1920px width), not a table quirk. A port that takes the number as points renders every table at double size and nothing else disagrees.",
+            "fn": "resolvedCell",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "a",
+                            "label": "A"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "a": "1"
+                        }
+                    ],
+                    "style": {
+                        "fontSize": 26
+                    }
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "1",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1300",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        }
+    ]
+}

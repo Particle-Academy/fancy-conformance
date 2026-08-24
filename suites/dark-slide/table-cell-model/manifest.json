@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "dark-slide/table-cell-model",
+  "title": "How a loose agent-authored table element resolves into per-cell decisions",
+  "since": "0.7.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "DarkSlide's three engines (PHP, Node, Python) turn one JSON table element into a pptx table. Between the two sits a pure resolver that decides, per CELL, every value the writer then serialises: fill, text colour and weight, alignment, vertical anchor, font size, letter spacing, capitalisation, the four insets, the four borders, and the two span directions. This suite pins that RESOLVER, not the XML. It exists because per-cell control was unreachable from the model in every engine — a:tcPr carried a fill and nothing else, header fill and zebra were hardcoded constants, and a declared column width was thrown away and replaced with an equal split. The resolver is where a port silently diverges, because two engines can emit well-formed XML from different decisions and no byte comparison of DIFFERENT inputs will notice.",
+    "functions": {
+      "resolvedCell": "resolvedCell(element, theme, row, col) -> the fully-resolved cell at that grid position. `row` counts the HEADER as row 0 when the table has one, so it addresses the emitted grid rather than the input's `rows` array.",
+      "gridWidthsEmu": "gridWidthsEmu(element, totalEmu) -> the <a:gridCol w> values, in order, as strings."
+    },
+    "runShape": {
+      "everyValueIsAString": "No golden in this file is a number. Fractional quantities are converted to the INTEGER unit the writer emits — font size and letter spacing in hundredths of a point, padding and border width in EMU — and then stringified. That removes float comparison from the suite entirely, which matters because the four fancy-conformance loaders do NOT agree on how a float golden is compared (PHP, Python and Rust use a scaled 1e-12 epsilon; the TypeScript loader uses exact Object.is). A suite whose verdict depends on which loader ran it is not a conformance suite.",
+      "resolvedCell": "{ text, bold, italic, underline, color, fill, align, anchor, fontSizeHundredths, letterSpacingHundredths, caps, padding: {left,right,top,bottom}, borders: {left,right,top,bottom}, colSpan, rowSpan, merged }. Booleans are \"1\" / \"0\". `fill` is null when the cell has none. Each border is null when the cell has none on that side, otherwise { widthEmu, color, style }.",
+      "gridWidthsEmu": "An ordered array of strings."
+    },
+    "reference": "php",
+    "referenceNote": "particle-academy/dark-slide is the reference: it shipped first and the trio's contract is 'the same document whichever backend runs it'. Every golden here is the output of RUNNING that engine, never what the value obviously ought to be — the width rows in particular are the accumulate-and-difference result rather than an independent division, and those differ.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/dark-slide", "symbol": "Table\\TableResolver::resolve" },
+      { "language": "node", "package": "@particle-academy/dark-slide", "symbol": "table/table-resolver.ts TableResolver.resolve" },
+      { "language": "python", "package": "fancy-dark-slide", "symbol": "dark_slide.table.table_resolver.resolve" }
+    ]
+  },
+  "notes": [
+    "PRECEDENCE IS THE POINT, and it is the half a byte comparison cannot reach. The chain is cell > row > column > band (header|stripe|body) > table > theme > default, and the rows here walk it one layer at a time (0009 through 0013) so a port that collapses two layers fails a NAMED case instead of shifting a colour somewhere in a large document. Byte parity across the three engines on a whole reference deck already covers the emission; it covers exactly ONE path through this chain.",
+    "AN ABSENT KEY AND A FALSE KEY ARE DIFFERENT, and conflating them is the most likely port bug in the whole model. Absent falls through to the next layer; `false` STOPS the chain and means off. `borders: false` on a table with a header must therefore beat the header band's own borders, and a row that sets `borders: {bottom: false}` must keep the other three sides. Cases 0005, 0006 and 0016 pin all three directions; a port written with `??` / `or` / `.get(k, default)` passes the first and fails the others.",
+    "COLUMN WIDTHS ARE TWO MODES CHOSEN BY THE VALUES. Every declared width <= 1 makes them FRACTIONS of the table and undeclared columns share the remainder; any declared width > 1 makes them WEIGHTS and undeclared columns weigh 1. No width anywhere is an equal split. Case 0018 pins the boundary at exactly 1.0, which is the value that decides the mode.",
+    "THE WIDTHS MUST SUM TO THE TABLE EXACTLY, so they are accumulated and differenced rather than each rounded independently. Case 0017's goldens are NOT totalEmu * frac rounded per column — 0019 exists specifically because independent rounding gives a different, plausible-looking answer that leaves the grid a few EMU off the frame.",
+    "SPANS ARE CLAMPED TO THE GRID, never emitted as written. A colSpan of 99 on a two-column table is a 2 (case 0020). A row with fewer <a:tc> than the grid declares is a corrupt file rather than a narrow table, so the covered cells are still emitted, carrying `merged` and an empty text.",
+    "THE SIBLING SUITE IS last-word/docx-constructs, and the two packages fail on the SAME axis — per-cell borders, insets, vertical alignment, merging — because both models were narrower than the XML their writers already emitted. That suite pins WordprocessingML output; this one pins a resolver. They are deliberately not the same shape: the XML cannot be shared (w:tcBorders / w:tcMar / w:vAlign against a:lnL..lnB / marL..marB / @anchor) but the DECISIONS can, and this file is expressed in points-and-hex for that reason. Promoting it to `shared/` is the right move the day last-word resolves through the same model; declaring it shared before then would list an implementation that does not run it, which is the failure this repository exists to prevent."
+  ]
+}
