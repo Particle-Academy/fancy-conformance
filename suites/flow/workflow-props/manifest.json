@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/workflow-props",
+  "title": "Resolving a caller's props against what a workflow declares",
+  "since": "0.9.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "resolveWorkflowProps(declared: array|null, passed: object|null) -> {ok: true, props: object} | {ok: false, code: string}",
+    "summary": "Check the flat, by-name object a caller passed against the `inputs` a workflow declares, and fill in declared defaults. `declared` is the list of input declarations ({name, type?, required?, default?}) or null when the workflow declares none. `passed` is what the caller supplied, or null. On success the result carries the RESOLVED map -- supplied values plus defaults for anything omitted, and nothing else. On failure it carries a stable `code`; the human-readable message is deliberately NOT part of the contract.",
+    "reference": "node",
+    "referenceNote": "@particle-academy/fancy-flow's src/runtime/workflow-props.ts is the behavioural source of truth, and the rules were designed there with this table written alongside rather than after.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "resolveWorkflowProps" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Runtime\\WorkflowProps::resolve" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.runtime.workflow_props.resolve_workflow_props" }
+    ]
+  },
+  "notes": [
+    "The CODE is asserted, never the message. Each runtime words its errors idiomatically and an English sentence is not a behaviour -- pinning the prose would hold three implementations to a translation, and would go red on a wording improvement that changed nothing.",
+    "The reason this feature exists is case 0101: passing a MISSPELLED key. Before workflow props, `initialInputs` was keyed by node id and an unrecognised key was not an error -- the value simply sat unread, the node saw nothing, and the run reported success with output that was quietly wrong. Every implementation must fail that case, because the silent version is what shipped.",
+    "Cases 0004-0006 are the falsy-value trap and they are the ones a re-implementation gets wrong. `0`, `false` and `\"\"` are values a caller MEANT to pass. A default applied with `||`, or with `??` on the wrong side, silently replaces them -- and a declared limit of 0 quietly becoming 10 is not an error anybody observes.",
+    "Absent is ABSENT. An input that is not supplied, has no default and is not required must not appear in the resolved map at all -- not as null, not as an empty string. PHP has one absent value and JS has two; letting that difference leak would make `{{ $props.x }}` disagree across runtimes for no useful reason.",
+    "`type` is optional and an omitted type accepts ANYTHING (case 0008). 'I am not asserting a shape' must not degrade into 'nothing is allowed', which is the failure mode of a validator written defensively.",
+    "Arrays are checked before objects (case 0010). `typeof []` is `\"object\"` in JavaScript, and a declaration saying `array` that accepts `{}` is a check that passes while meaning nothing.",
+    "Unknown keys are checked BEFORE required ones (case 0103). A caller who typed `topik` instead of `topic` should be told about `topik` -- the word they wrote -- rather than that `topic` is missing, which describes a key they believe they supplied."
+  ]
+}

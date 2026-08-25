@@ -10,6 +10,58 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-08-25
+
+### Added
+
+- **`flow/workflow-props` (20 cases)** — resolving the flat, by-name object a
+  caller passes against the `inputs` a workflow declares.
+
+  Written ALONGSIDE the feature rather than after it, which is the first time
+  that has happened here. `flow/subflow-registry` was written once all four
+  runtimes had already shipped the same bug; this table existed before the
+  second runtime was started, so it is a specification the ports are built
+  against instead of a post-mortem.
+
+  The behaviour being replaced was silence. Run inputs were keyed BY NODE ID,
+  so a caller had to know the trigger happened to be called `t` — and nothing
+  declared what a workflow accepted, so a **misspelled key was not an error**.
+  The value sat unread, the node saw nothing, and the run reported success with
+  output that was quietly wrong. Case `0101` is that case, and every
+  implementation must fail it.
+
+  Three traps get their own rows because a re-implementation gets them wrong
+  and nothing goes red:
+
+  - **`0004`–`0006`, the falsy trap.** `0`, `false` and `""` are values a caller
+    MEANT to pass. A default applied with `||`, or `??` on the wrong side,
+    silently replaces them — a declared limit of `0` quietly becoming `10` is
+    not an error anyone observes.
+  - **`0010` / `0106` / `0107`, array-versus-object.** `typeof []` is
+    `"object"`, so a check written with `typeof` alone rejects a real array
+    declared `array` AND accepts an array declared `object`. Note `0106` passes
+    such a mutant by accident, which the discrimination test records rather
+    than papers over.
+  - **`0007`, absent is absent.** PHP has one absent value and JS has two. A
+    port that writes `null` for every unsupplied optional makes
+    `{{ $props.note }}` resolve differently across runtimes for one graph.
+
+  Five discrimination tests: a faithful control plus one mutant per hazard,
+  each asserting the exact set of ids it fails.
+
+### Fixed
+
+- **The Python loader's version had drifted two releases behind and the check
+  that would have caught it was failing.** `python/pyproject.toml` and
+  `fancy_conformance.__version__` both sat at `0.7.0` while `VERSION` and
+  `package.json` said `0.8.0`, so a Python consumer printing the pinned suite
+  version reported a fixture set it was not running.
+
+  The test asserting all four agree already existed and was RED. A red test
+  nobody is failing the build on is a comment — and this is the repository
+  whose entire product is that unchecked duplicates drift. All four now say
+  `0.9.0`.
+
 ## [0.8.0] - 2026-08-24
 
 ### Added

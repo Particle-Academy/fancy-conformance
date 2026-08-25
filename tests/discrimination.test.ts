@@ -644,3 +644,165 @@ test("every suite has at least one case tagged as a known hazard", () => {
     assert.ok(tagged.length > 0, `${id} has no hazard-tagged case`);
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// flow/workflow-props
+//
+// The mutants here are the four ways a re-implementation of "check the caller's
+// props" goes wrong, and three of them are silent — which is the whole reason
+// the feature exists. The behaviour being replaced was: an unrecognised key did
+// nothing at all, and the run reported success.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Declared = { name: string; type?: string; required?: boolean; default?: unknown };
+type PropsInput = { declared: Declared[] | null; passed: Record<string, unknown> | null };
+type PropsOut = { ok: true; props: Record<string, unknown> } | { ok: false; code: string };
+
+const propsIdsFailedBy = (impl: (i: PropsInput) => PropsOut) =>
+  idsFailedBy("flow/workflow-props", (c) => impl(c.input as PropsInput));
+
+const typeOf = (v: unknown): string =>
+  v === null ? "null" : Array.isArray(v) ? "array" : typeof v;
+
+/** Correct: unknown keys first, then defaults by presence, then type. */
+const correctProps = ({ declared, passed }: PropsInput): PropsOut => {
+  const inputs = declared ?? [];
+  const given = passed ?? {};
+  const names = new Set(inputs.map((i) => i.name));
+
+  for (const k of Object.keys(given)) {
+    if (!names.has(k)) return { ok: false, code: "unknown_input" };
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const input of inputs) {
+    const supplied = Object.prototype.hasOwnProperty.call(given, input.name);
+    const hasDefault = Object.prototype.hasOwnProperty.call(input, "default");
+
+    if (!supplied) {
+      if (hasDefault) { out[input.name] = input.default; continue; }
+      if (input.required) return { ok: false, code: "missing_required" };
+      continue;
+    }
+    if (input.type !== undefined && typeOf(given[input.name]) !== input.type) {
+      return { ok: false, code: "type_mismatch" };
+    }
+    out[input.name] = given[input.name];
+  }
+  return { ok: true, props: out };
+};
+
+test("the workflow-props table passes a correct resolution", () => {
+  // The control. Every assertion below is meaningless if this one fails.
+  assert.deepEqual(propsIdsFailedBy(correctProps), []);
+});
+
+test("the table catches the mutant that IGNORES unknown keys", () => {
+  // The behaviour being replaced, and the only one that ever shipped: an
+  // unrecognised key is not an error, it just never reaches a node. The run is
+  // green and the output is quietly wrong.
+  const ignoresUnknown = (i: PropsInput): PropsOut => {
+    const strict = correctProps(i);
+    if (!strict.ok && strict.code === "unknown_input") {
+      return correctProps({ declared: i.declared, passed: null });
+    }
+    return strict;
+  };
+
+  assert.deepEqual(propsIdsFailedBy(ignoresUnknown), [
+    "0101-an-unknown-key-fails",
+    "0102-props-passed-to-a-workflow-declaring-none-fails",
+    "0103-unknown-is-reported-before-missing-required",
+  ]);
+});
+
+test("the table catches the mutant that applies defaults with ||", () => {
+  // The falsy trap, and the likeliest mistake in a re-implementation. It reads
+  // correctly, passes every non-falsy case, and silently turns a declared limit
+  // of 0 into 10 — which nobody observes, because it is a plausible number.
+  const falsyDefaults = ({ declared, passed }: PropsInput): PropsOut => {
+    const strict = correctProps({ declared, passed });
+    if (!strict.ok) return strict;
+
+    const out = { ...strict.props };
+    for (const input of declared ?? []) {
+      if (Object.prototype.hasOwnProperty.call(input, "default") && !out[input.name]) {
+        out[input.name] = input.default;
+      }
+    }
+    return { ok: true, props: out };
+  };
+
+  assert.deepEqual(propsIdsFailedBy(falsyDefaults), [
+    "0004-explicit-zero-is-not-replaced-by-a-default",
+    "0005-explicit-false-is-not-replaced-by-a-default",
+    "0006-explicit-empty-string-is-not-replaced-by-a-default",
+  ]);
+});
+
+test("the table catches the mutant that treats an array as an object", () => {
+  // `typeof [] === "object"`. A declaration saying `array` that accepts a map
+  // is a check that runs, passes, and asserts nothing.
+  const typeofOnly = ({ declared, passed }: PropsInput): PropsOut => {
+    const loose = (v: unknown): string => (v === null ? "null" : typeof v);
+    const inputs = declared ?? [];
+    const given = passed ?? {};
+    const names = new Set(inputs.map((i) => i.name));
+
+    for (const k of Object.keys(given)) {
+      if (!names.has(k)) return { ok: false, code: "unknown_input" };
+    }
+
+    const out: Record<string, unknown> = {};
+    for (const input of inputs) {
+      const supplied = Object.prototype.hasOwnProperty.call(given, input.name);
+      const hasDefault = Object.prototype.hasOwnProperty.call(input, "default");
+      if (!supplied) {
+        if (hasDefault) { out[input.name] = input.default; continue; }
+        if (input.required) return { ok: false, code: "missing_required" };
+        continue;
+      }
+      // `array` is never what `typeof` reports, so a declared array rejects a
+      // real list AND accepts a map — wrong in both directions at once.
+      if (input.type !== undefined && loose(given[input.name]) !== input.type) {
+        return { ok: false, code: "type_mismatch" };
+      }
+      out[input.name] = given[input.name];
+    }
+    return { ok: true, props: out };
+  };
+
+  // Note WHICH two, because the asymmetry is the interesting part and the
+  // exact-set assertion is what surfaced it.
+  //
+  // `typeof []` is `"object"`, so this mutant is wrong in two directions that
+  // are not mirror images:
+  //   0010 — a real array declared `array` is REJECTED ("object" !== "array")
+  //   0107 — an array declared `object` is ACCEPTED ("object" === "object")
+  // and 0106 — an object declared `array` — passes by ACCIDENT, because
+  // `"object" !== "array"` gets the right answer for the wrong reason. That
+  // case still earns its place in the table; it is simply not the one that
+  // catches this mutant.
+  assert.deepEqual(propsIdsFailedBy(typeofOnly), [
+    "0010-array-satisfies-array-not-object",
+    "0107-array-does-not-satisfy-object",
+  ]);
+});
+
+test("the table catches the mutant that fills absent optionals with null", () => {
+  // PHP has one absent value and JS has two. A port that writes `null` for
+  // every unsupplied optional makes `{{ $props.note }}` resolve to an empty
+  // string on one runtime and to nothing on another, for the same graph.
+  const nullFills = (i: PropsInput): PropsOut => {
+    const strict = correctProps(i);
+    if (!strict.ok) return strict;
+
+    const out = { ...strict.props };
+    for (const input of i.declared ?? []) {
+      if (!Object.prototype.hasOwnProperty.call(out, input.name)) out[input.name] = null;
+    }
+    return { ok: true, props: out };
+  };
+
+  assert.deepEqual(propsIdsFailedBy(nullFills), ["0007-absent-optional-is-absent-not-null"]);
+});
