@@ -1,0 +1,231 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/executor-resolution",
+  "cases": [
+    {
+      "id": "0101-node-id-wins-over-kind",
+      "title": "A binding on the node's own id beats one on its kind.",
+      "since": "0.12.0",
+      "tags": ["order"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [
+          { "key": "llm_call", "executor": "by-kind" },
+          { "key": "n1", "executor": "by-id" }
+        ],
+        "node": { "id": "n1", "type": "llm_call" }
+      },
+      "expected": "by-id",
+      "notes": "The per-node override is the whole reason id is consulted first — a graph pins ONE node to a stub without unbinding the kind for every other node using it."
+    },
+    {
+      "id": "0102-kind-wins-over-fallback",
+      "title": "A binding on the kind beats the `*` fallback.",
+      "since": "0.12.0",
+      "tags": ["order"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [
+          { "key": "*", "executor": "catch-all" },
+          { "key": "llm_call", "executor": "by-kind" }
+        ],
+        "node": { "id": "n1", "type": "llm_call" }
+      },
+      "expected": "by-kind"
+    },
+    {
+      "id": "0103-bare-binding-namespaced-node",
+      "title": "A node naming the canonical id resolves a binding made under the bare alias.",
+      "since": "0.12.0",
+      "tags": ["alias"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [{ "key": "llm_call", "executor": "bare" }],
+        "node": { "id": "n1", "type": "@particle-academy/llm_call" }
+      },
+      "expected": "bare",
+      "notes": "This is the direction a consumer hit in the wild: resolveKindId() hands back the NAMESPACED id, they keyed their registry by it, and the bare binding they already had stopped matching. A rename must not become a breaking change wearing a rename's costume."
+    },
+    {
+      "id": "0104-namespaced-binding-bare-node",
+      "title": "A node naming the bare alias resolves a binding made under the canonical id.",
+      "since": "0.12.0",
+      "tags": ["alias"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [{ "key": "@particle-academy/llm_call", "executor": "namespaced" }],
+        "node": { "id": "n1", "type": "llm_call" }
+      },
+      "expected": "namespaced",
+      "notes": "The mirror of 0103. Asserting only one direction would pass against an implementation that resolves aliases one way, which is half a feature and the harder half to notice is missing."
+    },
+    {
+      "id": "0105-unknown-kind-resolves-nothing",
+      "title": "A node whose kind nothing is bound to, with no fallback, resolves null.",
+      "since": "0.12.0",
+      "tags": ["closed"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [{ "key": "llm_call", "executor": "by-kind" }],
+        "node": { "id": "n1", "type": "http_request" }
+      },
+      "expected": null,
+      "notes": "Failing CLOSED is the correct default and is also what makes every miss in this suite silent — an unresolved node simply produces no outputs. Pinning it stops a well-meaning fall-through to an arbitrary binding from being added later."
+    },
+    {
+      "id": "0106-fallback-is-last",
+      "title": "The `*` fallback runs only after every id and kind candidate has missed.",
+      "since": "0.12.0",
+      "tags": ["closed", "order"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [{ "key": "*", "executor": "catch-all" }],
+        "node": { "id": "n1", "type": "http_request" }
+      },
+      "expected": "catch-all"
+    },
+    {
+      "id": "0107-fallback-has-no-aliases",
+      "title": "The fallback is a sentinel: a kind literally named `*` is not expanded through the alias machinery.",
+      "since": "0.12.0",
+      "tags": ["closed"],
+      "input": {
+        "kinds": [{ "name": "*", "aliases": ["everything"] }],
+        "bindings": [{ "key": "everything", "executor": "aliased-star" }],
+        "node": { "id": "n1", "type": "http_request" }
+      },
+      "expected": null,
+      "notes": "Pathological on purpose. A runtime that ran the `*` sentinel through alias expansion would bind every unmatched node to whatever `everything` points at, and the graph would still complete — the failure mode this whole suite is about."
+    },
+    {
+      "id": "0108-unregistered-kind-binds-literally",
+      "title": "A kind the registry has never heard of still resolves its own literal binding.",
+      "since": "0.12.0",
+      "tags": ["alias"],
+      "input": {
+        "kinds": [],
+        "bindings": [{ "key": "my_custom_node", "executor": "custom" }],
+        "node": { "id": "n1", "type": "my_custom_node" }
+      },
+      "expected": "custom",
+      "notes": "Alias awareness must not become a REQUIREMENT to be registered. A host binding an ad-hoc kind it invented gets exactly that kind and no expansion, because there is no alias list to expand from and inventing one would claim knowledge nothing has."
+    },
+    {
+      "id": "0201-data-kind-used-when-type-is-absent",
+      "title": "With no type, the kind carried in data.kind resolves the executor.",
+      "since": "0.12.0",
+      "tags": ["data-kind"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [{ "key": "llm_call", "executor": "by-kind" }],
+        "node": { "id": "n1", "type": null, "dataKind": "llm_call" }
+      },
+      "expected": "by-kind",
+      "skip": {
+        "php": "FlowNode is flattened — type IS the kind and there is no data slot, so a node without a type carries no kind at all.",
+        "python": "FlowNode is flattened — type IS the kind and there is no data slot, so a node without a type carries no kind at all."
+      },
+      "notes": "The legitimate use of data.kind, and the reason it is consulted at all."
+    },
+    {
+      "id": "0202-real-type-beats-unrelated-data-kind",
+      "title": "A type naming a registered kind wins over a data.kind naming a DIFFERENT registered kind.",
+      "since": "0.12.0",
+      "tags": ["data-kind", "regression"],
+      "input": {
+        "kinds": [
+          { "name": "@particle-academy/llm_call", "aliases": ["llm_call"] },
+          { "name": "@particle-academy/output", "aliases": ["output"] }
+        ],
+        "bindings": [{ "key": "@particle-academy/output", "executor": "output-exec" }],
+        "node": { "id": "n1", "type": "llm_call", "dataKind": "output" }
+      },
+      "expected": null,
+      "skip": {
+        "php": "FlowNode is flattened — there is no data.kind for a second opinion to live in, so this precedence question cannot arise.",
+        "python": "FlowNode is flattened — there is no data.kind for a second opinion to live in, so this precedence question cannot arise."
+      },
+      "notes": "fancy-flow 0.51.1 and earlier answered output-exec here: the alias step tried data.kind's ids before node.type's, so a node declaring itself an llm_call ran the OUTPUT executor. Null is correct — the node IS an llm_call and nothing is bound to that kind, so it must fail closed rather than run something else's code."
+    },
+    {
+      "id": "0203-real-type-beats-data-kind-even-when-both-bound",
+      "title": "The same precedence holds when BOTH kinds have an executor bound.",
+      "since": "0.12.0",
+      "tags": ["data-kind", "regression"],
+      "input": {
+        "kinds": [
+          { "name": "@particle-academy/llm_call", "aliases": ["llm_call"] },
+          { "name": "@particle-academy/output", "aliases": ["output"] }
+        ],
+        "bindings": [
+          { "key": "@particle-academy/llm_call", "executor": "llm-exec" },
+          { "key": "@particle-academy/output", "executor": "output-exec" }
+        ],
+        "node": { "id": "n1", "type": "llm_call", "dataKind": "output" }
+      },
+      "expected": "llm-exec",
+      "skip": {
+        "php": "FlowNode is flattened — no data.kind exists to take precedence over type.",
+        "python": "FlowNode is flattened — no data.kind exists to take precedence over type."
+      },
+      "notes": "The bug at its worst and the row worth reading twice. The CORRECT executor was registered, under the node's own declared kind, and 0.51.1 ran the other one anyway. 0202 could be argued away as an obscure unbound-kind edge; this cannot."
+    },
+    {
+      "id": "0204-category-label-in-data-kind-is-ignored",
+      "title": "A data.kind holding a category label rather than a kind id does not disable type.",
+      "since": "0.12.0",
+      "tags": ["data-kind", "regression"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/manual_trigger", "aliases": ["manual_trigger"] }],
+        "bindings": [{ "key": "@particle-academy/manual_trigger", "executor": "trigger-exec" }],
+        "node": { "id": "n1", "type": "manual_trigger", "dataKind": "trigger" }
+      },
+      "expected": "trigger-exec",
+      "skip": {
+        "php": "FlowNode is flattened — no data.kind.",
+        "python": "FlowNode is flattened — no data.kind."
+      },
+      "notes": "A category label is not a kind id — easy to write, says nothing false, and names nothing in the registry. This was the shape a consumer actually reported: the namespaced id (the one resolveKindId() hands you) was the spelling that failed, while the bare name worked. Fixed in 0.51.1; kept here so it stays fixed."
+    },
+    {
+      "id": "0205-renderer-type-defers-to-data-kind",
+      "title": "A type that names NO registered kind is a renderer type, and data.kind decides.",
+      "since": "0.12.0",
+      "tags": ["data-kind"],
+      "input": {
+        "kinds": [{ "name": "@particle-academy/llm_call", "aliases": ["llm_call"] }],
+        "bindings": [{ "key": "llm_call", "executor": "by-kind" }],
+        "node": { "id": "n1", "type": "fancyNode", "dataKind": "llm_call" }
+      },
+      "expected": "by-kind",
+      "skip": {
+        "php": "FlowNode is flattened — no data.kind.",
+        "python": "FlowNode is flattened — no data.kind."
+      },
+      "notes": "The row that stops the 0202-0204 fix from over-reaching. Registering ONE custom xyflow renderer and carrying the kind in data is ordinary xyflow practice; type here is a React component name, not a claim about behaviour. This is why the rule is that a type NAMING A REGISTERED KIND is authoritative, rather than the simpler and wrong rule that type always wins."
+    },
+    {
+      "id": "0206-node-id-still-wins-over-both",
+      "title": "A per-node binding still beats type and data.kind alike.",
+      "since": "0.12.0",
+      "tags": ["data-kind", "order"],
+      "input": {
+        "kinds": [
+          { "name": "@particle-academy/llm_call", "aliases": ["llm_call"] },
+          { "name": "@particle-academy/output", "aliases": ["output"] }
+        ],
+        "bindings": [
+          { "key": "@particle-academy/llm_call", "executor": "llm-exec" },
+          { "key": "n1", "executor": "pinned" }
+        ],
+        "node": { "id": "n1", "type": "llm_call", "dataKind": "output" }
+      },
+      "expected": "pinned",
+      "skip": {
+        "php": "FlowNode is flattened — no data.kind.",
+        "python": "FlowNode is flattened — no data.kind."
+      },
+      "notes": "Guards the fix's blast radius: reordering the kind step must not disturb the step above it."
+    }
+  ]
+}

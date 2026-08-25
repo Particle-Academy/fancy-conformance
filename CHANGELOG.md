@@ -10,6 +10,43 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-08-25
+
+### Added
+
+- **`flow/executor-resolution` — which executor a node actually runs.** 14 rows
+  pinning the `node id → kind → *` order, alias resolution in **both**
+  directions (a bare binding reached by a namespaced node and the reverse), and
+  failing **closed** when nothing matches.
+
+  It exists because fancy-flow ≤ 0.51.1 could run the **wrong executor,
+  silently**. Its alias step tried `data.kind`'s ids before `node.type`'s, so a
+  node with `type: "llm_call"` and `data.kind: "output"` ran the OUTPUT
+  executor — **even when an `llm_call` executor was registered** (row `0203`).
+  Nothing reported it, because running the wrong executor and running the right
+  one look identical from outside: the graph still completes.
+
+  The rule the rows pin: **when `node.type` names a registered kind it is
+  authoritative** and `data.kind` does not contribute; otherwise `data.kind`
+  decides. Row `0205` is what stops that from over-reaching — a `type` naming no
+  registered kind is an xyflow *renderer* type (`"fancyNode"`), which is
+  ordinary practice, and there `data.kind` is the only real answer.
+
+  **The eight `0100` rows run on all three runtimes.** The six `0200` rows are
+  skipped for PHP and Python on a **structural** ground, stated on each row:
+  their `FlowNode` is *flattened* — `type` IS the kind, there is no `data` slot
+  for a second opinion to live in — so the precedence question cannot arise
+  there. That asymmetry is why exactly one runtime had the bug, and it is
+  recorded rather than hidden. Adding a `data.kind` field to two runtimes so
+  they could answer rows about it would be writing code to satisfy a table,
+  which is the inversion this package exists to prevent.
+
+### Changed
+
+- `VERSION` → `0.12.0`, and the four manifests that declare it. Additive: no
+  existing suite, case id or golden changed, so a consumer already on 0.11.x
+  needs to do **nothing** beyond bumping if they want the new suite.
+
 ## [0.11.1] - 2026-08-25
 
 ### Fixed

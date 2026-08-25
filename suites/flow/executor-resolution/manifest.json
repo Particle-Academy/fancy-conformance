@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/executor-resolution",
+  "title": "Which executor a node runs — id, kind, alias, fallback",
+  "since": "0.12.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "resolveExecutor(kinds, bindings, node) -> string | null",
+    "summary": "Given a kind registry (each kind with its aliases), a set of executor bindings (each an opaque LABEL bound under some key), and a node, return the label of the executor that runs — or null when nothing resolves. The answer is a label rather than a key so the table is neutral about WHEN a runtime expands aliases: PHP and Python expand at bind time and would report the key they stored under, TypeScript expands at lookup time and would report the key it matched. Both run the same executor, which is the thing a consumer can actually observe.",
+    "reference": "node",
+    "referenceNote": "The order — node id, then kind, then `*` — is fancy-flow's, and the alias step exists because kinds are namespaced (`@particle-academy/llm_call`) while hosts routinely bind the bare name. Rows 0201+ pin a TYPESCRIPT-ONLY question and are skipped elsewhere; see the notes.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "pickExecutor" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\ExecutorRegistry::resolveFor" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.executors.ExecutorRegistry.resolve_for" }
+    ]
+  },
+  "notes": [
+    "THE 0200 ROWS ARE SKIPPED FOR PHP AND PYTHON ON A STRUCTURAL GROUND, NOT A CONVENIENCE ONE. TypeScript's `FlowNode` is an xyflow node — `{ id, type, data }` — so a graph can carry its kind in `data.kind` while `type` holds the RENDERER type, which is ordinary xyflow practice. PHP's and Python's `FlowNode` are FLATTENED: `type` IS the kind and there is no `data` slot for a second opinion to live in. The precedence question therefore cannot arise there, and inventing a `data.kind` field in two runtimes so they could answer rows about it would be writing code to satisfy a table — the exact inversion this package exists to prevent.",
+    "That asymmetry is worth stating rather than hiding, because it is WHY only one runtime had the bug these rows were written for. In fancy-flow <= 0.51.1 the alias step tried `data.kind`'s aliases BEFORE `node.type`'s, so a node with `type: \"llm_call\"` and `data.kind: \"output\"` ran the OUTPUT executor — even when an `llm_call` executor was registered (row 0203). Nothing reported it: running the wrong executor and running the right one look identical from the outside, and the graph still completes.",
+    "The rule the 0200 rows pin: WHEN `node.type` NAMES A REGISTERED KIND IT IS AUTHORITATIVE, and `data.kind` does not contribute at all. Otherwise `data.kind` is consulted. That keeps the xyflow pattern working (row 0205: `type: \"fancyNode\"` is a renderer, not a kind, so `data.kind` decides) while making a real kind in `type` mean what it says.",
+    "The 0100 rows are NOT skipped anywhere and are the substance of the cross-runtime claim: id beats kind, kind beats `*`, an alias resolves in both directions (bare binding + namespaced node, and the reverse), and an unresolvable node returns null rather than falling through to an arbitrary binding.",
+    "Bindings are a LIST, not a map, because insertion order is observable when two keys could both match and a JSON object's key order is not something every language's decoder preserves.",
+    "`*` is a sentinel, not a kind: it has no aliases and is only consulted after every id-and-kind candidate has missed (row 0106). A runtime that expanded `*` through the alias machinery would bind every kind to the fallback."
+  ]
+}
