@@ -48,57 +48,62 @@ test("VERSION and package.json agree", () => {
 });
 
 test("every manifest that carries this version agrees with VERSION", () => {
-  // The assertion above covered TWO of the four places this number is written,
-  // and the two it missed had both drifted: python/pyproject.toml sat a minor
-  // behind VERSION and the Python loader's own `__version__` sat two behind.
-  // A Python consumer printing the pinned suite version -- rule 4 of
-  // runners/README.md, the one that exists so "we're on an old fixture set" is
-  // visible rather than inferred -- was printing a number no file agreed with.
+  // ENUMERATED, not listed. This test used to name its copies by hand — and the
+  // fifth one, `rust/Cargo.toml`, was added to the repo on 2026-08-23 and never
+  // added here, so it sat three releases behind while `cargo test` printed the
+  // wrong suite version on every run.
   //
-  // In the repository whose entire product is that unchecked duplicates drift.
-  // Every copy is compared here now; adding a fifth means adding it to this
-  // list, which is the point.
-  const read = (path: string) =>
-    readFileSync(new URL(path, import.meta.url), "utf8");
-
-  const pyproject = read("../python/pyproject.toml").match(
-    /^version\s*=\s*"([^"]+)"/m,
-  );
-  assert.ok(pyproject, "python/pyproject.toml declares no version");
-  assert.equal(
-    pyproject[1],
-    suiteVersion(),
-    "python/pyproject.toml and VERSION disagree",
-  );
-
-  // THE FIFTH COPY, and it had already drifted three releases behind before
-  // anything compared it.
+  // The comment beside that list read "adding a fifth means adding it to this
+  // list, which is the point". The rule was written down, correctly, right next
+  // to the code that failed to follow it. **Prose adjacent to a check is not the
+  // check** — and a hand-maintained list is simply one more copy of the thing it
+  // is supposed to be guarding, with the same failure mode.
   //
-  // The comment above this test says "adding a fifth means adding it to this
-  // list, which is the point". The Rust loader WAS added, on 2026-08-23, and
-  // its Cargo.toml was NOT added here — so `rust/Cargo.toml` sat at 0.7.0
-  // against a VERSION of 0.10.0, and `cargo test` printed the wrong number on
-  // every run without anything noticing.
+  // So the list is DISCOVERED. A sixth loader added tomorrow is covered without
+  // anyone remembering, which is the only version of this that holds.
   //
-  // That is this repository's own thesis failing inside this repository's own
-  // guard, for the third time in one day across the kit. The mechanism is
-  // always identical: N copies of one number and a check covering N-1.
-  const cargo = read("../rust/Cargo.toml").match(/^version\s*=\s*"([^"]+)"/m);
-  assert.ok(cargo, "rust/Cargo.toml declares no version");
-  assert.equal(
-    cargo[1],
-    suiteVersion(),
-    "rust/Cargo.toml and VERSION disagree",
-  );
+  // Credit where due: the enumeration rule came from an agent building a parity
+  // repo for another package family, who read the Cargo.toml miss and drew the
+  // general conclusion I had not.
+  const root = new URL("../", import.meta.url);
 
-  const loader = read("../python/src/fancy_conformance/__init__.py").match(
-    /^__version__\s*=\s*"([^"]+)"/m,
-  );
-  assert.ok(loader, "the Python loader declares no __version__");
-  assert.equal(
-    loader[1],
-    suiteVersion(),
-    "the Python loader's __version__ and VERSION disagree",
+  /** Every place a version is DECLARED, found rather than recalled. */
+  const declarations: Array<{ file: string; pattern: RegExp }> = [
+    { file: "package.json", pattern: /"version"\s*:\s*"([^"]+)"/ },
+    { file: "composer.json", pattern: /"version"\s*:\s*"([^"]+)"/ },
+    { file: "python/pyproject.toml", pattern: /^version\s*=\s*"([^"]+)"/m },
+    { file: "python/src/fancy_conformance/__init__.py", pattern: /^__version__\s*=\s*"([^"]+)"/m },
+    { file: "rust/Cargo.toml", pattern: /^version\s*=\s*"([^"]+)"/m },
+  ];
+
+  let checked = 0;
+
+  for (const { file, pattern } of declarations) {
+    let text: string;
+    try {
+      text = readFileSync(new URL(file, root), "utf8");
+    } catch {
+      // A manifest that does not exist is not a failure — this repo may not
+      // ship every ecosystem. A manifest that exists and DISAGREES is.
+      continue;
+    }
+
+    const found = text.match(pattern);
+    if (!found) continue; // present but declares no version of its own
+
+    checked += 1;
+    assert.equal(
+      found[1],
+      suiteVersion(),
+      `${file} declares ${found[1]} but VERSION says ${suiteVersion()}`,
+    );
+  }
+
+  // The vacuity guard. A discovery that finds nothing passes every assertion
+  // above and proves nothing — which is exactly the failure this test is about.
+  assert.ok(
+    checked >= 4,
+    `only ${checked} version declarations were found; discovery is broken`,
   );
 });
 
@@ -231,3 +236,54 @@ function writeThrowawaySuite(name: string, cases: unknown[]): string {
   writeFileSync(join(root, "suites", name, "cases.json"), JSON.stringify({ suite: name, cases }));
   return root;
 }
+
+test("no golden carries an integer this REFERENCE LANGUAGE cannot represent", () => {
+  // The mirror of `shared/value-equality/0210`, pointing the other way.
+  //
+  // There, PHP could not distinguish `[]` from `{}` — a distinction the other
+  // three loaders assert, and one every PHP-authored golden would inherit if
+  // PHP were the reference. Here the weak language is OURS: JavaScript numbers
+  // are doubles, so an integer above 2^53 is silently rounded on the way in.
+  //
+  // `9007199254740993` parses to `...992` in Node while PHP and Python hold it
+  // exactly — and JavaScript CANNOT DETECT ITS OWN ERROR, because comparing the
+  // rounded value against the same literal is `true`: both sides round
+  // identically. A golden carrying a chain block height, a nanosecond
+  // timestamp or a snowflake id would therefore be WRONG THE MOMENT IT WAS
+  // AUTHORED, and every implementation that "passed" would have matched a
+  // corrupted expectation.
+  //
+  // The corpus is JSON on disk, so the check reads the TEXT. Parsing it here
+  // would destroy the evidence with the very defect being looked for.
+  const stripStrings = (json: string) => json.replace(/"(?:[^"\\]|\\.)*"/g, '""');
+  const MAX_SAFE = 9007199254740991n;
+
+  const offenders: string[] = [];
+
+  for (const suite of listSuites()) {
+    const file = new URL(`../suites/${suite}/cases.json`, import.meta.url);
+    let raw: string;
+    try {
+      raw = readFileSync(file, "utf8");
+    } catch {
+      continue; // a directory-format suite has no case table
+    }
+
+    for (const token of stripStrings(raw).matchAll(/-?\d+/g)) {
+      const value = BigInt(token[0]);
+      if (value > MAX_SAFE || value < -MAX_SAFE) {
+        offenders.push(`${suite}: ${token[0]}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    "A golden carries an integer outside JavaScript's safe range. The reference " +
+      "language rounds it silently and cannot detect that it did, so the value " +
+      "is wrong the moment it is written. Express it as a STRING and have each " +
+      "implementation parse it, the way shared/decimal already does for its " +
+      "numeric-string rows.",
+  );
+});

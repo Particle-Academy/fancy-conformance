@@ -10,6 +10,42 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-08-25
+
+### Fixed
+
+- **The version-drift check now ENUMERATES its copies instead of listing them.**
+  Yesterday's fix added `rust/Cargo.toml` to a hand-maintained list. That is one
+  more copy of the thing being guarded, with the same failure mode — the sixth
+  loader would have gone missing exactly as the fifth did.
+
+  The old comment read *"adding a fifth means adding it to this list, which is
+  the point"*: the rule was written down, correctly, beside the code that failed
+  to follow it. **Prose adjacent to a check is not the check.** The list is now
+  discovered, with a vacuity guard so a broken discovery fails instead of
+  passing over nothing. Verified red by reverting `Cargo.toml`.
+
+  The generalisation came from an agent building a parity repo for another
+  package family, reading our Cargo.toml miss.
+
+### Added
+
+- **A golden may not carry an integer JavaScript cannot represent.** The mirror
+  of `shared/value-equality/0210`, pointing the other way.
+
+  There, PHP could not distinguish `[]` from `{}` — a limit every PHP-authored
+  golden would inherit if PHP were the reference. Here the weak language is
+  **ours**: JS numbers are doubles, so `9007199254740993` parses as `...992`,
+  and **JavaScript cannot detect its own error** — comparing the rounded value
+  against the same literal is `true`, because both sides round identically.
+
+  A golden holding a chain block height, a nanosecond timestamp or a snowflake
+  id would therefore be wrong the moment it was authored, and every
+  implementation that "passed" would have matched a corrupted expectation. The
+  check reads the case files as TEXT, because parsing them would destroy the
+  evidence using the very defect being looked for. Nothing shipped violates it
+  today; verified red by planting one.
+
 ## [0.11.0] - 2026-08-25
 
 ### Added
