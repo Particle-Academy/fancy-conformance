@@ -201,7 +201,7 @@ final class Conformance
                 continue;
             }
 
-            $results[] = self::equals($actual, $case['expected'])
+            $results[] = self::equals($actual, $case['expected'], self::toleranceFor($case))
                 ? ['id' => $case['id'], 'title' => $case['title'], 'status' => 'pass']
                 : [
                     'id' => $case['id'],
@@ -276,14 +276,30 @@ final class Conformance
      * nearest double to it is not the nearest double to every language's parse
      * of the same text.
      */
-    public static function equals(mixed $a, mixed $b): bool
+    /**
+     * A case's declared float tolerance, or null for exact comparison.
+     *
+     * Declared ON THE ROW so it is visible in the fixtures and in any diff of
+     * them. A global epsilon is invisible: nobody reading a case can tell
+     * whether it is asserting a value or a neighbourhood.
+     *
+     * @param  array<string,mixed>  $case
+     */
+    private static function toleranceFor(array $case): ?float
+    {
+        $tolerance = $case['tolerance'] ?? null;
+
+        return \is_int($tolerance) || \is_float($tolerance) ? (float) $tolerance : null;
+    }
+
+    public static function equals(mixed $a, mixed $b, ?float $tolerance = null): bool
     {
         if (\is_array($a) && \is_array($b)) {
             if (\count($a) !== \count($b)) {
                 return false;
             }
             foreach ($a as $k => $v) {
-                if (! \array_key_exists($k, $b) || ! self::equals($v, $b[$k])) {
+                if (! \array_key_exists($k, $b) || ! self::equals($v, $b[$k], $tolerance)) {
                     return false;
                 }
             }
@@ -292,12 +308,44 @@ final class Conformance
         }
 
         if ((\is_int($a) || \is_float($a)) && (\is_int($b) || \is_float($b))) {
-            if (\is_int($a) && \is_int($b)) {
-                return $a === $b;
-            }
-            $scale = max(1.0, abs((float) $a), abs((float) $b));
+            // Compared AS NUMBERS, so an int golden and a float actual of the
+            // same value agree.
+            //
+            // An earlier draft of this change rejected int-vs-float outright,
+            // and `shared/decimal/0008-coerce-exponent` caught it: PHP's
+            // `"1e5" + 0` yields float(100000) while the golden is the JSON
+            // integer 100000. The strictness is wrong HERE for a specific
+            // reason -- the reference language is JavaScript, which has ONE
+            // number type, so a golden can never encode "this must be a float".
+            // Enforcing a distinction the reference cannot express means
+            // asserting something no golden can honestly claim.
+            //
+            // EXACT, and a scaled 1e-12 epsilon used to live here.
+            //
+            // Its stated reason was that "the nearest double to a decimal
+            // literal is not the nearest double to every language's parse of
+            // the same text". That is false, and was measured rather than
+            // argued: 0.002 (the literal the reason itself named), 0.1, 1e300,
+            // DBL_MAX, the 5e-324 denormal and 0.30000000000000004 all parse to
+            // BIT-IDENTICAL doubles in PHP, Python and Node. Decimal-to-double
+            // conversion is specified, not per-implementation.
+            //
+            // What the epsilon actually did was let two runtimes that computed
+            // DIFFERENT values pass as equal -- in the repository whose entire
+            // product is detecting exactly that. On a money row a relative
+            // 1e-12 is real money at scale.
+            //
+            // Where a case genuinely needs tolerance, it declares one. Visible
+            // on the row and reviewable in a diff, rather than a global
+            // behaviour no reader of the fixtures can see. Same principle as a
+            // skip having to state its reason.
+            if ($tolerance !== null) {
+                $scale = max(1.0, abs((float) $a), abs((float) $b));
 
-            return abs((float) $a - (float) $b) <= 1e-12 * $scale;
+                return abs((float) $a - (float) $b) <= $tolerance * $scale;
+            }
+
+            return (float) $a === (float) $b;
         }
 
         return $a === $b;

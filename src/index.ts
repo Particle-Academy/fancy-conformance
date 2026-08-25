@@ -140,7 +140,7 @@ export interface RunOptions {
    * Compare a produced value with the expected one. Defaults to a
    * canonicalising deep equality: object keys sorted, arrays order-sensitive.
    */
-  equals?: (actual: unknown, expected: unknown) => boolean;
+  equals?: (actual: unknown, expected: unknown, tolerance?: number) => boolean;
 }
 
 /**
@@ -180,7 +180,7 @@ export function runTable(
     }
 
     results.push(
-      equals(actual, c.expected)
+      equals(actual, c.expected, toleranceFor(c))
         ? { id: c.id, title: c.title, status: "pass" }
         : { id: c.id, title: c.title, status: "fail", expected: c.expected, actual },
     );
@@ -235,14 +235,48 @@ function preview(value: unknown): string {
 }
 
 /** Order-sensitive for arrays, order-insensitive for object keys. */
-export function deepEquals(a: unknown, b: unknown): boolean {
+/**
+ * A case's declared float tolerance, or `undefined` for exact comparison.
+ *
+ * Declared ON THE ROW so it is visible in the fixtures and in any diff of them.
+ * A global epsilon is invisible: nobody reading a case can tell whether it is
+ * asserting a value or a neighbourhood.
+ *
+ * A non-finite or boolean `tolerance` is ignored rather than trusted — a stray
+ * `true` coerces to 1 in JavaScript, which would silently widen a row to accept
+ * almost anything while still looking strict.
+ */
+function toleranceFor(c: ConformanceCase): number | undefined {
+  const tolerance = (c as { tolerance?: unknown }).tolerance;
+  return typeof tolerance === "number" && Number.isFinite(tolerance) ? tolerance : undefined;
+}
+
+export function deepEquals(a: unknown, b: unknown, tolerance?: number): boolean {
   if (Object.is(a, b)) return true;
+
+  // Numbers compare EXACTLY unless the case declares a tolerance.
+  //
+  // This loader was already exact while PHP, Python and Rust used a scaled
+  // 1e-12 epsilon -- a 3-1 split in the package whose product is agreement, and
+  // recorded as such in AGENTS.md for months. The other three now match THIS
+  // one, because the epsilon's stated justification turned out to be false:
+  // every hard literal (0.002, 0.1, 1e300, DBL_MAX, the 5e-324 denormal)
+  // parses to bit-identical doubles in all three languages.
+  //
+  // The tolerance is per-case and declared on the row, so it is visible in the
+  // fixture rather than being a global behaviour a reader cannot see.
+  if (typeof a === "number" && typeof b === "number") {
+    if (tolerance === undefined) return false;
+    const scale = Math.max(1, Math.abs(a), Math.abs(b));
+    return Math.abs(a - b) <= tolerance * scale;
+  }
+
   if (typeof a !== typeof b) return false;
   if (a === null || b === null) return false;
 
   if (Array.isArray(a) || Array.isArray(b)) {
     if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
-    return a.every((v, i) => deepEquals(v, b[i]));
+    return a.every((v, i) => deepEquals(v, b[i], tolerance));
   }
 
   if (typeof a === "object") {
@@ -250,7 +284,7 @@ export function deepEquals(a: unknown, b: unknown): boolean {
     const kb = Object.keys(b as object).sort();
     if (ka.length !== kb.length || ka.some((k, i) => k !== kb[i])) return false;
     return ka.every((k) =>
-      deepEquals((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]),
+      deepEquals((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k], tolerance),
     );
   }
 

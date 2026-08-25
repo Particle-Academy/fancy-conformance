@@ -47,6 +47,11 @@
           "additionalProperties": { "type": "string", "minLength": 1 },
           "minProperties": 1
         },
+        "tolerance": {
+          "description": "Optional relative tolerance for FLOAT comparison in this case, scaled by the larger magnitude. Omit it and numbers compare EXACTLY, which is the default in all four loaders. Declared on the row rather than applied globally so a reader of the fixture can see whether it asserts a value or a neighbourhood — the same reason a skip must state its reason. A global 1e-12 epsilon lived in three loaders until 0.10.0 and let two runtimes that computed different values pass as equal.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
         "notes": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": false

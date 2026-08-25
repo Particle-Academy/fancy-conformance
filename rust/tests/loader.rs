@@ -13,7 +13,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use fancy_conformance::{
+use fancy_conformance::{equals_within, 
     cases, equals, format_summary, list_suites, manifest, run_table, suite_path, suites_root,
     version, Language,
 };
@@ -249,24 +249,54 @@ fn object_key_order_does_not_affect_equality_but_array_order_does() {
 }
 
 #[test]
-fn an_integer_golden_is_never_satisfied_by_a_float() {
-    // The money rule. `roundMoney` returning 2 must never satisfy a golden of
-    // 3, and a golden of 0 must never be satisfied by 0.0 from a float path.
-    assert!(!equals(&parse("3").unwrap(), &parse("3.0").unwrap()));
+fn a_number_golden_is_satisfied_only_by_the_same_value() {
+    // Renamed and narrowed, and the narrowing is the point.
+    //
+    // This used to assert that `3` is NEVER satisfied by `3.0` -- a TYPE rule.
+    // The shipped corpus contradicts it: `shared/decimal/0008-coerce-exponent`
+    // carries the integer golden `100000`, and PHP's `"1e5" + 0` yields
+    // float(100000). TypeScript passes that row only because JavaScript has one
+    // number type and the distinction cannot arise there at all.
+    //
+    // Since the REFERENCE language cannot express int-versus-float, no golden
+    // can honestly claim it, and a loader enforcing it asserts something the
+    // fixtures are unable to state. So the type half is gone.
+    //
+    // The VALUE half -- which is what the old comment said it was protecting,
+    // "roundMoney returning 2 must never satisfy a golden of 3" -- is
+    // untouched and is now exact rather than epsilon-tolerant, so it is
+    // stronger than before.
+    assert!(equals(&parse("3").unwrap(), &parse("3.0").unwrap()));
     assert!(!equals(&parse("2").unwrap(), &parse("3").unwrap()));
+    assert!(!equals(&parse("2.9999999999999").unwrap(), &parse("3").unwrap()));
     assert!(equals(&parse("3").unwrap(), &parse("3").unwrap()));
 }
 
 #[test]
-fn floats_compare_within_a_scaled_epsilon() {
-    // Follows the PHP and Python loaders. The TypeScript one uses exact
-    // comparison — a divergence recorded in this repo's AGENTS.md, which a
-    // fourth loader must not deepen by inventing a third behaviour.
+fn floats_compare_exactly_unless_a_case_declares_a_tolerance() {
+    // The 3-1 split is closed, and the epsilon lost.
+    //
+    // Its justification was that a decimal literal's nearest double differs
+    // between languages. Measured: `0.002` (the literal that justification
+    // named), `0.1`, `1e300`, `DBL_MAX`, the `5e-324` denormal and
+    // `0.30000000000000004` all parse to BIT-IDENTICAL doubles in PHP, Python
+    // and Node. What it actually did was pass two runtimes that computed
+    // DIFFERENT values.
+    //
+    // NOTE 0.1 and 0.1000000000000000001 parse to the SAME double, so that
+    // pair could never have discriminated anything -- it passes under exact
+    // comparison too. A tolerance test needs values that genuinely differ.
     assert!(equals(
         &parse("0.1").unwrap(),
         &parse("0.1000000000000000001").unwrap()
     ));
     assert!(!equals(&parse("0.1").unwrap(), &parse("0.2").unwrap()));
+
+    // Genuinely different doubles: exact rejects, a declared tolerance accepts.
+    let (a, b) = (parse("1.0").unwrap(), parse("1.0000000000001").unwrap());
+    assert!(!equals(&a, &b));
+    assert!(equals_within(&a, &b, Some(1e-9)));
+    assert!(!equals_within(&a, &b, Some(1e-15)));
 }
 
 #[test]

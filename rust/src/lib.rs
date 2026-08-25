@@ -564,37 +564,66 @@ fn panic_message(payload: &Box<dyn std::any::Any + Send>) -> String {
 /// text. Integers stay exact so a `roundMoney` returning 2 never satisfies a
 /// golden of 3.
 ///
-/// This follows the PHP and Python loaders. **The TypeScript loader uses exact
-/// `Object.is` instead** — a live divergence in the loaders themselves, in a
-/// repository whose product is agreement, recorded in this repo's `AGENTS.md`.
-/// A fourth loader inventing a third behaviour would be strictly worse than
-/// joining the majority, so this joins the majority. No shipped case turns on
-/// it today.
+/// **All four loaders now compare EXACTLY.** This one used to follow PHP and
+/// Python's scaled `1e-12` epsilon while TypeScript used exact `Object.is` — a
+/// 3-1 split in a repository whose product is agreement, recorded in `AGENTS.md`
+/// for months with the note "pick one and make the other three match".
+///
+/// The epsilon lost, because its justification was measurably false: `0.002`
+/// (the literal the justification itself named), `0.1`, `1e300`, `DBL_MAX`, the
+/// `5e-324` denormal and `0.30000000000000004` all parse to BIT-IDENTICAL
+/// doubles in PHP, Python and Node. What it actually did was let two runtimes
+/// that computed DIFFERENT values pass as equal.
+///
+/// A case that genuinely needs tolerance declares one on the row, where a
+/// reader of the fixture can see it.
 #[must_use]
 pub fn equals(a: &Value, b: &Value) -> bool {
+    equals_within(a, b, None)
+}
+
+/// `equals`, with a case's declared float tolerance.
+///
+/// `None` means EXACT, which is now the rule in all four loaders.
+#[must_use]
+pub fn equals_within(a: &Value, b: &Value, tolerance: Option<f64>) -> bool {
     match (a, b) {
         (Value::Number(left), Value::Number(right)) => {
-            // An integer is never satisfied by a float and vice versa: the two
-            // are different JSON values, and blurring them is how a money
-            // golden gets satisfied by the wrong type.
-            if left.is_integer() != right.is_integer() {
-                return false;
-            }
-            if left.is_integer() {
+            if left.is_integer() && right.is_integer() {
                 return left == right;
             }
+
+            // Compared AS NUMBERS, so an int golden and a float actual of the
+            // same value agree. An earlier draft of this change rejected
+            // int-vs-float outright and `shared/decimal/0008-coerce-exponent`
+            // caught it: the reference language is JavaScript, which has ONE
+            // number type, so a golden can never encode "this must be a float".
+            // Enforcing a distinction the reference cannot express asserts
+            // something no golden can honestly claim.
             let (x, y) = (left.as_f64(), right.as_f64());
-            let scale = 1.0_f64.max(x.abs()).max(y.abs());
-            (x - y).abs() <= 1e-12 * scale
+
+            match tolerance {
+                Some(epsilon) => {
+                    let scale = 1.0_f64.max(x.abs()).max(y.abs());
+                    (x - y).abs() <= epsilon * scale
+                }
+                None => x == y,
+            }
         }
         (Value::Array(left), Value::Array(right)) => {
-            left.len() == right.len() && left.iter().zip(right.iter()).all(|(x, y)| equals(x, y))
-        }
-        (Value::Object(left), Value::Object(right)) => {
             left.len() == right.len()
                 && left
                     .iter()
-                    .all(|(key, value)| right.get(key).is_some_and(|other| equals(value, other)))
+                    .zip(right.iter())
+                    .all(|(x, y)| equals_within(x, y, tolerance))
+        }
+        (Value::Object(left), Value::Object(right)) => {
+            left.len() == right.len()
+                && left.iter().all(|(key, value)| {
+                    right
+                        .get(key)
+                        .is_some_and(|other| equals_within(value, other, tolerance))
+                })
         }
         _ => a == b,
     }

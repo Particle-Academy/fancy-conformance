@@ -31,9 +31,10 @@ import json
 import os
 from collections.abc import Callable
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any, Literal
 
-__version__ = "0.9.1"
+__version__ = "0.10.0"
 
 Language = Literal["php", "node", "rust", "python", "go"]
 
@@ -205,7 +206,17 @@ def run_table(
     drive another implementation out of process, exactly as the PHP loader's
     ``$language`` argument allows.
     """
-    compare = equals_fn or equals
+    # A caller-supplied comparator may take two arguments; the built-in takes an
+    # optional third. Adapting here keeps a custom comparator working rather
+    # than breaking every caller that passed one before tolerances existed.
+    base = equals_fn or equals
+
+    def compare(actual: Any, expected: Any, tolerance: float | None) -> bool:
+        try:
+            return bool(base(actual, expected, tolerance))
+        except TypeError:
+            return bool(base(actual, expected))
+
     results: list[dict[str, Any]] = []
 
     for row in cases(suite, root):
@@ -233,7 +244,7 @@ def run_table(
         expected = row.get("expected")
         results.append(
             {"id": row["id"], "title": row.get("title"), "status": "pass"}
-            if compare(actual, expected)
+            if compare(actual, expected, _tolerance_for(row))
             else {
                 "id": row["id"],
                 "title": row.get("title"),
@@ -260,7 +271,24 @@ def run_table(
     }
 
 
-def equals(a: Any, b: Any) -> bool:
+def _tolerance_for(case: Mapping[str, Any]) -> float | None:
+    """A case's declared float tolerance, or ``None`` for exact comparison.
+
+    Declared ON THE ROW so it is visible in the fixtures and in any diff of
+    them. A global epsilon is invisible: nobody reading a case can tell whether
+    it asserts a value or a neighbourhood.
+
+    ``bool`` is excluded explicitly -- ``isinstance(True, int)`` is true in
+    Python, so a stray ``"tolerance": true`` would otherwise become a tolerance
+    of 1.0 and quietly pass almost anything.
+    """
+    tolerance = case.get("tolerance")
+    if isinstance(tolerance, bool) or not isinstance(tolerance, int | float):
+        return None
+    return float(tolerance)
+
+
+def equals(a: Any, b: Any, tolerance: float | None = None) -> bool:
     """Order-sensitive for lists, order-insensitive for object keys.
 
     Two deliberate rules, each with a peer it is matching:
@@ -271,14 +299,24 @@ def equals(a: Any, b: Any) -> bool:
     implementation returning ``0``, and a money row expecting ``0`` by one
     returning ``False``.
 
-    **Floats compare within a scaled 1e-12 epsilon, integers exactly.** This
-    follows the PHP loader: a golden written as ``0.002`` in JSON is a decimal
-    literal, and the nearest double to it is not the nearest double to every
-    language's parse of the same text. The TypeScript loader uses exact
-    ``Object.is`` instead -- a live three-way divergence in the loaders
-    themselves, recorded in ``.ai/plans/fancy-python-commerce-gating.md``.
-    Integers stay exact so ``roundMoney`` returning 2 never satisfies a golden
-    of 3.
+    **Floats compare EXACTLY, by numeric value.** A scaled ``1e-12`` epsilon
+    used to live here, justified as "a golden written as ``0.002`` in JSON is a
+    decimal literal, and the nearest double to it is not the nearest double to
+    every language's parse of the same text".
+
+    That justification is FALSE, and it was measured rather than argued.
+    ``0.002`` -- the literal the reason itself named -- along with ``0.1``,
+    ``1e300``, ``DBL_MAX``, the ``5e-324`` denormal and
+    ``0.30000000000000004`` all parse to BIT-IDENTICAL doubles in PHP, Python
+    and Node. Decimal-to-double conversion is specified, not per-implementation.
+
+    What the epsilon actually did was let two runtimes that computed DIFFERENT
+    values pass as equal, in the package whose entire product is detecting
+    exactly that. On a money row a relative ``1e-12`` is real money at scale.
+
+    Where a case genuinely needs tolerance it declares one -- visible on the row
+    and reviewable in a diff, rather than a global behaviour no reader of the
+    fixtures can see. Same principle as a skip having to state its reason.
     """
     if isinstance(a, bool) != isinstance(b, bool):
         return False
@@ -288,12 +326,12 @@ def equals(a: Any, b: Any) -> bool:
     if isinstance(a, dict) and isinstance(b, dict):
         if set(a) != set(b):
             return False
-        return all(equals(a[k], b[k]) for k in a)
+        return all(equals(a[k], b[k], tolerance) for k in a)
 
     if isinstance(a, list) and isinstance(b, list):
         if len(a) != len(b):
             return False
-        return all(equals(x, y) for x, y in zip(a, b, strict=True))
+        return all(equals(x, y, tolerance) for x, y in zip(a, b, strict=True))
 
     if isinstance(a, dict | list) or isinstance(b, dict | list):
         return False
@@ -301,8 +339,10 @@ def equals(a: Any, b: Any) -> bool:
     if isinstance(a, int | float) and isinstance(b, int | float):
         if isinstance(a, int) and isinstance(b, int):
             return a == b
-        scale = max(1.0, abs(float(a)), abs(float(b)))
-        return abs(float(a) - float(b)) <= 1e-12 * scale
+        if tolerance is not None:
+            scale = max(1.0, abs(float(a)), abs(float(b)))
+            return abs(float(a) - float(b)) <= tolerance * scale
+        return float(a) == float(b)
 
     return bool(a == b)
 

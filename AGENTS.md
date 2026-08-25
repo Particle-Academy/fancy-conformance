@@ -142,15 +142,38 @@ Python loader is open work; until it lands, the Python loader is asserted by its
 own suite rather than against a peer's verdict, which is weaker and is recorded
 here so nobody reads three green ticks as a three-way comparison.
 
-### The float-comparison divergence, in the loaders themselves
+### Float comparison — CLOSED, and how
 
-`Conformance::equals` compares floats with a scaled `1e-12` epsilon; the
-TypeScript `deepEquals` uses exact `Object.is`. The Python **and Rust** loaders
-follow PHP. So the four loaders do **not** agree on how a float golden is
-compared, in a repository whose product is agreement. No shipped case turns on
-it today (`shared/decimal`'s float rows round-trip identically through every
-JSON parser involved), which is why it has survived.
+This section used to record a live 3-1 split: PHP, Python and Rust compared
+floats with a scaled `1e-12` epsilon while TypeScript used exact `Object.is`, in
+a repository whose product is agreement. It ended with "pick one and make the
+other three match". Resolved in 0.10.0: **all four are exact.**
 
-The Rust loader joined the MAJORITY rather than inventing a third behaviour,
-which is the only defensible move for a new loader but does not fix anything —
-it makes the score 3-1. Pick one and make the other three match.
+**The epsilon lost because its justification was measurably false.** It was
+stated as "a golden written as `0.002` in JSON is a decimal literal, and the
+nearest double to it is not the nearest double to every language's parse of the
+same text". Measured rather than argued: `0.002` (the literal the justification
+itself named), `0.1`, `1e300`, `DBL_MAX`, the `5e-324` denormal and
+`0.30000000000000004` all parse to **bit-identical doubles** in PHP, Python and
+Node. Decimal-to-double conversion is specified, not per-implementation.
+
+What the epsilon actually did was let two runtimes that computed DIFFERENT
+values pass as equal — the one thing this package exists to catch. On a money
+row a relative `1e-12` is real money at scale.
+
+**A case that genuinely needs tolerance declares one on the row**
+(`"tolerance": 1e-9`), where a reader of the fixture can see it. A global
+epsilon is invisible: nobody reading a case can tell whether it asserts a value
+or a neighbourhood. Same principle as a skip having to state its reason.
+
+**Numbers compare by VALUE, not by JSON type.** An integer golden IS satisfied
+by a float of the same value, and that is not laxness — `shared/decimal/0008-coerce-exponent`
+requires it, because PHP's `"1e5" + 0` yields `float(100000)` against an integer
+golden. The reference language is JavaScript, which has ONE number type, so a
+golden can never encode "this must be a float"; a loader enforcing that
+distinction asserts something no golden is able to claim. An earlier draft of
+the 0.10.0 change did enforce it, and both that fixture and a Rust unit test
+caught the contradiction — the Rust test was the one that was wrong, and its
+value assertions survive unchanged and are now stronger, being exact.
+
+Proven by `npm run cross-check`: 35 cases, two loaders, identical verdicts.

@@ -279,17 +279,62 @@ def test_list_order_does_matter(tmp_path: Path) -> None:
     assert run_table("order2", lambda c: [2, 1], root=tmp_path)["ok"] is False
 
 
-def test_floats_compare_within_the_php_tolerance(tmp_path: Path) -> None:
-    # PHP's loader compares floats with a scaled 1e-12 epsilon because a golden
-    # written as `0.002` in JSON is a decimal literal, and the nearest double to
-    # it is not the nearest double to every language's parse of the same text.
-    # Python matches PHP rather than the TypeScript loader's `Object.is`, and
-    # that choice is recorded in the plan rather than left to be discovered.
+def test_floats_compare_exactly_by_default(tmp_path: Path) -> None:
+    """A scaled 1e-12 epsilon used to live here, and it was wrong.
+
+    Its stated reason was that a golden written as ``0.002`` in JSON is a
+    decimal literal whose nearest double differs between languages. That was
+    measured and is false: ``0.002`` -- the literal the reason itself named --
+    plus ``0.1``, ``1e300``, ``DBL_MAX``, the ``5e-324`` denormal and
+    ``0.30000000000000004`` all parse to BIT-IDENTICAL doubles in PHP, Python
+    and Node.
+
+    What it actually did was pass two runtimes that computed DIFFERENT values,
+    in the package whose whole product is detecting that. On a money row a
+    relative 1e-12 is real money at scale.
+    """
     _write_suite(
         tmp_path, "floats", [{"id": "0001-x", "title": "x", "input": {}, "expected": 0.002}]
     )
-    assert run_table("floats", lambda c: 0.002 + 1e-18, root=tmp_path)["ok"] is True
+
+    assert run_table("floats", lambda c: 0.002, root=tmp_path)["ok"] is True
+    # One ulp away is a DIFFERENT value and now fails. This is the assertion
+    # that reversed.
+    assert run_table("floats", lambda c: 0.002 + 1e-18, root=tmp_path)["ok"] is False
     assert run_table("floats", lambda c: 0.0021, root=tmp_path)["ok"] is False
+
+
+def test_a_case_may_declare_a_tolerance(tmp_path: Path) -> None:
+    """The escape hatch, and why it lives on the ROW.
+
+    A global epsilon is invisible -- nobody reading a case can tell whether it
+    asserts a value or a neighbourhood. Declared per case, it shows up in the
+    fixture and in any diff of it, the same way a skip has to state its reason.
+    """
+    _write_suite(
+        tmp_path,
+        "floats",
+        [{"id": "0001-x", "title": "x", "input": {}, "expected": 0.002, "tolerance": 1e-12}],
+    )
+
+    assert run_table("floats", lambda c: 0.002 + 1e-18, root=tmp_path)["ok"] is True
+    # A tolerance widens the target; it does not remove it.
+    assert run_table("floats", lambda c: 0.0021, root=tmp_path)["ok"] is False
+
+
+def test_a_boolean_tolerance_is_ignored(tmp_path: Path) -> None:
+    """``isinstance(True, int)`` is true in Python.
+
+    A stray ``"tolerance": true`` would otherwise become a tolerance of 1.0 and
+    pass almost anything -- a fixture that looks strict and asserts nothing.
+    """
+    _write_suite(
+        tmp_path,
+        "floats",
+        [{"id": "0001-x", "title": "x", "input": {}, "expected": 0.002, "tolerance": True}],
+    )
+
+    assert run_table("floats", lambda c: 0.5, root=tmp_path)["ok"] is False
 
 
 def test_integers_compare_exactly(tmp_path: Path) -> None:

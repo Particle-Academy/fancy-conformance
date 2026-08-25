@@ -10,6 +10,64 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-08-25
+
+### Changed
+
+- **BREAKING: all four loaders now compare floats EXACTLY.** PHP, Python and
+  Rust used a scaled `1e-12` epsilon while TypeScript used exact `Object.is` —
+  a 3-1 split recorded in `AGENTS.md` for months with the note *"pick one and
+  make the other three match"*. The three now match the one.
+
+  **What a consumer must DO: probably nothing.** No shipped case turns on it —
+  all 11 float goldens in the corpus parse to bit-identical doubles in every
+  language, and `cross-check` confirms 35 cases with identical verdicts across
+  two loaders. If one of YOUR cases passed only by epsilon, it will now fail,
+  and that failure is the point: it means two runtimes computed different
+  values. Add `"tolerance": <number>` to that case if the difference is genuine.
+
+  **The epsilon lost because its justification was measurably false.** It was
+  stated as "a golden written as `0.002` in JSON is a decimal literal, and the
+  nearest double to it is not the nearest double to every language's parse of
+  the same text". Measured: `0.002` — the literal the justification itself
+  named — plus `0.1`, `1e300`, `DBL_MAX`, the `5e-324` denormal and
+  `0.30000000000000004` all parse to **bit-identical doubles** in PHP, Python
+  and Node. Decimal-to-double conversion is specified, not per-implementation.
+
+  What it actually did was let two runtimes that computed DIFFERENT values pass
+  as equal, in the package whose whole product is catching that. On a money row
+  a relative `1e-12` is real money at scale.
+
+  Prompted by two unrelated consumers naming round-trip-through-storage as
+  their next divergence surface within the same hour — one of them persisting
+  graphs between an unattended run and a human approval, in a codebase using
+  `float` for money. Their point was that the first computed-float case to land
+  would decide this implicitly, in whichever direction that case happened to
+  run.
+
+### Added
+
+- **`tolerance` on a case.** Optional, relative, scaled by the larger
+  magnitude. Declared ON THE ROW so a reader of the fixture can see whether it
+  asserts a value or a neighbourhood — a global epsilon is invisible. Same
+  principle as a skip having to state its reason. Added to the case schema,
+  which sets `additionalProperties: false` and would otherwise have rejected it.
+
+### Fixed
+
+- **Numbers now compare by VALUE rather than by JSON type in every loader.**
+  Rust rejected an integer golden satisfied by a float, and an earlier draft of
+  this change added the same rule to PHP. Both were wrong, and two things
+  caught it: `shared/decimal/0008-coerce-exponent` (an integer golden `100000`
+  that PHP's `"1e5" + 0` satisfies with a float) and a Rust unit test asserting
+  the opposite.
+
+  The corpus wins. The reference language is JavaScript, which has ONE number
+  type, so a golden can never encode "this must be a float" — a loader
+  enforcing that distinction asserts something no golden is able to claim. The
+  Rust test's VALUE assertions survive unchanged and are stronger for being
+  exact; only its type assertion is gone.
+
 ## [0.9.1] - 2026-08-25
 
 ### Added
