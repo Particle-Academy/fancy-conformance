@@ -1,0 +1,721 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/entry-points",
+  "cases": [
+    {
+      "id": "0101-unset-runs-every-entry-point",
+      "title": "Unset: every entry point runs, exactly as before the option existed.",
+      "since": "0.13.0",
+      "tags": [
+        "entry-points",
+        "compat"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t2",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t1": {
+            "n": 1
+          },
+          "t2": {
+            "n": 2
+          }
+        },
+        "entryNodes": null
+      },
+      "expected": [
+        "a",
+        "b",
+        "m",
+        "t1",
+        "t2"
+      ],
+      "notes": "The backward-compatibility row, and the most important one here. `null` means the caller is not using the feature, and every graph written before it existed must behave identically. A change that quietly altered this would break every multi-trigger graph in the field to fix one."
+    },
+    {
+      "id": "0102-naming-one-entry-skips-the-other-branch",
+      "title": "Naming one trigger runs its branch and skips everything reachable only from the other.",
+      "since": "0.13.0",
+      "tags": [
+        "entry-points"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t2",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t1": {
+            "n": 1
+          },
+          "t2": {
+            "n": 2
+          }
+        },
+        "entryNodes": [
+          "t1"
+        ]
+      },
+      "expected": [
+        "a",
+        "m",
+        "t1"
+      ],
+      "notes": "The defect, fixed. `t2` is an entry point that was not named, so it is inactive; `b` is reachable only from `t2` and therefore has no active inbound edge. No new routing logic is involved -- the existing dead-edge rule does all of it."
+    },
+    {
+      "id": "0103-the-mirror-direction",
+      "title": "The same holds for the other trigger, so the rule is not accidentally order-dependent.",
+      "since": "0.13.0",
+      "tags": [
+        "entry-points"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t2",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t1": {
+            "n": 1
+          },
+          "t2": {
+            "n": 2
+          }
+        },
+        "entryNodes": [
+          "t2"
+        ]
+      },
+      "expected": [
+        "b",
+        "m",
+        "t2"
+      ],
+      "notes": "The mirror of 0102. Asserting only one direction would pass against an implementation that hard-coded the first entry point in document order, which is exactly the kind of thing that survives a review and fails on a graph whose nodes were reordered."
+    },
+    {
+      "id": "0104-a-merge-fed-by-both-still-runs",
+      "title": "A node reachable from BOTH entry points still runs when only one fires.",
+      "since": "0.13.0",
+      "tags": [
+        "entry-points"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t2",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t1": {
+            "n": 1
+          },
+          "t2": {
+            "n": 2
+          }
+        },
+        "entryNodes": [
+          "t1"
+        ]
+      },
+      "expected": [
+        "a",
+        "m",
+        "t1"
+      ],
+      "notes": "The guard against over-reaching. `m` has two inbound edges and only one is active, and the merge-after-decision contract says one active inbound is enough. An implementation that required ALL inbound edges to be active would pass 0102 and silently stop every graph that converges its branches -- which is the shape consumers are told to use as the workaround for this very bug."
+    },
+    {
+      "id": "0105-naming-both-is-the-same-as-unset",
+      "title": "Naming every entry point runs everything, matching the unset case.",
+      "since": "0.13.0",
+      "tags": [
+        "entry-points"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t2",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t1": {
+            "n": 1
+          },
+          "t2": {
+            "n": 2
+          }
+        },
+        "entryNodes": [
+          "t1",
+          "t2"
+        ]
+      },
+      "expected": [
+        "a",
+        "b",
+        "m",
+        "t1",
+        "t2"
+      ],
+      "notes": "Pins that the option SELECTS rather than restricts-by-existing: opting in and naming everything must not be subtly different from not opting in."
+    },
+    {
+      "id": "0106-empty-list-runs-nothing",
+      "title": "An empty list says no entry point is live, and nothing runs.",
+      "since": "0.13.0",
+      "tags": [
+        "entry-points"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t2",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t1": {
+            "n": 1
+          },
+          "t2": {
+            "n": 2
+          }
+        },
+        "entryNodes": []
+      },
+      "expected": [],
+      "notes": "Empty is NOT unset, and this row exists so the two can never be collapsed. `null` = 'not using the feature'; `[]` = 'no entry is live'. A runtime treating `[]` as `null` would run every branch precisely when the caller asked for none."
+    },
+    {
+      "id": "0107-naming-a-non-entry-node-selects-no-entry",
+      "title": "Naming a node that HAS inbound edges names no entry point, so nothing runs.",
+      "since": "0.13.0",
+      "tags": [
+        "entry-points"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.n }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t2",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t1": {
+            "n": 1
+          },
+          "t2": {
+            "n": 2
+          }
+        },
+        "entryNodes": [
+          "a"
+        ]
+      },
+      "expected": [],
+      "notes": "Surprising, deliberate, and a consequence of the rule rather than a special case: the option gates only nodes with no incoming edges, so naming `a` leaves both real entries unnamed and therefore inactive. Pinned so no runtime 'helpfully' reinterprets it into something cleverer. A host that wants a typo to be loud must validate its own ids -- the runtime cannot distinguish a mistake from a deliberate empty selection."
+    }
+  ]
+}

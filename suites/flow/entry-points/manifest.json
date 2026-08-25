@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/entry-points",
+  "title": "Which entry point fired — and therefore which nodes run",
+  "since": "0.13.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "runEntryPoints(schema: WorkflowSchema, initialInputs: object, entryNodes: string[]|null) -> string[]",
+    "summary": "Import a WorkflowSchema v1 document leniently, run it with the built-in offline executors, and return the SORTED ids of the nodes that actually EXECUTED. `entryNodes` names which entry points are live: null means unset (today's behaviour), a list names the live ones. Sorted rather than in run order, because the question this suite asks is WHICH nodes ran, not in what sequence — `flow/graph-runs` already pins ordering-sensitive behaviour.",
+    "reference": "php",
+    "referenceNote": "Filed against the PHP runtime with production measurements, but the defect is in all three: a trigger has no inbound edges, and every runtime runs a node when it has no incoming edges. The rule is written here first so no runtime has to re-derive it.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Runtime\\RunOptions::$entryNodes" },
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "RunOptions.entryNodes" },
+      { "language": "python", "package": "fancy-flow", "symbol": "RunOptions.entry_nodes" }
+    ]
+  },
+  "notes": [
+    "THE DEFECT THIS FIXES WAS MEASURED IN PRODUCTION, not imagined. A graph may hold more than one trigger — a `manual_trigger` for hand-testing beside the event trigger that runs it for real — and every runtime executes EVERY trigger's branch on EVERY run, because a trigger node has no inbound edges and 'no inbound edges' is precisely the readiness rule. The consumer verified it is identical under both PHP queue drivers: `FlowRunner` walks a Kahn order and `Frontier::compute` restates the same rule for the per-node driver.",
+    "The cost is not the trigger nodes themselves — they emit a payload nobody reads. It is everything DOWNSTREAM of a trigger that did not fire. Two failures they measured: an empty payload winning a race into a shared `transform` (workaroundable by naming handles), and — with no workaround at all — a `user_input` on the manual branch executing during an EVENT-triggered run, so the run parks asking a person to paste data the event already supplied. From outside that looks like the event trigger being ignored.",
+    "THE RULE: `entryNodes` marks which nodes WITH NO INCOMING EDGES are live. An entry point that is not named is treated as INACTIVE — it does not run, and the existing 'at least one active inbound edge' rule then skips everything reachable only from it. Nodes that HAVE incoming edges are unaffected by the option and follow the rules they always did. That is the whole change: no new routing logic, and both schedulers already have the seam at their `incoming === []` check.",
+    "UNSET IS NOT THE SAME AS EMPTY, and 0101 versus 0106 pin the difference. `null` means the caller is not using the feature and gets today's behaviour exactly — this is what keeps every existing graph working. `[]` means the caller says no entry point is live, and nothing runs. Collapsing the two would either break every current consumer or make 'run nothing' unexpressible.",
+    "0107 is the surprising one and is deliberate. Naming a node that HAS inbound edges names no entry point, so every real entry is inactive and the graph runs nothing. That falls out of the rule rather than being a special case, and it is pinned so no runtime 'helpfully' reinterprets it. A host that wants a mistake here to be loud should validate its own ids before calling — the runtime cannot tell a typo from a deliberate empty selection."
+  ]
+}

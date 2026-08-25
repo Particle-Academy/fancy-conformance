@@ -10,6 +10,42 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-08-25
+
+### Added
+
+- **`flow/entry-points` — which entry point fired, and therefore which nodes
+  run.** 7 rows pinning a rule that does not exist in any runtime yet, so this
+  suite is a **specification rather than a post-mortem**.
+
+  The defect it fixes was measured in production, not imagined. A graph may hold
+  more than one trigger — a `manual_trigger` for hand-testing beside the event
+  trigger that runs it for real — and **every runtime executes every trigger's
+  branch on every run**, because a trigger has no inbound edges and "no inbound
+  edges" is exactly the readiness rule. Verified identical under both PHP queue
+  drivers: `FlowRunner` walks a Kahn order and `Frontier::compute` restates the
+  same rule for the per-node driver.
+
+  The cost is downstream, not the triggers themselves. Two measured failures: an
+  empty payload winning a race into a shared `transform`, and — with no
+  workaround — a `user_input` on the manual branch executing during an
+  **event**-triggered run, so the run parks asking a person to paste data the
+  event already supplied. From outside, that looks like the event trigger being
+  ignored.
+
+  **The rule:** `entryNodes` marks which nodes WITH NO INCOMING EDGES are live.
+  An unnamed entry point is inactive, and the existing "at least one active
+  inbound edge" rule then skips everything reachable only from it. Nodes that
+  have incoming edges are untouched. No new routing logic — both schedulers
+  already have the seam at their `incoming === []` check.
+
+  Rows worth reading before implementing: `0101` (unset must behave exactly as
+  before — the compatibility guarantee), `0104` (a merge fed by both branches
+  must still run, or the documented workaround for this very bug breaks),
+  `0106` (empty is NOT unset), and `0107` (naming a non-entry node selects no
+  entry and runs nothing — a consequence of the rule, pinned so nobody
+  reinterprets it).
+
 ## [0.12.0] - 2026-08-25
 
 ### Added
