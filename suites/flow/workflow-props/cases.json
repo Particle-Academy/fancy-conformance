@@ -6,221 +6,553 @@
       "id": "0001-supplied-value-passes-through",
       "title": "A declared, supplied value arrives in the resolved map unchanged.",
       "since": "0.9.0",
-      "tags": ["happy-path"],
+      "tags": [
+        "happy-path"
+      ],
       "input": {
-        "declared": [{ "name": "topic", "type": "string" }],
-        "passed": { "topic": "otters" }
+        "declared": [
+          {
+            "name": "topic",
+            "type": "string"
+          }
+        ],
+        "passed": {
+          "topic": "otters"
+        }
       },
-      "expected": { "ok": true, "props": { "topic": "otters" } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "topic": "otters"
+        }
+      }
     },
     {
       "id": "0002-default-fills-an-omitted-value",
       "title": "An omitted input with a default resolves to the default.",
       "since": "0.9.0",
-      "tags": ["defaults"],
+      "tags": [
+        "defaults"
+      ],
       "input": {
-        "declared": [{ "name": "limit", "type": "number", "default": 10 }],
+        "declared": [
+          {
+            "name": "limit",
+            "type": "number",
+            "default": 10
+          }
+        ],
         "passed": {}
       },
-      "expected": { "ok": true, "props": { "limit": 10 } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "limit": 10
+        }
+      }
     },
     {
       "id": "0003-supplied-beats-default",
       "title": "An explicitly supplied value wins over the declared default.",
       "since": "0.9.0",
-      "tags": ["defaults"],
+      "tags": [
+        "defaults"
+      ],
       "input": {
-        "declared": [{ "name": "limit", "type": "number", "default": 10 }],
-        "passed": { "limit": 25 }
+        "declared": [
+          {
+            "name": "limit",
+            "type": "number",
+            "default": 10
+          }
+        ],
+        "passed": {
+          "limit": 25
+        }
       },
-      "expected": { "ok": true, "props": { "limit": 25 } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "limit": 25
+        }
+      }
     },
     {
       "id": "0004-explicit-zero-is-not-replaced-by-a-default",
       "title": "A supplied 0 survives a non-zero default.",
       "since": "0.9.0",
-      "tags": ["defaults", "falsy", "trap"],
+      "tags": [
+        "defaults",
+        "falsy",
+        "trap"
+      ],
       "input": {
-        "declared": [{ "name": "limit", "type": "number", "default": 10 }],
-        "passed": { "limit": 0 }
+        "declared": [
+          {
+            "name": "limit",
+            "type": "number",
+            "default": 10
+          }
+        ],
+        "passed": {
+          "limit": 0
+        }
       },
-      "expected": { "ok": true, "props": { "limit": 0 } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "limit": 0
+        }
+      }
     },
     {
       "id": "0005-explicit-false-is-not-replaced-by-a-default",
       "title": "A supplied false survives a true default.",
       "since": "0.9.0",
-      "tags": ["defaults", "falsy", "trap"],
+      "tags": [
+        "defaults",
+        "falsy",
+        "trap"
+      ],
       "input": {
-        "declared": [{ "name": "dryRun", "type": "boolean", "default": true }],
-        "passed": { "dryRun": false }
+        "declared": [
+          {
+            "name": "dryRun",
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        "passed": {
+          "dryRun": false
+        }
       },
-      "expected": { "ok": true, "props": { "dryRun": false } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "dryRun": false
+        }
+      }
     },
     {
       "id": "0006-explicit-empty-string-is-not-replaced-by-a-default",
       "title": "A supplied empty string survives a non-empty default.",
       "since": "0.9.0",
-      "tags": ["defaults", "falsy", "trap"],
+      "tags": [
+        "defaults",
+        "falsy",
+        "trap"
+      ],
       "input": {
-        "declared": [{ "name": "note", "type": "string", "default": "unset" }],
-        "passed": { "note": "" }
+        "declared": [
+          {
+            "name": "note",
+            "type": "string",
+            "default": "unset"
+          }
+        ],
+        "passed": {
+          "note": ""
+        }
       },
-      "expected": { "ok": true, "props": { "note": "" } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "note": ""
+        }
+      }
     },
     {
       "id": "0007-absent-optional-is-absent-not-null",
       "title": "An optional input with no default and no value is missing from the map entirely.",
       "since": "0.9.0",
-      "tags": ["absence"],
+      "tags": [
+        "absence"
+      ],
       "input": {
         "declared": [
-          { "name": "topic", "type": "string" },
-          { "name": "note", "type": "string" }
+          {
+            "name": "topic",
+            "type": "string"
+          },
+          {
+            "name": "note",
+            "type": "string"
+          }
         ],
-        "passed": { "topic": "otters" }
+        "passed": {
+          "topic": "otters"
+        }
       },
-      "expected": { "ok": true, "props": { "topic": "otters" } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "topic": "otters"
+        }
+      }
     },
     {
       "id": "0008-untyped-declaration-accepts-anything",
       "title": "An input declaring no type accepts a nested object.",
       "since": "0.9.0",
-      "tags": ["types"],
+      "tags": [
+        "types"
+      ],
       "input": {
-        "declared": [{ "name": "payload" }],
-        "passed": { "payload": { "nested": [1, 2] } }
+        "declared": [
+          {
+            "name": "payload"
+          }
+        ],
+        "passed": {
+          "payload": {
+            "nested": [
+              1,
+              2
+            ]
+          }
+        }
       },
-      "expected": { "ok": true, "props": { "payload": { "nested": [1, 2] } } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "payload": {
+            "nested": [
+              1,
+              2
+            ]
+          }
+        }
+      }
     },
     {
       "id": "0009-required-is-satisfied-by-its-default",
       "title": "A required input carrying a default does not need the caller to supply it.",
       "since": "0.9.0",
-      "tags": ["required", "defaults"],
+      "tags": [
+        "required",
+        "defaults"
+      ],
       "input": {
-        "declared": [{ "name": "limit", "type": "number", "required": true, "default": 5 }],
+        "declared": [
+          {
+            "name": "limit",
+            "type": "number",
+            "required": true,
+            "default": 5
+          }
+        ],
         "passed": {}
       },
-      "expected": { "ok": true, "props": { "limit": 5 } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "limit": 5
+        }
+      }
     },
     {
       "id": "0010-array-satisfies-array-not-object",
       "title": "A list satisfies a declared array.",
       "since": "0.9.0",
-      "tags": ["types", "trap"],
+      "tags": [
+        "types",
+        "trap"
+      ],
       "input": {
-        "declared": [{ "name": "tags", "type": "array" }],
-        "passed": { "tags": ["a", "b"] }
+        "declared": [
+          {
+            "name": "tags",
+            "type": "array"
+          }
+        ],
+        "passed": {
+          "tags": [
+            "a",
+            "b"
+          ]
+        }
       },
-      "expected": { "ok": true, "props": { "tags": ["a", "b"] } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "tags": [
+            "a",
+            "b"
+          ]
+        }
+      }
     },
     {
       "id": "0011-object-satisfies-object",
       "title": "A map satisfies a declared object.",
       "since": "0.9.0",
-      "tags": ["types"],
+      "tags": [
+        "types"
+      ],
       "input": {
-        "declared": [{ "name": "meta", "type": "object" }],
-        "passed": { "meta": { "k": "v" } }
+        "declared": [
+          {
+            "name": "meta",
+            "type": "object"
+          }
+        ],
+        "passed": {
+          "meta": {
+            "k": "v"
+          }
+        }
       },
-      "expected": { "ok": true, "props": { "meta": { "k": "v" } } }
+      "expected": {
+        "ok": true,
+        "props": {
+          "meta": {
+            "k": "v"
+          }
+        }
+      }
     },
     {
       "id": "0012-no-declaration-and-no-props",
       "title": "A workflow that declares nothing, called with nothing, resolves to an empty map.",
       "since": "0.9.0",
-      "tags": ["happy-path", "absence"],
-      "input": { "declared": null, "passed": null },
-      "expected": { "ok": true, "props": {} }
+      "tags": [
+        "happy-path",
+        "absence"
+      ],
+      "input": {
+        "declared": null,
+        "passed": null
+      },
+      "expected": {
+        "ok": true,
+        "props": {}
+      }
     },
     {
       "id": "0101-an-unknown-key-fails",
       "title": "A misspelled input name FAILS rather than sitting unread.",
       "since": "0.9.0",
-      "tags": ["validation", "regression", "silent-failure"],
+      "tags": [
+        "validation",
+        "regression",
+        "silent-failure"
+      ],
       "input": {
-        "declared": [{ "name": "topic", "type": "string" }],
-        "passed": { "topik": "otters" }
+        "declared": [
+          {
+            "name": "topic",
+            "type": "string"
+          }
+        ],
+        "passed": {
+          "topik": "otters"
+        }
       },
-      "expected": { "ok": false, "code": "unknown_input" }
+      "expected": {
+        "ok": false,
+        "code": "unknown_input"
+      }
     },
     {
       "id": "0102-props-passed-to-a-workflow-declaring-none-fails",
       "title": "Passing anything to a workflow that declares no inputs FAILS.",
       "since": "0.9.0",
-      "tags": ["validation", "silent-failure"],
+      "tags": [
+        "validation",
+        "silent-failure"
+      ],
       "input": {
         "declared": null,
-        "passed": { "topic": "otters" }
+        "passed": {
+          "topic": "otters"
+        }
       },
-      "expected": { "ok": false, "code": "unknown_input" }
+      "expected": {
+        "ok": false,
+        "code": "unknown_input"
+      }
     },
     {
       "id": "0103-unknown-is-reported-before-missing-required",
       "title": "A caller who misspells a required input is told about the word they typed.",
       "since": "0.9.0",
-      "tags": ["validation", "ordering"],
+      "tags": [
+        "validation",
+        "ordering"
+      ],
       "input": {
-        "declared": [{ "name": "topic", "type": "string", "required": true }],
-        "passed": { "topik": "otters" }
+        "declared": [
+          {
+            "name": "topic",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "passed": {
+          "topik": "otters"
+        }
       },
-      "expected": { "ok": false, "code": "unknown_input" }
+      "expected": {
+        "ok": false,
+        "code": "unknown_input"
+      }
     },
     {
       "id": "0104-missing-required-fails",
       "title": "A required input with no default and no value FAILS.",
       "since": "0.9.0",
-      "tags": ["validation", "required"],
+      "tags": [
+        "validation",
+        "required"
+      ],
       "input": {
-        "declared": [{ "name": "topic", "type": "string", "required": true }],
+        "declared": [
+          {
+            "name": "topic",
+            "type": "string",
+            "required": true
+          }
+        ],
         "passed": {}
       },
-      "expected": { "ok": false, "code": "missing_required" }
+      "expected": {
+        "ok": false,
+        "code": "missing_required"
+      }
     },
     {
       "id": "0105-wrong-type-fails",
       "title": "A string supplied where a number is declared FAILS.",
       "since": "0.9.0",
-      "tags": ["validation", "types"],
+      "tags": [
+        "validation",
+        "types"
+      ],
       "input": {
-        "declared": [{ "name": "limit", "type": "number" }],
-        "passed": { "limit": "ten" }
+        "declared": [
+          {
+            "name": "limit",
+            "type": "number"
+          }
+        ],
+        "passed": {
+          "limit": "ten"
+        }
       },
-      "expected": { "ok": false, "code": "type_mismatch" }
+      "expected": {
+        "ok": false,
+        "code": "type_mismatch"
+      }
     },
     {
       "id": "0106-object-does-not-satisfy-array",
       "title": "A map supplied where an array is declared FAILS.",
       "since": "0.9.0",
-      "tags": ["validation", "types", "trap"],
+      "tags": [
+        "validation",
+        "types",
+        "trap"
+      ],
       "input": {
-        "declared": [{ "name": "tags", "type": "array" }],
-        "passed": { "tags": { "0": "a" } }
+        "declared": [
+          {
+            "name": "tags",
+            "type": "array"
+          }
+        ],
+        "passed": {
+          "tags": {
+            "0": "a"
+          }
+        }
       },
-      "expected": { "ok": false, "code": "type_mismatch" }
+      "expected": {
+        "ok": false,
+        "code": "type_mismatch"
+      },
+      "skip": {
+        "php": "Not representable in PHP. `json_decode('{\"0\":\"a\"}', true)` coerces the numeric STRING key to int 0, producing a list -- so the map this case describes cannot exist on that runtime and `array_is_list` correctly reports a list. The rule itself is pinned for every runtime by 0109, which uses a non-numeric key."
+      },
+      "notes": "Kept rather than rewritten because the divergence is worth recording: a JS host and a PHP host genuinely disagree about this value, and the reason is PHP's key coercion rather than either implementation being wrong."
     },
     {
       "id": "0107-array-does-not-satisfy-object",
       "title": "A list supplied where an object is declared FAILS.",
       "since": "0.9.0",
-      "tags": ["validation", "types", "trap"],
+      "tags": [
+        "validation",
+        "types",
+        "trap"
+      ],
       "input": {
-        "declared": [{ "name": "meta", "type": "object" }],
-        "passed": { "meta": ["a"] }
+        "declared": [
+          {
+            "name": "meta",
+            "type": "object"
+          }
+        ],
+        "passed": {
+          "meta": [
+            "a"
+          ]
+        }
       },
-      "expected": { "ok": false, "code": "type_mismatch" }
+      "expected": {
+        "ok": false,
+        "code": "type_mismatch"
+      }
     },
     {
       "id": "0108-null-does-not-satisfy-a-declared-type",
       "title": "An explicit null supplied where a string is declared FAILS.",
       "since": "0.9.0",
-      "tags": ["validation", "types"],
+      "tags": [
+        "validation",
+        "types"
+      ],
       "input": {
-        "declared": [{ "name": "topic", "type": "string" }],
-        "passed": { "topic": null }
+        "declared": [
+          {
+            "name": "topic",
+            "type": "string"
+          }
+        ],
+        "passed": {
+          "topic": null
+        }
       },
-      "expected": { "ok": false, "code": "type_mismatch" }
+      "expected": {
+        "ok": false,
+        "code": "type_mismatch"
+      }
+    },
+    {
+      "id": "0109-a-string-keyed-map-does-not-satisfy-array",
+      "title": "A map with a non-numeric key supplied where an array is declared FAILS.",
+      "since": "0.9.1",
+      "tags": [
+        "validation",
+        "types",
+        "trap"
+      ],
+      "notes": "The runnable half of 0106. A non-numeric key survives json_decode on PHP as a string-keyed array, so `array_is_list` reports false and every runtime agrees. This is the case that actually pins object-is-not-array across all three.",
+      "input": {
+        "declared": [
+          {
+            "name": "tags",
+            "type": "array"
+          }
+        ],
+        "passed": {
+          "tags": {
+            "a": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "type_mismatch"
+      }
     }
   ]
 }

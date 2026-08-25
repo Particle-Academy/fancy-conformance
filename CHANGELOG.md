@@ -10,6 +10,25 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-25
+
+### Added
+
+- **`0109`, the runnable half of `0106`.** `0106` asserts that a map supplied
+  where an `array` is declared must fail — and it is **not representable in
+  PHP**: `json_decode('{"0":"a"}', true)` coerces the numeric STRING key to int
+  `0`, producing a list, so `array_is_list` correctly reports a list and the
+  map the case describes cannot exist on that runtime.
+
+  `0106` is now skipped for PHP with that reason and kept rather than
+  rewritten, because the divergence is worth recording — a JS host and a PHP
+  host genuinely disagree about this value, and neither implementation is
+  wrong. `0109` uses a non-numeric key, which survives `json_decode` as a
+  string-keyed array, so it pins object-is-not-array on all three runtimes.
+
+  Found by the PHP port failing exactly one row of a table it was written
+  against, which is the table doing its job on its first real use.
+
 ## [0.9.0] - 2026-08-25
 
 ### Added
