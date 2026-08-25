@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/value-equality",
+  "title": "What the LOADERS mean by equal",
+  "since": "0.11.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "equals(a: json, b: json, tolerance: number|null) -> boolean",
+    "summary": "Each loader's own comparison, run against a shared table. `a` and `b` are arbitrary JSON values; `tolerance` is the case's declared relative float tolerance, or null for exact. The result is whether that loader considers the two values equal.",
+    "reference": "node",
+    "referenceNote": "The rules were settled in 0.10.0 when the four loaders' float comparison was unified. This table makes them a test result rather than four independent readings of the same paragraph.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-conformance", "symbol": "deepEquals" },
+      { "language": "php", "package": "particle-academy/fancy-conformance", "symbol": "ParticleAcademy\\Conformance\\Conformance::equals" },
+      { "language": "python", "package": "fancy-conformance", "symbol": "fancy_conformance.equals" },
+      { "language": "rust", "package": "fancy-conformance", "symbol": "fancy_conformance::equals_within" }
+    ]
+  },
+  "notes": [
+    "THIS PACKAGE HELD EVERY IMPLEMENTATION TO A TABLE EXCEPT ITSELF. The loaders are implementations too, and until this suite existed each one's comparison was asserted only by its own hand-written unit tests, against pairs its own author chose. That is precisely the setup this repository exists to argue against.",
+    "It was not hypothetical. The Rust loader asserted that an integer golden is never satisfied by a float, and had a passing unit test saying so — while `shared/decimal/0008-coerce-exponent` carries the integer golden `100000` that PHP's `\"1e5\" + 0` satisfies with a float. A loader had encoded a rule the shipped corpus disproves, and nothing ran the two against each other. It surfaced in 0.10.0 only because an unrelated change happened to break it.",
+    "The generalisation, and the reason this suite is worth its weight: A LOADER CAN ASSERT SOMETHING THE REFERENCE LANGUAGE CANNOT EXPRESS, AND NO NUMBER OF GREEN TICKS WILL SURFACE IT. The reference here is JavaScript, which has ONE number type, so no golden can encode \"this must be a float\" — a loader enforcing that distinction asserts something the fixtures are structurally unable to state.",
+    "Raised independently by an agent building a parity repo for another package family, who identified their own instance before writing it: their reference is PHP, which has ONE absent value, while TypeScript has `null` and `undefined` and Python has `None`. A TS loader could very reasonably assert a null-versus-undefined distinction that a PHP-authored golden cannot encode, pass its own tests, and be wrong in exactly the Rust way. Cases 0201-0204 pin the absent-versus-null axis for that reason.",
+    "Numbers compare BY VALUE, not by JSON type (0101-0103). Booleans are never numbers (0110-0111) — Python's `==` says `True == 1` and PHP's loose comparison agrees, so this needs asserting rather than assuming.",
+    "Floats are EXACT unless the case declares a tolerance (0120-0124). A scaled 1e-12 epsilon lived in three of the four loaders until 0.10.0, on a justification that measured false: `0.002`, `0.1`, `1e300`, `DBL_MAX`, the `5e-324` denormal and `0.30000000000000004` all parse to bit-identical doubles in PHP, Python and Node."
+  ]
+}

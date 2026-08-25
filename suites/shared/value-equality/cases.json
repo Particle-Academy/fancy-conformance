@@ -1,0 +1,524 @@
+{
+  "$schema": "../../../schema/cases.schema.json",
+  "suite": "shared/value-equality",
+  "cases": [
+    {
+      "id": "0001-identical-strings",
+      "title": "Identical strings are equal.",
+      "since": "0.11.0",
+      "tags": [
+        "scalars"
+      ],
+      "input": {
+        "a": "a",
+        "b": "a"
+      },
+      "expected": true
+    },
+    {
+      "id": "0002-different-strings",
+      "title": "Different strings are not.",
+      "since": "0.11.0",
+      "tags": [
+        "scalars"
+      ],
+      "input": {
+        "a": "a",
+        "b": "b"
+      },
+      "expected": false
+    },
+    {
+      "id": "0003-identical-integers",
+      "title": "Identical integers are equal.",
+      "since": "0.11.0",
+      "tags": [
+        "scalars"
+      ],
+      "input": {
+        "a": 3,
+        "b": 3
+      },
+      "expected": true
+    },
+    {
+      "id": "0004-different-integers",
+      "title": "Different integers are not.",
+      "since": "0.11.0",
+      "tags": [
+        "scalars"
+      ],
+      "input": {
+        "a": 2,
+        "b": 3
+      },
+      "expected": false
+    },
+    {
+      "id": "0005-null-equals-null",
+      "title": "null equals null.",
+      "since": "0.11.0",
+      "tags": [
+        "scalars",
+        "absence"
+      ],
+      "input": {
+        "a": null,
+        "b": null
+      },
+      "expected": true
+    },
+    {
+      "id": "0101-int-golden-satisfied-by-float",
+      "title": "An integer is equal to a float of the same value.",
+      "since": "0.11.0",
+      "tags": [
+        "numbers",
+        "regression",
+        "trap"
+      ],
+      "input": {
+        "a": 100000,
+        "b": 100000.0
+      },
+      "expected": true,
+      "notes": "The rule a Rust unit test denied while `shared/decimal/0008-coerce-exponent` required it: that case has the integer golden 100000 and PHP's `\"1e5\" + 0` yields float(100000). The reference language has ONE number type, so no golden can demand a float."
+    },
+    {
+      "id": "0102-float-golden-satisfied-by-int",
+      "title": "...and the same in reverse.",
+      "since": "0.11.0",
+      "tags": [
+        "numbers",
+        "trap"
+      ],
+      "input": {
+        "a": 3.0,
+        "b": 3
+      },
+      "expected": true
+    },
+    {
+      "id": "0103-different-values-across-types",
+      "title": "Different values are unequal regardless of type.",
+      "since": "0.11.0",
+      "tags": [
+        "numbers"
+      ],
+      "input": {
+        "a": 2,
+        "b": 3.0
+      },
+      "expected": false
+    },
+    {
+      "id": "0110-true-is-not-one",
+      "title": "true is not 1.",
+      "since": "0.11.0",
+      "tags": [
+        "booleans",
+        "trap"
+      ],
+      "input": {
+        "a": true,
+        "b": 1
+      },
+      "expected": false,
+      "notes": "Python's `==` says `True == 1`, and PHP's loose comparison agrees. Without this a row expecting `false` is satisfied by an implementation returning `0`."
+    },
+    {
+      "id": "0111-false-is-not-zero",
+      "title": "false is not 0.",
+      "since": "0.11.0",
+      "tags": [
+        "booleans",
+        "trap"
+      ],
+      "input": {
+        "a": false,
+        "b": 0
+      },
+      "expected": false
+    },
+    {
+      "id": "0112-true-is-not-the-string",
+      "title": "true is not \"true\".",
+      "since": "0.11.0",
+      "tags": [
+        "booleans"
+      ],
+      "input": {
+        "a": true,
+        "b": "true"
+      },
+      "expected": false
+    },
+    {
+      "id": "0120-same-double",
+      "title": "The same double is equal to itself.",
+      "since": "0.11.0",
+      "tags": [
+        "floats"
+      ],
+      "input": {
+        "a": 0.1,
+        "b": 0.1
+      },
+      "expected": true
+    },
+    {
+      "id": "0121-adjacent-doubles-are-not-equal",
+      "title": "Genuinely different doubles are NOT equal.",
+      "since": "0.11.0",
+      "tags": [
+        "floats",
+        "regression"
+      ],
+      "input": {
+        "a": 1.0,
+        "b": 1.0000000000001
+      },
+      "expected": false,
+      "notes": "A scaled 1e-12 epsilon in three of the four loaders passed this until 0.10.0. On a money row a relative 1e-12 is real money at scale."
+    },
+    {
+      "id": "0122-tolerance-accepts-a-near-miss",
+      "title": "A declared tolerance accepts a near miss.",
+      "since": "0.11.0",
+      "tags": [
+        "floats",
+        "tolerance"
+      ],
+      "input": {
+        "a": 1.0,
+        "b": 1.0000000000001,
+        "tolerance": 1e-09
+      },
+      "expected": true
+    },
+    {
+      "id": "0123-tolerance-is-not-unlimited",
+      "title": "A tolerance widens the target; it does not remove it.",
+      "since": "0.11.0",
+      "tags": [
+        "floats",
+        "tolerance"
+      ],
+      "input": {
+        "a": 1.0,
+        "b": 1.5,
+        "tolerance": 1e-09
+      },
+      "expected": false
+    },
+    {
+      "id": "0124-tolerance-tighter-than-the-gap",
+      "title": "A tolerance smaller than the gap still rejects.",
+      "since": "0.11.0",
+      "tags": [
+        "floats",
+        "tolerance"
+      ],
+      "input": {
+        "a": 1.0,
+        "b": 1.0000000000001,
+        "tolerance": 1e-15
+      },
+      "expected": false
+    },
+    {
+      "id": "0130-numeric-string-is-not-a-number",
+      "title": "\"1\" is not 1.",
+      "since": "0.11.0",
+      "tags": [
+        "scalars",
+        "trap"
+      ],
+      "input": {
+        "a": "1",
+        "b": 1
+      },
+      "expected": false,
+      "notes": "PHP's `==` coerces a numeric string to a number. A golden of 1 must not be satisfied by an implementation returning the string."
+    },
+    {
+      "id": "0140-arrays-order-matters",
+      "title": "Array order is significant.",
+      "since": "0.11.0",
+      "tags": [
+        "arrays"
+      ],
+      "input": {
+        "a": [
+          1,
+          2
+        ],
+        "b": [
+          2,
+          1
+        ]
+      },
+      "expected": false
+    },
+    {
+      "id": "0141-arrays-same-order",
+      "title": "Same values in the same order are equal.",
+      "since": "0.11.0",
+      "tags": [
+        "arrays"
+      ],
+      "input": {
+        "a": [
+          1,
+          2
+        ],
+        "b": [
+          1,
+          2
+        ]
+      },
+      "expected": true
+    },
+    {
+      "id": "0142-arrays-different-length",
+      "title": "Different lengths are unequal.",
+      "since": "0.11.0",
+      "tags": [
+        "arrays"
+      ],
+      "input": {
+        "a": [
+          1
+        ],
+        "b": [
+          1,
+          2
+        ]
+      },
+      "expected": false
+    },
+    {
+      "id": "0143-empty-arrays",
+      "title": "Two empty arrays are equal.",
+      "since": "0.11.0",
+      "tags": [
+        "arrays"
+      ],
+      "input": {
+        "a": [],
+        "b": []
+      },
+      "expected": true
+    },
+    {
+      "id": "0150-object-key-order-does-not-matter",
+      "title": "Object key order is NOT significant.",
+      "since": "0.11.0",
+      "tags": [
+        "objects"
+      ],
+      "input": {
+        "a": {
+          "a": 1,
+          "b": 2
+        },
+        "b": {
+          "b": 2,
+          "a": 1
+        }
+      },
+      "expected": true
+    },
+    {
+      "id": "0151-object-different-values",
+      "title": "Same keys, different values, unequal.",
+      "since": "0.11.0",
+      "tags": [
+        "objects"
+      ],
+      "input": {
+        "a": {
+          "a": 1
+        },
+        "b": {
+          "a": 2
+        }
+      },
+      "expected": false
+    },
+    {
+      "id": "0152-nested",
+      "title": "Nesting is compared all the way down.",
+      "since": "0.11.0",
+      "tags": [
+        "objects"
+      ],
+      "input": {
+        "a": {
+          "a": {
+            "b": [
+              1,
+              {
+                "c": "d"
+              }
+            ]
+          }
+        },
+        "b": {
+          "a": {
+            "b": [
+              1,
+              {
+                "c": "d"
+              }
+            ]
+          }
+        }
+      },
+      "expected": true
+    },
+    {
+      "id": "0153-nested-differs-deep",
+      "title": "A difference at depth is still a difference.",
+      "since": "0.11.0",
+      "tags": [
+        "objects"
+      ],
+      "input": {
+        "a": {
+          "a": {
+            "b": [
+              1,
+              {
+                "c": "d"
+              }
+            ]
+          }
+        },
+        "b": {
+          "a": {
+            "b": [
+              1,
+              {
+                "c": "e"
+              }
+            ]
+          }
+        }
+      },
+      "expected": false
+    },
+    {
+      "id": "0201-explicit-null-key-vs-missing-key",
+      "title": "An object with an explicit null value is NOT equal to one missing that key.",
+      "since": "0.11.0",
+      "tags": [
+        "absence",
+        "trap"
+      ],
+      "input": {
+        "a": {
+          "x": null
+        },
+        "b": {}
+      },
+      "expected": false,
+      "notes": "The axis a PHP-referenced corpus cannot express: PHP has ONE absent value while JavaScript has null and undefined and Python has None. Raised by an agent building a parity repo whose reference IS PHP, who spotted that a TypeScript loader could assert a null/undefined distinction no PHP-authored golden can encode, pass its own tests, and be wrong. Pinned here so the four loaders' current agreement is a test result rather than a coincidence."
+    },
+    {
+      "id": "0202-both-missing",
+      "title": "Two objects both missing the key are equal.",
+      "since": "0.11.0",
+      "tags": [
+        "absence"
+      ],
+      "input": {
+        "a": {},
+        "b": {}
+      },
+      "expected": true
+    },
+    {
+      "id": "0203-null-is-not-zero",
+      "title": "null is not 0.",
+      "since": "0.11.0",
+      "tags": [
+        "absence",
+        "trap"
+      ],
+      "input": {
+        "a": null,
+        "b": 0
+      },
+      "expected": false
+    },
+    {
+      "id": "0204-null-is-not-empty-string",
+      "title": "null is not \"\".",
+      "since": "0.11.0",
+      "tags": [
+        "absence",
+        "trap"
+      ],
+      "input": {
+        "a": null,
+        "b": ""
+      },
+      "expected": false
+    },
+    {
+      "id": "0205-null-inside-an-array-holds-its-place",
+      "title": "A null inside an array is a value, not a gap.",
+      "since": "0.11.0",
+      "tags": [
+        "absence",
+        "arrays"
+      ],
+      "input": {
+        "a": [
+          1,
+          null,
+          3
+        ],
+        "b": [
+          1,
+          3
+        ]
+      },
+      "expected": false
+    },
+    {
+      "id": "0210-array-is-not-an-object",
+      "title": "An array is not an object.",
+      "since": "0.11.0",
+      "tags": [
+        "containers",
+        "trap"
+      ],
+      "input": {
+        "a": [],
+        "b": {}
+      },
+      "expected": false,
+      "notes": "PHP has ONE array type for both, so this needs asserting rather than assuming. FOUND BY THIS SUITE ON ITS FIRST RUN, which is the argument for the suite: three loaders agreed and the fourth could not even express the question, and nothing had ever asked them the same question side by side.",
+      "skip": {
+        "php": "Not representable in PHP. `json_decode('[]', true)` and `json_decode('{}', true)` produce the IDENTICAL value -- an empty PHP array -- so the loader has nothing left to compare. This is a real expressiveness limit rather than a loader defect: a PHP-authored golden cannot distinguish an empty array from an empty object at all. Node, Python and Rust all keep the distinction and assert it."
+      }
+    },
+    {
+      "id": "0211-array-is-not-a-scalar",
+      "title": "An array is not a scalar.",
+      "since": "0.11.0",
+      "tags": [
+        "containers"
+      ],
+      "input": {
+        "a": [
+          1
+        ],
+        "b": 1
+      },
+      "expected": false
+    }
+  ]
+}

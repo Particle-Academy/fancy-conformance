@@ -10,6 +10,55 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-08-25
+
+### Added
+
+- **`shared/value-equality` (32 cases) — the loaders' own comparison, held to a
+  table.** This package held every implementation to a table **except itself**.
+  Each loader's `equals` was asserted only by its own hand-written unit tests,
+  against pairs its own author chose — precisely the setup this repository
+  exists to argue against.
+
+  It was not hypothetical. In 0.10.0 the Rust loader was found asserting that an
+  integer golden is never satisfied by a float, with a **passing unit test**
+  saying so, while `shared/decimal/0008-coerce-exponent` carries the integer
+  golden `100000` that PHP's `"1e5" + 0` satisfies with a float. A rule the
+  shipped corpus disproves, green for as long as nobody ran the two against each
+  other. It surfaced only because an unrelated change happened to break it.
+
+  The generalisation, which is the suite's reason to exist: **a loader can
+  assert something the REFERENCE LANGUAGE cannot express, and no number of green
+  ticks will surface it.**
+
+  **It found a divergence on its first run.** `0210-array-is-not-an-object`:
+  Node, Python and Rust all distinguish `[]` from `{}`; PHP cannot, because
+  `json_decode('[]', true)` and `json_decode('{}', true)` produce the identical
+  value. Skipped for PHP with that reason — a real expressiveness limit rather
+  than a loader defect, and one a PHP-authored golden inherits.
+
+  Cases `0201`-`0205` pin the absent-versus-null axis, raised by an agent
+  building a parity repo whose reference is PHP: PHP has one absent value while
+  TypeScript has `null` and `undefined` and Python has `None`, so a TS loader
+  could assert a distinction no PHP-authored golden can encode and be wrong in
+  exactly the Rust way. The four loaders agree today; now that agreement is a
+  test result.
+
+### Fixed
+
+- **`rust/Cargo.toml` had drifted three releases behind, and the test written to
+  catch that did not cover it.** It sat at `0.7.0` against a `VERSION` of
+  `0.10.0`, so `cargo test` printed the wrong suite version on every run.
+
+  The test's own comment reads *"Every copy is compared here now; adding a fifth
+  means adding it to this list, which is the point."* The Rust loader **was**
+  added, on 2026-08-23, and its manifest was not added to the list. All five
+  copies now agree and the fifth is asserted; verified by reverting it and
+  watching the suite go red.
+
+  Third instance of this shape in the kit in one day. The mechanism is always
+  identical: N copies of one number and a check covering N-1.
+
 ## [0.10.0] - 2026-08-25
 
 ### Changed

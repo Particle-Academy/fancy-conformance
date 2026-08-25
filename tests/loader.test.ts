@@ -71,6 +71,26 @@ test("every manifest that carries this version agrees with VERSION", () => {
     "python/pyproject.toml and VERSION disagree",
   );
 
+  // THE FIFTH COPY, and it had already drifted three releases behind before
+  // anything compared it.
+  //
+  // The comment above this test says "adding a fifth means adding it to this
+  // list, which is the point". The Rust loader WAS added, on 2026-08-23, and
+  // its Cargo.toml was NOT added here — so `rust/Cargo.toml` sat at 0.7.0
+  // against a VERSION of 0.10.0, and `cargo test` printed the wrong number on
+  // every run without anything noticing.
+  //
+  // That is this repository's own thesis failing inside this repository's own
+  // guard, for the third time in one day across the kit. The mechanism is
+  // always identical: N copies of one number and a check covering N-1.
+  const cargo = read("../rust/Cargo.toml").match(/^version\s*=\s*"([^"]+)"/m);
+  assert.ok(cargo, "rust/Cargo.toml declares no version");
+  assert.equal(
+    cargo[1],
+    suiteVersion(),
+    "rust/Cargo.toml and VERSION disagree",
+  );
+
   const loader = read("../python/src/fancy_conformance/__init__.py").match(
     /^__version__\s*=\s*"([^"]+)"/m,
   );
