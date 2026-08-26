@@ -10,6 +10,63 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-08-25
+
+### Added
+
+- **`expr/references` — a new suite: what an expression READS.** Twelve rows
+  pinning `references(expression) -> string[]`, the root identifiers an
+  expression needs, unique and sorted, answered with no data and no evaluation.
+
+  It exists because of a field report. `{{ $now }}` renders as nothing: a
+  `$`-prefixed root reads to an author as *engine-provided*, so agents reach for
+  `$now` / `$today` / `$index` the way they reach for the two that exist, and a
+  real document shipped titled `"Deal List Export -"` with the date silently
+  missing. The reporter's own observation is the one that mattered — **an
+  unknown `$` root is detectable at PARSE time in a way `in.genuinely_absent`
+  is not.**
+
+  The check deliberately does **not** live in `fancy-expr`. It cannot know
+  whether `$now` exists; `$json`, `$input` and `$props` are real in one host and
+  meaningless in another. So the package answers the only question it can answer
+  honestly and the host compares that list against what it provides. The same
+  primitive also catches the second reported shape — `{{ n2.transcript }}`, a
+  real node id two hops upstream that resolves to nothing because a node id only
+  addresses a *direct* predecessor.
+
+  `0106` and `0108` are the rows that matter most: object-literal KEYS are not
+  references (collecting them makes a host reject a valid expression, and a
+  false rejection at save time is the worse direction — the author cannot
+  comply), and BOTH branches of a ternary are read (an implementation reusing
+  the evaluator's short-circuit would approve an expression that fails on the
+  other road).
+
+  The manifest also records what it **cannot** catch: `{{ in.output }}`, a real
+  root with a field that node never emits. Nothing static separates that from a
+  field absent this run.
+
+- **`expr/evaluate` 1001-1003 — the field report itself, as rows.** `1001` is a
+  consumer's production expression *verbatim*: an object literal with three
+  `||` fallback chains, a ternary and four keys, every operand a path that may
+  legitimately be absent. Under the old dot-path-only resolver the whole thing
+  evaluated to `null` and the run reported success.
+
+  Their description is why it is in the table rather than paraphrased: it is
+  "what an agent writes when it is trying to normalise two trigger shapes into
+  one, which is the single most common thing they attempt." Every other row here
+  isolates one rule; this one is the rules COMPOSED, which is how they arrive.
+
+  `1003` is extracted from it deliberately — the composed row would still pass
+  if the `|| ''` tail broke, because its `transcript` key never reaches the
+  final fallback.
+
+### Fixed
+
+- **`VERSION`, `python/…/__init__.py` and `rust/Cargo.toml` are back in step.**
+  The repo's own `every manifest that carries this version agrees with VERSION`
+  test caught two stale declarations during this bump — which is the guard doing
+  exactly its job, in the repository that argues a claim must be a test result.
+
 ## [0.16.0] - 2026-08-25
 
 ### Changed

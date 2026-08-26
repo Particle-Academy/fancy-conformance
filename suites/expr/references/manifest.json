@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "expr/references",
+  "title": "What an expression READS -- the root names a host must be able to supply",
+  "since": "0.17.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "references(expression: string) -> { ok: true, value: string[] } | { ok: false }",
+    "summary": "Return the ROOT identifiers an expression reads, unique and sorted, without evaluating anything and without a context. `{ ok: false }` when the expression cannot PARSE -- the same failure `parse()` reports, because this is a static question asked of the same syntax tree. Object-literal KEYS are not references; a computed index IS one.",
+    "reference": "node",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-expr", "symbol": "references" },
+      { "language": "php", "package": "particle-academy/fancy-expr", "symbol": "FancyExpr\\Expr::references" },
+      { "language": "python", "package": "fancy-expr", "symbol": "fancy_expr.references" }
+    ]
+  },
+  "notes": [
+    "WHY THIS EXISTS, and it is not a convenience. A consumer reported that `{{ $now }}` renders as nothing: `$`-prefixed roots read to an author as ENGINE-PROVIDED, so agents reach for `$now` / `$today` / `$index` the way they reach for the two that exist. A real document shipped titled 'Deal List Export -' with the date silently missing. Their words: an unknown `$` root is detectable at PARSE time in a way `in.genuinely_absent` is not.",
+    "THE HOST DECIDES, NOT THIS PACKAGE. `fancy-expr` must never carry a list of magic root names -- it does not know whether `$props` exists, and inventing an allowlist would make it wrong for every host but one. So it answers the only question it CAN answer honestly ('what does this expression read?') and the host compares that against what it actually provides. That keeps the grammar host-agnostic while making the check possible at all.",
+    "IT ALSO CATCHES THE SECOND REPORTED SHAPE. The same consumer reported `{{ n2.transcript }}` -- a REAL node id, two hops upstream, which is legal-looking and resolves to nothing because a node id only addresses a direct predecessor. A host holding the predecessor set can refuse that from these roots too. One primitive, both shapes, and neither rule living in this package.",
+    "WHAT IT DELIBERATELY CANNOT CATCH: `{{ in.output }}` -- a real port and a field that node never emits. The root is legitimate, so nothing static can tell an absent field from a field that is absent THIS RUN. That is the boundary of the idea and is recorded so nobody reads a green check as covering it.",
+    "COMPUTED INDICES COUNT (0105). `items[i]` reads `i`, and an author who typo'd it gets the same silent empty as `$now`. An implementation that walked only `.name` steps would pass every other row here.",
+    "OBJECT KEYS DO NOT COUNT (0106). `{ transcript: in.content }` reads `in` and nothing else -- `transcript` is a key being written, not a name being read. An implementation collecting every identifier it sees would report both and make the host reject a valid expression, which is the more damaging direction of wrong."
+  ]
+}

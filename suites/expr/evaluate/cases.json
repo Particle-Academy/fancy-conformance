@@ -1470,6 +1470,81 @@
         "value": null
       },
       "notes": "The companion to 0904, and the form every runtime can express. PHP cannot distinguish an EMPTY object from an empty array -- both decode to the same value and both read as a list -- so 0904 is skipped there. A non-empty object is unambiguous in all three, which keeps the rule pinned rather than merely skipped. Same shape as flow/workflow-props 0106/0109."
+    },
+    {
+      "id": "1001-the-normalisation-an-agent-writes",
+      "title": "The production expression that started this package: object literal, || fallback chains and a ternary, every operand legitimately absent.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "field-report"
+      ],
+      "notes": "VERBATIM from a consumer's production Op, authored by a chat agent that reasonably assumed `{{ }}` was an expression language. Under the old dot-path-only resolver the WHOLE thing evaluated to null and the run reported success. They describe it as 'what an agent writes when it is trying to normalise two trigger shapes into one, which is the single most common thing they attempt' -- so this is the shape to keep working, not a toy. Every other row here isolates one rule; this one is the rules COMPOSED, which is how they actually arrive.",
+      "input": {
+        "expression": "{ transcript: in.transcript || in.file_content || '', deal_id: in.deal_id || '', file_name: in.name || 'Pasted transcript', source: in.transcript ? 'manual' : 'file_event' }",
+        "context": {
+          "in": {
+            "transcript": null,
+            "file_content": "…the call went well…",
+            "deal_id": "D-1",
+            "name": null
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": {
+          "transcript": "…the call went well…",
+          "deal_id": "D-1",
+          "file_name": "Pasted transcript",
+          "source": "file_event"
+        }
+      }
+    },
+    {
+      "id": "1002-the-branch-condition-that-took-the-wrong-road",
+      "title": "The other half of the same Op: a branch condition using && and !==.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "field-report"
+      ],
+      "notes": "The expensive face of the defect. `truthy(null)` is false, so a condition the engine could not evaluate did not error -- it silently picked the false road on EVERY run while the run reported success. 0406 pins the same expression against a present deal_id; this pins it against an ABSENT one, where the honest answer is a real false rather than a false that means 'could not tell'.",
+      "input": {
+        "expression": "in.deal_id && in.deal_id !== ''",
+        "context": {
+          "in": {
+            "deal_id": null
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": null
+      }
+    },
+    {
+      "id": "1003-empty-string-fallback-survives-the-chain",
+      "title": "A || chain ending in '' yields the empty string, not null.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "field-report"
+      ],
+      "notes": "Extracted from 1001 because the composed row would still pass if this rule broke -- its `transcript` key never reaches the final fallback. An author writes `|| ''` precisely so a missing field becomes a printable gap rather than the word null.",
+      "input": {
+        "expression": "in.a || in.b || ''",
+        "context": {
+          "in": {
+            "a": null,
+            "b": null
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": ""
+      }
     }
   ]
 }

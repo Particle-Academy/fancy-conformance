@@ -1,0 +1,226 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "expr/references",
+  "cases": [
+    {
+      "id": "0101-single-root",
+      "title": "One path reads one root.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "input": {
+        "expression": "in.content"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "in"
+        ]
+      }
+    },
+    {
+      "id": "0102-unique-and-sorted",
+      "title": "Repeated roots collapse; the order is sorted, not source order.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "notes": "Sorted and unique so three languages produce the SAME list. A set iterated in insertion order agrees with a sorted list often enough to look correct and not always -- and the disagreement would surface as a host rejecting an expression in one runtime and accepting it in another.",
+      "input": {
+        "expression": "user.name + in.a + in.b + user.id"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "in",
+          "user"
+        ]
+      }
+    },
+    {
+      "id": "0103-dollar-root-is-reported-like-any-other",
+      "title": "A $-prefixed root is returned, not filtered and not special-cased.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "notes": "THE REPORTED CASE. This package does not know whether `$now` exists -- `$json`, `$input` and `$props` do exist in one host and mean nothing in another. It reports what is read; the HOST owns the list. Filtering `$` names here would silently delete the only signal the check needs.",
+      "input": {
+        "expression": "$now"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "$now"
+        ]
+      }
+    },
+    {
+      "id": "0104-mixed-dollar-and-plain",
+      "title": "Both kinds in one expression.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "input": {
+        "expression": "$props.content || in.content"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "$props",
+          "in"
+        ]
+      }
+    },
+    {
+      "id": "0105-computed-index-is-a-reference",
+      "title": "A computed index reads a root too.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "notes": "An implementation that walked only `.name` steps passes every other row in this suite and fails exactly here. A typo'd index gets the same silent empty as `$now`, so it needs the same static answer.",
+      "input": {
+        "expression": "items[i]"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "i",
+          "items"
+        ]
+      }
+    },
+    {
+      "id": "0106-object-keys-are-not-references",
+      "title": "An object literal's KEYS are written, not read.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "notes": "The damaging direction: an implementation collecting every identifier would report `transcript` and `source`, and the host would reject a perfectly valid expression. A false rejection at save time is worse than a missed one, because the author has no way to comply.",
+      "input": {
+        "expression": "{ transcript: in.content, source: 'manual' }"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "in"
+        ]
+      }
+    },
+    {
+      "id": "0107-literals-read-nothing",
+      "title": "An expression with no paths reads nothing.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "input": {
+        "expression": "1 + 2 === 3 ? 'yes' : 'no'"
+      },
+      "expected": {
+        "ok": true,
+        "value": []
+      }
+    },
+    {
+      "id": "0108-both-sides-of-a-branch",
+      "title": "Every branch is read, not only the taken one.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "notes": "A static question has no run to take a branch in. An implementation that short-circuited here -- reusing the evaluator's logic -- would report only what one run happened to touch, and the host would approve an expression that fails on the other road.",
+      "input": {
+        "expression": "a ? b : c"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    },
+    {
+      "id": "0109-the-field-report-normalisation",
+      "title": "The consumer's production expression reads exactly one root.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "notes": "The same expression as expr/evaluate 1001, asked the static question. Four keys, three fallback chains and a ternary, and the honest answer is one root -- which is what makes the check cheap enough for a host to run on every save.",
+      "input": {
+        "expression": "{ transcript: in.transcript || in.file_content || '', deal_id: in.deal_id || '', file_name: in.name || 'Pasted transcript', source: in.transcript ? 'manual' : 'file_event' }"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "in"
+        ]
+      }
+    },
+    {
+      "id": "0110-length-is-not-a-root",
+      "title": "`.length` is a step, never a name to supply.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "input": {
+        "expression": "results.length === 0"
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          "results"
+        ]
+      }
+    },
+    {
+      "id": "0201-malformed-does-not-parse",
+      "title": "A malformed expression fails here exactly as it fails in parse().",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "notes": "Same outcome, same reason: this is a question about a syntax tree, and there is no tree. Returning an empty list instead would tell a host 'this expression needs nothing', and it would save a node that can never run.",
+      "input": {
+        "expression": "in.a &&"
+      },
+      "expected": {
+        "ok": false
+      }
+    },
+    {
+      "id": "0202-a-call-does-not-parse",
+      "title": "A call is still refused at parse time.",
+      "since": "0.17.0",
+      "tags": [
+        "expr",
+        "references"
+      ],
+      "input": {
+        "expression": "count(in.items)"
+      },
+      "expected": {
+        "ok": false
+      }
+    }
+  ]
+}
