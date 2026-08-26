@@ -13,9 +13,9 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use fancy_conformance::{equals_within, 
-    cases, equals, format_summary, list_suites, manifest, run_table, suite_path, suites_root,
-    version, Language,
+use fancy_conformance::{
+    cases, equals, equals_within, format_summary, list_suites, manifest, run_table, suite_path,
+    suites_root, version, Language,
 };
 use fancy_json::{parse, to_string, Value};
 
@@ -268,7 +268,10 @@ fn a_number_golden_is_satisfied_only_by_the_same_value() {
     // stronger than before.
     assert!(equals(&parse("3").unwrap(), &parse("3.0").unwrap()));
     assert!(!equals(&parse("2").unwrap(), &parse("3").unwrap()));
-    assert!(!equals(&parse("2.9999999999999").unwrap(), &parse("3").unwrap()));
+    assert!(!equals(
+        &parse("2.9999999999999").unwrap(),
+        &parse("3").unwrap()
+    ));
     assert!(equals(&parse("3").unwrap(), &parse("3").unwrap()));
 }
 
