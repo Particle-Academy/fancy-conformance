@@ -8,6 +8,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Pre-1.0, breaking changes land in MINOR releases.** The version number is not
 promising otherwise until 1.0.
 
+## [0.19.0] - 2026-08-26
+
+### Added
+
+- **`flow/kind-declaration-surface` — parity of SURFACE, not behaviour.** 20
+  cases asserting that every runtime's `NodeKind` declares the same things about
+  the same kinds: the SET of field paths in `outputShape`, and the `emits`
+  relation.
+
+  **Every other suite here pins behaviour. Nothing pinned surface**, and four
+  capabilities were found present in one runtime and absent in the others as a
+  result — `graph.inputs` dropped on import, `sideEffects` declared by nothing,
+  the Python loader never published, and `outputShape` existing only in
+  TypeScript. In each, **absent reads as a legitimate answer**, so nothing
+  reported the gap.
+
+  Three design rules, each from a real near-miss:
+
+  - **Assert the SHAPE of each field, not its presence.** `OutputField[] | ((config) => OutputField[])`
+    in one runtime and a plain `array` in another passes a presence check and
+    fails every real use. A presence-only fixture would have been the fifth
+    instance, written by the people fixing the first four.
+  - **Compare field paths as a SET.** Rust's `for_each` inserts `count` before
+    `items`; the values are maps, so order carries no meaning and asserting on
+    it would report a divergence that is not one.
+  - **TypeScript is the SPECIFICATION, not a peer.** It ships no executors, so
+    its declarations are the only ones that cannot be checked against code. A
+    disagreement is an implementation contradicting the spec — and the
+    implementation is the one with an executor to be wrong about.
+
+  `wait` and `schedule_trigger` are the rows that carry the hard-won rule: a
+  relation with no destination can only express a TOP-LEVEL merge, so a kind
+  that NESTS its input declares fields and no relation.
+
 ## [Unreleased]
 
 ## [0.18.0] - 2026-08-26

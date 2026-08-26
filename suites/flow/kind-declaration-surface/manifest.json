@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/kind-declaration-surface",
+  "title": "Every runtime's NodeKind exposes the same declaration fields, with the same shape",
+  "since": "0.19.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "declarationSurface(kindId: string) -> { outputShape: string[]|null|\"dynamic\", emits: string|null }",
+    "summary": "Look a builtin kind up in this runtime's registry and report what it DECLARES: the SET of field paths its outputShape names (or null when undeclared, or the marker \"dynamic\" when it is config-dependent and unresolvable here), and its emits relation (or null). Field paths are compared as a SET, never as an ordered list — every runtime returns them from a map, so order is not semantic and asserting on it would report a divergence that is not one.",
+    "reference": "node",
+    "referenceNote": "TypeScript is the SPECIFICATION here, not a peer. It ships no executors — a host supplies them — so its declarations are the contract a conforming executor must satisfy, and they are the only ones that cannot be checked against code. PHP, Python and Rust each ship executors and can always fall back to reading their own source. So a disagreement is not 'two runtimes differ'; it is an implementation disagreeing with the spec, and the implementation is the one with an executor to be wrong about.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "NodeKindDefinition.outputShape / .emits" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "NodeKind::outputShapeFor() / ::emitsFor()" },
+      { "language": "python", "package": "fancy-flow", "symbol": "NodeKind.output_shape_for() / .emits_for()" },
+      { "language": "rust", "package": "fancy-flow", "symbol": "NodeKind::output_fields() / .emits" }
+    ]
+  },
+  "notes": [
+    "THIS SUITE EXISTS BECAUSE THE CONFORMANCE TABLES COVERED BEHAVIOUR AND NOTHING COVERED SURFACE. Four capabilities were found present in one runtime and absent in the others, each time where ABSENT reads as a legitimate answer: `graph.inputs` dropped on import, `sideEffects` declared by nothing, the conformance Python loader never published, and `outputShape` existing only in TypeScript. In every one the wrong reading is the reassuring one, so nothing reported the gap. A fixture asserting that every runtime exposes the same declaration fields would have caught all four.",
+    "ASSERT THE SHAPE OF EACH FIELD, NOT ITS PRESENCE. `outputShape: OutputField[] | ((config) => OutputField[])` in one runtime and `outputShape: array` in another passes a presence check and fails every real use. A presence-only parity fixture would have been the fifth instance of this bug, written by the people fixing the first four. Raised by the reference consumer.",
+    "COMPARE FIELD PATHS AS A SET. `for_each` inserts `count` before `items` in the Rust executor and the reverse elsewhere; the values are maps, so the order carries no meaning. A fixture that asserted order would report a divergence that is not one, and a fixture that cries wolf is one nobody reads.",
+    "NULL, EMPTY AND DYNAMIC ARE THREE ANSWERS, and every row that pins one of them exists because collapsing them is the defect. `null` = nobody declared. `[]` = declares that it emits no fields. `\"dynamic\"` = declared, config-dependent, unresolvable in this process. A consumer that treats `null` as `[]` refuses every valid reference on an undeclared kind; one that treats `\"dynamic\"` as `null` falls back to a fixed table to answer a config-dependent question, which is wrong by construction.",
+    "A PASS-THROUGH KIND MUST DECLARE NOTHING. `branch`, `switch_case`, `output`, `transform`, `merge`, `manual_trigger`, `webhook_trigger`, `human_approval` and `variable` emit what arrived, so their field shape is not knowable from the kind. The rows asserting they stay `null` are not filler: a partial static list on such a kind refuses every field it omits, and a false rejection is one an author cannot comply with.",
+    "`wait` IS THE ROW THAT PROVES A RELATION NEEDS A DESTINATION. It returns `{waited, duration, input}` — it NESTS its input under a key rather than merging it at the top level. `emits: \"input\"` there would make a reader accept `{{ in.<any inbound field> }}` at top level, which resolves to nothing at run time. So it declares a field list and NO relation. Read the executor and ask *merge or nest* before assigning a relation; under-claiming is free.",
+    "`schedule_trigger` IS THE COMPOSITION CASE and it is correct precisely where `wait` is not: it merges its inputs into the TOP level alongside its own `cron`/`timezone`, so it declares both a list and a relation. It was undeclared until the relation existed, because a partial list with nothing to say the inputs also merge is a false-rejection generator.",
+    "`agent` IS NOT IN THIS TABLE, and the reason is worth recording: TypeScript has no `agent` kind, PHP registers it through its own `Builtin::agentKind()` rather than the default registry, and Rust declares it without an executor. A parity row would compare a kind three runtimes disagree about the existence of. Its emissions are pinned by each runtime's own suite instead — and the PHP one was wrong for twenty minutes because it cited the first of AgentExecutor's TWO returns and missed `truncated`, which taught the rule: read EVERY return, not the top one."
+  ]
+}

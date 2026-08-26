@@ -1,0 +1,393 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/kind-declaration-surface",
+  "cases": [
+    {
+      "id": "0101-api_request-declares-its-fields",
+      "title": "`api_request` declares the fields its executor returns.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "output-shape"
+      ],
+      "input": {
+        "kind": "api_request",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "body",
+          "headers",
+          "status"
+        ],
+        "emits": null
+      }
+    },
+    {
+      "id": "0102-embed_search-declares-its-fields",
+      "title": "`embed_search` declares the fields its executor returns.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "output-shape"
+      ],
+      "input": {
+        "kind": "embed_search",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "matches",
+          "query"
+        ],
+        "emits": null
+      }
+    },
+    {
+      "id": "0103-llm_router-declares-its-fields",
+      "title": "`llm_router` declares the fields its executor returns.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "output-shape"
+      ],
+      "input": {
+        "kind": "llm_router",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "input",
+          "reason",
+          "route"
+        ],
+        "emits": null
+      }
+    },
+    {
+      "id": "0104-notify-declares-its-fields",
+      "title": "`notify` declares the fields its executor returns.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "output-shape"
+      ],
+      "input": {
+        "kind": "notify",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "channel",
+          "message",
+          "sent",
+          "to"
+        ],
+        "emits": null
+      }
+    },
+    {
+      "id": "0105-webhook_out-declares-its-fields",
+      "title": "`webhook_out` declares the fields its executor returns.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "output-shape"
+      ],
+      "input": {
+        "kind": "webhook_out",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "response",
+          "sent",
+          "status"
+        ],
+        "emits": null
+      }
+    },
+    {
+      "id": "0106-for_each-declares-its-fields",
+      "title": "`for_each` declares the fields its executor returns.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "output-shape"
+      ],
+      "input": {
+        "kind": "for_each",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "count",
+          "items"
+        ],
+        "emits": null
+      }
+    },
+    {
+      "id": "0107-log-declares-its-fields",
+      "title": "`log` declares the fields its executor returns.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "output-shape"
+      ],
+      "input": {
+        "kind": "log",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "level",
+          "logged"
+        ],
+        "emits": null
+      }
+    },
+    {
+      "id": "0201-pass-through-declares-nothing",
+      "title": "A pass-through kind declares NO field shape — null, never an empty list.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "three-state"
+      ],
+      "input": {
+        "kind": "branch",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": "input"
+      },
+      "note": "null means nobody declared. Reading it as [] refuses every valid reference on the kind."
+    },
+    {
+      "id": "0202-merge-concat-declares-nothing",
+      "title": "`merge` in concat mode declares neither a shape nor a relation.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "three-state"
+      ],
+      "input": {
+        "kind": "merge",
+        "config": {
+          "mode": "concat"
+        }
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": null
+      },
+      "note": "It emits a LIST, whose elements are not addressable as top-level fields. [] would claim 'emits no fields', which is false and would refuse every reference."
+    },
+    {
+      "id": "0203-llm-call-is-dynamic",
+      "title": "`llm_call` is config-dependent, and says so rather than staying silent.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "three-state",
+        "dynamic"
+      ],
+      "input": {
+        "kind": "llm_call",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": "dynamic",
+        "emits": null
+      },
+      "note": "A consumer must tell 'declared, unresolvable here' from 'nobody declared': the first means ask the host, the second means fall back to your own knowledge. Collapsing them makes a fixed table answer a config-dependent question."
+    },
+    {
+      "id": "0204-user-input-is-dynamic",
+      "title": "`user_input` emits the keys its author defined, so it is dynamic too.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "three-state",
+        "dynamic"
+      ],
+      "input": {
+        "kind": "user_input",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": "dynamic",
+        "emits": null
+      }
+    },
+    {
+      "id": "0301-switch_case-relation",
+      "title": "`switch_case` declares the relation `input`.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits"
+      ],
+      "input": {
+        "kind": "switch_case",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": "input"
+      }
+    },
+    {
+      "id": "0302-output-relation",
+      "title": "`output` declares the relation `input`.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits"
+      ],
+      "input": {
+        "kind": "output",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": "input"
+      }
+    },
+    {
+      "id": "0303-human_approval-relation",
+      "title": "`human_approval` declares the relation `input`.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits"
+      ],
+      "input": {
+        "kind": "human_approval",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": "input"
+      }
+    },
+    {
+      "id": "0304-manual_trigger-relation",
+      "title": "`manual_trigger` declares the relation `input`.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits"
+      ],
+      "input": {
+        "kind": "manual_trigger",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": "input"
+      }
+    },
+    {
+      "id": "0305-variable-relation",
+      "title": "`variable` declares the relation `expression:value`.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits"
+      ],
+      "input": {
+        "kind": "variable",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": "expression:value"
+      }
+    },
+    {
+      "id": "0306-expression-relation-names-its-config-key",
+      "title": "An expression relation carries the config key it reads — `value`, not `expression`.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits",
+        "expression"
+      ],
+      "input": {
+        "kind": "variable",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": "expression:value"
+      },
+      "note": "A consumer hardcoding 'the field called expression' has copied the runtime's knowledge one level down, which is what carrying the key removes. `transform` reads `expression`; `variable` reads `value`."
+    },
+    {
+      "id": "0401-wait-nests-so-it-declares-a-list-and-no-relation",
+      "title": "`wait` NESTS its input under a key, so it declares fields and NO relation.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits",
+        "merge-or-nest"
+      ],
+      "input": {
+        "kind": "wait",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "duration",
+          "input",
+          "waited"
+        ],
+        "emits": null
+      },
+      "note": "A relation with no destination can only express a TOP-LEVEL merge. emits:'input' here would make a reader accept {{ in.<any inbound field> }} at top level, which resolves to nothing at run time. This row is why merge-or-nest must be read off the executor before a relation is assigned."
+    },
+    {
+      "id": "0402-schedule-trigger-composes-a-list-with-a-merge",
+      "title": "`schedule_trigger` declares BOTH, because its merge is genuinely top-level.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits",
+        "merge-or-nest"
+      ],
+      "input": {
+        "kind": "schedule_trigger",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": [
+          "cron",
+          "timezone"
+        ],
+        "emits": "inputs-merged"
+      },
+      "note": "Correct precisely where `wait` is not. It was undeclared until the relation existed: a partial ['cron','timezone'] list with nothing to say the inputs also merge is a false-rejection generator."
+    },
+    {
+      "id": "0403-webhook-trigger-is-data-dependent",
+      "title": "`webhook_trigger` declares no relation — its choice is DATA-dependent.",
+      "since": "0.19.0",
+      "tags": [
+        "surface",
+        "emits"
+      ],
+      "input": {
+        "kind": "webhook_trigger",
+        "config": {}
+      },
+      "expected": {
+        "outputShape": null,
+        "emits": null
+      },
+      "note": "`inputs.payload ?? inputs` cannot be answered from config, so no relation is honest. Under-claiming is free."
+    }
+  ]
+}
