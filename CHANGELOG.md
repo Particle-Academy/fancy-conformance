@@ -10,7 +10,46 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-08-26
+
+### Added
+
+- **Discrimination probes for `expr/evaluate` and `expr/references`** —
+  `tests/discrimination-expr.test.ts`. The `expr/evaluate` manifest had said
+  since 0.14.0 that this suite "needs DISCRIMINATION PROBES before it can claim
+  more than drift-guarding", and named three. They are written: six mutants over
+  `evaluate`, three over `references`, each asserting the **exact** set of ids it
+  breaks, plus a faithful control and a guard that no two mutants fail the same
+  rows.
+
+  It matters more here than elsewhere. `fancy-expr` exists *because*
+  `symfony/expression-language`, `expr-eval` and `simpleeval` disagree on these
+  semantics — a table all three would pass is evidence of nothing.
+
+- **`expr/evaluate/1101` — the loose spelling does not coerce either.**
+
 ### Fixed
+
+- **The suite could not catch a coercing `==`, while the manifest said it
+  could.** That claim — "one that coerces on `==` (must fail 0503)" — was false:
+  `0503` pins no-coercion using the **strict** spelling (`'3' === in.count`) and
+  `0502` compares two values equal either way. So an implementation whose `==`
+  coerced — **PHP's and JavaScript's native behaviour, and the likeliest port
+  mistake there is** — passed *every row in the suite*.
+
+  Prose beside a check, asserting what the check could not express. Found by
+  writing the probes the same manifest asked for, which is the only reason it
+  surfaced: the mutant failed nothing, and a mutant that fails nothing is a
+  table that is not looking.
+
+  `1101` is the row that makes the claim true. `0502` and `1101` are not
+  duplicates: the first asks whether the loose spelling is *accepted*, the
+  second whether it *coerces*, and a table with only the first reads as covering
+  equality while covering half of it.
+
+  The manifest's other two predictions were merely **incomplete** rather than
+  wrong — boolean `&&`/`||` also breaks `0402` and `1002`, and short-circuiting
+  `references` also breaks `0104`. Both are now pinned as exact id sets.
 
 - **`py.typed` was missing**, while `python/pyproject.toml` declared
   `Typing :: Typed`. A consumer running mypy against the installed package got
