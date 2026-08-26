@@ -10,6 +10,31 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- **The Python loader has a PyPI publish job. It never had one.** The workflow
+  was called *"Publish to npm"* — accurate, and exactly the problem.
+
+  This loader was promoted into this repo because FOUR consumers had each
+  hand-rolled it and two of their copies read `skip` as a scalar, silently
+  skipping every language. It has 29 tests and a required CI job. It has never
+  been installable: `pip install fancy-conformance` 404s, and every Python
+  consumer in the kit has to install it from a path.
+
+  So the fix for "four consumers wrote their own" shipped to none of them, and
+  nothing reported it — the npm and Packagist halves published fine, and a green
+  release is a green release.
+
+  It was found when `ship-it`'s preflight was taught that **a repo can publish
+  to more than one registry**. Before that it returned on the first manifest it
+  found and called this repo `ALREADY SHIPPED` having checked npm alone — a
+  verdict reading as full coverage while covering one registry of three, from
+  the tool written to prevent that.
+
+  **The PyPI name still needs the owner**: a pending publisher must be
+  configured before the first tag can claim it. Nothing publishes to PyPI until
+  that exists, so the job is armed rather than live.
+
 ## [0.17.0] - 2026-08-25
 
 ### Added

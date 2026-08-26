@@ -1,4 +1,4 @@
-name: Publish to npm
+name: Publish
 
 on:
   push:
@@ -149,3 +149,81 @@ jobs:
           # because some of these matrices run on windows-latest where a
           # multi-line run: block is PowerShell and rm -rf is not a command.
           node -e "require('node:fs').rmSync('.third-party-allowlist',{recursive:true,force:true})"
+
+  # ---------------------------------------------------------------------- #
+  # PyPI
+  #
+  # THIS JOB DID NOT EXIST UNTIL 2026-08-25, and the workflow was called
+  # "Publish to npm" -- accurate, and precisely the problem. The Python loader
+  # was promoted into this repo because FOUR consumers had each hand-rolled it
+  # and two of their copies had a silent bug. It has 29 tests and a required CI
+  # job. It has never been installable: `pip install fancy-conformance` 404s.
+  #
+  # So the fix for "four consumers wrote their own" shipped to nobody, and
+  # nothing reported it -- the npm and Packagist halves published fine, and a
+  # green release is a green release. Found when the ship-it preflight was
+  # taught that a repo can publish to more than one registry; before that it
+  # read the first manifest it found and called this repo ALREADY SHIPPED.
+  # ---------------------------------------------------------------------- #
+
+  # Build and publish are separate jobs so `id-token: write` is never held by
+  # the job that executes build code.
+  build-python:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Require a CHANGELOG entry for this tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          grep -qE "^## +\[?v?${version}\]?" CHANGELOG.md || {
+            echo "::error::No CHANGELOG.md entry for ${version}."
+            exit 1
+          }
+
+      # The Python package declares its own version, and it is the one that
+      # goes to PyPI -- so it, not just VERSION, must match the tag. The
+      # repo's `every manifest agrees with VERSION` test covers the other
+      # direction; this covers the tag.
+      - name: Require pyproject.toml to match the tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          grep -q "^version = \"${version}\"$" python/pyproject.toml || {
+            echo "::error::python/pyproject.toml does not declare ${version}."
+            exit 1
+          }
+
+      - name: Build
+        working-directory: python
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-dists
+          path: python/dist/
+
+  publish-python:
+    needs: build-python
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/fancy-conformance
+    permissions:
+      id-token: write        # mandatory for Trusted Publishing; there is no token
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-dists
+          path: dist/
+      # Pinned by SHA, not by tag: a mutable reference in exactly this position
+      # is what the April 2026 supply-chain compromises exploited.
+      # v1.14.2 -- no `password:` (that is the point), attestations default on.
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
