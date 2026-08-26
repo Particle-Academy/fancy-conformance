@@ -199,11 +199,36 @@ jobs:
             exit 1
           }
 
+      # `--sdist --wheel` EXPLICITLY, and it is not a style choice.
+      #
+      # Bare `python -m build` builds the sdist from the source tree and then
+      # the wheel FROM THAT SDIST. The wheel's `force-include` reaches OUTSIDE
+      # `python/` for the fixture tree (`../suites`, `../schema`, `../VERSION`),
+      # and inside an unpacked sdist there is no `..` to reach into -- the
+      # sdist's own force-include has already flattened them to its root. So
+      # build-via-sdist dies with `Forced include not found: .../VERSION`.
+      #
+      # Naming both targets builds each from the SOURCE TREE, where those paths
+      # resolve. This had never been caught because nothing has ever built this
+      # package -- it has no PyPI presence at all, which is the gap this job
+      # exists to close.
       - name: Build
         working-directory: python
         run: |
           python -m pip install --upgrade build
-          python -m build
+          python -m build --sdist --wheel
+
+      # Assert the artifacts actually CARRY the fixture tree. The fixtures are
+      # the product here; a wheel that builds cleanly and ships an EMPTY loader
+      # is the failure this repository argues against, and "the build
+      # succeeded" does not rule it out.
+      #
+      # A script rather than an inline check: a heredoc terminator cannot be
+      # indented inside a YAML `run:` block, and `>-` folding prefixes the
+      # command with a space that Python rejects. Both were tried.
+      - name: The artifacts carry the fixture tree
+        working-directory: python
+        run: python scripts/check_artifacts.py
 
       - uses: actions/upload-artifact@v4
         with:
