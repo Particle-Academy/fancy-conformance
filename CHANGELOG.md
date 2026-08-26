@@ -10,6 +10,53 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-08-25
+
+### Added
+
+- **`expr/evaluate` — the fancy-expr grammar, written BEFORE any implementation
+  of it exists.** 39 rows. Nothing satisfies them yet; each of the three ports
+  will be built against published rows rather than against another port's source.
+
+  Every previous flow suite was a post-mortem in fixture form — rows written once
+  all the runtimes had already shipped the same bug. This one is a
+  **specification**, which is the whole argument for owning the grammar: three
+  real expression libraries (`symfony/expression-language`, `expr-eval`,
+  `simpleeval`) exist and **disagree with each other**, so adopting them would
+  ship three subtly different languages under one syntax with nobody able to fix
+  the divergence.
+
+  The rows that carry the weight are the ones three languages would otherwise
+  drift on:
+
+  - **Truthiness (`0301`–`0305`).** `[]` and `{}` are **TRUTHY**, against PHP's
+    and Python's native instincts. The data arrived as JSON: an array that exists
+    is a value, and asking whether it is *empty* is what `.length` is for.
+  - **Equality (`0501`–`0503`).** `==` and `===` are the SAME operator and
+    neither coerces.
+  - **Short-circuit (`0401`–`0404`).** `&&` and `||` return the **operand**, not
+    a boolean — which is what makes `in.transcript || in.content` a fallback
+    rather than merely `true`.
+  - **Malformed fails (`0801`–`0805`).** Never `null`, because a null there is
+    indistinguishable from an absent path — the exact defect being removed. A
+    function call does not parse: sandboxing is a security property, since these
+    expressions arrive from end users and agents over the wire.
+
+  Row `0406` is a consumer's production condition verbatim — the one that
+  returned `null`, was read as `false` by `branch`, and routed a live graph the
+  wrong way on every run while reporting success.
+
+  Discrimination probes are NOT yet written, and the manifest says so, so the
+  green tick is not read as the stronger claim.
+
+### Removed
+
+- The `flow/expression-classification` suite added earlier the same day, before
+  it ever shipped. It classified an expression as `path` or `malformed`; the
+  design then settled on malformed expressions **throwing**, which `expr/evaluate`
+  pins directly. Two suites saying the same thing is the duplication this
+  repository exists to argue against.
+
 ## [0.13.0] - 2026-08-25
 
 ### Added

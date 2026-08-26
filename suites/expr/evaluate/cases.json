@@ -1,0 +1,1248 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "expr/evaluate",
+  "cases": [
+    {
+      "id": "0101-simple-path",
+      "title": "A dot-path resolves.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.content",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "hello"
+      }
+    },
+    {
+      "id": "0102-nested-path",
+      "title": "Nesting resolves.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "user.name",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "Ada"
+      }
+    },
+    {
+      "id": "0103-absent-path-is-null",
+      "title": "An absent path is null, NOT an error.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "the-point"
+      ],
+      "input": {
+        "expression": "in.nope",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": null
+      },
+      "notes": "The legitimate null, and the one this grammar keeps. A path that is absent today may be present tomorrow; that is not a malformed expression and must never throw."
+    },
+    {
+      "id": "0104-bracket-index",
+      "title": "A bracket index resolves.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.items[0]",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": 1
+      }
+    },
+    {
+      "id": "0105-absent-through-null",
+      "title": "Walking through a null yields null rather than throwing.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.transcript.anything",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": null
+      }
+    },
+    {
+      "id": "0201-number",
+      "title": "A number literal.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "42",
+        "context": {}
+      },
+      "expected": {
+        "ok": true,
+        "value": 42
+      }
+    },
+    {
+      "id": "0202-string",
+      "title": "A string literal.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "'hi'",
+        "context": {}
+      },
+      "expected": {
+        "ok": true,
+        "value": "hi"
+      }
+    },
+    {
+      "id": "0203-true",
+      "title": "true.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "true",
+        "context": {}
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      }
+    },
+    {
+      "id": "0204-false",
+      "title": "false.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "false",
+        "context": {}
+      },
+      "expected": {
+        "ok": true,
+        "value": false
+      }
+    },
+    {
+      "id": "0205-null",
+      "title": "null.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "null",
+        "context": {}
+      },
+      "expected": {
+        "ok": true,
+        "value": null
+      }
+    },
+    {
+      "id": "0301-empty-array-is-truthy",
+      "title": "An EMPTY ARRAY is truthy.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "truthiness",
+        "deliberate"
+      ],
+      "input": {
+        "expression": "in.empty ? 'yes' : 'no'",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "yes"
+      },
+      "notes": "Deliberate, and against PHP's and Python's native instincts, both of which call an empty container false. The data arrived as JSON: an array that EXISTS is a value, and asking whether it is empty is what `.length` is for. Conflating the two turns 'did we get results?' into 'did the call succeed?'."
+    },
+    {
+      "id": "0302-empty-object-is-truthy",
+      "title": "An EMPTY OBJECT is truthy, for the same reason.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "truthiness",
+        "deliberate"
+      ],
+      "input": {
+        "expression": "in.obj ? 'yes' : 'no'",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "yes"
+      }
+    },
+    {
+      "id": "0303-zero-is-falsy",
+      "title": "0 is falsy.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "truthiness"
+      ],
+      "input": {
+        "expression": "in.zero ? 'yes' : 'no'",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "no"
+      }
+    },
+    {
+      "id": "0304-empty-string-is-falsy",
+      "title": "An empty string is falsy.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "truthiness"
+      ],
+      "input": {
+        "expression": "in.blank ? 'yes' : 'no'",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "no"
+      }
+    },
+    {
+      "id": "0305-null-is-falsy",
+      "title": "null is falsy.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "truthiness"
+      ],
+      "input": {
+        "expression": "in.transcript ? 'yes' : 'no'",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "no"
+      }
+    },
+    {
+      "id": "0401-or-returns-the-operand",
+      "title": "`||` returns the OPERAND, not a boolean.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "short-circuit"
+      ],
+      "input": {
+        "expression": "in.transcript || in.content",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "hello"
+      },
+      "notes": "What makes `||` useful rather than merely true. The reported production case wrote exactly this shape to fall back from a missing transcript to the content, and got null."
+    },
+    {
+      "id": "0402-or-short-circuits",
+      "title": "`||` yields the left operand when truthy.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.content || in.nope",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "hello"
+      }
+    },
+    {
+      "id": "0403-and-returns-the-operand",
+      "title": "`&&` returns the right operand when the left is truthy.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.content && in.deal_id",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "D-1"
+      }
+    },
+    {
+      "id": "0404-and-short-circuits",
+      "title": "`&&` yields the left operand when falsy.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.zero && in.content",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": 0
+      }
+    },
+    {
+      "id": "0405-not",
+      "title": "`!` yields a boolean.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "!in.transcript",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      }
+    },
+    {
+      "id": "0406-the-reported-condition",
+      "title": "The exact condition that silently routed a production graph the wrong way.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "regression",
+        "the-point"
+      ],
+      "input": {
+        "expression": "in.deal_id && in.deal_id !== ''",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      },
+      "notes": "Verbatim from the report. It returned null, `branch` read that as false, and the graph took the wrong road on EVERY run while reporting success."
+    },
+    {
+      "id": "0501-strict-equal",
+      "title": "`===` compares by value without coercion.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.count === 3",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      }
+    },
+    {
+      "id": "0502-double-equals-is-the-same",
+      "title": "`==` is the SAME operator as `===`.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "deliberate"
+      ],
+      "input": {
+        "expression": "in.count == 3",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      },
+      "notes": "Both spellings are accepted because authors write both, and NEITHER coerces. A language with two equality operators that differ subtly generates bug reports, and there are three runtimes to keep in step."
+    },
+    {
+      "id": "0503-no-coercion",
+      "title": "A string is never equal to a number.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "deliberate"
+      ],
+      "input": {
+        "expression": "'3' === in.count",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": false
+      }
+    },
+    {
+      "id": "0504-not-equal",
+      "title": "`!==` negates it.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.count !== 4",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      }
+    },
+    {
+      "id": "0601-greater-than",
+      "title": "Numeric comparison.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.count > 2",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      }
+    },
+    {
+      "id": "0602-less-or-equal",
+      "title": "Inclusive comparison.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.count <= 3",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      }
+    },
+    {
+      "id": "0603-addition",
+      "title": "`+` on two numbers adds.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.count + 1",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": 4
+      }
+    },
+    {
+      "id": "0604-string-concat",
+      "title": "`+` with a string concatenates.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "'n=' + in.count",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "n=3"
+      }
+    },
+    {
+      "id": "0605-unary-minus",
+      "title": "Unary minus.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "-in.count",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": -3
+      }
+    },
+    {
+      "id": "0701-ternary",
+      "title": "A ternary picks a branch.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "in.count > 2 ? 'big' : 'small'",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": "big"
+      }
+    },
+    {
+      "id": "0702-object-literal",
+      "title": "An object literal builds a value.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "regression"
+      ],
+      "input": {
+        "expression": "{ transcript: in.content }",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": {
+          "transcript": "hello"
+        }
+      },
+      "notes": "The shape an agent authoring a graph reaches for first, and the one that used to yield null."
+    },
+    {
+      "id": "0703-array-literal",
+      "title": "An array literal builds a value.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "[in.count, 'x']",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": [
+          3,
+          "x"
+        ]
+      }
+    },
+    {
+      "id": "0704-parens",
+      "title": "Parentheses group.",
+      "since": "0.14.0",
+      "tags": [
+        "expr"
+      ],
+      "input": {
+        "expression": "(1 + 2) * 1 === 3",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": true
+      }
+    },
+    {
+      "id": "0801-unclosed-string",
+      "title": "An unterminated string does not parse.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "malformed",
+        "the-point"
+      ],
+      "input": {
+        "expression": "'oops",
+        "context": {}
+      },
+      "expected": {
+        "ok": false
+      },
+      "notes": "Malformed expressions must FAIL, never return null. A null here would be indistinguishable from an absent path, which is the entire defect this package exists to remove."
+    },
+    {
+      "id": "0802-dangling-operator",
+      "title": "A dangling operator does not parse.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "malformed"
+      ],
+      "input": {
+        "expression": "in.count &&",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": false
+      }
+    },
+    {
+      "id": "0803-unclosed-paren",
+      "title": "An unclosed paren does not parse.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "malformed"
+      ],
+      "input": {
+        "expression": "(1 + 2",
+        "context": {}
+      },
+      "expected": {
+        "ok": false
+      }
+    },
+    {
+      "id": "0804-empty-expression",
+      "title": "An empty expression does not parse.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "malformed"
+      ],
+      "input": {
+        "expression": "",
+        "context": {}
+      },
+      "expected": {
+        "ok": false
+      }
+    },
+    {
+      "id": "0805-no-function-calls",
+      "title": "A call does not parse — this is not a programming language.",
+      "since": "0.14.0",
+      "tags": [
+        "expr",
+        "malformed",
+        "sandbox"
+      ],
+      "input": {
+        "expression": "count(in.items)",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": false
+      },
+      "notes": "Sandboxing is a security property, not a style preference: these expressions arrive from end users and from agents, over the wire. No calls, no host reach, in any implementation."
+    }
+  ]
+}

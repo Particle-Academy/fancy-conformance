@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "expr/evaluate",
+  "title": "The fancy-expr grammar — what an expression evaluates to",
+  "since": "0.14.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "evaluate(expression: string, context: object) -> { ok: true, value: json } | { ok: false }",
+    "summary": "Parse and evaluate one expression against a context. `{ ok: true, value }` when it evaluates; `{ ok: false }` when it cannot PARSE. An expression that parses but whose path is absent is `{ ok: true, value: null }` — absence and malformity are different outcomes and the distinction is the reason this package exists. Evaluation is total otherwise: it never reaches the host, never calls anything, and never throws for missing data.",
+    "reference": "node",
+    "referenceNote": "No implementation exists yet in any language. This table is written FIRST and every implementation is built against it, which is the whole argument for owning the grammar rather than adopting three libraries that disagree.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-expr", "symbol": "evaluate" },
+      { "language": "php", "package": "particle-academy/fancy-expr", "symbol": "FancyExpr\\Expr::evaluate" },
+      { "language": "python", "package": "fancy-expr", "symbol": "fancy_expr.evaluate" }
+    ]
+  },
+  "notes": [
+    "WRITTEN BEFORE ANY IMPLEMENTATION. Every previous flow suite was a post-mortem in fixture form — rows written after all the runtimes had already shipped the same bug. This one is a specification: nothing satisfies it yet, and each port will be built against published rows rather than against another port's source. The one time that was done before (flow/workflow-props) the second implementation failed exactly one row on its first run, and the row turned out to describe a genuine cross-language limit rather than a mistake.",
+    "THE DEFECT THIS REPLACES. fancy-flow's `{{ }}` resolved dot-paths ONLY and returned null for everything else — the same null a real-but-absent path returns. Indistinguishable, so a condition the engine could not evaluate silently read as FALSE: `branch` took the wrong road on every run and the run reported success. A consumer lost a production workflow to it and found it only by reading the resolver's source. Row 0406 is their condition verbatim.",
+    "TRUTHINESS IS THE ROW SET THAT MATTERS MOST (0301-0305), because it is where three languages disagree natively and where a silent divergence is most expensive. `[]` and `{}` are TRUTHY here — against PHP's and Python's instincts, both of which call an empty container false. The data arrived as JSON: an array that exists is a value, and asking whether it is EMPTY is what `.length` is for. Conflating the two turns 'did we get results?' into 'did the call succeed?'.",
+    "`==` AND `===` ARE THE SAME OPERATOR (0501-0503), and neither coerces. Both spellings are accepted because authors write both. Two equality operators that differ subtly is a language that generates bug reports, and there are three runtimes to keep in step.",
+    "`&&` AND `||` RETURN THE OPERAND, NOT A BOOLEAN (0401-0404). That is what makes `in.transcript || in.content` a useful fallback rather than merely `true` — and the reported production case wrote exactly that shape.",
+    "MALFORMED EXPRESSIONS FAIL (0801-0805) and never return null. A null there would be indistinguishable from an absent path, which is the defect being removed. 0805 pins that a function call does not parse: sandboxing is a security property here, not a style preference, because these expressions arrive from end users and from agents over the wire.",
+    "This suite needs DISCRIMINATION PROBES before it can claim more than drift-guarding — deliberately-wrong evaluators that must each fail an exact set of ids. Notably: one that uses native truthiness (must fail 0301/0302), one that coerces on `==` (must fail 0503), and one that returns booleans from `&&`/`||` (must fail 0401/0403/0404). Not yet written; recorded so a green tick is not read as the stronger claim."
+  ]
+}
