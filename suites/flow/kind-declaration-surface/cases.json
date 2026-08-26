@@ -290,8 +290,9 @@
       },
       "expected": {
         "outputShape": null,
-        "emits": "input"
-      }
+        "emits": "input-map-merged"
+      },
+      "note": "`input-map-merged`, not `input` or `inputs-merged`. This kind merges the raw input MAP, whose shape depends on POSITION: collectInputs seeds an entry node flat and keys every other node by handle, so the same kind with an inbound edge emits {cron, timezone, in: {...}}. `merge` unions each port's PAYLOAD, which is a different operation -- two names rather than one name plus a positional rule a reader has to know."
     },
     {
       "id": "0305-variable-relation",
@@ -370,9 +371,9 @@
           "cron",
           "timezone"
         ],
-        "emits": "inputs-merged"
+        "emits": "input-map-merged"
       },
-      "note": "Correct precisely where `wait` is not. It was undeclared until the relation existed: a partial ['cron','timezone'] list with nothing to say the inputs also merge is a false-rejection generator."
+      "note": "`input-map-merged`, not `input` or `inputs-merged`. This kind merges the raw input MAP, whose shape depends on POSITION: collectInputs seeds an entry node flat and keys every other node by handle, so the same kind with an inbound edge emits {cron, timezone, in: {...}}. `merge` unions each port's PAYLOAD, which is a different operation -- two names rather than one name plus a positional rule a reader has to know."
     },
     {
       "id": "0403-webhook-trigger-is-data-dependent",

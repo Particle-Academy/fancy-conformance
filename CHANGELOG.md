@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Pre-1.0, breaking changes land in MINOR releases.** The version number is not
 promising otherwise until 1.0.
 
+## [0.20.0] - 2026-08-26
+
+### Changed
+
+- **`manual_trigger` and `schedule_trigger` now declare `input-map-merged`, not
+  `input` / `inputs-merged`.** They merge the raw input MAP; `merge` unions each
+  port's PAYLOAD. Those coincide **only at an entry point**, because
+  `collectInputs` seeds an entry node FLAT and keys every other node by handle.
+
+  Give a `schedule_trigger` an inbound edge — a subflow where the trigger is
+  also a target — and it emits `{cron, timezone, in: {...}}`. One keyword
+  covering both over-permitted `{{ in.<upstream field> }}` when the real path is
+  `{{ in.in.<field> }}`.
+
+  **Two names because they are two operations**, rather than one name plus a
+  positional rule the reader has to know. Named by the reference consumer, who
+  found the boundary by reading `$ctx->inputs`'s two shapes rather than the
+  relation's description.
+
 ## [0.19.0] - 2026-08-26
 
 ### Added
