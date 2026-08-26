@@ -10,6 +10,28 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-08-25
+
+### Added
+
+- **`.length` in `expr/evaluate` (rows `0901`–`0905`)** — the grammar's one
+  pseudo-property, on arrays and strings.
+
+  It is load-bearing rather than convenient. Because `[]` is **truthy**
+  (row `0301`), a consumer without `.length` would have **no way to ask whether a
+  collection is empty** — the grammar would assert that an array which exists is
+  a value and then leave nobody able to test the thing they actually care about.
+
+  A computed count, not host reach: nothing is called and no prototype walked.
+  `0905` pins that nothing else on the chain resolves, and `0904` pins that
+  objects deliberately have none, since no count would survive three languages.
+
+  **These rows exist because writing the reference implementation's
+  discrimination tests found the SPEC contradicting the CODE.** The truthiness
+  rule was justified with `.length` while `.length` returned `null` — prose
+  promising what the code did not do, in a package written the same hour. Exactly
+  the failure this corpus argues against, caught by the practice it argues for.
+
 ## [0.14.0] - 2026-08-25
 
 ### Added

@@ -1243,6 +1243,192 @@
         "ok": false
       },
       "notes": "Sandboxing is a security property, not a style preference: these expressions arrive from end users and from agents, over the wire. No calls, no host reach, in any implementation."
+    },
+    {
+      "id": "0901-array-length",
+      "title": "`.length` counts an array.",
+      "since": "0.15.0",
+      "tags": [
+        "expr",
+        "length"
+      ],
+      "input": {
+        "expression": "in.items.length",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": 2
+      },
+      "notes": "The one pseudo-property, and it is load-bearing: `[]` is TRUTHY (0301), so without `.length` a consumer has no way to ask whether a collection is empty. The grammar would assert that an array which exists is a value and then leave nobody able to test the thing they care about."
+    },
+    {
+      "id": "0902-empty-array-length",
+      "title": "An empty array has length 0 while still being truthy.",
+      "since": "0.15.0",
+      "tags": [
+        "expr",
+        "length"
+      ],
+      "input": {
+        "expression": "in.empty.length",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": 0
+      },
+      "notes": "The pair that makes the truthiness decision coherent: truthy AND countable. An implementation that made [] falsy would pass this row and fail 0301."
+    },
+    {
+      "id": "0903-string-length",
+      "title": "`.length` counts a string.",
+      "since": "0.15.0",
+      "tags": [
+        "expr",
+        "length"
+      ],
+      "input": {
+        "expression": "in.content.length",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": 5
+      }
+    },
+    {
+      "id": "0904-object-has-no-length",
+      "title": "An object has NO `.length`.",
+      "since": "0.15.0",
+      "tags": [
+        "expr",
+        "length",
+        "deliberate"
+      ],
+      "input": {
+        "expression": "in.obj.length",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": null
+      },
+      "notes": "Deliberate. There is no count three languages would agree on for an object, and an object used as a collection is rare enough not to justify inventing one. Null here is the ordinary absent-path answer, not a special case."
+    },
+    {
+      "id": "0905-length-is-not-host-reach",
+      "title": "No other host property is reachable.",
+      "since": "0.15.0",
+      "tags": [
+        "expr",
+        "length",
+        "sandbox"
+      ],
+      "input": {
+        "expression": "in.items.constructor",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": null
+      },
+      "notes": "`.length` is a computed count, not an opening. Nothing else on the prototype chain resolves -- these expressions arrive from end users and from agents, over the wire."
     }
   ]
 }

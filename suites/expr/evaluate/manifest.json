@@ -11,9 +11,21 @@
     "reference": "node",
     "referenceNote": "No implementation exists yet in any language. This table is written FIRST and every implementation is built against it, which is the whole argument for owning the grammar rather than adopting three libraries that disagree.",
     "implementations": [
-      { "language": "node", "package": "@particle-academy/fancy-expr", "symbol": "evaluate" },
-      { "language": "php", "package": "particle-academy/fancy-expr", "symbol": "FancyExpr\\Expr::evaluate" },
-      { "language": "python", "package": "fancy-expr", "symbol": "fancy_expr.evaluate" }
+      {
+        "language": "node",
+        "package": "@particle-academy/fancy-expr",
+        "symbol": "evaluate"
+      },
+      {
+        "language": "php",
+        "package": "particle-academy/fancy-expr",
+        "symbol": "FancyExpr\\Expr::evaluate"
+      },
+      {
+        "language": "python",
+        "package": "fancy-expr",
+        "symbol": "fancy_expr.evaluate"
+      }
     ]
   },
   "notes": [
@@ -23,6 +35,7 @@
     "`==` AND `===` ARE THE SAME OPERATOR (0501-0503), and neither coerces. Both spellings are accepted because authors write both. Two equality operators that differ subtly is a language that generates bug reports, and there are three runtimes to keep in step.",
     "`&&` AND `||` RETURN THE OPERAND, NOT A BOOLEAN (0401-0404). That is what makes `in.transcript || in.content` a useful fallback rather than merely `true` — and the reported production case wrote exactly that shape.",
     "MALFORMED EXPRESSIONS FAIL (0801-0805) and never return null. A null there would be indistinguishable from an absent path, which is the defect being removed. 0805 pins that a function call does not parse: sandboxing is a security property here, not a style preference, because these expressions arrive from end users and from agents over the wire.",
-    "This suite needs DISCRIMINATION PROBES before it can claim more than drift-guarding — deliberately-wrong evaluators that must each fail an exact set of ids. Notably: one that uses native truthiness (must fail 0301/0302), one that coerces on `==` (must fail 0503), and one that returns booleans from `&&`/`||` (must fail 0401/0403/0404). Not yet written; recorded so a green tick is not read as the stronger claim."
+    "This suite needs DISCRIMINATION PROBES before it can claim more than drift-guarding — deliberately-wrong evaluators that must each fail an exact set of ids. Notably: one that uses native truthiness (must fail 0301/0302), one that coerces on `==` (must fail 0503), and one that returns booleans from `&&`/`||` (must fail 0401/0403/0404). Not yet written; recorded so a green tick is not read as the stronger claim.",
+    "`.length` (0901-0905) IS the one pseudo-property, and it is load-bearing rather than convenient. Because `[]` is TRUTHY, a consumer with no `.length` would have no way to ask whether a collection is EMPTY -- the grammar would assert that an array which exists is a value and then leave nobody able to test the thing they care about. It is a computed count, not host reach: nothing is called and no prototype is walked, and 0905 pins that nothing else on the chain resolves. Objects deliberately have none (0904), since no count would survive three languages. These rows were added after writing the reference implementation's discrimination tests found the SPEC contradicting the CODE -- the truthiness rule was justified with `.length` while `.length` returned null."
   ]
 }
