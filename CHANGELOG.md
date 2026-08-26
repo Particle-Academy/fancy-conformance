@@ -12,6 +12,17 @@ promising otherwise until 1.0.
 
 ### Fixed
 
+- **`py.typed` was missing**, while `python/pyproject.toml` declared
+  `Typing :: Typed`. A consumer running mypy against the installed package got
+  `cannot be type checked due to missing py.typed marker` and **no type
+  information at all** — metadata claiming what the wheel did not carry.
+
+  Six of the kit's eight Python packages ship the marker. The two that did not
+  are this repo and `fancy-expr` — the only two where Python lives in `python/`
+  rather than at the repository root. It passes locally because
+  `mypy_path = src` checks the SOURCE; only a check against the INSTALLED
+  package asks the question a consumer asks.
+
 - **The Python loader has a PyPI publish job. It never had one.** The workflow
   was called *"Publish to npm"* — accurate, and exactly the problem.
 
