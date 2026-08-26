@@ -1545,6 +1545,43 @@
         "ok": true,
         "value": ""
       }
+    },
+    {
+      "id": "1101-loose-spelling-does-not-coerce",
+      "title": "The LOOSE spelling does not coerce either -- '3' == 3 is false.",
+      "since": "0.18.0",
+      "tags": [
+        "expr",
+        "equality"
+      ],
+      "notes": "BELONGS WITH 0501-0504 and is numbered here only because ids are never renumbered. It exists because the mutant harness found the table could not do what this manifest claimed it did. 0503 pins no-coercion using the STRICT spelling ('3' === in.count) and 0502 compares two values that are equal anyway -- so a runtime whose `==` coerced, which is PHP's and JavaScript's native behaviour and the single most likely port mistake, passed every row. The manifest said a coercing probe 'must fail 0503'. It failed nothing. Prose beside a check, asserting what the check could not express.",
+      "input": {
+        "expression": "'3' == in.count",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": false
+      }
     }
   ]
 }
