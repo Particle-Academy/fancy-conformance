@@ -1390,7 +1390,10 @@
         "ok": true,
         "value": null
       },
-      "notes": "Deliberate. There is no count three languages would agree on for an object, and an object used as a collection is rare enough not to justify inventing one. Null here is the ordinary absent-path answer, not a special case."
+      "notes": "Deliberate. There is no count three languages would agree on for an object, and an object used as a collection is rare enough not to justify inventing one. Null here is the ordinary absent-path answer, not a special case. PHP cannot represent this case; see its skip reason and 0906.",
+      "skip": {
+        "php": "Not representable in PHP. json_decode('{}', true) and json_decode('[]', true) produce the IDENTICAL value, and array_is_list() calls both a list -- so an EMPTY object cannot be distinguished from an empty array, and the `.length` an empty array legitimately has is returned. The same limit shared/value-equality/0210 records. 0906 pins the same rule with a NON-EMPTY object, which every language can express."
+      }
     },
     {
       "id": "0905-length-is-not-host-reach",
@@ -1429,6 +1432,44 @@
         "value": null
       },
       "notes": "`.length` is a computed count, not an opening. Nothing else on the prototype chain resolves -- these expressions arrive from end users and from agents, over the wire."
+    },
+    {
+      "id": "0906-non-empty-object-has-no-length",
+      "title": "A NON-EMPTY object has no `.length` either.",
+      "since": "0.16.0",
+      "tags": [
+        "expr",
+        "length",
+        "deliberate"
+      ],
+      "input": {
+        "expression": "user.length",
+        "context": {
+          "in": {
+            "content": "hello",
+            "count": 3,
+            "deal_id": "D-1",
+            "transcript": null,
+            "items": [
+              1,
+              2
+            ],
+            "empty": [],
+            "obj": {},
+            "flag": true,
+            "zero": 0,
+            "blank": ""
+          },
+          "user": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "value": null
+      },
+      "notes": "The companion to 0904, and the form every runtime can express. PHP cannot distinguish an EMPTY object from an empty array -- both decode to the same value and both read as a list -- so 0904 is skipped there. A non-empty object is unambiguous in all three, which keeps the rule pinned rather than merely skipped. Same shape as flow/workflow-props 0106/0109."
     }
   ]
 }

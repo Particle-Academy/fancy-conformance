@@ -10,6 +10,35 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-08-25
+
+### Changed
+
+- **`expr/evaluate/0904` is now skipped for PHP, and `0906` pins the same rule in
+  a form every runtime can express.** The table earned its keep on the first
+  independent implementation, exactly as its manifest predicted.
+
+  The PHP port — written against these published rows rather than against the
+  TypeScript source — failed **1 of 44** on its first run: `0904`, that an object
+  has no `.length`.
+
+  It is **not a bug in the port.** `json_decode('{}', true)` and
+  `json_decode('[]', true)` produce the *identical value* in PHP, and
+  `array_is_list()` calls both a list. So an EMPTY object cannot be distinguished
+  from an empty array, and the `.length` an empty array legitimately has is
+  returned. A genuine cross-language expressiveness limit — the same one
+  `shared/value-equality/0210` already records.
+
+  Skipped there with that reason attached, and `0906` pins the identical rule
+  using a **non-empty** object, which is unambiguous everywhere. Two rows, one
+  rule, divergence documented rather than discovered — the same shape as
+  `flow/workflow-props` `0106`/`0109`.
+
+  This is the argument for writing the table first, in one paragraph: a port
+  built against a specification found a real limit of its own language on day
+  one, instead of quietly encoding it as behaviour for someone to trip over
+  later.
+
 ## [0.15.0] - 2026-08-25
 
 ### Added
