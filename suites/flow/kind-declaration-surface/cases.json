@@ -183,7 +183,10 @@
         "outputShape": null,
         "emits": null
       },
-      "note": "It emits a LIST, whose elements are not addressable as top-level fields. [] would claim 'emits no fields', which is false and would refuse every reference."
+      "note": "It emits a LIST, whose elements are not addressable as top-level fields. [] would claim 'emits no fields', which is false and would refuse every reference.",
+      "skip": {
+        "rust": "fancy-flow-rs cannot resolve a config-dependent relation in-process: NodeKind derives Clone + PartialEq, so it carries EmitsRelation::Dynamic as a MARKER rather than a closure. It answers \"dynamic\" here -- which is honest and is NOT null: null claims nobody declared, about a kind that has. Requiring null would force it either to fail forever or to lie. Every other row in this table runs on Rust; this is the one question it cannot be asked."
+      }
     },
     {
       "id": "0203-llm-call-is-dynamic",
