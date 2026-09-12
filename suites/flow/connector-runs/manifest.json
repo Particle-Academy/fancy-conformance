@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/connector-runs",
+  "title": "A connector node inside a running graph: the same WorkflowSchema in, the same published fields out",
+  "since": "0.21.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "runConnectorGraph(schema: WorkflowSchema, runIdentity: RunIdentity) -> { ok: true, outputs: object } | { ok: false, error: string }",
+    "summary": "Import a WorkflowSchema v1 document STRICTLY against the HOST's kind registry — with a connector package's kinds and executors registered by that package's own registrar — run it with a supplied run identity, and return the run's outputs. Every connector node runs in fake mode, so the suite reaches no network by construction.",
+    "reference": "authored",
+    "referenceNote": "The expectations are read off the provider's own faker fixture (providers/stripe/provider/fixtures/customer-create.json in weaver.agi), NOT captured from any runtime. `created: 1767225600` is a literal in that fixture: an engine fabricating plausible customer data cannot produce it, and a faker that drifts stops producing it. `email` and `name` come from the node's CONFIG, which is how a connector proves it read the graph rather than its own defaults. `id` cannot be authored — it is drawn from the seeded sequence — so it is pinned by shape and by determinism instead. Authored by the connector lab (weaver) and landed here rather than held privately, so the lab and this suite cannot hold two goldens that disagree.",
+    "implementations": [
+      {
+        "language": "php",
+        "package": "particle-academy/stripe-php",
+        "symbol": "ParticleAcademy\\Stripe\\Flow\\StripeFlow::register(NodeKindRegistry, ExecutorRegistry)",
+        "engine": "particle-academy/fancy-flow-php >=0.51"
+      },
+      {
+        "language": "node",
+        "package": "@particle-academy/stripe-js",
+        "symbol": "STRIPE_RUNNABLE_KINDS from \"@particle-academy/stripe-js/flow\" (executor attached to each kind)",
+        "engine": "@particle-academy/fancy-flow >=0.69"
+      },
+      {
+        "language": "python",
+        "package": "fancy-stripe",
+        "symbol": "fancy_stripe.flow.register(kinds, executors), discovered through the fancy_flow.nodes entry point",
+        "engine": "fancy-flow >=0.19",
+        "status": "not-yet-implemented"
+      }
+    ]
+  },
+  "notes": [
+    "WHY THIS IS NOT `flow/graph-runs`. That suite's contract specifies a LENIENT import, a LOCAL kind registry carrying only the built-in and structural kinds, and the built-in offline executors. A connector kind is none of those. A connector case dropped into graph-runs would not be red-until-an-implementation-catches-up — it would be red against a contract that excludes it, permanently, which is not what \"lands here first, red\" means. This suite exists to state the different prerequisite out loud: its runners CARRY the connector packages.",
+
+    "IMPORT IS STRICT HERE, and graph-runs is lenient. That difference is deliberate and worth stating rather than inheriting: a document one engine accepts and another refuses is not one document. It is also live — `fancy-flow-php`'s `FancyFlowManager::toGraph()` forces `lenient: true` on every `run()` caller while the TypeScript and Python twins default strict, so the same versionless graph runs in Laravel and is refused by the editor meant to edit it. Ungating the version check is queued on the PHP side; until it lands, a PHP runner for this suite must call the strict import path explicitly rather than going through `run()`.",
+
+    "A RUN IDENTITY MUST BE SUPPLIED. The connector derives an idempotency key from it, and some connectors refuse to write without one — so a runner that omits it is not exercising the same code path. Derive it from the graph so every runner sends the same key; the reference derivation is `\"lab\" + sha256(canonical json)[0:8]`. That was originally kept short to dodge a defect in `fancy-connector-core` — `Idempotency::fit()` clamped only at the 255-character catalogue ceiling and never at the provider's own declared `idempotencyMaxLength`, so Discord (25) refused a legitimate 29-character key. Fixed in fancy-connector-core 0.4.0; the short derivation is kept here because a stable short key is good practice, not because it is still required.",
+
+    "THIS SUITE ASSERTS NAMED PATHS, NOT THE WHOLE OUTPUTS OBJECT, and that is weaker than graph-runs in one specific way: an extra key a runtime publishes at `out` will not fail a case. It is done this way because `out.data.id` is drawn from the faker's seeded sequence and cannot be authored, so a whole-object equality would have to pin a value nobody wrote down. Read the green tick as \"every named field agrees\", not \"the outputs are identical\". The softer whole-object claim is recorded in the case's own notes where it has been measured.",
+
+    "ABSENT IS NOT NULL. A path that was never published FAILS its check rather than comparing equal to null. A runner that skipped the connector entirely and published nothing at `out` must not satisfy any expectation — and without this rule it would satisfy several, because a missing path and a null value are the same value in three of the four languages here.",
+
+    "STRICT EQUALITY ON TYPES. `\"1767225600\"` is not `1767225600`. A runtime that stringifies its numbers on the way out must fail, and one of the discrimination probes is exactly that mutation.",
+
+    "PYTHON IS RED ON PURPOSE and its row is kept rather than removed. `fancy-stripe` ships no `flow` module yet — the Python executors are owner-ordered after the real `fancy-connector-core` Python package — so the entry point the engine now discovers (`fancy_flow.nodes`, added in fancy-flow 0.19.0) finds nothing to register. A removed row would say the language is not part of the contract; a red one says it is and has not arrived. That is the shape \"lands here first, red\" is supposed to have.",
+
+    "DISCRIMINATION PROBES EXIST for this suite, in `tests/discrimination-connector-runs.test.ts`, and they are the reason the case asserts `name` as well as `email`. The graph's email happens to equal the faker fixture's own default, so a connector that ignored its config entirely would still publish the right email — `name` has no default and is what actually discriminates. That defect was in the authored golden before the probes were written, which is the argument for writing them at all."
+  ]
+}

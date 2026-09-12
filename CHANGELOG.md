@@ -8,6 +8,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Pre-1.0, breaking changes land in MINOR releases.** The version number is not
 promising otherwise until 1.0.
 
+## [0.21.0] - 2026-09-12
+
+### Added
+
+- **`flow/connector-runs` — a connector node inside a running graph.** One case
+  so far, `0001-stripe-customer-fake`: `manual_trigger → stripe_customer (fake)
+  → output`, asserting the fields the faker AUTHORED and the fields the node's
+  own CONFIG supplied.
+
+  Authored by the connector lab and landed here rather than held privately, so
+  the lab and this suite cannot end up holding two goldens that disagree — which
+  is the whole property this repository sells.
+
+  **It is a separate suite from `flow/graph-runs` on purpose.** That contract
+  specifies a lenient import, a LOCAL registry of built-in and structural kinds,
+  and the built-in offline executors. A connector kind is none of those, so a
+  connector case dropped in there would be red against a contract that excludes
+  it — permanently, which is not what "lands here first, red" means. This
+  suite's `contract.implementations` names the packages a runner must carry.
+
+  `created: 1767225600` is a literal in the provider's faker fixture, not a
+  captured value: an engine fabricating plausible customer data cannot produce
+  it, and a faker that drifts stops producing it. `out.data.id` cannot be
+  authored, so it is pinned by shape (`^cus_fake_[0-9a-f]{12}$`) and by
+  determinism. The `_fake_` infix is deliberate — a faked id indistinguishable
+  from a real one is the reassuring reading.
+
+  **The Python row is SKIPPED WITH A REASON rather than removed.** `fancy-stripe`
+  ships no `flow` module yet, so the `fancy_flow.nodes` entry point finds nothing
+  to register. A removed row would say the language is not part of the contract;
+  a skipped one says it is and has not arrived.
+
+- **Discrimination probes for it**, in `tests/discrimination-connector-runs.test.ts`
+  — a faithful control plus five mutants, each asserting the EXACT set of paths
+  it breaks: a plausible id with no `_fake_` infix, a freshly generated
+  `created`, an executor that ignores its config, a skipped node, and a
+  stringified number.
+
+  **The third one found a hole in the golden before it landed.** The case
+  originally asserted `email` alone, and the graph's email coincides with the
+  faker fixture's own default — so a connector that never read the graph would
+  have passed. `name` has no default, so it discriminates and is now asserted
+  too. That is the argument for writing probes rather than recording that you
+  should: this table would have shipped green and hollow.
+
+  `flow/graph-runs` still has none, and that remains a stated gap rather than an
+  oversight — the implementation under test there is an entire workflow engine.
+
+### Changed
+
+- **This suite asserts NAMED PATHS, not the whole outputs object**, which is
+  weaker than `graph-runs` in one specific way: an extra key a runtime publishes
+  will not fail a case. The manifest says so, because `out.data.id` is drawn
+  from a seeded sequence and a whole-object equality would have to pin a value
+  nobody wrote down. Read its green as "every named field agrees".
+
 ## [0.20.0] - 2026-08-26
 
 ### Changed

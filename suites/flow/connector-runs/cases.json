@@ -1,0 +1,96 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/connector-runs",
+  "cases": [
+    {
+      "id": "0001-stripe-customer-fake",
+      "title": "A Stripe customer node in fake mode publishes the faker's authored fields and the node's own config.",
+      "since": "0.21.0",
+      "tags": ["connector", "stripe", "fake", "idempotency"],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "name": "Stripe customer (fake)",
+          "graph": {
+            "nodes": [
+              {
+                "id": "start",
+                "kind": "@particle-academy/manual_trigger",
+                "label": "Run it",
+                "config": {},
+                "position": { "x": 0, "y": 0 }
+              },
+              {
+                "id": "customer",
+                "kind": "@particle-academy/stripe_customer",
+                "label": "Create the customer",
+                "config": {
+                  "mode": "fake",
+                  "email": "ada@example.test",
+                  "name": "Ada Lovelace"
+                },
+                "position": { "x": 280, "y": 0 }
+              },
+              {
+                "id": "out",
+                "kind": "@particle-academy/output",
+                "label": "Result",
+                "config": {},
+                "position": { "x": 560, "y": 0 }
+              }
+            ],
+            "edges": [
+              {
+                "id": "start-customer",
+                "source": "start",
+                "target": "customer",
+                "sourceHandle": "out",
+                "targetHandle": "in"
+              },
+              {
+                "id": "customer-out",
+                "source": "customer",
+                "target": "out",
+                "sourceHandle": "out",
+                "targetHandle": "in"
+              }
+            ]
+          }
+        },
+        "initialInputs": {},
+        "runIdentity": {
+          "derivation": "\"lab\" + sha256(canonical json of input.schema)[0:8]",
+          "note": "Supplied, not optional. The connector derives its idempotency key from this, and some connectors refuse to write without one — a runner that omits it exercises a different path."
+        }
+      },
+      "expected": {
+        "ok": true,
+        "paths": {
+          "equals": {
+            "out.mode": "fake",
+            "out.data.object": "customer",
+            "out.data.email": "ada@example.test",
+            "out.data.name": "Ada Lovelace",
+            "out.data.created": 1767225600,
+            "out.data.livemode": false
+          },
+          "matches": {
+            "out.data.id": "^cus_fake_[0-9a-f]{12}$"
+          },
+          "deterministic": ["out.data.id"]
+        }
+      },
+      "notes": [
+        "`created: 1767225600` is a LITERAL in the provider's faker fixture, not a captured value. An engine fabricating plausible customer data cannot produce that number, and a faker that drifts stops producing it — which is what makes this row evidence rather than a snapshot.",
+        "`email` and `name` come from the node's CONFIG. Both are here because only one of them discriminates: the graph's email coincides with the faker fixture's own default, so a connector that ignored its config entirely would still publish the right email. `name` has no default. That was a hole in the authored golden, found by writing the discrimination probes.",
+        "`out.data.id` cannot be authored — it is drawn from the faker's seeded sequence — so it is pinned by SHAPE and by DETERMINISM instead of by value. The `_fake_` infix is deliberate: a faked id indistinguishable from a real one is the reassuring reading, and this repository exists because the reassuring reading is the one people take.",
+        "`deterministic` means two runs of the unchanged graph publish the same value AND every runner publishes the same value. Measured as `cus_fake_abaeeb55ae4a` on the PHP and Node lanes at the time of authoring; the literal is recorded here as evidence rather than asserted, because pinning it would couple the golden to the faker's seeding.",
+        "SOFTER CLAIM, measured and not asserted: `json_encode(outputs)` is byte-identical between the PHP and Node lanes for the WHOLE graph, envelope on the intermediate node included. It is recorded here rather than turned into an expectation because nothing documents `RunResult.outputs` as a stable cross-runtime surface, and an assertion would be making that promise on the engines' behalf. The lab that measured it had previously reported a divergence here and retracted it after writing the comparison down — the retraction is why this sits in notes."
+      ],
+      "skip": {
+        "python": "fancy-stripe ships no `flow` module yet, so the `fancy_flow.nodes` entry point finds nothing to register. The Python executors are owner-ordered after the real fancy-connector-core Python package. The row is kept rather than removed: a removed row says the language is not part of the contract, a skipped one says it is and has not arrived."
+      }
+    }
+  ]
+}
