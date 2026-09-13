@@ -34,7 +34,7 @@ from pathlib import Path
 from collections.abc import Mapping
 from typing import Any, Literal
 
-__version__ = "0.21.1"
+__version__ = "0.21.2"
 
 Language = Literal["php", "node", "rust", "python", "go"]
 

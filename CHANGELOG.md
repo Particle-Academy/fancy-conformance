@@ -8,6 +8,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Pre-1.0, breaking changes land in MINOR releases.** The version number is not
 promising otherwise until 1.0.
 
+## [0.21.2] - 2026-09-13
+
+### Fixed
+
+- **The connector-runs run identity is now a pinned CONSTANT: `labd5f9ddb2`.**
+  0.21.1 defined four canonical-JSON rules, and two faithful implementations of
+  those four still disagreed — `labe4b755a3` in Node, `labd5f9ddb2` in PHP. The
+  graph contains `config: {}`; a JavaScript parse keeps it an object, and PHP's
+  `json_decode(..., true)` — which this package's own PHP loader uses — turns it
+  into `[]`, with nothing left to recover the difference from. The definition
+  never said what an empty object is.
+
+  Found by the connector lab comparing its PHP and Node canonical forms byte for
+  byte, and independently re-derived in Python while landing it: all three give
+  `labe4b755a3` under the old rules and `labd5f9ddb2` under the new one.
+
+  `value` is authoritative; `derivation` and `canonicalJson` stay as provenance
+  so a runner can prove it agrees. A runner SHOULD derive the identity itself and
+  refuse a run whose supplied value differs, rather than trust the literal.
+
+- **Three rules added, and the other two the definition promised are now TESTS.**
+  - An empty object and an empty array are one value: emit `[]`. It is the only
+    spelling every runtime can reach given how the PHP loader decodes.
+  - **Integers only** in the hashed input. Measured, not assumed: Python prints
+    the float `1.0` as `1.0`, JavaScript as `1`, PHP as either depending on
+    `JSON_PRESERVE_ZERO_FRACTION` — so no output format is native everywhere,
+    while an integer is. ("Numbers as written" in 0.21.1 was unimplementable:
+    no runtime can recover how a number was written after a parse.)
+  - **Code point** key order, replacing UTF-16 code unit. PHP's bytewise UTF-8
+    sort, Python and Rust all produce code point order natively; only
+    JavaScript's default sort does not. They diverge when a supplementary-plane
+    character sits beside one in U+E000–U+FFFF. **ASCII keys only**, so that
+    divergence cannot be reached silently.
+
+  `tests/connector-runs-identity.test.ts` recomputes the key from the case and
+  requires it to equal the literal, pins the literal itself, proves the `{}`
+  rule changes the result (without it the graph derives `labe4b755a3`), and
+  enforces integers-only and ASCII keys. The case text said "enforced by a test"
+  — this is that test, written in the same release rather than promised.
+  Verified by mutation: a fractional number, a non-ASCII key and a changed graph
+  fail four of the five, and restoring the case passes all five.
+
 ## [0.21.1] - 2026-09-13
 
 ### Fixed

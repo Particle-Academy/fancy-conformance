@@ -6,7 +6,12 @@
       "id": "0001-stripe-customer-fake",
       "title": "A Stripe customer node in fake mode publishes the faker's authored fields and the node's own config.",
       "since": "0.21.0",
-      "tags": ["connector", "stripe", "fake", "idempotency"],
+      "tags": [
+        "connector",
+        "stripe",
+        "fake",
+        "idempotency"
+      ],
       "input": {
         "schema": {
           "$schema": "https://particle.academy/schemas/workflow/v1.json",
@@ -19,7 +24,10 @@
                 "kind": "@particle-academy/manual_trigger",
                 "label": "Run it",
                 "config": {},
-                "position": { "x": 0, "y": 0 }
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
               },
               {
                 "id": "customer",
@@ -30,14 +38,20 @@
                   "email": "ada@example.test",
                   "name": "Ada Lovelace"
                 },
-                "position": { "x": 280, "y": 0 }
+                "position": {
+                  "x": 280,
+                  "y": 0
+                }
               },
               {
                 "id": "out",
                 "kind": "@particle-academy/output",
                 "label": "Result",
                 "config": {},
-                "position": { "x": 560, "y": 0 }
+                "position": {
+                  "x": 560,
+                  "y": 0
+                }
               }
             ],
             "edges": [
@@ -62,14 +76,17 @@
         "runIdentity": {
           "derivation": "\"lab\" + sha256(canonicalJson(input.schema))[0:8]",
           "canonicalJson": [
-            "Object keys sorted lexicographically by UTF-16 code unit, at every depth. Array order is preserved.",
+            "Object keys sorted by Unicode CODE POINT, at every depth. Array order is preserved. (Code point order is what PHP's bytewise UTF-8 sort, Python and Rust produce natively; JavaScript's default sort is UTF-16 code-unit order and must not be used — they diverge when a supplementary-plane character sits beside one in U+E000–U+FFFF.)",
             "No insignificant whitespace: separators are exactly `,` and `:`.",
-            "UTF-8 output. Escape only what JSON requires — PHP must pass JSON_UNESCAPED_SLASHES and JSON_UNESCAPED_UNICODE, because its default escapes `/` and every non-ASCII character and neither matches the other three runtimes.",
-            "Numbers as written in this file. No reformatting of integers to floats or vice versa."
+            "UTF-8 output. Escape only what JSON requires — PHP must pass JSON_UNESCAPED_SLASHES and JSON_UNESCAPED_UNICODE, because its default escapes `/` and every non-ASCII character and neither matches the other runtimes.",
+            "An empty object and an empty array are ONE value: emit `[]`. PHP's `json_decode(..., true)` cannot tell them apart and this package's own PHP loader decodes that way, so `[]` is the only spelling every runtime can reach.",
+            "The hashed input contains INTEGERS ONLY. No fractional value and no `x.0` literal. After a parse no runtime can recover how a number was written, and they disagree on how to print a float — measured: Python emits `1.0`, JavaScript `1`, PHP `1` or `1.0` depending on JSON_PRESERVE_ZERO_FRACTION. An integer prints identically everywhere with no flags. Enforced by a test over the case, not left to the author.",
+            "Every object key in the hashed input is ASCII. Enforced by a test. With ASCII keys every ordering rule above coincides, so the code-point-vs-code-unit divergence cannot be reached silently — a case that needs a non-ASCII key has to change that test first, and in doing so read why."
           ],
           "note": "Supplied, not optional. The connector derives its idempotency key from this, and some connectors refuse to write without one — a runner that omits it exercises a different path.",
-          "why-spelled-out": "The word `canonical` alone is not a specification, and leaving it at that is worse than either concrete choice: every runtime believes its own encoder is canonical, and PHP's `json_encode` escapes slashes and unicode by default while Node's does neither. Two runners would then derive different identities from the same graph, send different idempotency keys, and — because the faker seeds from the key — produce different ids, failing a determinism check for a reason that has nothing to do with the connector.",
-          "pending": "The resulting key is NOT yet pinned as a literal here. It should be: for a fixed fixture graph the identity is a constant, and a constant cannot be disagreed about the way a derivation can. Awaiting the value from the first runner to implement this canonical form, after which the literal becomes authoritative and the derivation stays as provenance."
+          "value": "labd5f9ddb2",
+          "valueProvenance": "Pinned 2026-09-13. Derived independently by THREE runtimes under the rules above and identical in all of them: the connector lab's PHP lane and its Node lane (weaver), and a Python re-derivation made when landing it. `value` is authoritative; `derivation` and `canonicalJson` stay as provenance and so a runner can prove it agrees. A runner SHOULD derive the identity itself and refuse a run whose supplied value differs, rather than trust the literal blindly — that is what stops two lanes drifting while each still reads a pinned string.",
+          "history": "0.21.0 wrote `canonical json` without defining it. 0.21.1 defined four rules. Implementing those in PHP and Node found they still produced two different keys — `labe4b755a3` (Node, `{}` survives a parse) and `labd5f9ddb2` (PHP, `{}` collapses to `[]`) — because the definition never said what an empty object is. The loader decides that, not the case, and the PHP loader decodes to arrays. Found by the connector lab by comparing the two byte for byte; the lab also found its own PHP canonicaliser had been emitting lists with integer keys, self-consistent since it was written and so invisible to every digest it produced."
         }
       },
       "expected": {
@@ -86,7 +103,9 @@
           "matches": {
             "out.data.id": "^cus_fake_[0-9a-f]{12}$"
           },
-          "deterministic": ["out.data.id"]
+          "deterministic": [
+            "out.data.id"
+          ]
         }
       },
       "notes": [
