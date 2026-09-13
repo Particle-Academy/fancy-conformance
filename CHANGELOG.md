@@ -10,6 +10,12 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`dark-slide/table-cell-model` manifest no longer claims the loaders disagree on float
+  comparison.** They have compared exactly since 0.10.0; the note was wrong when it was
+  written. No case or golden changed.
+
 ### Added
 
 - **`runners/README.md`: a consumer reading the fixtures from git checks out the

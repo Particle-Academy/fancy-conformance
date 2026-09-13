@@ -12,7 +12,7 @@
       "gridWidthsEmu": "gridWidthsEmu(element, totalEmu) -> the <a:gridCol w> values, in order, as strings."
     },
     "runShape": {
-      "everyValueIsAString": "No golden in this file is a number. Fractional quantities are converted to the INTEGER unit the writer emits — font size and letter spacing in hundredths of a point, padding and border width in EMU — and then stringified. That removes float comparison from the suite entirely, which matters because the four fancy-conformance loaders do NOT agree on how a float golden is compared (PHP, Python and Rust use a scaled 1e-12 epsilon; the TypeScript loader uses exact Object.is). A suite whose verdict depends on which loader ran it is not a conformance suite.",
+      "everyValueIsAString": "No golden in this file is a number. Fractional quantities are converted to the INTEGER unit the writer emits — font size and letter spacing in hundredths of a point, padding and border width in EMU — and then stringified. That removes float comparison from the suite entirely: a value in EMU or hundredths of a point is exactly what the writer emits, so no golden carries a tolerance question. (This note first said the loaders disagree on float comparison. That was already false when it was written: all four have compared exactly since 0.10.0.)",
       "resolvedCell": "{ text, bold, italic, underline, color, fill, align, anchor, fontSizeHundredths, letterSpacingHundredths, caps, padding: {left,right,top,bottom}, borders: {left,right,top,bottom}, colSpan, rowSpan, merged }. Booleans are \"1\" / \"0\". `fill` is null when the cell has none. Each border is null when the cell has none on that side, otherwise { widthEmu, color, style }.",
       "gridWidthsEmu": "An ordered array of strings."
     },
