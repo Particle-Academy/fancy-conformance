@@ -8,6 +8,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Pre-1.0, breaking changes land in MINOR releases.** The version number is not
 promising otherwise until 1.0.
 
+## [0.22.0] - 2026-09-13
+
+### Changed
+
+- **BREAKING for `dark-slide/table-cell-model` runners: the goldens follow
+  dark-slide 0.10's unit model.** Every authored length is now a design pixel on
+  a canvas `theme.slideWidth` wide (1920 by default), resolving to
+  `px * 720 / slideWidth` points. Before, a table's `fontSize` was halved and
+  every other length taken as points.
+
+  23 of the 26 existing goldens changed, and every change is one of two kinds:
+  the default font size (28px is now 10.5pt, `fontSizeHundredths` 1400 → 1050),
+  or a length the case states explicitly (a 1-wide border is now 0.375pt, 4763
+  EMU instead of 12700). Inputs are untouched. Unstated defaults such as the
+  7.2pt / 3.6pt insets stay points, so rows that never state a padding keep
+  91440 / 45720.
+
+  **What to do:** move the engine under test to dark-slide 0.10 (PHP), 0.8
+  (Node) or 0.3 (Python) with this version. An engine still on the old model
+  fails 23 named rows here and nothing else changes.
+
+- **Case `0026` renamed** from `0026-font-size-is-halved-into-points` to
+  `0026-font-size-is-a-design-pixel`, because the old id stated the rule this
+  release removes. Its number is unchanged, and no repository referenced the old
+  id in a skip list.
+
+### Added
+
+- **`0027-slide-width-1440-reproduces-the-old-halving`**: `theme.slideWidth: 1440`
+  lands every length where dark-slide 0.9 put it, the documented upgrade path.
+- **`0028-authored-lengths-convert-defaults-stay-points`**: a stated padding and
+  border width convert; the unstated insets stay PowerPoint's points.
+- **`scripts/build-table-cell-model-goldens.py`** regenerates the goldens by
+  running the PHP reference (`scripts/table-cell-model-reference.php`). Without
+  `--write` it is a drift check. Before rewriting anything it was run against the
+  previous reference (dark-slide 0.9.2): it reproduced all 26 goldens exactly, so
+  the projection matches how they were first made. Python writes the file because
+  PHP's `json_decode` turns `{}` into `[]`.
+
 ## [0.21.2] - 2026-09-13
 
 ### Fixed
