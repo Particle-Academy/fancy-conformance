@@ -60,8 +60,16 @@
         },
         "initialInputs": {},
         "runIdentity": {
-          "derivation": "\"lab\" + sha256(canonical json of input.schema)[0:8]",
-          "note": "Supplied, not optional. The connector derives its idempotency key from this, and some connectors refuse to write without one — a runner that omits it exercises a different path."
+          "derivation": "\"lab\" + sha256(canonicalJson(input.schema))[0:8]",
+          "canonicalJson": [
+            "Object keys sorted lexicographically by UTF-16 code unit, at every depth. Array order is preserved.",
+            "No insignificant whitespace: separators are exactly `,` and `:`.",
+            "UTF-8 output. Escape only what JSON requires — PHP must pass JSON_UNESCAPED_SLASHES and JSON_UNESCAPED_UNICODE, because its default escapes `/` and every non-ASCII character and neither matches the other three runtimes.",
+            "Numbers as written in this file. No reformatting of integers to floats or vice versa."
+          ],
+          "note": "Supplied, not optional. The connector derives its idempotency key from this, and some connectors refuse to write without one — a runner that omits it exercises a different path.",
+          "why-spelled-out": "The word `canonical` alone is not a specification, and leaving it at that is worse than either concrete choice: every runtime believes its own encoder is canonical, and PHP's `json_encode` escapes slashes and unicode by default while Node's does neither. Two runners would then derive different identities from the same graph, send different idempotency keys, and — because the faker seeds from the key — produce different ids, failing a determinism check for a reason that has nothing to do with the connector.",
+          "pending": "The resulting key is NOT yet pinned as a literal here. It should be: for a fixed fixture graph the identity is a constant, and a constant cannot be disagreed about the way a derivation can. Awaiting the value from the first runner to implement this canonical form, after which the literal becomes authoritative and the derivation stays as provenance."
         }
       },
       "expected": {

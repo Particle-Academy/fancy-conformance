@@ -8,6 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Pre-1.0, breaking changes land in MINOR releases.** The version number is not
 promising otherwise until 1.0.
 
+## [0.21.1] - 2026-09-13
+
+### Fixed
+
+- **`flow/connector-runs` specified "canonical JSON" without defining it.** The
+  run identity is derived as `"lab" + sha256(<json of the schema>)[0:8]`, and
+  every runner must derive the SAME identity — the connector keys its
+  idempotency on it and the faker seeds its id from that key, so a different
+  identity produces a different `out.data.id` and fails the determinism check
+  for a reason that has nothing to do with the connector.
+
+  The authoring lab specified `sha256(json)`. 0.21.0 recorded it as
+  `sha256(canonical json)` — a change made while landing the case and NOT
+  flagged to the lab, which caught it by asking. "Canonical" was the right
+  instinct, since `json_encode` differs across these runtimes, but an undefined
+  word is worse than either concrete choice: every runtime believes its own
+  encoder is canonical. PHP escapes `/` and every non-ASCII character by
+  default; Node escapes neither.
+
+  `input.runIdentity.canonicalJson` now defines it: keys sorted by UTF-16 code
+  unit at every depth, array order preserved, separators exactly `,` and `:`,
+  UTF-8 with only the escapes JSON requires (PHP must pass
+  `JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE`), numbers as written.
+  Defined in ONE place — the manifest note points at it rather than restating
+  it.
+
+  The resulting key is not yet pinned as a literal and should be: for a fixed
+  fixture graph the identity is a constant, and a constant cannot be disagreed
+  about the way a derivation can. It lands once the first runner implements this
+  form and reports the value.
+
 ## [0.21.0] - 2026-09-12
 
 ### Added
