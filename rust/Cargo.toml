@@ -1,6 +1,6 @@
 [package]
 name = "fancy-conformance"
-version = "0.22.0"
+version = "0.22.1"
 edition = "2021"
 rust-version = "1.85"
 description = "Rust loader for the shared fancy-conformance fixture tables. One contract, N implementations, one table asserted by every one of them."
@@ -16,4 +16,4 @@ readme = "README.md"
 # and no third-party code at all -- which is what lets a consuming repo run the
 # tables without an approval conversation.
 [dependencies]
-fancy-json = { version = "0.1", git = "https://github.com/Particle-Academy/fancy-json-rs", branch = "main" }
+fancy-json = { version = "0.1", git = "https://github.com/Particle-Academy/fancy-json-rs", tag = "v0.1.1" }

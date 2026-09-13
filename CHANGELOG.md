@@ -10,7 +10,18 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.22.1] - 2026-09-13
+
+No case or golden changed.
+
 ### Fixed
+
+- **The Rust loader depends on `fancy-json` at tag `v0.1.1`, not `branch = "main"`.**
+  A consumer pinning this repository by tag still got whatever fancy-json's `main`
+  was, and could not pin fancy-json itself: two refs of one crate are two crates to
+  Cargo, and their types do not unify. **What to do:** a Rust consumer that also
+  depends on fancy-json moves that dependency to `tag = "v0.1.1"` together with
+  this pin.
 
 - **`dark-slide/table-cell-model` manifest no longer claims the loaders disagree on float
   comparison.** They have compared exactly since 0.10.0; the note was wrong when it was
