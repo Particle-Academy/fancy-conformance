@@ -29,9 +29,8 @@ from __future__ import annotations
 
 import json
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
-from collections.abc import Mapping
 from typing import Any, Literal
 
 __version__ = "0.22.0"

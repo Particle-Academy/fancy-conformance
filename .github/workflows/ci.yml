@@ -97,7 +97,18 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ./python --group ./python/pyproject.toml:test
+          python -m pip install -e ./python --group ./python/pyproject.toml:test --group ./python/pyproject.toml:lint
+
+      # Lint was declared (the `lint` group) and never run, so the loader and
+      # the golden scripts collected ruff errors that surfaced in CONSUMERS'
+      # CI instead, which check this repo out inside their workspace: an
+      # unsorted import here turned fancy-catalog-py red. scripts/ uses the
+      # loader's config because it has none of its own.
+      - name: Lint
+        run: |
+          (cd python && ruff check . && ruff format --check .)
+          ruff check --config python/pyproject.toml scripts
+          ruff format --config python/pyproject.toml --check scripts
 
       - name: Test
         working-directory: python

@@ -63,14 +63,21 @@ def main() -> int:
 
     goldens = json.loads(result.stdout)
     if len(goldens) != len(suite["cases"]):
-        print(f"reference returned {len(goldens)} goldens for {len(suite['cases'])} cases", file=sys.stderr)
+        print(
+            f"reference returned {len(goldens)} goldens for {len(suite['cases'])} cases",
+            file=sys.stderr,
+        )
         return 2
 
     changed = 0
-    for case, golden in zip(suite["cases"], goldens):
+    for case, golden in zip(suite["cases"], goldens, strict=True):
         before = dict(flatten(case.get("expected")))
         after = dict(flatten(golden))
-        diffs = [f"{k}: {before.get(k)!r} -> {after.get(k)!r}" for k in sorted(set(before) | set(after)) if before.get(k) != after.get(k)]
+        diffs = [
+            f"{k}: {before.get(k)!r} -> {after.get(k)!r}"
+            for k in sorted(set(before) | set(after))
+            if before.get(k) != after.get(k)
+        ]
         if diffs:
             changed += 1
             print(case["id"])
@@ -78,10 +85,12 @@ def main() -> int:
                 print("   ", line)
         case["expected"] = golden
 
-    print(f"{changed} of {len(suite['cases'])} goldens {'changed' if args.write else 'would change'}")
+    verb = "changed" if args.write else "would change"
+    print(f"{changed} of {len(suite['cases'])} goldens {verb}")
 
     if args.write and changed:
-        CASES.write_text(json.dumps(suite, indent=4, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+        text = json.dumps(suite, indent=4, ensure_ascii=False) + "\n"
+        CASES.write_text(text, encoding="utf-8", newline="\n")
         return 0
 
     return 1 if changed and not args.write else 0
