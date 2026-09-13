@@ -34,6 +34,18 @@ promising otherwise until 1.0.
   release removes. Its number is unchanged, and no repository referenced the old
   id in a skip list.
 
+- **`flow/connector-runs` manifest: the schema-version split is recorded as
+  closed.** Its "IMPORT IS STRICT HERE" note said `fancy-flow-php` ran a
+  versionless graph that the TypeScript and Python twins refused. `lenient` no
+  longer softens the version in any runtime (fancy-flow 0.70.0, fancy-flow-php
+  0.52.0, fancy-flow Python 0.20.0). The note keeps the part that still holds:
+  import strictly here, because `lenient` softens an unregistered connector
+  kind. No case or golden changed. No case was added to pin the version
+  refusal: `graph-runs` asserts exact errors and the three runtimes format an
+  absent version differently (`undefined`, `NULL`, `None`), and its contract
+  does not yet say how a refused import surfaces. Each runtime pins the rule in
+  its own suite.
+
 ### Added
 
 - **`0027-slide-width-1440-reproduces-the-old-halving`**: `theme.slideWidth: 1440`
