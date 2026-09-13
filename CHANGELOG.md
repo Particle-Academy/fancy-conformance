@@ -8,6 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Pre-1.0, breaking changes land in MINOR releases.** The version number is not
 promising otherwise until 1.0.
 
+## [Unreleased]
+
+### Added
+
+- **`runners/README.md`: a consumer reading the fixtures from git checks out the
+  tag it pins.** Unpinned `actions/checkout` steps turned four Python ports red
+  on every fixture release, for weeks, for reasons none of their commits caused.
+  Docs only. **What to do:** if your CI checks this repository out with no
+  `ref`, set `ref: v<your pinned version>` on that step and add a test that the
+  two agree; otherwise nothing.
+
 ## [0.22.0] - 2026-09-13
 
 ### Changed

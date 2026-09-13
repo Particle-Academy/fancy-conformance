@@ -85,6 +85,15 @@ that reported green while covering nothing.
    `Conformance::version()`. "We're on an old fixture set" should be visible in
    the log rather than inferred months later.
 
+**Reading the fixtures from git? Check out the tag you pin.** A consumer that
+checks this repository out (an `actions/checkout` step, a git dependency) must
+pin that checkout to `v<pinned version>`, never `main`, and keep a test that
+fails when the ref and the pin disagree. Unpinned, every fixture release turns
+every such consumer red at once for a reason none of its commits caused, and
+nobody reads it: four Python ports sat red for weeks that way in 2026-09. The
+pin is the contract, and moving it is a deliberate commit in the consumer. A
+registry install gets this from a committed lockfile, and only from one.
+
 ## Adding a case
 
 A new case lands **here first, red**, then in each implementation. Where an
