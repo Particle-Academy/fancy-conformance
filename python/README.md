@@ -5,9 +5,19 @@ the third one, alongside `src/index.ts` (Node) and `php/src/Conformance.php`
 (PHP), and deliberately the same shape so a reviewer comparing three CI logs is
 comparing like with like.
 
+**Not on PyPI, and it will not be.** This repository is the suite's own alignment
+tool. A Python consumer checks it out at the tag it pins and puts `python/src` on
+its path:
+
 ```bash
-pip install fancy-conformance          # ships the fixtures with it
+# CI: check out Particle-Academy/fancy-conformance at `ref: v<pinned>` into
+# .fancy-conformance, then
+export PYTHONPATH="$PWD/.fancy-conformance/python/src"
+export FANCY_CONFORMANCE_ROOT="$PWD/.fancy-conformance"
 ```
+
+In the `.agi` envelope, pytest's `pythonpath` names `../fancy-conformance/python/src`
+instead. `runners/README.md` says why the checkout must be the pinned tag.
 
 ## Why it lives here
 
