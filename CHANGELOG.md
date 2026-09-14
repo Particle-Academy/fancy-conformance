@@ -10,6 +10,13 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Removed
+
+- **The PyPI publish jobs.** This repository is the suite's alignment tool, not
+  a product; Python consumers check it out at the tag they pin. The job failed
+  on every tag since it was added (2026-08-25) for want of a trusted publisher.
+  **What to do:** nothing. `pip install fancy-conformance` never worked.
+
 ## [0.22.1] - 2026-09-13
 
 No case or golden changed.
@@ -268,8 +275,6 @@ No case or golden changed.
   `wait` and `schedule_trigger` are the rows that carry the hard-won rule: a
   relation with no destination can only express a TOP-LEVEL merge, so a kind
   that NESTS its input declares fields and no relation.
-
-## [Unreleased]
 
 ## [0.18.0] - 2026-08-26
 
