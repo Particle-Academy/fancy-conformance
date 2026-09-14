@@ -137,16 +137,14 @@ that such a claim must be a test result rather than a sentence. Both the
 `python` and `rust` jobs were added on 2026-08-23. If you add a sixth loader,
 the job is part of adding it.
 
-**The Python loader was unpublished until 2026-08-25**, and the publish
-workflow was named "Publish to npm" — which was accurate. `pip install
-fancy-conformance` 404s, so every Python consumer installs it from a path. A
-`build-python` / `publish-python` job pair now exists, but **PyPI still needs a
-pending publisher configured by the owner before any tag can claim the name**;
-until then the job is armed, not live.
-
-The lesson is not "add the job". It is that this repo publishes to THREE
-registries and only two of them were ever checked, by a release that was green
-both times.
+**The Python loader is not published to PyPI, and must not be.** This
+repository exists so the suite's own packages stay aligned; nothing outside it
+installs the fixtures. A Python consumer checks this repository out at the tag it
+pins and puts `python/src` on its path (pytest `pythonpath` in the envelope,
+`PYTHONPATH` in CI). A `publish-python` job existed from 2026-08-25 to
+2026-09-13 and failed on every tag for want of a trusted publisher; it was
+removed rather than armed, on the owner's ruling. npm and Packagist remain,
+because the TypeScript and PHP consumers install from them as a dev dependency.
 
 **`cross-check.mjs` still compares only Node and PHP.** Extending it to the
 Python loader is open work; until it lands, the Python loader is asserted by its
