@@ -10,6 +10,56 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-09-14
+
+**Six rows added to `shared/expr`. A runtime without the fancy-flow-php#16 fix
+fails five of them**, so moving a pin to this version means taking that fix in
+the same change. No existing case or golden changed.
+
+### Added
+
+- **`shared/expr` 0021-0026: a whole-string expression is EXACTLY one `{{ }}`.**
+  Every fancy-flow runtime decided a template was a single expression by asking
+  whether the trimmed string starts with `{{` and ends with `}}`. So
+  `{{ in.text }} --- {{ user.transcript }}` became one path,
+  `in.text }} --- {{ user.transcript`, which never resolves: the template returned
+  null, and a document node wrote nothing with both references valid. All four
+  runtimes documented it as a deliberate corner, and this table, which compares
+  them with each other, read their agreement as parity. The rule now: the inner
+  text may contain neither `}}` nor `{{`; anything else interpolates each
+  reference. Goldens from fancy-flow-php 0.52.2 (0.52.1 returns null for all but
+  0024).
+  - `0021-several-references-interpolate-each`: the reported template.
+  - `0022-several-references-across-newlines`: the production shape, with a
+    trailing newline that must survive.
+  - `0023-adjacent-references-are-two-references`: `{{ a }}{{ b }}` is `"12"`.
+  - `0024-padded-single-expression-keeps-type`: ` {{ a }} ` is still the number 1.
+  - `0025-one-unresolved-reference-of-several-interpolates-empty`: the policy
+    applies per reference.
+  - `0026-an-inner-opening-brace-is-not-one-expression`: the rule's second
+    condition, which no other row reaches.
+
+  The table models only the default unresolved-path policy. Its contract takes no
+  policy argument and fancy-flow-rs has none; Keep and Throw are pinned in each
+  runtime's own suite.
+
+  **What to do:** a runner of `shared/expr` moves its pin together with the
+  engine fix (fancy-flow-php 0.52.2, fancy-flow 0.70.4, fancy-flow Python 0.20.2,
+  fancy-flow-rs main). An engine without it fails 0021, 0022, 0023, 0025 and
+  0026, and nothing else. A runner that counts rows expects 26.
+
+- **`tests/discrimination-shared-expr.test.ts`**: the first probes for
+  `shared/expr`. A faithful evaluator passes all 26 rows; the shipped corner fails
+  exactly the five above; a port that checks only for an inner `}}` fails 0026
+  alone; one that drops the typed branch fails 0001, 0007 and 0024. Against the
+  0.22.1 table the three mutants caught nothing.
+
+### Changed
+
+- **`shared/expr` manifest lists the Python and Rust implementations**, which
+  already ran this table while the manifest named only PHP and Node, and records
+  the whole-expression rule and the one-policy limit.
+
 ### Removed
 
 - **The PyPI publish jobs.** This repository is the suite's alignment tool, not

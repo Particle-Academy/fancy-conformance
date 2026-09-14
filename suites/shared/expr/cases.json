@@ -181,6 +181,75 @@
       "fn": "truthy",
       "input": { "value": "no thanks" },
       "expected": true
+    },
+    {
+      "id": "0021-several-references-interpolate-each",
+      "title": "A template that starts with `{{` and ends with `}}` but holds two references interpolates both",
+      "since": "0.23.0",
+      "tags": ["evaluate", "regression"],
+      "fn": "evaluateExpression",
+      "input": {
+        "template": "{{ in.text }} --- {{ user.transcript }}",
+        "context": { "in": { "text": "SUMMARY" }, "user": { "transcript": "TRANSCRIPT" } }
+      },
+      "expected": "SUMMARY --- TRANSCRIPT",
+      "notes": "fancy-flow-php#16. Every runtime used to read this as ONE whole expression whose path was `in.text }} --- {{ user.transcript`, because the whole-string test only asked whether the trimmed template starts with `{{` and ends with `}}`. That path never resolves, so the template returned null and a document node wrote nothing, with both references individually valid. It was documented as a deliberate corner in all four runtimes, so no row here could see it. Golden from fancy-flow-php 0.52.2; 0.52.1 returns null."
+    },
+    {
+      "id": "0022-several-references-across-newlines",
+      "title": "A multi-line template with a reference on its first and last line interpolates, trailing newline kept",
+      "since": "0.23.0",
+      "tags": ["evaluate", "regression"],
+      "fn": "evaluateExpression",
+      "input": {
+        "template": "{{ in.text }}\n\n---\n\n## Original\n\n{{ user.transcript }}\n",
+        "context": { "in": { "text": "SUMMARY" }, "user": { "transcript": "TRANSCRIPT" } }
+      },
+      "expected": "SUMMARY\n\n---\n\n## Original\n\nTRANSCRIPT\n",
+      "notes": "The production shape from #16: a prompt or document template whose first and last lines are references. Two things are pinned. The whole-string test runs on the TRIMMED template, so a trailing newline does not protect it from the old corner; and the interpolation runs on the UNTRIMMED template, so the newline survives. A port that interpolated the trimmed string would drop it."
+    },
+    {
+      "id": "0023-adjacent-references-are-two-references",
+      "title": "`{{ a }}{{ b }}` is two references, interpolated as text",
+      "since": "0.23.0",
+      "tags": ["evaluate", "regression", "stringify"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ a }}{{ b }}", "context": { "a": 1, "b": 2 } },
+      "expected": "12",
+      "notes": "The corner the runtimes' own docs used to name as deliberate: one path, `a }}{{ b`, that resolved to null. The golden is the STRING \"12\" — two numbers interpolated as text, not added and not typed."
+    },
+    {
+      "id": "0024-padded-single-expression-keeps-type",
+      "title": "Exactly one expression, with surrounding whitespace, still returns the typed value",
+      "since": "0.23.0",
+      "tags": ["evaluate", "types"],
+      "fn": "evaluateExpression",
+      "input": { "template": " {{ a }} ", "context": { "a": 1, "b": 2 } },
+      "expected": 1,
+      "notes": "The other side of 0021-0023. The fix narrows the whole-string branch; it must not remove it. A port that 'fixed' #16 by always interpolating passes 0021-0023 and fails this row and 0001."
+    },
+    {
+      "id": "0025-one-unresolved-reference-of-several-interpolates-empty",
+      "title": "When one of several references does not resolve, the others still interpolate",
+      "since": "0.23.0",
+      "tags": ["evaluate", "regression"],
+      "fn": "evaluateExpression",
+      "input": {
+        "template": "{{ in.text }} / {{ in.nope }}",
+        "context": { "in": { "text": "SUMMARY" } }
+      },
+      "expected": "SUMMARY / ",
+      "notes": "The unresolved-path policy applies PER REFERENCE, not to the template. This table models only the default policy (an unresolved reference interpolates to empty); the contract takes no policy argument and fancy-flow-rs has none. Under Keep the golden is \"SUMMARY / {{ in.nope }}\" and under Throw evaluation throws; those are pinned in each runtime's own suite (fancy-flow-php TemplateWithSeveralReferencesTest and its TypeScript and Python ports). Before #16 this returned null."
+    },
+    {
+      "id": "0026-an-inner-opening-brace-is-not-one-expression",
+      "title": "A template whose inner text holds `{{` is not a single expression either",
+      "since": "0.23.0",
+      "tags": ["evaluate", "regression"],
+      "fn": "evaluateExpression",
+      "input": { "template": "{{ a {{ b }}", "context": { "a": 1, "b": 2 } },
+      "expected": "",
+      "notes": "The rule has TWO conditions: the inner text may contain neither `}}` nor `{{`. 0021-0023 all contain `}}`, so a port that checked only that half would pass them and still read this template as one path. It fails here instead: the whole-string branch returns null, and the golden is the empty STRING. The template is malformed, and the value is simply what the scan does with it (the first `{{` pairs with the first `}}`, giving the path `a {{ b`, which does not resolve). This row pins the rule, not that reading."
     }
   ]
 }
