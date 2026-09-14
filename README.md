@@ -1,5 +1,7 @@
 # fancy-conformance
 
+[![Fancified](art/fancified.svg)](https://particle.academy)
+
 Shared cross-language conformance fixtures for the [Fancy](https://ui.particle.academy) suite.
 
 One contract, N implementations, and a single fixture table that **every**
