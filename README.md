@@ -71,6 +71,7 @@ verbatim.
 | `flow/graph-runs` | 23 | Whole-graph execution: the same `WorkflowSchema` in, the same `RunResult.outputs` out |
 | `flow/run-diagnostics` | 14 | The run-time warnings for a graph that delivers nothing: an edge naming a port its source can never publish, and a route taken on a path that did not resolve. Half the rows pin when to stay silent |
 | `flow/durable-dispatch` | 14 | How a queued run hands out nodes: one at a time by default, in declaration order, with a paused gate keeping its slot; a cap and the whole frontier only when a host asks |
+| `shared/subscription-lease` | 13 | A subscription that expires: when a renewal is due, when the lease has expired, and why a missed lease is a resync rather than a quiet re-create |
 
 Every case carries an `id`, a `title`, the suite version it arrived in, and —
 where it exists to catch something specific — a `notes` field saying what.

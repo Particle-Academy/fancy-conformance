@@ -1,0 +1,41 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "shared/subscription-lease",
+  "title": "A subscription that EXPIRES, and when the host must act on it",
+  "since": "0.26.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "summary": "A `subscription` trigger is a webhook the provider stops delivering unless somebody renews it. The lease is the provider's expiry plus the connector's declaration of how early to renew and which operation does it, so a host runs ONE renewal scheduler for every expiring trigger instead of one per connector. `state` says where the lease is; `action` says what the host does about it.",
+    "functions": {
+      "renewAt": "renewAt(lease) -> instant  (expiresAt - renewBeforeSeconds)",
+      "state": "state(lease, now) -> active | due | expired",
+      "action": "action(lease, now) -> none | renew | resync"
+    },
+    "reference": "authored",
+    "referenceNote": "Boundaries are decided here, not measured: `due` is INCLUSIVE at renewAt, `expired` is INCLUSIVE at expiresAt and wins over `due` (Microsoft Graph refuses to renew a subscription that has expired; a Google Calendar channel simply stops). A missed lease is `resync`, never a quiet re-create: notifications during the gap are gone, so the host must re-list (sync token or full) AND re-subscribe.",
+    "implementations": [
+      {
+        "language": "node",
+        "package": "@particle-academy/fancy-connector-core",
+        "symbol": "subscriptionLease / leaseRenewAt / leaseState / leaseAction from \"@particle-academy/fancy-connector-core\""
+      },
+      {
+        "language": "php",
+        "package": "particle-academy/fancy-connector-core",
+        "symbol": "ParticleAcademy\\Connectors\\SubscriptionLease (renewAt(), state(), action())"
+      }
+    ]
+  },
+  "notes": [
+    "The lease carries the provider's expiry as an RFC 3339 INSTANT. Google Calendar hands back `expiration` as an epoch in MILLISECONDS as a string, Graph hands back `expirationDateTime` as ISO 8601 — the CONNECTOR converts on the way in; the lease refuses anything that is not an instant (case 0010) rather than guessing units.",
+    "`renewBeforeSeconds` must be positive (cases 0011, 0012). Zero would make `due` unreachable — the moment it applies is the moment `expired` wins — which is a lease nobody ever renews, declared in a way nothing would report.",
+    "`renewOperation` names the operation the host calls when the lease is due. For Graph that is a renew; for Google Calendar, whose channels cannot be renewed, it is the create again (the connector stops the old channel itself). The lease does not know the difference and does not need to: it says WHEN, the connector says WHAT.",
+    "`expired` beats `due` at the same instant (case 0004): a lease that has just expired cannot be renewed, so the only honest action is resync.",
+    "Clock skew clamps nothing here, unlike isReplaySafe: a `now` before renewAt is simply `active` (case 0006), because there is no earlier attempt to have forgotten.",
+    "LANDED AS AUTHORED. Taken from fancy-connector-core v0.7.0 `fixtures/subscription-lease/cases.json` (weaver.agi, owner-approved lease vocabulary 2026-09-14). Rows, contract and notes are unchanged; only the split into manifest.json + cases.json and a per-row `since` were added to fit this repository's format. Core deletes its local copy and reads this suite once it pins this release, so the table lives in one place.",
+    "EVERY ROW EXERCISES ALL THREE FUNCTIONS, so no row names an `fn`: a row pins `renewAt`, `state` and `action` together, or pins that constructing the lease is refused and names the field. A runner returns `{refused: <field>}` for a refusal and `{renewAt, state, action}` otherwise, with `renewAt` as an RFC 3339 instant in UTC with milliseconds (`...T00:00:00.000Z`).",
+    "PYTHON IS NOT LISTED: fancy-connector-core has no Python port yet. It joins the `implementations` when that package exists.",
+    "THERE IS A DISCRIMINATION PROBE (tests/discrimination-subscription-lease.test.ts): a faithful lease passes every row, and each mutant a competent author would write -- an exclusive `due`, an exclusive `expired`, `due` winning over `expired`, a missed lease re-created instead of resynced, an epoch guessed as milliseconds, a zero margin allowed, an offset dropped, fractional seconds truncated -- fails an exact set of rows."
+  ]
+}

@@ -13,7 +13,8 @@
     "implementations": [
       { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Laravel\\Runs\\DispatchLimit" },
       { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "selectDispatch" },
-      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.durable.select_dispatch" }
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.durable.select_dispatch" },
+      { "language": "rust", "package": "fancy-flow", "symbol": "fancy_flow::durable::select_dispatch" }
     ]
   },
   "notes": [
@@ -24,7 +25,7 @@
     "THE BUDGET IS MEASURED AGAINST WORK ALREADY HELD, not the size of one batch. Two nodes settling at once each trigger an advance on a real queue; a per-batch cap lets each dispatch its own quota. The simulation cannot race, so 0014 and 0010 pin the held-count arithmetic directly, and each runtime's own suite pins the race.",
     "WORKERS ARE FIFO AND SETTLE ONE AT A TIME. That makes every row deterministic without pretending to model a real queue's timing. It is a model of the decision, not of the transport.",
     "SKIPS AND NOTES NEVER TAKE A SLOT (0011, 0012). The frontier settles a dead branch, everything below it, and a sticky note in the same pass, before selection.",
-    "RUST IS NOT LISTED: fancy-flow-rs has no durable coordinator. Whether it gets one is an open decision recorded in the envelope's .ai/plans/fancy-flow-serial-dispatch.md.",
+    "RUST JOINED IN 0.26.0. fancy-flow-rs had no durable coordinator when this table was written; the owner ruled to build one rather than record its absence, and it passes all 14 rows against its own frontier and selection. It also runs flow/run-diagnostics through its coordinator, and matches flow/graph-runs durably and in a single process.",
     "THERE IS A DISCRIMINATION PROBE (tests/discrimination-durable-dispatch.test.ts): a faithful frontier + selection passes every row, and four mutants each fail an exact set -- a paused node not held (0008, 0010), a per-batch cap (0008, 0010, 0014), the pre-#17 default (0001, 0004, 0005, 0007, 0008, 0013) and breadth-first order (0007). Writing it is what turned the goldens from dispatch batches into a trace: the batch shape let the first two mutants through."
   ]
 }

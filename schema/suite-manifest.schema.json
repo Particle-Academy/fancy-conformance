@@ -37,8 +37,8 @@
         },
         "runShape": { "type": "object" },
         "reference": {
-          "description": "Which language's behaviour the goldens were taken from. Goldens are never what a value 'obviously' is.",
-          "enum": ["php", "node", "rust", "python", "go"]
+          "description": "Which language's behaviour the goldens were taken from. Goldens are never what a value 'obviously' is. 'authored' means the suite's author decided them rather than capturing them from a runtime; referenceNote must say by whom and on what evidence.",
+          "enum": ["php", "node", "rust", "python", "go", "authored"]
         },
         "referenceNote": { "type": "string" },
         "implementations": {
@@ -50,7 +50,8 @@
             "properties": {
               "language": { "enum": ["php", "node", "rust", "python", "go"] },
               "package": { "type": "string", "minLength": 1 },
-              "symbol": { "type": "string" }
+              "symbol": { "type": "string" },
+              "engine": { "type": "string", "description": "For an implementation that runs inside a workflow engine: the engine package and the range it is exercised against." }
             },
             "additionalProperties": false
           }

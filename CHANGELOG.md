@@ -10,6 +10,48 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-09-15
+
+**A new suite, `shared/subscription-lease`, and Rust joins `flow/durable-dispatch`.
+No existing case or golden changed.**
+
+### Added
+
+- **`shared/subscription-lease`: a subscription that EXPIRES, and when the host
+  must act on it.** 13 rows over `renewAt`, `state` (active / due / expired) and
+  `action` (none / renew / resync), plus the three refusals: an epoch where an
+  RFC 3339 instant belongs, a margin that is not positive, and no renew
+  operation.
+  - **Boundaries:** `due` is inclusive at renewAt; `expired` is inclusive at
+    expiresAt and wins over `due`.
+  - **A missed lease is `resync`, never a quiet re-create.**
+
+  Authored by the connector lab (weaver) in fancy-connector-core v0.7.0 and
+  landed as written. The rows, contract and notes are unchanged; only the split
+  into manifest + cases and a per-row `since` were added. Implementations are
+  fancy-connector-core's Node and PHP runtimes. Core reads the suite from here
+  once it pins this release, and deletes its local copy.
+- **A discrimination probe for it**
+  (`tests/discrimination-subscription-lease.test.ts`). The control passes all 13
+  rows, and eight mutants each fail an exact set:
+  - an exclusive `due` (0002);
+  - an exclusive `expired` (0004);
+  - `due` winning over `expired` (0004, 0007);
+  - renewing a missed lease (0004, 0007);
+  - guessing an epoch (0010);
+  - allowing a zero margin (0011);
+  - dropping the offset (0008);
+  - truncating fractions (0009).
+- **`flow/durable-dispatch` lists Rust.** fancy-flow-rs now has a durable,
+  per-node coordinator, serial by default, and passes all 14 rows.
+
+### Changed
+
+- **The manifest schema accepts what an existing suite already uses:**
+  `reference: "authored"` (goldens decided by the suite's author, as
+  `flow/connector-runs` and now `shared/subscription-lease` declare) and an
+  `engine` field on an implementation.
+
 ## [0.25.0] - 2026-09-14
 
 **A new suite, `flow/durable-dispatch`. No existing case or golden changed.**

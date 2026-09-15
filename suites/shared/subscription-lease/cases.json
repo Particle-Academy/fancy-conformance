@@ -1,0 +1,206 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "shared/subscription-lease",
+  "cases": [
+    {
+      "id": "0001-active-well-before-renewal",
+      "title": "Three days into a seven-day lease with a one-day margin is active, nothing to do",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-18T00:00:00Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T00:00:00.000Z",
+        "state": "active",
+        "action": "none"
+      }
+    },
+    {
+      "id": "0002-due-at-the-boundary",
+      "title": "Exactly at renewAt the lease is DUE — the boundary is inclusive",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-21T00:00:00Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T00:00:00.000Z",
+        "state": "due",
+        "action": "renew"
+      }
+    },
+    {
+      "id": "0003-one-second-before-due",
+      "title": "One second before renewAt is still active",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-20T23:59:59Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T00:00:00.000Z",
+        "state": "active",
+        "action": "none"
+      }
+    },
+    {
+      "id": "0004-expired-at-the-boundary-beats-due",
+      "title": "Exactly at expiresAt the lease is EXPIRED, and expired wins over due",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-22T00:00:00Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T00:00:00.000Z",
+        "state": "expired",
+        "action": "resync"
+      }
+    },
+    {
+      "id": "0005-one-second-before-expiry-is-still-renewable",
+      "title": "One second before expiry the lease is due, not expired",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-21T23:59:59Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T00:00:00.000Z",
+        "state": "due",
+        "action": "renew"
+      }
+    },
+    {
+      "id": "0006-now-long-before-is-simply-active",
+      "title": "A now far before the lease (clock skew, or a lease issued for the future) is active — nothing clamps",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "subscription_renew",
+        "now": "2020-01-01T00:00:00Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T00:00:00.000Z",
+        "state": "active",
+        "action": "none"
+      }
+    },
+    {
+      "id": "0007-missed-by-a-week-is-resync",
+      "title": "A lease nobody renewed is resync, however long ago it lapsed",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-29T00:00:00Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T00:00:00.000Z",
+        "state": "expired",
+        "action": "resync"
+      }
+    },
+    {
+      "id": "0008-offset-and-zulu-are-one-instant",
+      "title": "An expiry with a +02:00 offset and a Zulu now compare as instants",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T02:00:00+02:00",
+        "renewBeforeSeconds": 3600,
+        "renewOperation": "channel_create",
+        "now": "2026-09-21T23:30:00Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T23:00:00.000Z",
+        "state": "due",
+        "action": "renew"
+      }
+    },
+    {
+      "id": "0009-fractional-seconds-parse",
+      "title": "Fractional seconds do not break the comparison",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00.500Z",
+        "renewBeforeSeconds": 60,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-21T23:59:00.400Z"
+      },
+      "expected": {
+        "renewAt": "2026-09-21T23:59:00.500Z",
+        "state": "active",
+        "action": "none"
+      }
+    },
+    {
+      "id": "0010-an-epoch-is-refused-not-guessed",
+      "title": "A Google-shaped epoch-milliseconds expiry is refused — the connector converts, the lease never guesses units",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "1789430400000",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "channel_create",
+        "now": "2026-09-18T00:00:00Z"
+      },
+      "expected": {
+        "refused": "expiresAt"
+      }
+    },
+    {
+      "id": "0011-zero-margin-is-refused",
+      "title": "renewBeforeSeconds of 0 is refused: due would be unreachable, and nobody would renew",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 0,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-18T00:00:00Z"
+      },
+      "expected": {
+        "refused": "renewBeforeSeconds"
+      }
+    },
+    {
+      "id": "0012-negative-margin-is-refused",
+      "title": "A negative renewBeforeSeconds is refused",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": -60,
+        "renewOperation": "subscription_renew",
+        "now": "2026-09-18T00:00:00Z"
+      },
+      "expected": {
+        "refused": "renewBeforeSeconds"
+      }
+    },
+    {
+      "id": "0013-no-renew-operation-is-refused",
+      "title": "A lease with no renew operation is refused — a due lease with nothing to call is one nobody renews",
+      "since": "0.26.0",
+      "input": {
+        "expiresAt": "2026-09-22T00:00:00Z",
+        "renewBeforeSeconds": 86400,
+        "renewOperation": "",
+        "now": "2026-09-18T00:00:00Z"
+      },
+      "expected": {
+        "refused": "renewOperation"
+      }
+    }
+  ]
+}
