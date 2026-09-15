@@ -52,12 +52,12 @@ function parseInstant(text: string, m: Mutations): number | null {
   const match = INSTANT.exec(text);
   if (!match) return null;
 
-  const [, y, mo, d, h, mi, s, fraction, zone] = match;
+  const [, y, mo, d, h, mi, s, fraction, zone = "Z"] = match;
   let millis = Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s));
   if (fraction && !m.truncatesFraction) millis += Math.round(Number(fraction) * 1000);
   if (zone !== "Z" && !m.dropsOffset) {
     const sign = zone.startsWith("-") ? -1 : 1;
-    const [oh, om] = zone.slice(1).split(":").map(Number);
+    const [oh = 0, om = 0] = zone.slice(1).split(":").map(Number);
     millis -= sign * (oh * 3_600_000 + om * 60_000);
   }
 
