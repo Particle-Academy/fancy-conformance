@@ -1,0 +1,1334 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/run-diagnostics",
+  "cases": [
+    {
+      "id": "0001-branch-routes-on-an-unresolved-path",
+      "title": "A branch whose whole-expression condition resolves to nothing warns, naming the path and the port it took.",
+      "since": "0.24.0",
+      "tags": [
+        "routing",
+        "branch",
+        "warns"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.urgent }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "no",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "false side"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "other": true
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "b",
+          "message": "Node b took the \"false\" port because `condition` resolved to NOTHING — the path $json.urgent names no field on this node's inputs. That is not the same as a false condition: the route was decided by an absent value rather than by the data.",
+          "detail": {
+            "node": "b",
+            "configKey": "condition",
+            "path": "$json.urgent",
+            "tookPort": "false"
+          }
+        }
+      ],
+      "notes": "The failure flabs found: a correct triage graph whose urgency check named a field that did not resolve, so every request, including one reporting total payment failure, was routed as non-urgent. Routing is unchanged -- it still takes `false` -- and the warning supplies the reason."
+    },
+    {
+      "id": "0002-branch-condition-legitimately-false",
+      "title": "A condition that resolves to false is silent: most branches ever run take false honestly.",
+      "since": "0.24.0",
+      "tags": [
+        "routing",
+        "branch",
+        "silent"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.urgent }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "no",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "false side"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "urgent": false
+          }
+        }
+      },
+      "expected": [],
+      "notes": "The discipline row. A warning that fires on ordinary branching is noise, and noise is how a real warning stops being read."
+    },
+    {
+      "id": "0003-branch-condition-resolves-to-null",
+      "title": "A key that exists holding null is RESOLVED, and is silent.",
+      "since": "0.24.0",
+      "tags": [
+        "routing",
+        "branch",
+        "silent",
+        "absent-vs-null"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.urgent }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "no",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "false side"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "urgent": null
+          }
+        }
+      },
+      "expected": [],
+      "notes": "Absent and null are different answers. An implementation that tests the resolved VALUE for null instead of asking whether the path resolved warns here, and that is the collapse this whole table exists to prevent."
+    },
+    {
+      "id": "0004-branch-condition-mixes-text-and-an-expression",
+      "title": "A condition that mixes literal text with an unresolved expression is interpolation, not routing, and is silent.",
+      "since": "0.24.0",
+      "tags": [
+        "routing",
+        "branch",
+        "silent"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "urgent is {{ $json.nope }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "no",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "false side"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "x": 1
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0005-adjacent-references-are-not-one-missing-path",
+      "title": "`{{ a }}{{ b }}` is two references, never one path spanning `}}{{`, so even when neither resolves it is not reported as a missing field.",
+      "since": "0.24.0",
+      "tags": [
+        "routing",
+        "branch",
+        "silent"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.a }}{{ $json.b }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "no",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "false side"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "x": 1
+          }
+        }
+      },
+      "expected": [],
+      "notes": "Before fancy-flow-php#16 the whole-string branch read this as ONE path, `$json.a }}{{ $json.b`. A diagnostic built on that reading would name a field no graph could have."
+    },
+    {
+      "id": "0006-switch-routes-on-an-unresolved-value",
+      "title": "A switch_case whose value resolves to nothing warns that it fell to `default`, naming `value` as the config key.",
+      "since": "0.24.0",
+      "tags": [
+        "routing",
+        "switch_case",
+        "warns"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "s",
+                "kind": "switch_case",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "value": "{{ $json.lane }}",
+                  "cases": {
+                    "billing": "case_a"
+                  }
+                }
+              },
+              {
+                "id": "to_case_a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "case_a"
+                }
+              },
+              {
+                "id": "to_default",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "default"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "s"
+              },
+              {
+                "id": "e2",
+                "source": "s",
+                "target": "to_case_a",
+                "sourceHandle": "case_a"
+              },
+              {
+                "id": "e3",
+                "source": "s",
+                "target": "to_default",
+                "sourceHandle": "default"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "something_else": "billing"
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "s",
+          "message": "Node s took the \"default\" port because `value` resolved to NOTHING — the path $json.lane names no field on this node's inputs. That is not the same as a false condition: the route was decided by an absent value rather than by the data.",
+          "detail": {
+            "node": "s",
+            "configKey": "value",
+            "path": "$json.lane",
+            "tookPort": "default"
+          }
+        }
+      ]
+    },
+    {
+      "id": "0007-switch-value-matches-no-case",
+      "title": "A switch_case value that resolves but matches no case is what `default` is FOR, and is silent.",
+      "since": "0.24.0",
+      "tags": [
+        "routing",
+        "switch_case",
+        "silent"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "s",
+                "kind": "switch_case",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "value": "{{ $json.lane }}",
+                  "cases": {
+                    "billing": "case_a"
+                  }
+                }
+              },
+              {
+                "id": "to_case_a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "case_a"
+                }
+              },
+              {
+                "id": "to_default",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "default"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "s"
+              },
+              {
+                "id": "e2",
+                "source": "s",
+                "target": "to_case_a",
+                "sourceHandle": "case_a"
+              },
+              {
+                "id": "e3",
+                "source": "s",
+                "target": "to_default",
+                "sourceHandle": "default"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "lane": "unmapped"
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0008-edge-names-a-port-its-source-never-publishes",
+      "title": "An edge whose sourceHandle names no port of a node that completed warns: edge id first, the consequence, what is available, and the remedy.",
+      "since": "0.24.0",
+      "tags": [
+        "undelivered-edge",
+        "warns"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.name }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o",
+                "sourceHandle": "result"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "message": "Edge e2 reads port \"result\" from node tf, which never publishes it — nothing would reach o at run time. Available: out. Leave sourceHandle off to read the node's output.",
+          "detail": {
+            "edge": "e2",
+            "source": "tf",
+            "sourceHandle": "result"
+          }
+        }
+      ],
+      "notes": "The warning is reported against the TARGET node, which is the one that will never receive anything. Its only inbound edge is the bad one, so it is skipped -- the silent shape."
+    },
+    {
+      "id": "0009-untaken-branch-port-is-ordinary",
+      "title": "The edge leaving the branch port that was NOT taken binds nothing, and is silent: that is ordinary branching.",
+      "since": "0.24.0",
+      "tags": [
+        "undelivered-edge",
+        "silent"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.urgent }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "no",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "false side"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "urgent": true
+          }
+        }
+      },
+      "expected": [],
+      "notes": "Asking 'did the source publish this port?' cannot tell an untaken branch from an impossible handle -- both are absent. The rule asks whether the port is POSSIBLE for the node."
+    },
+    {
+      "id": "0010-inverted-switch-cases-map",
+      "title": "A switch_case whose cases map is inverted (port => value) warns once per edge naming a port the node can never publish.",
+      "since": "0.24.0",
+      "tags": [
+        "undelivered-edge",
+        "switch_case",
+        "warns"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "s",
+                "kind": "switch_case",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "value": "{{ $json.kind }}",
+                  "cases": {
+                    "case_a": "a",
+                    "case_b": "b"
+                  }
+                }
+              },
+              {
+                "id": "to_case_a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "case_a"
+                }
+              },
+              {
+                "id": "to_case_b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "case_b"
+                }
+              },
+              {
+                "id": "to_default",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "default"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "s"
+              },
+              {
+                "id": "e2",
+                "source": "s",
+                "target": "to_case_a",
+                "sourceHandle": "case_a"
+              },
+              {
+                "id": "e3",
+                "source": "s",
+                "target": "to_case_b",
+                "sourceHandle": "case_b"
+              },
+              {
+                "id": "e4",
+                "source": "s",
+                "target": "to_default",
+                "sourceHandle": "default"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "kind": "a"
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "to_case_a",
+          "message": "Edge e2 reads port \"case_a\" from node s, which never publishes it — nothing would reach to_case_a at run time. Available: default. Leave sourceHandle off to read the node's output.",
+          "detail": {
+            "edge": "e2",
+            "source": "s",
+            "sourceHandle": "case_a"
+          }
+        },
+        {
+          "nodeId": "to_case_b",
+          "message": "Edge e3 reads port \"case_b\" from node s, which never publishes it — nothing would reach to_case_b at run time. Available: default. Leave sourceHandle off to read the node's output.",
+          "detail": {
+            "edge": "e3",
+            "source": "s",
+            "sourceHandle": "case_b"
+          }
+        }
+      ],
+      "notes": "Measured, not imagined: the flabs smart-routing reference graph had exactly this inversion. PHP warned about the dead edge at once; the Node, Python and Rust engines ran the same graph and said nothing (fancy-flow#17). `cases` maps VALUE => PORT, so the possible ports here are `a`, `b` and `default`."
+    },
+    {
+      "id": "0011-configured-third-case-is-a-real-port",
+      "title": "A port derived from a switch_case's own cases config is possible, so an edge from it is silent even when the run did not take it.",
+      "since": "0.24.0",
+      "tags": [
+        "undelivered-edge",
+        "switch_case",
+        "silent",
+        "config-derived-ports"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "s",
+                "kind": "switch_case",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "value": "{{ $json.kind }}",
+                  "cases": {
+                    "a": "case_a",
+                    "b": "case_b",
+                    "c": "case_c"
+                  }
+                }
+              },
+              {
+                "id": "to_case_a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "case_a"
+                }
+              },
+              {
+                "id": "to_case_b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "case_b"
+                }
+              },
+              {
+                "id": "to_case_c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "case_c"
+                }
+              },
+              {
+                "id": "to_default",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "default"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "s"
+              },
+              {
+                "id": "e2",
+                "source": "s",
+                "target": "to_case_a",
+                "sourceHandle": "case_a"
+              },
+              {
+                "id": "e3",
+                "source": "s",
+                "target": "to_case_b",
+                "sourceHandle": "case_b"
+              },
+              {
+                "id": "e4",
+                "source": "s",
+                "target": "to_case_c",
+                "sourceHandle": "case_c"
+              },
+              {
+                "id": "e5",
+                "source": "s",
+                "target": "to_default",
+                "sourceHandle": "default"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "kind": "a"
+          }
+        }
+      },
+      "expected": [],
+      "notes": "The kind's static declaration lists only case_a, case_b and default. An engine that reads that instead of the node's cases reports case_c as impossible -- which is exactly what the authoring tools had invited an agent to build, and flabs caught it."
+    },
+    {
+      "id": "0012-handle-names-a-field-not-a-port",
+      "title": "When the bad handle is a FIELD the source emits, the warning says so and shows how to read the field.",
+      "since": "0.24.0",
+      "tags": [
+        "undelivered-edge",
+        "near-miss",
+        "warns"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "fe",
+                "kind": "for_each",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "source": "{{ $json.items }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "fe"
+              },
+              {
+                "id": "e2",
+                "source": "fe",
+                "target": "o",
+                "sourceHandle": "count"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "items": [
+              1,
+              2
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "message": "Edge e2 reads port \"count\" from node fe, which never publishes it — nothing would reach o at run time. Available: item, done. Note: \"count\" is a FIELD this node emits, not a port — read it downstream as {{ in.count }} rather than naming it as a source handle. Leave sourceHandle off to read the node's output.",
+          "detail": {
+            "edge": "e2",
+            "source": "fe",
+            "sourceHandle": "count"
+          }
+        }
+      ],
+      "notes": "`count` is in for_each's declared output shape. Nearly every occurrence is an agent reaching for a field name where a port belongs, and naming that turns a correction into an explanation."
+    },
+    {
+      "id": "0013-bad-edge-beside-a-live-one",
+      "title": "A bad edge into a node that ALSO has a live inbound edge still warns, although the node runs.",
+      "since": "0.24.0",
+      "tags": [
+        "undelivered-edge",
+        "merge",
+        "warns"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "transform",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.name }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "transform",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.name }}"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "merge",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e2",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e3",
+                "source": "a",
+                "target": "m"
+              },
+              {
+                "id": "e4",
+                "source": "b",
+                "target": "m",
+                "sourceHandle": "nope"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "name": "Ada"
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "m",
+          "message": "Edge e4 reads port \"nope\" from node b, which never publishes it — nothing would reach m at run time. Available: out. Leave sourceHandle off to read the node's output.",
+          "detail": {
+            "edge": "e4",
+            "source": "b",
+            "sourceHandle": "nope"
+          }
+        }
+      ],
+      "notes": "The more misleading of the two silent shapes: the node runs with that input simply missing, so a downstream template is entirely correct and renders empty. A consumer misdiagnosed two filed issues off the back of it."
+    },
+    {
+      "id": "0014-source-that-never-ran-is-not-judged",
+      "title": "An edge out of a node that was skipped is silent, whatever its handle: only a source that COMPLETED can be said to never publish a port.",
+      "since": "0.24.0",
+      "tags": [
+        "undelivered-edge",
+        "silent"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ $json.urgent }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "skipped",
+                "kind": "transform",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "expression": "{{ $json.urgent }}"
+                }
+              },
+              {
+                "id": "after",
+                "kind": "output",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "skipped",
+                "sourceHandle": "false"
+              },
+              {
+                "id": "e4",
+                "source": "skipped",
+                "target": "after",
+                "sourceHandle": "nope"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "urgent": true
+          }
+        }
+      },
+      "expected": []
+    }
+  ]
+}

@@ -10,6 +10,40 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-09-14
+
+**A new suite, `flow/run-diagnostics`. No existing case or golden changed.** Only
+fancy-flow-php passes it today. `@particle-academy/fancy-flow`, `fancy-flow`
+(Python) and fancy-flow-rs emit neither warning, and pass only the eight silent
+rows until they implement it (fancy-flow#17).
+
+### Added
+
+- **`flow/run-diagnostics`: a graph that runs and delivers nothing must say so.**
+  14 rows over the two run-time warnings fancy-flow-php emits and the other three
+  runtimes do not:
+  - **Undelivered edge:** an edge whose `sourceHandle` names a port its source
+    COMPLETED without publishing, and could never publish. The warning goes
+    against the target node.
+  - **Route on an unresolved path:** a `branch` condition or `switch_case` value
+    that is one whole `{{ path }}` which did not resolve, so the run took
+    `false` or `default` because a value was absent.
+
+  The contract returns every `warn` log event as `{ nodeId, message, detail }`
+  sorted by message, so exact wording and structured detail are both pinned.
+  Goldens are from fancy-flow-php 0.52.2, reviewed row by row.
+  - Six rows warn: 0001 and 0006 (routing), 0008, 0010, 0012 and 0013
+    (undelivered).
+    - 0010 is the flabs smart-routing graph with an inverted `cases` map. It is
+      the graph that exposed the gap: PHP warned, and the other three passed it
+      silently.
+    - 0012 pins the near-miss note for a handle that is a declared output FIELD.
+  - Eight rows are silent on purpose: a false condition, a null value, mixed
+    text, adjacent references, an unmatched switch value, the untaken branch
+    port, a port that exists only through the node's own `cases`, and an edge
+    out of a node that never ran. Each is a way to warn on ordinary branching,
+    which is how a real warning stops being read.
+
 ## [0.23.0] - 2026-09-14
 
 **Six rows added to `shared/expr`. A runtime without the fancy-flow-php#16 fix

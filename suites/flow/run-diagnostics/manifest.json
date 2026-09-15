@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/run-diagnostics",
+  "title": "A graph that runs and delivers nothing must say so",
+  "since": "0.24.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "runDiagnostics(schema: WorkflowSchema, initialInputs: object) -> Array<{ nodeId: string|null, message: string, detail: object }>",
+    "summary": "Import a WorkflowSchema v1 document leniently against a local built-in kind registry with the structural kinds registered, run it with the built-in offline executors, and return every `log` event at level `warn` as { nodeId, message, detail }, SORTED by `message` (code-point order). Two warnings are pinned. (1) UNDELIVERED EDGE: before deciding whether a node runs, for each inbound edge whose source COMPLETED, whose port was not published, and whose `sourceHandle` (default `out`) is not among the ports the source could POSSIBLY publish, warn against the TARGET node with detail { edge, source, sourceHandle }. (2) ROUTE ON AN UNRESOLVED PATH: when `branch` (config key `condition`) or `switch_case` (config key `value`) holds a single whole `{{ path }}` whose path does not resolve against the node's inputs, warn against that node with detail { node, configKey, path, tookPort }. Routing itself is unchanged.",
+    "reference": "php",
+    "referenceNote": "Goldens produced by fancy-flow-php 0.52.2's FlowRunner (`undeliveredEdgeMessage`, `possiblePortIds` via `PortResolution::possible`) and `Nodes/Support/RoutingDiagnostics::warnIfUnresolved`, then reviewed row by row. PHP is the only runtime that emitted either warning when this table was written (fancy-flow#17).",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Engine\\FlowRunner" },
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "runFlow" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.engine.FlowRunner" },
+      { "language": "rust", "package": "fancy-flow", "symbol": "fancy_flow::engine::FlowRunner" }
+    ]
+  },
+  "notes": [
+    "MEASURED BEFORE IT WAS WRITTEN DOWN. The flabs smart-routing reference graph carried an inverted switch_case map. PHP warned about the dead edge at once; the Node, Python and Rust engines ran the identical graph, reported success and said nothing. A lab that judges a graph by those warnings could therefore catch a dead edge on one lane in four, and could only say of the other three that the engine reports nothing. Row 0010 is that graph.",
+    "BOTH WARNINGS ARE THE SAME SILENT FAILURE: a graph that runs, reports success, and delivers nothing down one path. Neither changes what runs. The undelivered-edge warning names the edge, the consequence, what the source did publish and the common remedy; the routing warning names the path that did not resolve and the port that was taken because of it.",
+    "HALF THE ROWS ARE SILENT, ON PURPOSE. A warning that fires on ordinary branching is noise, and noise is how a real warning stops being read. 0009 (the untaken branch port), 0011 (a port that exists only because of the node's own cases config), 0014 (an edge out of a node that never ran), 0002 and 0003 (a condition that is false, or resolves to null) each pin a way an implementation can warn too often. The undelivered rule asks whether a port is POSSIBLE, never whether it was published: the two cannot be told apart by looking at what arrived.",
+    "ABSENT IS NOT NULL. 0003 resolves to null and is silent; 0001 does not resolve and warns. An implementation that tests the resolved VALUE instead of asking whether the path RESOLVED fails 0003.",
+    "SORTED BY MESSAGE, NOT EMISSION ORDER. Undelivered-edge warnings are emitted as each target is reached in topological order, and runtimes may break ties between same-depth nodes differently. Ordering is `flow/graph-runs`' question; this table asks which warnings a run produces.",
+    "THE NEAR-MISS NOTE (0012) comes from the source kind's declared output shape: a handle that equals a field path of that shape is an agent naming a field where a port belongs, and the message says how to read the field instead. It needs the shape, which every runtime's builtin `for_each` declares.",
+    "There is NO discrimination probe for this suite, for the same reason as `flow/graph-runs`: the implementation under test is a whole workflow engine, which this package does not carry."
+  ]
+}

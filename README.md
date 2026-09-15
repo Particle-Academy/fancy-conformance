@@ -69,6 +69,7 @@ verbatim.
 | `shared/image-header` | 16 | Image dimensions read from the header bytes, without an image library |
 | `shared/flow-run-identity` | 25 | fancy-flow's run/step identity: the idempotency key a retrying connector sends, and when a retry may still reuse it |
 | `flow/graph-runs` | 23 | Whole-graph execution: the same `WorkflowSchema` in, the same `RunResult.outputs` out |
+| `flow/run-diagnostics` | 14 | The run-time warnings for a graph that delivers nothing: an edge naming a port its source can never publish, and a route taken on a path that did not resolve. Half the rows pin when to stay silent |
 
 Every case carries an `id`, a `title`, the suite version it arrived in, and —
 where it exists to catch something specific — a `notes` field saying what.
