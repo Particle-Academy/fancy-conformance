@@ -10,6 +10,39 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-09-14
+
+**A new suite, `flow/durable-dispatch`. No existing case or golden changed.**
+fancy-flow-php passes it from 0.54.0. `@particle-academy/fancy-flow` and
+`fancy-flow` (Python) implement it next; fancy-flow-rs has no durable coordinator
+and is not listed.
+
+### Added
+
+- **`flow/durable-dispatch`: a queued run hands out one node at a time unless the
+  host asks for more** (fancy-flow-php#17, the owner's ruling). 14 rows simulate a
+  per-node run with each runtime's OWN frontier and dispatch selection, FIFO
+  workers settling one node at a time, and no engine or queue:
+  - **Serial is the default** (`maxConcurrent` 1). A node is dispatched only after
+    the node before it settles, in DECLARATION order among what is ready now.
+    0007 pins that this is not breadth-first; 0004 that edge-list order is ignored.
+  - **A paused gate keeps its slot** (0008, and 0010 under a cap), so nothing
+    queues alongside a person who is still deciding.
+  - **A cap is measured against work already held**, not the size of one batch
+    (0014).
+  - **`maxConcurrent` 0 is the whole ready frontier** (0002, 0006, 0009): the
+    opt-in to parallel.
+  - Skips and notes never take a slot (0011, 0012).
+
+  The goldens are an ordered TRACE (`dispatch`/`complete`/`pause`/`skip`), not a
+  list of dispatch batches. Produced by fancy-flow-php 0.54.0's `Frontier` and
+  `DispatchLimit`, reviewed row by row.
+- **A discrimination probe for it** (`tests/discrimination-durable-dispatch.test.ts`):
+  the control passes every row, and four mutants each fail an exact set. Writing
+  the probe is what changed the golden shape: a batch list let both a
+  paused-node-not-held and a per-batch cap dispatcher through, because it cannot
+  see WHEN a node was dispatched.
+
 ## [0.24.0] - 2026-09-14
 
 **A new suite, `flow/run-diagnostics`. No existing case or golden changed.** Only

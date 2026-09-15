@@ -1,0 +1,1199 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/durable-dispatch",
+  "cases": [
+    {
+      "id": "0001-a-fan-out-dispatches-one-node-at-a-time-by-default",
+      "title": "Serial: a trigger fanning out to three nodes hands out one node per settle, in declaration order.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "default",
+        "fan-out"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "t-c",
+                "source": "t",
+                "target": "c"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "complete a",
+          "dispatch b",
+          "complete b",
+          "dispatch c",
+          "complete c"
+        ],
+        "neverDispatched": []
+      },
+      "notes": "The default. Before fancy-flow-php 0.54.0 an unset limit dispatched the whole frontier here, as 0002 does."
+    },
+    {
+      "id": "0002-unlimited-dispatches-the-whole-ready-frontier",
+      "title": "maxConcurrent 0 is the opt-in to parallel: the whole ready frontier goes out in one batch.",
+      "since": "0.25.0",
+      "tags": [
+        "unlimited",
+        "fan-out"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "t-c",
+                "source": "t",
+                "target": "c"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 0,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "dispatch b",
+          "dispatch c",
+          "complete a",
+          "complete b",
+          "complete c"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0003-a-cap-of-two-fills-both-slots-then-waits",
+      "title": "A cap of 2 dispatches two siblings, and the third only once one of them settles.",
+      "since": "0.25.0",
+      "tags": [
+        "cap",
+        "fan-out"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "t-c",
+                "source": "t",
+                "target": "c"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 2,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "dispatch b",
+          "complete a",
+          "dispatch c",
+          "complete b",
+          "complete c"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0004-declaration-order-not-edge-order",
+      "title": "Siblings go out in the order the graph DECLARES them, not the order their edges are listed.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "order"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch b",
+          "complete b",
+          "dispatch a",
+          "complete a"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0005-a-diamond-joins-once-after-both-branches-serially",
+      "title": "Serial diamond: each branch in turn, then the join, which is never dispatched before both inputs settle.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "fan-in"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "j",
+                "kind": "merge",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "a-j",
+                "source": "a",
+                "target": "j"
+              },
+              {
+                "id": "b-j",
+                "source": "b",
+                "target": "j"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "complete a",
+          "dispatch b",
+          "complete b",
+          "dispatch j",
+          "complete j"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0006-a-diamond-under-unlimited",
+      "title": "Unlimited diamond: both branches together, then the join.",
+      "since": "0.25.0",
+      "tags": [
+        "unlimited",
+        "fan-in"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "j",
+                "kind": "merge",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "a-j",
+                "source": "a",
+                "target": "j"
+              },
+              {
+                "id": "b-j",
+                "source": "b",
+                "target": "j"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 0,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "dispatch b",
+          "complete a",
+          "complete b",
+          "dispatch j",
+          "complete j"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0007-a-successor-declared-before-a-waiting-sibling-goes-first",
+      "title": "Order is declaration order among what is READY NOW: a node that just became ready and is declared earlier goes before a sibling that has been waiting. Not breadth-first.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "order"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "a-c",
+                "source": "a",
+                "target": "c"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "complete a",
+          "dispatch c",
+          "complete c",
+          "dispatch b",
+          "complete b"
+        ],
+        "neverDispatched": []
+      },
+      "notes": "The discriminating order row: breadth-first would dispatch b before c."
+    },
+    {
+      "id": "0008-a-paused-gate-keeps-its-slot",
+      "title": "Serial: a node paused for a person holds the only slot, so its ready siblings are never dispatched while the person decides.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "pause"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "gate",
+                "kind": "human_approval",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-gate",
+                "source": "t",
+                "target": "gate"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "t-c",
+                "source": "t",
+                "target": "c"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "pauses": [
+          "gate"
+        ],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch gate",
+          "pause gate"
+        ],
+        "neverDispatched": [
+          "b",
+          "c"
+        ]
+      },
+      "notes": "The gap the ruling closes: b and c are never dispatched while the gate is paused."
+    },
+    {
+      "id": "0009-a-paused-gate-under-unlimited",
+      "title": "Unlimited: the gate and its siblings go out together, and the siblings complete while the gate waits.",
+      "since": "0.25.0",
+      "tags": [
+        "unlimited",
+        "pause"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "gate",
+                "kind": "human_approval",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-gate",
+                "source": "t",
+                "target": "gate"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "t-c",
+                "source": "t",
+                "target": "c"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 0,
+        "pauses": [
+          "gate"
+        ],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch gate",
+          "dispatch b",
+          "dispatch c",
+          "pause gate",
+          "complete b",
+          "complete c"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0010-a-paused-gate-counts-against-a-cap",
+      "title": "A cap of 2 with a paused gate: the gate keeps one slot after it pauses, so only one sibling runs at a time beside it.",
+      "since": "0.25.0",
+      "tags": [
+        "cap",
+        "pause"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "gate",
+                "kind": "human_approval",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-gate",
+                "source": "t",
+                "target": "gate"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "t-c",
+                "source": "t",
+                "target": "c"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 2,
+        "pauses": [
+          "gate"
+        ],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch gate",
+          "dispatch b",
+          "pause gate",
+          "complete b",
+          "dispatch c",
+          "complete c"
+        ],
+        "neverDispatched": []
+      },
+      "notes": "Held counts the paused gate: c goes out only after b settles. An implementation that does not count a paused node dispatches c the moment the gate pauses."
+    },
+    {
+      "id": "0011-a-dead-branch-is-skipped-and-never-dispatched",
+      "title": "The branch publishes only `true`: the false side and everything below it is settled as skipped, and never takes a slot.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "skip"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": true
+                }
+              },
+              {
+                "id": "y",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "n",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "n2",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-br",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "br-y",
+                "source": "br",
+                "target": "y",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "br-n",
+                "source": "br",
+                "target": "n",
+                "sourceHandle": "false"
+              },
+              {
+                "id": "n-n2",
+                "source": "n",
+                "target": "n2"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "publishes": {
+          "br": [
+            "true"
+          ]
+        },
+        "pauses": []
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch br",
+          "complete br",
+          "skip n",
+          "skip n2",
+          "dispatch y",
+          "complete y"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0012-a-note-is-settled-not-dispatched",
+      "title": "A sticky note is never executed: it settles as skipped without taking a slot.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "note"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "memo",
+                "kind": "note",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "skip memo",
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "complete a"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0013-two-entry-points-take-turns",
+      "title": "Two triggers with nothing between them: serial dispatches them one after the other, in declaration order.",
+      "since": "0.25.0",
+      "tags": [
+        "serial",
+        "entry-points"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t1",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "t2",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t1-a",
+                "source": "t1",
+                "target": "a"
+              },
+              {
+                "id": "t2-b",
+                "source": "t2",
+                "target": "b"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 1,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t1",
+          "complete t1",
+          "dispatch t2",
+          "complete t2",
+          "dispatch a",
+          "complete a",
+          "dispatch b",
+          "complete b"
+        ],
+        "neverDispatched": []
+      }
+    },
+    {
+      "id": "0014-a-cap-is-measured-against-held-work-not-the-batch",
+      "title": "A cap of 2 over four siblings: when one settles, ONE more goes out, because the other is still held. A cap applied per batch would dispatch two.",
+      "since": "0.25.0",
+      "tags": [
+        "cap",
+        "budget"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "a",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "b",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "c",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "d",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "t-a",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "t-b",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "t-c",
+                "source": "t",
+                "target": "c"
+              },
+              {
+                "id": "t-d",
+                "source": "t",
+                "target": "d"
+              }
+            ]
+          }
+        },
+        "maxConcurrent": 2,
+        "pauses": [],
+        "publishes": {}
+      },
+      "expected": {
+        "trace": [
+          "dispatch t",
+          "complete t",
+          "dispatch a",
+          "dispatch b",
+          "complete a",
+          "dispatch c",
+          "complete b",
+          "dispatch d",
+          "complete c",
+          "complete d"
+        ],
+        "neverDispatched": []
+      },
+      "notes": "A per-batch cap dispatches c AND d when a settles, putting three in flight under a cap of 2."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/durable-dispatch",
+  "title": "A queued run hands out one node at a time unless the host asks for more",
+  "since": "0.25.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "dispatchTrace(schema: WorkflowSchema, maxConcurrent: int, publishes: { [nodeId]: string[] }, pauses: string[]) -> { trace: string[], neverDispatched: string[] }",
+    "summary": "Simulate a durable (queued, per-node) run with the runtime's OWN frontier and dispatch-selection functions, and no engine execution. Import the schema leniently against a local built-in kind registry with the structural kinds. Let `limit` be null when `maxConcurrent` is 0 (unlimited), else `maxConcurrent`. Start with empty node state, an empty FIFO `inFlight` and an empty `trace`. Repeat: (1) compute the frontier from the state; record every `skipped` node as SKIPPED with no ports and append `skip <id>`; (2) SELECT from `ready` (declaration order): with a null limit take all of them, else take the first `limit - held`, where `held` counts nodes whose state is CLAIMED or PAUSED; mark each selected node CLAIMED, push it onto `inFlight` and append `dispatch <id>`; (3) if `inFlight` is empty, stop; (4) shift the first node off `inFlight`: when it is in `pauses`, record it PAUSED (it keeps its slot) and append `pause <id>`; otherwise record it COMPLETED publishing `publishes[id]` (default [\"out\"]) and append `complete <id>`. `neverDispatched` is every node, in declaration order, that never entered the state. The TRACE, not a list of batches, is pinned: a batch list cannot tell a node dispatched the moment a gate paused from one dispatched after a sibling settled, and that is the difference between counting a paused node as held and not.",
+    "reference": "php",
+    "referenceNote": "Goldens produced by fancy-flow-php 0.54.0's `FancyFlow\\Laravel\\Runs\\Frontier::compute` and `FancyFlow\\Laravel\\Runs\\DispatchLimit::select`, then reviewed row by row. Written for fancy-flow-php#17, which made serial the default.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Laravel\\Runs\\DispatchLimit" },
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "selectDispatch" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.durable.select_dispatch" }
+    ]
+  },
+  "notes": [
+    "THE OWNER'S RULING, relayed from the estate's largest consumer: nodes never queue at the same time; a node is added to the worker queue only after the previous node finishes, and that is fancy-flow's DEFAULT. Parallel dispatch of a ready frontier is an explicit opt-in. Rows 0001, 0004, 0005, 0007, 0008, 0011, 0012 and 0013 are the default; 0002, 0003, 0006, 0009, 0010 and 0014 are what a host gets only by asking.",
+    "SERIAL IS maxConcurrent 1, UNLIMITED IS 0. Every coordinator defaults to 1. A positive integer caps how many of one run's nodes are held at once; 0 is the whole ready frontier, exported under a name (`DispatchLimit::UNLIMITED`, `UNLIMITED_CONCURRENCY`) so a host never writes a bare 0. A negative limit is refused where it is set: under a serial default, a typo that silently turned a run parallel is the failure to avoid.",
+    "HELD MEANS CLAIMED OR PAUSED. A node paused for a person keeps its slot, so a gate never opens a gap for a sibling to queue alongside it while the person decides (0008, and 0010 under a cap). On fancy-flow-php a pause also parks the whole run, so this changes nothing observable there; on the TS and Python coordinators a pause does NOT park the run, and without this rule a later advance would dispatch the gate's siblings.",
+    "ORDER IS DECLARATION ORDER AMONG WHAT IS READY NOW, not breadth-first. 0007 is the discriminating row: `c` becomes ready after `a` settles and is declared before the still-waiting `b`, so it goes first. An implementation that queues nodes in the order they became ready fails it. 0004 pins that the edge list's order does not matter.",
+    "THE BUDGET IS MEASURED AGAINST WORK ALREADY HELD, not the size of one batch. Two nodes settling at once each trigger an advance on a real queue; a per-batch cap lets each dispatch its own quota. The simulation cannot race, so 0014 and 0010 pin the held-count arithmetic directly, and each runtime's own suite pins the race.",
+    "WORKERS ARE FIFO AND SETTLE ONE AT A TIME. That makes every row deterministic without pretending to model a real queue's timing. It is a model of the decision, not of the transport.",
+    "SKIPS AND NOTES NEVER TAKE A SLOT (0011, 0012). The frontier settles a dead branch, everything below it, and a sticky note in the same pass, before selection.",
+    "RUST IS NOT LISTED: fancy-flow-rs has no durable coordinator. Whether it gets one is an open decision recorded in the envelope's .ai/plans/fancy-flow-serial-dispatch.md.",
+    "THERE IS A DISCRIMINATION PROBE (tests/discrimination-durable-dispatch.test.ts): a faithful frontier + selection passes every row, and four mutants each fail an exact set -- a paused node not held (0008, 0010), a per-batch cap (0008, 0010, 0014), the pre-#17 default (0001, 0004, 0005, 0007, 0008, 0013) and breadth-first order (0007). Writing it is what turned the goldens from dispatch batches into a trace: the batch shape let the first two mutants through."
+  ]
+}
