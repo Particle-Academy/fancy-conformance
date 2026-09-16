@@ -160,10 +160,7 @@
         "result": { "ok": true }
       },
       "expected": [],
-      "skip": {
-        "node": "DIVERGENCE, not an exemption: @particle-academy/fancy-flow collapses an explicitly-empty outputs to ['out'] because its fallback tests `declared?.length` and [] is falsy, so the three states (undeclared / explicitly none / declared) become two. Measured on 0.74.1. PHP, Python and Rust all publish nothing. Tracked as an issue on fancy-flow; this row starts passing there the day it is fixed."
-      },
-      "notes": "THREE STATES, NOT TWO. `null` falls back to `out` (row 0302); `[]` means a terminal node that genuinely publishes nothing. Collapsing them is how a terminal node starts publishing — and downstream of that, an edge nobody drew starts delivering. Kept as a skipped row rather than deleted so every runner prints the disagreement: a table that omits the one case its implementations disagree on is a table that agrees by saying less."
+      "notes": "THREE STATES, NOT TWO. `null` falls back to `out` (row 0302); `[]` means a node that genuinely publishes nothing. Collapsing them is how a terminal node starts publishing — and downstream of that, an edge nobody drew starts delivering. THIS ROW WAS SKIPPED FOR NODE IN 0.27.0 and is unskipped in 0.28.0: it recorded a real divergence (that engine collapsed `[]` to `out` while PHP, Python and Rust published nothing), the owner ruled strict-but-loud, and all four now agree. The skip was the right way to carry a disagreement — visible in every runner's summary — and removing it is what settling the disagreement looks like."
     }
   ]
 }

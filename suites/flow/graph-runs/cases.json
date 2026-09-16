@@ -293,13 +293,10 @@
           "lg": {
             "logged": "regular Bo",
             "level": "info"
-          },
-          "o": {
-            "logged": "regular Bo",
-            "level": "info"
           }
         }
-      }
+      },
+      "notes": "THE GOLDEN CHANGED IN 0.28.0, and the change is the point of the row. `lg` is a `log` node — a terminal kind, which declares an EMPTY output port list — and edge e3 leaves it for `o`. Every runtime used to refuse that empty list and publish `out` instead, so the chain continued straight through a node that had declared it publishes nothing, and `o` ran. Under the owner's strict-but-loud ruling the declaration is honoured: `lg` terminates, `o` never runs, and the run raises the undelivered-edge warning naming e3 rather than truncating in silence. A runtime that still reports `o` here is one that has not taken the ruling."
     },
     {
       "id": "0004-switch-case",

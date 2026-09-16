@@ -10,6 +10,55 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-09-16
+
+**A declared-empty output port list now means "this node publishes NOTHING" in
+every runtime, and a chain it cuts must say so. One golden changes and one skip
+is removed — both because a real disagreement was settled rather than papered
+over.**
+
+### Changed
+
+- **`flow/graph-runs` row `0003-branch-false-log`: the `o` node no longer runs,
+  and its output is gone from the golden.** BREAKING for any runtime that has
+  not taken the ruling below — which is the point of a shared table.
+
+  The graph is `trigger -> branch -> log -> output`. `lg` is a `log` node, a
+  terminal kind, which declares an **empty** output port list. Every runtime
+  refused that empty list and published `out` instead, so the chain continued
+  straight through a node that had declared it publishes nothing.
+
+  That refusal was defensible while the alternative was a silent cut. It is not
+  any more, so it is gone: `lg` terminates, `o` never runs, and the run raises
+  the undelivered-edge warning naming edge `e3`.
+
+  **What a runtime must DO:** honour an empty declaration from a node AND from a
+  kind, and make sure the undelivered-edge lookup honours it too. If this row
+  still reports `o`, that runtime has not taken the change.
+
+- **`flow/port-activation` row `0303` is no longer skipped for `node`.** It
+  carried a measured divergence — `@particle-academy/fancy-flow` collapsed
+  `outputs: []` to `["out"]` because its fallback tested `declared?.length`,
+  while PHP, Python and Rust published nothing. The owner ruled **strict, but a
+  terminal node must be loud**, and all four now agree, so the skip is removed.
+
+  Carrying a disagreement as a visible skip and then removing it when it is
+  decided is what that mechanism is for. The row's text was not softened to make
+  the table agree; the implementations moved.
+
+### Notes added, because half a fix here is worse than none
+
+- **Both gates that shape a port set must honour the empty declaration** — the
+  one deciding what a node PUBLISHES, and the one behind the undelivered-edge
+  warning deciding what is DELIVERABLE. A runtime that fixes only the first
+  truncates chains while its own diagnostic still reports the edge as fine,
+  which is strictly worse than the lenient behaviour it replaced. Every runtime
+  had the same collapse in both places.
+- **The kind-level case is pinned by `flow/graph-runs` 0003, not by a
+  port-activation row**, because it needs a registered kind and those rows
+  deliberately name one no runtime ships. Recorded so nobody adds a duplicate
+  row that needs a new adapter field.
+
 ## [0.27.0] - 2026-09-15
 
 **A new suite, `flow/port-activation`, which pins which output ports a node
