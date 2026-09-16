@@ -10,6 +10,48 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-09-16
+
+**Fixes a row 0.28.0 made unanswerable. `flow/graph-runs` 0003 now declares its
+ports on the NODE, so it stops depending on something this suite deliberately
+leaves to each runtime.**
+
+### Fixed
+
+- **`flow/graph-runs` row `0003-branch-false-log`: the `lg` node now carries an
+  explicit `"outputs": []`.**
+
+  0.28.0 changed that row's golden so the `o` node no longer runs, on the
+  strict-but-loud ruling. But `lg` is a `log` node and `log`'s empty port list
+  lives on the **kind** — so the row was really asking *does the runner hold a
+  kind catalogue?*, and this suite's own contract leaves that to the runtime.
+  fancy-flow-php's runner always has one; fancy-flow-rs' `flow/graph-runs`
+  harness deliberately has none, because handing it over gives `for_each` its
+  `item` / `done` ports and breaks a different row.
+
+  So the identical document had two defensible answers for a reason that had
+  nothing to do with the rule under test, and 0.28.0 would have passed on PHP
+  and failed on Rust. Measured on both before this fix.
+
+  Declaring the ports on the NODE removes the ambiguity rather than picking a
+  side: every runtime reads them from the document, catalogue or not. The
+  golden is unchanged from 0.28.0 — `o` still does not run — and the row now
+  gives one answer everywhere.
+
+  **What you must DO:** nothing beyond taking 0.29.0, if you were already on
+  0.28.0 and had not yet reconciled this row. The kind-level half of the same
+  rule is pinned by each runtime's own suite, where the catalogue is not in
+  question.
+
+### A note for whoever touches this suite next
+
+`flow/graph-runs`' contract says the kind registry is NOT handed to the runner,
+and three of the four runtimes hold a catalogue anyway — PHP falls back to a
+default registry, TypeScript's is module-global, and Python's harness passes one
+explicitly. Only Rust can genuinely run without. **A row whose answer turns on
+that difference is not testing the engine**, and this one did for exactly one
+release. Prefer declaring on the node whatever a row means to assert.
+
 ## [0.28.0] - 2026-09-16
 
 **A declared-empty output port list now means "this node publishes NOTHING" in

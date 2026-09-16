@@ -238,7 +238,8 @@
                 "config": {
                   "level": "info",
                   "message": "regular {{ $json.name }}"
-                }
+                },
+                "outputs": []
               },
               {
                 "id": "o",
@@ -296,7 +297,7 @@
           }
         }
       },
-      "notes": "THE GOLDEN CHANGED IN 0.28.0, and the change is the point of the row. `lg` is a `log` node — a terminal kind, which declares an EMPTY output port list — and edge e3 leaves it for `o`. Every runtime used to refuse that empty list and publish `out` instead, so the chain continued straight through a node that had declared it publishes nothing, and `o` ran. Under the owner's strict-but-loud ruling the declaration is honoured: `lg` terminates, `o` never runs, and the run raises the undelivered-edge warning naming e3 rather than truncating in silence. A runtime that still reports `o` here is one that has not taken the ruling."
+      "notes": "THE GOLDEN CHANGED IN 0.28.0 AND THE DOCUMENT CHANGED IN 0.29.0 — read both, because the second change is what makes the row answerable at all. `lg` is a `log` node and edge e3 leaves it for `o`. Every runtime used to refuse an empty output declaration and publish `out` instead, so the chain ran straight through a node that publishes nothing, and `o` ran. Under the owner's strict-but-loud ruling the declaration is honoured: `lg` terminates, `o` never runs, and the run raises the undelivered-edge warning naming e3 rather than truncating in silence. 0.29.0 adds an explicit `\"outputs\": []` TO THE `lg` NODE, and that is not cosmetic. Without it the row asked whether the runner holds a kind CATALOGUE — `log`'s empty list lives on the kind — and this suite's contract deliberately leaves that to the runtime: PHP's runner always has one and Rust's graph-runs harness deliberately has none, so the identical document gave two answers for a reason that had nothing to do with the rule under test. Declaring the ports on the NODE removes the ambiguity instead of picking a side: every runtime reads them from the document. The kind-level half of the same rule is pinned by each runtime's own suite, where the catalogue is not in question."
     },
     {
       "id": "0004-switch-case",
