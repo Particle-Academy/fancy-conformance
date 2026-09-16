@@ -10,7 +10,58 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
-## [0.26.0] - 2026-09-15
+## [0.27.0] - 2026-09-15
+
+**A new suite, `flow/port-activation`, which pins which output ports a node
+lights and what each one carries — and records the one case the four runtimes
+do not agree on. No existing case or golden changed.**
+
+### Added
+
+- **`flow/port-activation`: 12 rows over the rule every fancy-flow runtime
+  applies to an executor's return value.** Run a one-node graph whose node
+  declares `declaredOutputs` and whose executor returns `result`; report the
+  `node-output` events, in order, as `[{ port, value }]`.
+
+  The events rather than the function's return value, because all four runtimes
+  keep this logic private (`activatedPorts`, `_activated_ports`,
+  `Walk::activated_ports`) and the events are what a consumer — and the durable
+  layer — actually observes. It also means the table needs no new export in any
+  runtime to be asserted.
+
+  - **The subset rule, new in fancy-flow-php#18** (rows 0101–0106). A `__ports`
+    LIST lights exactly those ports, each carrying the shared value; a `__ports`
+    MAP gives each lit port its own payload, in the map's declaration order. An
+    explicitly empty `__ports` lights **nothing** — the honest answer for a
+    router that matched no rule. A malformed `__ports` (a string, a number)
+    falls through to the every-declared-port rule rather than lighting nothing,
+    so a typo cannot silently truncate a run.
+  - **The single-port rules, unchanged and now pinned** (rows 0201–0203).
+    `__port` lights one port. `branch` with `value` present and **null** carries
+    null; `branch` with no `value` key carries the whole result. All four
+    runtimes shipped that distinction wrong, identically, so no parity table
+    caught it — they agreed on being wrong. These rows exist so the next one
+    cannot hide the same way.
+  - **The fallbacks** (rows 0301–0303). A plain result lights every declared
+    port; a node declaring none lights `out`.
+
+- **Row 0303 records a real DIVERGENCE as a skip rather than omitting it.**
+  `declaredOutputs: []` means "explicitly no output ports".
+  `particle-academy/fancy-flow-php`, `fancy-flow` (PyPI) and `fancy-flow` (Rust)
+  all honour it and publish nothing. `@particle-academy/fancy-flow` collapses it
+  to `["out"]`, because its fallback tests `declared?.length` and `[]` is falsy —
+  so the three states (undeclared / explicitly none / declared) become two.
+  Measured on fancy-flow 0.74.1, not inferred.
+
+  It is skipped for `node` with that reason, so **every runner prints it**. A
+  table that deletes the one case its implementations disagree on is a table
+  that agrees by saying less. The row starts passing on Node the day the
+  fallback is fixed, with no change here.
+
+### Changed
+
+- The Python and Rust loader packages carry the suite version, so both move to
+  `0.27.0` with the fixtures.
 
 **A new suite, `shared/subscription-lease`, and Rust joins `flow/durable-dispatch`.
 No existing case or golden changed.**

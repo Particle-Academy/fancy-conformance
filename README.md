@@ -70,6 +70,7 @@ verbatim.
 | `shared/flow-run-identity` | 25 | fancy-flow's run/step identity: the idempotency key a retrying connector sends, and when a retry may still reuse it |
 | `flow/graph-runs` | 23 | Whole-graph execution: the same `WorkflowSchema` in, the same `RunResult.outputs` out |
 | `flow/run-diagnostics` | 14 | The run-time warnings for a graph that delivers nothing: an edge naming a port its source can never publish, and a route taken on a path that did not resolve. Half the rows pin when to stay silent |
+| `flow/port-activation` | 12 | Which output ports a node lights and what each carries: a chosen SUBSET via `__ports`, one port via `__port` / `branch`, and the declared-port fallbacks. One row records a real disagreement as a skip rather than omitting it |
 | `flow/durable-dispatch` | 14 | How a queued run hands out nodes: one at a time by default, in declaration order, with a paused gate keeping its slot; a cap and the whole frontier only when a host asks |
 | `shared/subscription-lease` | 13 | A subscription that expires: when a renewal is due, when the lease has expired, and why a missed lease is a resync rather than a quiet re-create |
 

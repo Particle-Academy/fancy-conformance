@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/port-activation",
+  "title": "Which output ports a node lights, and what each one carries",
+  "since": "0.27.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "run(node with declaredOutputs, executor returning result) -> ordered [{ port, value }]",
+    "summary": "Run a ONE-NODE graph whose node declares `declaredOutputs` as its output ports and whose executor returns `result`, and report the `node-output` events that node emitted, in order, as `[{ port, value }]`. The answer is the events rather than a private function's return value because every runtime keeps this logic private (`activatedPorts`, `_activated_ports`, `Walk::activated_ports`) and the events are what a consumer — and the durable layer — actually observes. A row with an empty `expected` asserts the node emitted NOTHING, which is a different claim from emitting one port with a null payload and is the claim several of these rows are about.",
+    "reference": "node",
+    "referenceNote": "The result-shape rules are `@particle-academy/fancy-flow`'s and predate this table; the `__ports` rows were added with fancy-flow-php#18 across all four runtimes in the same week and the goldens were captured by running each. Row 0303 is the one place the four do NOT agree, and it is recorded as a skip rather than removed — see the notes.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "activatedPorts" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Engine\\FlowRunner::activatedPorts" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.engine.runner.FlowRunner._activated_ports" },
+      { "language": "rust", "package": "fancy-flow", "symbol": "fancy_flow::engine::walk::Walk::activated_ports" }
+    ]
+  },
+  "notes": [
+    "`declaredOutputs` is a LIST OF PORT IDS, or null for a node that declares none. Each runtime puts it where its own FlowNode keeps ports: TypeScript's is an xyflow node so they live in `data.outputs` as `{ id }` descriptors, while PHP, Python and Rust have a flattened `node.outputs`. The table asks about the ENGINE's rule, not about where a document stores it.",
+    "The node's kind must NOT be registered in the runtime running these rows. The declared-port fallback consults the kind's ports before falling back to `out`, so a row that accidentally named a builtin would be asserting the builtin's ports instead of the rule under test. Every row uses `hostRouter`, which no runtime ships.",
+    "THE ORDER OF THE EXPECTED LIST IS PART OF THE ASSERTION. A map-shaped `__ports` lights its ports in the order the object declares them (row 0105), which every one of the four preserves — JavaScript for string keys, PHP for array keys, Python for dicts since 3.7, and Rust because `fancy_json::Map` is insertion-ordered. A runtime that sorted them would still deliver every payload correctly and would still be wrong, because a downstream node reading a shared resource would see a different interleaving.",
+    "PER-PORT PAYLOADS ARE READ BY KEY PRESENCE, NEVER BY TRUTHINESS (rows 0103, 0202). A payload that is present and null is a payload. `values[port] ?? value` and `$ports[$port] ?? $result` cannot tell 'no key' from 'null', and all four runtimes shipped exactly that confusion in `branch` — every downstream node received the `{branch, value}` WRAPPER, two fields no kind declares, while the fields it does declare were absent. No parity table caught it because the four agreed on being wrong; these rows exist so the next one cannot hide the same way.",
+    "AN EMPTY `__ports` LIGHTS NOTHING, DELIBERATELY (row 0104). It is the honest answer for a router that matched no rule, and it is the same answer an explicitly empty `outputs` gives in three of the four runtimes. Lighting every port instead would wake every lane precisely when the node decided none applied.",
+    "A MALFORMED `__ports` FALLS THROUGH to the every-declared-port rule rather than lighting nothing (row 0106). `__ports` that is a string, a number or null is not a subset instruction, and treating an unreadable one as 'no ports' would turn a typo into a silently truncated run — the failure mode this whole table is written against.",
+    "ROW 0303 IS THE DIVERGENCE, AND IT IS RECORDED RATHER THAN REMOVED. `declaredOutputs: []` means 'this node explicitly has no output ports'. PHP, Python and Rust honour it and publish nothing; `@particle-academy/fancy-flow` collapses it to `[\"out\"]`, because its fallback tests `declared?.length` and an empty array is falsy — so the three-state distinction (undeclared / explicitly none / declared) becomes two-state there. Measured on fancy-flow 0.74.1, not inferred. It is skipped for node with that reason so every runner PRINTS it, which is the only way a known disagreement stays visible; deleting the row would make the table agree by saying less. Tracked as an issue on fancy-flow.",
+    "Nothing here asserts that a lit port must be a DECLARED one. All four runtimes publish whatever `__port` / `__ports` / `branch` names, declared or not, and an edge from a port that does not exist simply matches nothing. That is deliberate slack for hosts whose ports are config-driven, and pinning it either way belongs in its own row once someone decides it — not smuggled in through a row about something else."
+  ]
+}

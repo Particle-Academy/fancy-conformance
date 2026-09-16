@@ -1,0 +1,169 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/port-activation",
+  "cases": [
+    {
+      "id": "0101-ports-list-lights-the-named-subset",
+      "title": "A `__ports` LIST lights exactly those ports, each carrying the shared value.",
+      "since": "0.27.0",
+      "tags": ["subset"],
+      "input": {
+        "declaredOutputs": ["a", "b", "c", "d", "e"],
+        "result": { "__ports": ["a", "c"], "value": "matched" }
+      },
+      "expected": [
+        { "port": "a", "value": "matched" },
+        { "port": "c", "value": "matched" }
+      ],
+      "notes": "The rule fancy-flow-php#18 added. Before it the engine knew two answers — one port, or every port — so a router that matched two of five lanes had to drop the rest of the work or wake lanes nobody asked for. Ports `b`, `d` and `e` are declared and stay DARK, which is the half of this row that matters."
+    },
+    {
+      "id": "0102-ports-map-gives-each-port-its-own-payload",
+      "title": "A `__ports` MAP lights its keys, each carrying its own payload.",
+      "since": "0.27.0",
+      "tags": ["subset"],
+      "input": {
+        "declaredOutputs": ["a", "b", "c", "d", "e"],
+        "result": { "__ports": { "a": { "queue": "billing" }, "c": { "queue": "abuse" } } }
+      },
+      "expected": [
+        { "port": "a", "value": { "queue": "billing" } },
+        { "port": "c", "value": { "queue": "abuse" } }
+      ],
+      "notes": "One classifier, two lanes, two different payloads. Sharing one payload across the lit ports would force every lane to re-derive which part of the result was addressed to it."
+    },
+    {
+      "id": "0103-per-port-null-is-a-payload",
+      "title": "A per-port payload that is present and NULL is delivered as null.",
+      "since": "0.27.0",
+      "tags": ["subset", "null"],
+      "input": {
+        "declaredOutputs": ["a", "b"],
+        "result": { "__ports": { "a": null } }
+      },
+      "expected": [{ "port": "a", "value": null }],
+      "notes": "Key presence, not truthiness. `values[port] ?? value` reads this as 'absent' and hands the port the shared value instead — which is `undefined`/null here, so it would PASS by accident. It is asserted anyway because the same lookup is what row 0102 depends on, and the version of this bug that shipped in `branch` was invisible for exactly this reason."
+    },
+    {
+      "id": "0104-an-empty-ports-list-lights-nothing",
+      "title": "An explicitly empty `__ports` lights NOTHING.",
+      "since": "0.27.0",
+      "tags": ["subset", "empty"],
+      "input": {
+        "declaredOutputs": ["a", "b", "c"],
+        "result": { "__ports": [], "value": "unrouted" }
+      },
+      "expected": [],
+      "notes": "The honest answer for a router that matched no rule. Falling through to 'every declared port' here would wake all three lanes at precisely the moment the node decided none applied — and the run would look successful."
+    },
+    {
+      "id": "0105-map-order-is-emission-order",
+      "title": "A `__ports` map lights its ports in the order the map declares them.",
+      "since": "0.27.0",
+      "tags": ["subset", "order"],
+      "input": {
+        "declaredOutputs": ["a", "b", "c"],
+        "result": { "__ports": { "c": 1, "a": 2 } }
+      },
+      "expected": [
+        { "port": "c", "value": 1 },
+        { "port": "a", "value": 2 }
+      ],
+      "notes": "Declaration order, not the declared-outputs order and not sorted. A runtime that sorted these would deliver every payload correctly and still be wrong: two lanes touching one resource would interleave differently on different runtimes, which is the class of bug that only reproduces in production."
+    },
+    {
+      "id": "0106-a-malformed-ports-falls-through",
+      "title": "A `__ports` that is neither a list nor a map falls through to every declared port.",
+      "since": "0.27.0",
+      "tags": ["subset", "malformed"],
+      "input": {
+        "declaredOutputs": ["a", "b"],
+        "result": { "__ports": "a" }
+      },
+      "expected": [
+        { "port": "a", "value": { "__ports": "a" } },
+        { "port": "b", "value": { "__ports": "a" } }
+      ],
+      "notes": "A string is not a subset instruction. Reading an unreadable `__ports` as 'no ports' would turn one typo into a silently truncated run; falling through publishes the whole result, which is loud downstream. Note what each port carries: the WHOLE result, wrapper included, because no subset rule fired."
+    },
+    {
+      "id": "0201-port-sugar-lights-one-port",
+      "title": "`__port` lights exactly one port, carrying `value`.",
+      "since": "0.27.0",
+      "tags": ["single"],
+      "input": {
+        "declaredOutputs": ["a", "b", "c"],
+        "result": { "__port": "b", "value": "only-b" }
+      },
+      "expected": [{ "port": "b", "value": "only-b" }],
+      "notes": "Unchanged by #18 and asserted here so it stays that way. `__ports` was added as a sibling rule, not a replacement, and is checked AFTER `__port`."
+    },
+    {
+      "id": "0202-branch-with-an-explicit-null-payload",
+      "title": "`branch` with `value` present and null delivers null, not the wrapper.",
+      "since": "0.27.0",
+      "tags": ["single", "null"],
+      "input": {
+        "declaredOutputs": ["a", "b"],
+        "result": { "branch": "b", "value": null }
+      },
+      "expected": [{ "port": "b", "value": null }],
+      "notes": "ALL FOUR RUNTIMES SHIPPED THIS WRONG, IDENTICALLY, so no parity table caught it — they agreed on being wrong. `value ?? result` cannot tell 'no value key' (row 0203, where the whole result IS the payload) from 'value is null' (this row), so a branch whose payload was null leaked `{branch, value}` downstream: two fields no kind declares, while the declared ones were absent. The reachable path is an upstream `transform` whose dot-path did not resolve."
+    },
+    {
+      "id": "0203-branch-with-no-value-key-carries-the-whole-result",
+      "title": "`branch` with NO `value` key carries the entire result.",
+      "since": "0.27.0",
+      "tags": ["single"],
+      "input": {
+        "declaredOutputs": ["a", "b"],
+        "result": { "branch": "b", "verdict": "approved" }
+      },
+      "expected": [{ "port": "b", "value": { "branch": "b", "verdict": "approved" } }],
+      "notes": "The other half of 0202, and the reason the lookup must ask about key presence. An executor that returns its own object and names a branch inside it gets the object delivered; the wrapper is the payload here by design."
+    },
+    {
+      "id": "0301-a-plain-result-lights-every-declared-port",
+      "title": "A result naming no ports lights EVERY declared output port, each carrying the whole result.",
+      "since": "0.27.0",
+      "tags": ["fallback"],
+      "input": {
+        "declaredOutputs": ["a", "b", "c"],
+        "result": { "ok": true }
+      },
+      "expected": [
+        { "port": "a", "value": { "ok": true } },
+        { "port": "b", "value": { "ok": true } },
+        { "port": "c", "value": { "ok": true } }
+      ],
+      "notes": "The default, and what `__ports` narrows. Declared order."
+    },
+    {
+      "id": "0302-a-node-declaring-no-ports-lights-out",
+      "title": "A node that declares NO outputs lights the lone `out` port.",
+      "since": "0.27.0",
+      "tags": ["fallback"],
+      "input": {
+        "declaredOutputs": null,
+        "result": { "ok": true }
+      },
+      "expected": [{ "port": "out", "value": { "ok": true } }],
+      "notes": "`null` is 'undeclared', which is not the same as 'explicitly none' — see row 0303. The `out` fallback is what lets a hand-written document omit ports entirely and still chain."
+    },
+    {
+      "id": "0303-an-explicitly-empty-outputs-lights-nothing",
+      "title": "A node whose outputs are an explicitly EMPTY list lights nothing.",
+      "since": "0.27.0",
+      "tags": ["fallback", "empty", "divergence"],
+      "input": {
+        "declaredOutputs": [],
+        "result": { "ok": true }
+      },
+      "expected": [],
+      "skip": {
+        "node": "DIVERGENCE, not an exemption: @particle-academy/fancy-flow collapses an explicitly-empty outputs to ['out'] because its fallback tests `declared?.length` and [] is falsy, so the three states (undeclared / explicitly none / declared) become two. Measured on 0.74.1. PHP, Python and Rust all publish nothing. Tracked as an issue on fancy-flow; this row starts passing there the day it is fixed."
+      },
+      "notes": "THREE STATES, NOT TWO. `null` falls back to `out` (row 0302); `[]` means a terminal node that genuinely publishes nothing. Collapsing them is how a terminal node starts publishing — and downstream of that, an edge nobody drew starts delivering. Kept as a skipped row rather than deleted so every runner prints the disagreement: a table that omits the one case its implementations disagree on is a table that agrees by saying less."
+    }
+  ]
+}
