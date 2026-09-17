@@ -10,6 +10,17 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-09-17
+
+### Changed
+
+- **BREAKING:** `flow/kind-declaration-surface` row
+  `0106-for_each-declares-its-fields` now requires `results` alongside `items`
+  and `count`. A wired `for_each` lane executes per item and exposes each
+  iteration's node results in item order; runtimes that have not implemented
+  iteration must now fail or carry an explicit, reasoned skip instead of
+  reporting surface parity.
+
 ## [0.29.0] - 2026-09-16
 
 **Fixes a row 0.28.0 made unanswerable. `flow/graph-runs` 0003 now declares its

@@ -122,7 +122,8 @@
       "expected": {
         "outputShape": [
           "count",
-          "items"
+          "items",
+          "results"
         ],
         "emits": null
       }
