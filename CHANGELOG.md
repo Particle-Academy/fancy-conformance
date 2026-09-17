@@ -10,6 +10,15 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-09-17
+
+### Changed
+
+- **BREAKING:** `flow/kind-declaration-surface` row
+  `0106-for_each-declares-its-fields` now requires `failures`. Iterating
+  runtimes continue after a genuine per-item error and report it beside the
+  ordered results instead of dropping the remaining items.
+
 ## [0.30.0] - 2026-09-17
 
 ### Changed
