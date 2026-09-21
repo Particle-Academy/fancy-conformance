@@ -9,14 +9,17 @@ permissions:
   contents: read
 
 jobs:
-  node:
+  # One gate, stated once, that every installing job waits on. It used to sit
+  # inline in a single job, which meant the other jobs installed unchecked --
+  # a check that finishes beside the thing it guards is a report, not a gate.
+  # Prism raised the distinction 2026-09-21; this repo is polyglot, so the
+  # JS job was gated and the PHP/Python ones were not.
+  allowlist:
+    name: Third-party allowlist
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # Third-party dependency allowlist. Cheap, and failing here is cheap --
-      # the same check gates the release, so a PR that adds an unapproved or
-      # abandoned dependency finds out now rather than at tag time.
       # The allowlist is FETCHED, never vendored: one source, no copies to drift.
       - name: Fetch the third-party allowlist
         uses: actions/checkout@v4
@@ -28,12 +31,14 @@ jobs:
       - name: Third-party dependency allowlist
         run: |
           node .third-party-allowlist/third-party/check.mjs --repo .
-          # Delete it. A fetched checkout left lying in the workspace is not
-          # inert: vitest globbed the checker's own tests out of it and failed
-          # a package whose code was fine. Removed with node, not rm -rf,
-          # because some of these matrices run on windows-latest where a
-          # multi-line run: block is PowerShell and rm -rf is not a command.
           node -e "require('node:fs').rmSync('.third-party-allowlist',{recursive:true,force:true})"
+
+  node:
+    needs: allowlist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -54,6 +59,7 @@ jobs:
         run: npm run build
 
   php:
+    needs: allowlist
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -78,6 +84,7 @@ jobs:
         run: vendor/bin/pest
 
   python:
+    needs: allowlist
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -115,6 +122,7 @@ jobs:
         run: python -m pytest -q
 
   rust:
+    needs: allowlist
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

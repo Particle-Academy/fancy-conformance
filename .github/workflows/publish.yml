@@ -80,6 +80,32 @@ jobs:
           php-version: "8.4"
           coverage: none
 
+      - name: Fetch the third-party allowlist
+        uses: actions/checkout@v4
+        with:
+          repository: Particle-Academy/.github
+          path: .third-party-allowlist
+          persist-credentials: false
+
+      - name: Third-party dependency allowlist
+        run: |
+          node .third-party-allowlist/third-party/check.mjs --repo .
+          # Delete it. A fetched checkout left lying in the workspace is not
+          # inert: vitest globbed the checker's own tests out of it and failed
+          # a package whose code was fine. Removed with node, not rm -rf,
+          # because some of these matrices run on windows-latest where a
+          # multi-line run: block is PowerShell and rm -rf is not a command.
+          node -e "require('node:fs').rmSync('.third-party-allowlist',{recursive:true,force:true})"
+
+  # No PyPI job, deliberately (2026-09-13). This repository is the suite's own
+  # alignment tool, not a product: nobody outside it installs the fixtures. A
+  # Python consumer checks this repository out at the tag it pins (see
+  # runners/README.md) and puts python/src on its path, so a PyPI leg would
+  # publish to nobody. It existed from 2026-08-25 and failed on every tag
+  # (no trusted publisher), which read as a broken release rather than an
+  # unneeded one. npm and Packagist stay: the TypeScript and PHP consumers
+  # install the fixtures from those registries as a dev dependency.
+
       - name: Install
         run: |
           npm install
@@ -133,28 +159,3 @@ jobs:
       # to everyone who upgrades -- the same reason the changelog gate sits
       # here. The allowlist is FETCHED, never vendored: one source of truth,
       # so there is no per-repo copy that can drift out of agreement with it.
-      - name: Fetch the third-party allowlist
-        uses: actions/checkout@v4
-        with:
-          repository: Particle-Academy/.github
-          path: .third-party-allowlist
-          persist-credentials: false
-
-      - name: Third-party dependency allowlist
-        run: |
-          node .third-party-allowlist/third-party/check.mjs --repo .
-          # Delete it. A fetched checkout left lying in the workspace is not
-          # inert: vitest globbed the checker's own tests out of it and failed
-          # a package whose code was fine. Removed with node, not rm -rf,
-          # because some of these matrices run on windows-latest where a
-          # multi-line run: block is PowerShell and rm -rf is not a command.
-          node -e "require('node:fs').rmSync('.third-party-allowlist',{recursive:true,force:true})"
-
-  # No PyPI job, deliberately (2026-09-13). This repository is the suite's own
-  # alignment tool, not a product: nobody outside it installs the fixtures. A
-  # Python consumer checks this repository out at the tag it pins (see
-  # runners/README.md) and puts python/src on its path, so a PyPI leg would
-  # publish to nobody. It existed from 2026-08-25 and failed on every tag
-  # (no trusted publisher), which read as a broken release rather than an
-  # unneeded one. npm and Packagist stay: the TypeScript and PHP consumers
-  # install the fixtures from those registries as a dev dependency.
