@@ -18,13 +18,16 @@ promising otherwise until 1.0.
   `false`, padded paths, bare switch paths and literal case keys must abort.
   Exact errors name the node, field, and the trimmed `{{ }}` replacement.
   Goldens verified against PHP; all six fail with each runtime guard removed.
+- Rows 0030–0031 refuse unmatched `{{` in either field, including an unclosed
+  second interpolation after a completed first one. Close every `{{` with `}}`;
+  properly closed mixed interpolation remains valid.
 
 ### Changed
 
-- **BREAKING:** Routing strings without `{{` are refused. Wrap bare values in
+- **BREAKING:** Bare or unclosed routing expressions are refused. Wrap bare values in
   `{{ }}`; bare branch strings previously selected a constant route (normally
   `true`) regardless of data, while switches selected a literal case key.
-
+  Close every opening `{{`; unclosed templates previously survived as literals.
 
 ## [0.31.0] - 2026-09-17
 

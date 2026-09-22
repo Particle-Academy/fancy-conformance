@@ -2370,6 +2370,186 @@
       },
       "notes": "#24: a bare routing string must abort before either downstream route executes. Non-empty literal strings must not become unconditional routing decisions. Message uses the trimmed value.",
       "since": "0.32.0"
+    },
+    {
+      "id": "0030-branch-unclosed-expression",
+      "title": "branch refuses an unclosed expression",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ in.data.fits"
+                }
+              },
+              {
+                "id": "deal",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "drop",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-deal",
+                "source": "r",
+                "target": "deal",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e-drop",
+                "source": "r",
+                "target": "drop",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "branch \"r\" condition \"{{ in.data.fits\" has an unclosed expression -- close every {{ with }}"
+      },
+      "notes": "#24 review: an unclosed template also survives as a literal. Reject any unmatched opening, including a valid first interpolation followed by an unclosed second one. Properly closed mixed interpolation remains valid.",
+      "since": "0.32.0"
+    },
+    {
+      "id": "0031-switch-case-unclosed-expression",
+      "title": "switch_case refuses an unclosed expression",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "switch_case",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "value": "{{ in.kind }}-{{ in.kind",
+                  "cases": {
+                    "a": "case_a",
+                    "b": "case_b"
+                  }
+                }
+              },
+              {
+                "id": "on_a",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "on_b",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "fallback",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-on_a",
+                "source": "r",
+                "target": "on_a",
+                "sourceHandle": "case_a"
+              },
+              {
+                "id": "e-on_b",
+                "source": "r",
+                "target": "on_b",
+                "sourceHandle": "case_b"
+              },
+              {
+                "id": "e-fallback",
+                "source": "r",
+                "target": "fallback",
+                "sourceHandle": "default"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "switch_case \"r\" value \"{{ in.kind }}-{{ in.kind\" has an unclosed expression -- close every {{ with }}"
+      },
+      "notes": "#24 review: an unclosed template also survives as a literal. Reject any unmatched opening, including a valid first interpolation followed by an unclosed second one. Properly closed mixed interpolation remains valid.",
+      "since": "0.32.0"
     }
   ]
 }

@@ -337,7 +337,7 @@ fn the_graph_runs_suite_carries_what_a_flow_runtime_needs() {
     // its SHAPE here means a runtime wiring it up finds a clear failure rather
     // than a confusing one.
     let rows = cases("flow/graph-runs", None).unwrap();
-    assert_eq!(rows.len(), 29);
+    assert_eq!(rows.len(), 31);
 
     for row in &rows {
         let input = row.input();
