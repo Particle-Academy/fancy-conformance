@@ -10,6 +10,22 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-09-22
+
+### Added
+
+- `flow/graph-runs` rows 0024–0029: bare branch paths, `$props`, the literal
+  `false`, padded paths, bare switch paths and literal case keys must abort.
+  Exact errors name the node, field, and the trimmed `{{ }}` replacement.
+  Goldens verified against PHP; all six fail with each runtime guard removed.
+
+### Changed
+
+- **BREAKING:** Routing strings without `{{` are refused. Wrap bare values in
+  `{{ }}`; bare branch strings previously selected a constant route (normally
+  `true`) regardless of data, while switches selected a literal case key.
+
+
 ## [0.31.0] - 2026-09-17
 
 ### Changed

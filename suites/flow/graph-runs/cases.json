@@ -1848,6 +1848,528 @@
         }
       },
       "notes": "Two mutually-exclusive branches rejoin on the SAME target handle. `collectInputs` must read only ACTIVE edges: assigning unconditionally lets the dead branch's absent value clobber the live one whenever it happens to come last, emptying the merge point while the run still reports success. TypeScript implemented the code and PHP the documented contract; they disagreed silently until fancy-flow 0.27.1."
+    },
+    {
+      "id": "0024-branch-bare-path",
+      "title": "branch refuses bare-path",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "in.data.fits"
+                }
+              },
+              {
+                "id": "deal",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "drop",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-deal",
+                "source": "r",
+                "target": "deal",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e-drop",
+                "source": "r",
+                "target": "drop",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "branch \"r\" condition \"in.data.fits\" is not an expression -- wrap it: {{ in.data.fits }}"
+      },
+      "notes": "#24: a bare routing string must abort before either downstream route executes. Non-empty literal strings must not become unconditional routing decisions. Message uses the trimmed value.",
+      "since": "0.32.0"
+    },
+    {
+      "id": "0025-branch-bare-props",
+      "title": "branch refuses bare-props",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "$props.deal_id"
+                }
+              },
+              {
+                "id": "deal",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "drop",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-deal",
+                "source": "r",
+                "target": "deal",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e-drop",
+                "source": "r",
+                "target": "drop",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "branch \"r\" condition \"$props.deal_id\" is not an expression -- wrap it: {{ $props.deal_id }}"
+      },
+      "notes": "#24: a bare routing string must abort before either downstream route executes. Non-empty literal strings must not become unconditional routing decisions. Message uses the trimmed value.",
+      "since": "0.32.0"
+    },
+    {
+      "id": "0026-branch-bare-false",
+      "title": "branch refuses bare-false",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "false"
+                }
+              },
+              {
+                "id": "deal",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "drop",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-deal",
+                "source": "r",
+                "target": "deal",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e-drop",
+                "source": "r",
+                "target": "drop",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "branch \"r\" condition \"false\" is not an expression -- wrap it: {{ false }}"
+      },
+      "notes": "#24: a bare routing string must abort before either downstream route executes. Non-empty literal strings must not become unconditional routing decisions. Message uses the trimmed value.",
+      "since": "0.32.0"
+    },
+    {
+      "id": "0027-branch-bare-padded",
+      "title": "branch refuses bare-padded",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "  in.data.fits \n"
+                }
+              },
+              {
+                "id": "deal",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "drop",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-deal",
+                "source": "r",
+                "target": "deal",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e-drop",
+                "source": "r",
+                "target": "drop",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "branch \"r\" condition \"in.data.fits\" is not an expression -- wrap it: {{ in.data.fits }}"
+      },
+      "notes": "#24: a bare routing string must abort before either downstream route executes. Non-empty literal strings must not become unconditional routing decisions. Message uses the trimmed value.",
+      "since": "0.32.0"
+    },
+    {
+      "id": "0028-switch-case-bare-path",
+      "title": "switch_case refuses bare-path",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "switch_case",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "value": "in.kind",
+                  "cases": {
+                    "a": "case_a",
+                    "b": "case_b"
+                  }
+                }
+              },
+              {
+                "id": "on_a",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "on_b",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "fallback",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-on_a",
+                "source": "r",
+                "target": "on_a",
+                "sourceHandle": "case_a"
+              },
+              {
+                "id": "e-on_b",
+                "source": "r",
+                "target": "on_b",
+                "sourceHandle": "case_b"
+              },
+              {
+                "id": "e-fallback",
+                "source": "r",
+                "target": "fallback",
+                "sourceHandle": "default"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "switch_case \"r\" value \"in.kind\" is not an expression -- wrap it: {{ in.kind }}"
+      },
+      "notes": "#24: a bare routing string must abort before either downstream route executes. Non-empty literal strings must not become unconditional routing decisions. Message uses the trimmed value.",
+      "since": "0.32.0"
+    },
+    {
+      "id": "0029-switch-case-bare-case",
+      "title": "switch_case refuses bare-case",
+      "input": {
+        "schema": {
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "r",
+                "kind": "switch_case",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "value": "b",
+                  "cases": {
+                    "a": "case_a",
+                    "b": "case_b"
+                  }
+                }
+              },
+              {
+                "id": "on_a",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "on_b",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "fallback",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "r"
+              },
+              {
+                "id": "e-on_a",
+                "source": "r",
+                "target": "on_a",
+                "sourceHandle": "case_a"
+              },
+              {
+                "id": "e-on_b",
+                "source": "r",
+                "target": "on_b",
+                "sourceHandle": "case_b"
+              },
+              {
+                "id": "e-fallback",
+                "source": "r",
+                "target": "fallback",
+                "sourceHandle": "default"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "data": {
+              "fits": false
+            },
+            "kind": "b"
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "error": "switch_case \"r\" value \"b\" is not an expression -- wrap it: {{ b }}"
+      },
+      "notes": "#24: a bare routing string must abort before either downstream route executes. Non-empty literal strings must not become unconditional routing decisions. Message uses the trimmed value.",
+      "since": "0.32.0"
     }
   ]
 }
