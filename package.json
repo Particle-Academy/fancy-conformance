@@ -37,7 +37,8 @@
     "runners",
     "VERSION",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup",
