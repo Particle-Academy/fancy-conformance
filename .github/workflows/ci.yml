@@ -18,11 +18,11 @@ jobs:
     name: Third-party allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The allowlist is FETCHED, never vendored: one source, no copies to drift.
       - name: Fetch the third-party allowlist
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Particle-Academy/.github
           path: .third-party-allowlist
@@ -37,9 +37,9 @@ jobs:
     needs: allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
 
@@ -66,7 +66,7 @@ jobs:
       matrix:
         php: ["8.4"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # A missing toolchain is a FAILURE, not a skip. `skipIf(!HAS_PHP)`
       # returning green is the specific mechanism that hid two-way drift for
@@ -87,8 +87,8 @@ jobs:
     needs: allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
@@ -125,7 +125,7 @@ jobs:
     needs: allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -146,8 +146,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [node, php, python, rust]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       - uses: shivammathur/setup-php@v2

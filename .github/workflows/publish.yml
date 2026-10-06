@@ -16,7 +16,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Release gate: a tag with no CHANGELOG entry fails HERE, before the
       # package reaches the registry. A published version whose changes are
@@ -70,7 +70,7 @@ jobs:
           fi
           echo "Version ${VERSION} agrees across the tag, VERSION and package.json."
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
@@ -81,7 +81,7 @@ jobs:
           coverage: none
 
       - name: Fetch the third-party allowlist
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Particle-Academy/.github
           path: .third-party-allowlist
