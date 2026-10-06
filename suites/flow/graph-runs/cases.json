@@ -2550,6 +2550,483 @@
       },
       "notes": "#24 review: an unclosed template also survives as a literal. Reject any unmatched opening, including a valid first interpolation followed by an unclosed second one. Properly closed mixed interpolation remains valid.",
       "since": "0.32.0"
+    },
+    {
+      "id": "0032-branch-raw-boolean-true",
+      "title": "A RAW boolean true condition is a configured condition and routes true.",
+      "since": "0.33.0",
+      "tags": [
+        "branch",
+        "routing",
+        "parity"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": true
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "no",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 1
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "n": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "n": 1
+          },
+          "br": {
+            "branch": "true",
+            "value": {
+              "n": 1
+            }
+          },
+          "yes": {
+            "n": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "0033-branch-raw-boolean-false",
+      "title": "A raw boolean false routes false — and not because nothing was configured.",
+      "since": "0.33.0",
+      "tags": [
+        "branch",
+        "routing",
+        "parity"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": false
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "no",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 1
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "n": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "n": 1
+          },
+          "br": {
+            "branch": "false",
+            "value": {
+              "n": 1
+            }
+          },
+          "no": {
+            "n": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "0034-branch-raw-number-truthy",
+      "title": "A raw non-zero number is truthy and routes true.",
+      "since": "0.33.0",
+      "tags": [
+        "branch",
+        "routing",
+        "parity"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": 1
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "no",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 1
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "n": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "n": 1
+          },
+          "br": {
+            "branch": "true",
+            "value": {
+              "n": 1
+            }
+          },
+          "yes": {
+            "n": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "0035-branch-raw-number-zero",
+      "title": "A raw zero is falsy and routes false.",
+      "since": "0.33.0",
+      "tags": [
+        "branch",
+        "routing",
+        "parity"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "condition": 0
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "no",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 1
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "n": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "n": 1
+          },
+          "br": {
+            "branch": "false",
+            "value": {
+              "n": 1
+            }
+          },
+          "no": {
+            "n": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "0036-branch-unconfigured-is-false",
+      "title": "A branch with NO condition at all routes false — a half-built graph must not take the success path.",
+      "since": "0.33.0",
+      "tags": [
+        "branch",
+        "routing",
+        "parity"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              },
+              {
+                "id": "no",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 1
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "br"
+              },
+              {
+                "id": "e2",
+                "source": "br",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "n": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "n": 1
+          },
+          "br": {
+            "branch": "false",
+            "value": {
+              "n": 1
+            }
+          },
+          "no": {
+            "n": 1
+          }
+        }
+      }
     }
   ]
 }

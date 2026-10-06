@@ -10,6 +10,30 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-10-06
+
+### Added
+
+- **`flow/graph-runs`: five rows pinning a RAW (non-string) `branch.condition`.**
+  `{"kind":"branch","config":{"condition":true}}` routed `false` in TypeScript
+  and `true` in PHP, Python and Rust — the same `WorkflowSchema` taking different
+  routes, which is the one thing these suites exist to prevent. TypeScript was
+  fixed in `@particle-academy/fancy-flow` 0.80.0, so all four agree today;
+  nothing pinned that agreement until now.
+
+  - `0032-branch-raw-boolean-true` — a raw `true` is a CONFIGURED condition
+  - `0033-branch-raw-boolean-false`
+  - `0034-branch-raw-number-truthy` / `0035-branch-raw-number-zero`
+  - `0036-branch-unconfigured-is-false` — no `condition` at all stays falsy
+
+  The last one is not padding. Honouring a configured `true` while keeping an
+  unconfigured branch falsy is ONE rule, and rows for only the first half would
+  pass against an implementation that routes everything `true`.
+
+  Routing was verified against the TypeScript engine before release, and the
+  goldens follow the suite's existing PHP-reference output shape.
+
+
 ### Fixed
 
 - **`CHANGELOG.md` is now in the published tarball.** `files` did not whitelist it, so npm never shipped it — and this package puts breaking changes in MINOR releases and tells you in the README to read the entry before taking one. The instruction existed for the author, who has the file, and not for the consumer, who is the only one being instructed. Nothing for you to do; the file simply arrives from this release on.
