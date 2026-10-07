@@ -2069,6 +2069,389 @@
                 "rowSpan": "1",
                 "merged": "none"
             }
+        },
+        {
+            "id": "0029-a-positional-row-is-read-in-column-order",
+            "title": "A row given as a list fills the columns in order",
+            "since": "0.34.0",
+            "fn": "resolvedCell",
+            "notes": "The three engines disagreed on this input and NOTHING here covered it. PHP kept the row and resolved every cell to nothing; Node and Python dropped the row from the deck entirely, so the same deck came out with a different ROW COUNT per engine, silently. It is the shape an author guesses when the schema publishes a column list and no row shape, and it reached a customer as a table whose rows were empty (fancy-slides#14).",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "plan",
+                            "label": "Plan"
+                        },
+                        {
+                            "key": "price",
+                            "label": "Monthly price"
+                        }
+                    ],
+                    "rows": [
+                        [
+                            "Starter",
+                            "$49"
+                        ]
+                    ]
+                },
+                "theme": [],
+                "row": 1,
+                "col": 0
+            },
+            "expected": {
+                "text": "Starter",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1050",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0030-a-positional-row-fills-every-column-not-just-the-first",
+            "title": "The second column of a positional row",
+            "since": "0.34.0",
+            "fn": "resolvedCell",
+            "notes": "0029 passes for an engine that puts the whole list in cell 0. This is the other half of the same claim.",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "plan",
+                            "label": "Plan"
+                        },
+                        {
+                            "key": "price",
+                            "label": "Monthly price"
+                        }
+                    ],
+                    "rows": [
+                        [
+                            "Starter",
+                            "$49"
+                        ]
+                    ]
+                },
+                "theme": [],
+                "row": 1,
+                "col": 1
+            },
+            "expected": {
+                "text": "$49",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1050",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0031-a-short-positional-row-leaves-the-remaining-columns-empty",
+            "title": "One value, two columns: the second cell is empty, not a repeat",
+            "since": "0.34.0",
+            "fn": "resolvedCell",
+            "notes": "A positional row shorter than the grid resolves the surplus COLUMNS to empty, exactly as a missing key does. An engine that cycles or repeats the list produces a plausible-looking table that is wrong.",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "plan",
+                            "label": "Plan"
+                        },
+                        {
+                            "key": "price",
+                            "label": "Monthly price"
+                        }
+                    ],
+                    "rows": [
+                        [
+                            "Starter"
+                        ]
+                    ]
+                },
+                "theme": [],
+                "row": 1,
+                "col": 1
+            },
+            "expected": {
+                "text": "",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1050",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0032-a-positional-list-under-cells-is-positional-too",
+            "title": "`cells` holding a list is read in column order, and the row still carries its own style",
+            "since": "0.34.0",
+            "fn": "resolvedCell",
+            "notes": "`cells` is the escape hatch for a cell key that collides with a row-level style key, so it accepts both row forms. The row here also sets `height`, which only the object form can carry -- an engine that reads the list but loses the row wrapper drops it.",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "plan",
+                            "label": "Plan"
+                        },
+                        {
+                            "key": "price",
+                            "label": "Monthly price"
+                        }
+                    ],
+                    "rows": [
+                        {
+                            "cells": [
+                                "Starter",
+                                "$49"
+                            ],
+                            "height": 44
+                        }
+                    ]
+                },
+                "theme": [],
+                "row": 1,
+                "col": 1
+            },
+            "expected": {
+                "text": "$49",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1050",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
+        },
+        {
+            "id": "0033-surplus-positional-values-have-nowhere-to-go",
+            "title": "A positional row longer than the grid drops the surplus",
+            "since": "0.34.0",
+            "fn": "resolvedCell",
+            "notes": "Three values, two columns. The third has no column to land in. An engine that widens the row instead emits more <a:tc> than the <a:tblGrid> declares, which is a corrupt file rather than a wider table.",
+            "input": {
+                "element": {
+                    "type": "table",
+                    "w": 0.9,
+                    "columns": [
+                        {
+                            "key": "plan",
+                            "label": "Plan"
+                        },
+                        {
+                            "key": "price",
+                            "label": "Monthly price"
+                        }
+                    ],
+                    "rows": [
+                        [
+                            "Starter",
+                            "$49",
+                            "ignored"
+                        ]
+                    ]
+                },
+                "theme": [],
+                "row": 1,
+                "col": 1
+            },
+            "expected": {
+                "text": "$49",
+                "bold": "0",
+                "italic": "0",
+                "underline": "0",
+                "color": "0F172A",
+                "fill": null,
+                "align": "left",
+                "anchor": "middle",
+                "fontSizeHundredths": "1050",
+                "letterSpacingHundredths": "0",
+                "caps": "none",
+                "padding": {
+                    "left": "91440",
+                    "right": "91440",
+                    "top": "45720",
+                    "bottom": "45720"
+                },
+                "borders": {
+                    "left": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "right": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "top": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    },
+                    "bottom": {
+                        "widthEmu": "9525",
+                        "color": "D9DEE4",
+                        "style": "solid"
+                    }
+                },
+                "colSpan": "1",
+                "rowSpan": "1",
+                "merged": "none"
+            }
         }
     ]
 }
