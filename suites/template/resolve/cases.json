@@ -1,0 +1,2122 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "template/resolve",
+  "cases": [
+    {
+      "id": "0001-a-token-in-a-run",
+      "title": "A token in run text is replaced by the value",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ recipientName }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada Lovelace"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The whole feature in one row."
+    },
+    {
+      "id": "0002-two-tokens-and-text",
+      "title": "Several tokens and text in one string",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ recipientName }} completed {{ programName }}."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada Lovelace completed Analytical Engines."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0003-title-takes-tokens",
+      "title": "The document title is a text field",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "title": "Certificate for {{ recipientName }}",
+            "blocks": []
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "title": "Certificate for Ada Lovelace",
+          "blocks": []
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0004-declared-default-fills-an-absent-value",
+      "title": "An absent variable with a declared default takes it",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Issued by {{ issuer }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Issued by Particle Academy"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0005-nested-property-and-nested-default",
+      "title": "A dotted path walks an object; a property's own default applies",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ program.name }}: {{ program.hours }} hours"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines",
+          "program": {
+            "name": "Engines"
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Engines: 10 hours"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Defaults apply at every level (SPEC 4), and an integer in a text field is its digits."
+    },
+    {
+      "id": "0006-numbers-stringify-like-javascript",
+      "title": "A number in a text field is JavaScript's Number#toString",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "n1": {
+              "type": "number"
+            },
+            "n2": {
+              "type": "number"
+            },
+            "n3": {
+              "type": "number"
+            },
+            "n4": {
+              "type": "number"
+            },
+            "n5": {
+              "type": "number"
+            },
+            "n6": {
+              "type": "number"
+            },
+            "n7": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ n1 }}"
+                  },
+                  {
+                    "text": "{{ n2 }}"
+                  },
+                  {
+                    "text": "{{ n3 }}"
+                  },
+                  {
+                    "text": "{{ n4 }}"
+                  },
+                  {
+                    "text": "{{ n5 }}"
+                  },
+                  {
+                    "text": "{{ n6 }}"
+                  },
+                  {
+                    "text": "{{ n7 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "n1": 42,
+          "n2": 0.1,
+          "n3": 3.0,
+          "n4": 1e+21,
+          "n5": 1.5e-07,
+          "n6": -0.0,
+          "n7": 123456789.125
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "42"
+                },
+                {
+                  "text": "0.1"
+                },
+                {
+                  "text": "3"
+                },
+                {
+                  "text": "1e+21"
+                },
+                {
+                  "text": "1.5e-7"
+                },
+                {
+                  "text": "0"
+                },
+                {
+                  "text": "123456789.125"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The cross-language row. PHP's (string) of a float uses `precision` (14 digits) and its json_encode uses `serialize_precision` and writes 1.0e+21; Python's str writes 3.0 and 1e+21; only one of the three is the spec. -0 is \"0\", as in JavaScript."
+    },
+    {
+      "id": "0007-booleans-stringify",
+      "title": "A boolean in a text field is true or false",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "a": {
+              "type": "boolean"
+            },
+            "b": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ a }}/{{ b }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "a": true,
+          "b": false
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "true/false"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Not 1 and the empty string, which is PHP's native cast."
+    },
+    {
+      "id": "0008-an-array-in-text-is-not-a-scalar",
+      "title": "An array in a text field is TEMPLATE_NOT_SCALAR",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Tags: {{ tags }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines",
+          "tags": [
+            "a",
+            "b"
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_NOT_SCALAR",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": "Never `Array`, `[object Object]` or a JSON dump. The way to write a list is `| join`."
+    },
+    {
+      "id": "0009-absent-optional-is-loud",
+      "title": "An absent optional variable in a token is TEMPLATE_MISSING",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ subtitle }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_MISSING",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": "THE RULE the plan calls 'missing data is loud'. Not an empty string: an empty string is what laravel-courses' Blade templates silently produced. The path names the template field, never the data."
+    },
+    {
+      "id": "0010-array-index",
+      "title": "Digits index into an array",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ tags.1 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines",
+          "tags": [
+            "first",
+            "second"
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "second"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0011-index-out-of-range-is-missing",
+      "title": "An index past the end is absent: TEMPLATE_MISSING",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ tags.5 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines",
+          "tags": [
+            "first"
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_MISSING",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": "Absent, not an error of a different kind and not an empty string."
+    },
+    {
+      "id": "0012-literal-open-braces-render",
+      "title": "`{{ \"{{\" }}` renders a literal `{{`",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ \"{{\" }} name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "{{ name }}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "How an author writes about templates inside a template."
+    },
+    {
+      "id": "0013-non-string-values-are-untouched",
+      "title": "Numbers, booleans and token-free strings in the document pass through",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "align": "center",
+                "spaceAfter": 18,
+                "keepNext": true,
+                "runs": [
+                  {
+                    "text": "Plain {page}",
+                    "size": 30,
+                    "italic": true
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "align": "center",
+              "spaceAfter": 18,
+              "keepNext": true,
+              "runs": [
+                {
+                  "text": "Plain {page}",
+                  "size": 30,
+                  "italic": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Key order is the template's. `{page}` in a run is fine-print's business, not ours."
+    },
+    {
+      "id": "0014-render-validates-data-first",
+      "title": "Missing required data stops render with the DATA code and a data path",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ recipientName }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "programName": "x"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "DATA_REQUIRED",
+        "path": "/recipientName"
+      },
+      "notes": "SPEC 11: inspect, then validateData, then render; the first failure is thrown."
+    },
+    {
+      "id": "0015-render-inspects-first",
+      "title": "An undeclared token stops render before data is looked at",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ nope }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_UNDECLARED",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": "The template is wrong whatever the data says, and that is the more useful thing to hear first."
+    },
+    {
+      "id": "0016-extra-data-is-ignored",
+      "title": "Data the template does not declare is ignored",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ recipientName }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines",
+          "password": "hunter2"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada Lovelace"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Not an error, and not reachable: inspect refuses any token naming an undeclared variable, so extra data can never reach a document (SPEC 4)."
+    },
+    {
+      "id": "0101-valid-data",
+      "title": "Valid data has no errors",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines"
+        }
+      },
+      "expected": {
+        "errors": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "0102-every-missing-required-is-listed",
+      "title": "Every absent required variable is listed, in declaration order",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/recipientName",
+            "code": "DATA_REQUIRED"
+          },
+          {
+            "path": "/programName",
+            "code": "DATA_REQUIRED"
+          }
+        ]
+      },
+      "notes": "All errors, not the first: a form should show every field at once."
+    },
+    {
+      "id": "0103-null-is-not-a-value",
+      "title": "null is DATA_TYPE for any type",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines",
+          "subtitle": null
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/subtitle",
+            "code": "DATA_TYPE"
+          }
+        ]
+      },
+      "notes": "null is not absent. A host sending null for 'no subtitle' should omit the key; accepting null would give every variable two spellings of nothing."
+    },
+    {
+      "id": "0104-max-length-counts-code-points",
+      "title": "maxLength counts code points, not bytes or UTF-16 units",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "a": {
+              "type": "string",
+              "maxLength": 3
+            },
+            "b": {
+              "type": "string",
+              "maxLength": 3
+            },
+            "c": {
+              "type": "string",
+              "maxLength": 2
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "a": "Łód",
+          "b": "Łódź",
+          "c": "😀😀"
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/b",
+            "code": "DATA_MAX_LENGTH"
+          }
+        ]
+      },
+      "notes": "JSON Schema's unit. Łód is 3 code points and 5 bytes; two emoji are 2 code points and 4 UTF-16 units. A byte count fails a, a UTF-16 count fails c."
+    },
+    {
+      "id": "0105-number-types",
+      "title": "integer accepts 3.0, rejects 3.5; strings are never numbers; \"true\" is not a boolean",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "i": {
+              "type": "integer"
+            },
+            "j": {
+              "type": "integer"
+            },
+            "n": {
+              "type": "number"
+            },
+            "b": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "i": 3.0,
+          "j": 3.5,
+          "n": "3",
+          "b": "true"
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/j",
+            "code": "DATA_TYPE"
+          },
+          {
+            "path": "/n",
+            "code": "DATA_TYPE"
+          },
+          {
+            "path": "/b",
+            "code": "DATA_TYPE"
+          }
+        ]
+      },
+      "notes": "No coercion of any kind."
+    },
+    {
+      "id": "0106-enum",
+      "title": "A value outside enum is DATA_ENUM",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "tier": {
+              "type": "string",
+              "enum": [
+                "gold",
+                "silver"
+              ]
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "tier": "bronze"
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/tier",
+            "code": "DATA_ENUM"
+          }
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "id": "0107-dates",
+      "title": "Calendar dates and times are checked for real",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "a": {
+              "type": "date"
+            },
+            "b": {
+              "type": "date"
+            },
+            "c": {
+              "type": "date"
+            },
+            "d": {
+              "type": "date"
+            },
+            "e": {
+              "type": "date"
+            },
+            "f": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "a": "2024-02-29",
+          "b": "2026-02-29",
+          "c": "2026-10-27T25:00",
+          "d": "27/10/2026",
+          "e": "2026-10-27T14:05:09.5+05:30",
+          "f": "2026-10-27T14:05Z"
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/b",
+            "code": "DATA_FORMAT"
+          },
+          {
+            "path": "/c",
+            "code": "DATA_FORMAT"
+          },
+          {
+            "path": "/d",
+            "code": "DATA_FORMAT"
+          }
+        ]
+      },
+      "notes": "2024 is a leap year and 2026 is not. A regex alone passes b."
+    },
+    {
+      "id": "0108-images",
+      "title": "An image is a PNG or JPEG data URL whose bytes match its type",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "a": {
+              "type": "image"
+            },
+            "b": {
+              "type": "image"
+            },
+            "c": {
+              "type": "image"
+            },
+            "d": {
+              "type": "image"
+            },
+            "e": {
+              "type": "image"
+            },
+            "f": {
+              "type": "image"
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "a": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
+          "b": "data:image/jpeg;base64,/9j/4AAAAAAAAAAAAAAAAA==",
+          "c": "data:image/gif;base64,R0lGODlhAAAAAAAAAAAAAA==",
+          "d": "data:image/png;base64,/9j/4AAAAAAAAAAAAAAAAA==",
+          "e": "data:image/png;base64,***",
+          "f": "/etc/passwd"
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/c",
+            "code": "DATA_FORMAT"
+          },
+          {
+            "path": "/d",
+            "code": "DATA_FORMAT"
+          },
+          {
+            "path": "/e",
+            "code": "DATA_FORMAT"
+          },
+          {
+            "path": "/f",
+            "code": "DATA_FORMAT"
+          }
+        ]
+      },
+      "notes": "d is labelled PNG and carries JPEG bytes: the magic-byte check, not the label, decides. f is a local path, which is exactly what dark-slide's ImageResolver would read off the host's disk."
+    },
+    {
+      "id": "0109-nested-paths",
+      "title": "Errors inside objects and arrays carry their full pointer",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {
+          "recipientName": "Ada Lovelace",
+          "programName": "Analytical Engines",
+          "program": {
+            "name": 7
+          },
+          "tags": [
+            "a",
+            2,
+            "c"
+          ]
+        }
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "/tags",
+            "code": "DATA_MAX_ITEMS"
+          },
+          {
+            "path": "/tags/1",
+            "code": "DATA_TYPE"
+          },
+          {
+            "path": "/program/name",
+            "code": "DATA_TYPE"
+          }
+        ]
+      },
+      "notes": "Declaration order: tags is declared before program."
+    },
+    {
+      "id": "0110-data-must-be-an-object",
+      "title": "Data that is not an object is DATA_TYPE at the root",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": [
+          "Ada"
+        ]
+      },
+      "expected": {
+        "errors": [
+          {
+            "path": "",
+            "code": "DATA_TYPE"
+          }
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "id": "0111-a-default-satisfies-required",
+      "title": "A required variable with a default may be absent",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "validateData",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "x": {
+              "type": "string",
+              "required": true,
+              "default": "fallback"
+            }
+          },
+          "document": {
+            "blocks": []
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "errors": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "0201-preview-uses-examples",
+      "title": "preview renders each variable's example",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "preview",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ recipientName }} / {{ programName }} / {{ issuer }}"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada Lovelace / Analytical Engines / Particle Academy"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "issuer has no example and falls back to its default."
+    },
+    {
+      "id": "0202-preview-needs-something",
+      "title": "A required variable with neither example nor default fails preview",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "resolve"
+      ],
+      "fn": "preview",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "x": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ x }}"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "DATA_REQUIRED",
+        "path": "/x"
+      },
+      "notes": "A preview that invented a value would show the admin a document the real data cannot produce."
+    }
+  ]
+}

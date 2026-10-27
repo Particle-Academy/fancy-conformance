@@ -1,0 +1,1852 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "template/filters",
+  "cases": [
+    {
+      "id": "0001-default-when-absent",
+      "title": "default replaces an absent value",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | default:\"N/A\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "N/A"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0002-default-when-present",
+      "title": "default passes a present value through",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | default:\"N/A\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "Ada"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0003-default-then-upper",
+      "title": "default first, then another filter",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | default:\"none\" | upper }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "NONE"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Left to right."
+    },
+    {
+      "id": "0004-upper-before-default-is-missing",
+      "title": "A filter before default meets the absent value: TEMPLATE_MISSING",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | upper | default:\"x\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_MISSING",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": "Order is meaning. `upper` is handed nothing and cannot invent something."
+    },
+    {
+      "id": "0005-bare-default-is-a-string",
+      "title": "A bare default argument is a string",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | default:0 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "0"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0006-upper-ascii",
+      "title": "upper maps ASCII letters",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | upper }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "ada lovelace"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "ADA LOVELACE"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0007-upper-leaves-non-ascii",
+      "title": "upper leaves non-ASCII characters as they are",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | upper }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "łukasz ß é"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "łUKASZ ß é"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "ENGLISH ONLY in v1 (owner decision 4). Full Unicode case mapping differs between JavaScript, PHP and Python (ß, dotted I, final sigma), and PHP needs mbstring for it. Unchanged is wrong-looking but identical everywhere; a half-mapped string would be wrong AND different per runtime."
+    },
+    {
+      "id": "0008-lower",
+      "title": "lower maps ASCII letters",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | lower }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "ÉCOLE Normale"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "École normale"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0009-upper-on-a-number",
+      "title": "upper stringifies a scalar first",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | upper }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 3
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "3"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0010-number-pads-and-groups",
+      "title": "number:2 pads and groups thousands",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:2 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 1234.5
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1,234.50"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0011-number-rounds-in-decimal",
+      "title": "2.675 rounds to 2.68, not 2.67",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:2 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 2.675
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "2.68"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The double nearest 2.675 is 2.67499999...; binary rounding (JavaScript's toFixed, PHP's round on the double) gives 2.67. The spec rounds the SHORTEST round-trip decimal, \"2.675\", which is what the author typed."
+    },
+    {
+      "id": "0012-number-1-005",
+      "title": "1.005 rounds to 1.01",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:2 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 1.005
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1.01"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The other classic."
+    },
+    {
+      "id": "0013-number-negative-zero",
+      "title": "A value rounding to zero has no sign",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:2 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": -0.004
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "0.00"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0014-number-half-away-from-zero",
+      "title": "Halves round away from zero",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:0 }} {{ w | number:0 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 0.5,
+          "w": -2.5
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1 -3"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Not banker's rounding, which is Python's round() and gives 0 and -2."
+    },
+    {
+      "id": "0015-number-carry",
+      "title": "Rounding carries through the grouping",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:2 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 999999.995
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1,000,000.00"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0016-number-huge",
+      "title": "A large integer keeps every digit",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:0 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 1e+21
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1,000,000,000,000,000,000,000"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Shortest repr is 1e+21; the filter expands it rather than printing an exponent."
+    },
+    {
+      "id": "0017-number-on-a-string",
+      "title": "number on a string is FILTER_INPUT",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | number:2 }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "12"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "FILTER_INPUT",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": "No coercion."
+    },
+    {
+      "id": "0018-money-usd",
+      "title": "money takes integer MINOR units",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "integer"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | money:USD }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 123450
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "$1,234.50"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Never via a float: the amount is an integer the whole way."
+    },
+    {
+      "id": "0019-money-jpy",
+      "title": "JPY has no minor digits",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "integer"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | money:JPY }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 1234
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "¥1,234"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0020-money-kwd",
+      "title": "KWD has three, and no symbol",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "integer"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | money:KWD }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 1234567
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "KWD 1,234.567"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "A hard-coded 100 multiplies a Kuwaiti price by ten (shared/money-minor-units)."
+    },
+    {
+      "id": "0021-money-negative",
+      "title": "A negative amount puts the sign before the symbol",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "integer"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | money:EUR }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": -5
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "-€0.05"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0022-money-zero-and-code",
+      "title": "Zero pads; a currency without a symbol is written as its code",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "integer"
+            },
+            "w": {
+              "type": "integer"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | money:GBP }} {{ w | money:CHF }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 0,
+          "w": 1
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "£0.00 CHF 0.01"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0023-money-english-grouping",
+      "title": "Grouping is English, not per-locale",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "integer"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | money:INR }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 100000000
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "₹1,000,000.00"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Not the lakh grouping 10,00,000.00. One locale in v1 (owner decision 4)."
+    },
+    {
+      "id": "0024-money-rejects-a-fraction",
+      "title": "money on a non-integer is FILTER_INPUT",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "number"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | money:USD }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": 12.5
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "FILTER_INPUT",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": "12.5 minor units is not an amount. Guessing major units here is how a price becomes a hundred times wrong."
+    },
+    {
+      "id": "0025-date-long",
+      "title": "date with month name",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | date:\"MMMM d, yyyy\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "2026-10-27"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "October 27, 2026"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0026-date-weekday",
+      "title": "date with weekday and short forms",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | date:\"EEEE, d MMM yy\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "2026-10-27"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Tuesday, 27 Oct 26"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Weekday computed from the calendar by the generator."
+    },
+    {
+      "id": "0027-date-twelve-hour",
+      "title": "date with a 12-hour clock",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | date:\"h:mm a\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "2026-10-27T14:05:09Z"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "2:05 PM"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0028-date-midnight-and-noon",
+      "title": "Midnight is 12 AM, noon 12 PM",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "date"
+            },
+            "w": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | date:\"hh a\" }} {{ w | date:\"hh a\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "2026-10-27T00:00",
+          "w": "2026-10-27T12:00"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "12 AM 12 PM"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0029-date-quoted-literal",
+      "title": "Quoted text is literal, and '' is one quote",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | date:\"yyyy-MM-dd'T'HH:mm 'o''clock'\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "2026-01-05T09:07"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "2026-01-05T09:07 o'clock"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0030-date-offset-is-not-applied",
+      "title": "An offset is ignored: the wall-clock time is written as given",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | date:\"HH:mm\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "2026-10-27T23:30:00-05:00"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "23:30"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "No time-zone database in any runtime. Converting would need one, and a certificate's date should be the date the issuer wrote."
+    },
+    {
+      "id": "0031-date-on-a-non-date",
+      "title": "date on a string that is not a date is FILTER_INPUT",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | date:\"d MMM\" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": "yesterday"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "FILTER_INPUT",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0032-join-default-separator",
+      "title": "join without an argument uses \", \"",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | join }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": [
+            "a",
+            "b",
+            "c"
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a, b, c"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0033-join-separator-and-scalars",
+      "title": "join stringifies scalars",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | join:\" / \" }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": [
+            1,
+            2.5
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1 / 2.5"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0034-join-empty",
+      "title": "join of an empty array is the empty string",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "[{{ v | join }}]"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": []
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "[]"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Present and empty, which is different from absent."
+    },
+    {
+      "id": "0035-join-nested-is-input-error",
+      "title": "join of an array holding an array is FILTER_INPUT",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ v | join }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": [
+            [
+              "x"
+            ]
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "FILTER_INPUT",
+        "path": "/document/blocks/0/runs/0/text"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0036-filter-on-a-literal",
+      "title": "Filters apply to a string literal too",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {},
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ \"draft\" | upper }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "DRAFT"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    }
+  ]
+}

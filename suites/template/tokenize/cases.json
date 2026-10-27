@@ -1,0 +1,744 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "template/tokenize",
+  "cases": [
+    {
+      "id": "0001-plain-text",
+      "title": "Text with no token is one text part",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "Hello"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "text": "Hello"
+          }
+        ]
+      },
+      "notes": "The baseline."
+    },
+    {
+      "id": "0002-empty-string",
+      "title": "The empty string has no parts",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": ""
+      },
+      "expected": {
+        "ok": true,
+        "parts": []
+      },
+      "notes": "Not one empty text part: empty text is omitted, so a consumer never iterates over a part that renders nothing."
+    },
+    {
+      "id": "0003-token-in-text",
+      "title": "A token between two texts",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "Dear {{ name }},"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "text": "Dear "
+          },
+          {
+            "path": [
+              "name"
+            ],
+            "filters": []
+          },
+          {
+            "text": ","
+          }
+        ]
+      },
+      "notes": "Whitespace inside the braces is not part of the path."
+    },
+    {
+      "id": "0004-no-inner-whitespace",
+      "title": "Whitespace inside the braces is optional",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{name}}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "name"
+            ],
+            "filters": []
+          }
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "id": "0005-tabs-are-whitespace",
+      "title": "Tabs count as whitespace inside a token",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{\t name \t}}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "name"
+            ],
+            "filters": []
+          }
+        ]
+      },
+      "notes": "SPEC 5: ws is space or TAB, and nothing else."
+    },
+    {
+      "id": "0006-dotted-path-with-index",
+      "title": "A path walks names and array indices",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ a.b.0.c }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "a",
+              "b",
+              "0",
+              "c"
+            ],
+            "filters": []
+          }
+        ]
+      },
+      "notes": "Digits are a segment, kept as the STRING \"0\": the path is data about the template, and a number there would invite arithmetic."
+    },
+    {
+      "id": "0007-loop-binding-head",
+      "title": "`$index` is a valid head",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ $index }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "$index"
+            ],
+            "filters": []
+          }
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "id": "0008-unknown-dollar-head-is-syntax",
+      "title": "Any other `$` head is TOKEN_SYNTAX",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ $foo }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": "Only $index, $first and $last exist. An agent reaching for $now or $today -- the shape fancy-expr's references() exists to catch -- is refused while it is still a typo."
+    },
+    {
+      "id": "0009-filter-chain-with-quoted-arg",
+      "title": "Filters chain left to right; a quoted argument keeps its spaces and comma",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ d | date:\"MMMM d, yyyy\" | upper }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "d"
+            ],
+            "filters": [
+              {
+                "name": "date",
+                "arg": "MMMM d, yyyy"
+              },
+              {
+                "name": "upper"
+              }
+            ]
+          }
+        ]
+      },
+      "notes": "A filter with no argument has no `arg` key at all, rather than an empty one."
+    },
+    {
+      "id": "0010-bare-arguments",
+      "title": "A bare argument is a string too",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ n | number:2 | default:none }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "n"
+            ],
+            "filters": [
+              {
+                "name": "number",
+                "arg": "2"
+              },
+              {
+                "name": "default",
+                "arg": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "notes": "`2` is the string \"2\": a filter decides what its argument means, not the tokenizer."
+    },
+    {
+      "id": "0011-escapes-in-a-quoted-argument",
+      "title": "Inside quotes, backslash escapes a quote and a backslash",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ x | default:\"say \\\"hi\\\" \\\\ bye\" }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "x"
+            ],
+            "filters": [
+              {
+                "name": "default",
+                "arg": "say \"hi\" \\ bye"
+              }
+            ]
+          }
+        ]
+      },
+      "notes": "The only two escapes. Generated with chr(92); see the generator's docstring."
+    },
+    {
+      "id": "0012-literal-open-braces",
+      "title": "`{{ \"{{\" }}` is how a literal `{{` is written",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ \"{{\" }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "literal": "{{",
+            "filters": []
+          }
+        ]
+      },
+      "notes": "There is no other escape. One way to say it is one thing to get right in three languages."
+    },
+    {
+      "id": "0013-close-braces-inside-a-string-do-not-close",
+      "title": "`}}` inside a string literal does not end the token",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "a{{ \"}}\" }}b"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "text": "a"
+          },
+          {
+            "literal": "}}",
+            "filters": []
+          },
+          {
+            "text": "b"
+          }
+        ]
+      },
+      "notes": "The scanner skips string literals while looking for the close. A scanner that searched for the first `}}` would cut this token in half."
+    },
+    {
+      "id": "0014-lone-close-braces-are-text",
+      "title": "A `}}` outside a token is literal text",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "a }} b"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "text": "a }} b"
+          }
+        ]
+      },
+      "notes": "Only `{{` is special in text."
+    },
+    {
+      "id": "0015-single-braces-are-text",
+      "title": "Single braces are literal text",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{a} {b}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "text": "{a} {b}"
+          }
+        ]
+      },
+      "notes": "fine-print's own `{page}` lives in text like this, and must pass through untouched."
+    },
+    {
+      "id": "0016-adjacent-tokens",
+      "title": "Two adjacent tokens are two parts",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{a}}{{b}}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "a"
+            ],
+            "filters": []
+          },
+          {
+            "path": [
+              "b"
+            ],
+            "filters": []
+          }
+        ]
+      },
+      "notes": "The corner fancy-flow once read as ONE path `a }}{{ b` (shared/expr 0023)."
+    },
+    {
+      "id": "0017-unclosed",
+      "title": "No closing `}}` is TOKEN_UNCLOSED",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "Hi {{ name"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_UNCLOSED"
+      },
+      "notes": "Never literal text: an author who forgot the braces must hear about it, not ship them."
+    },
+    {
+      "id": "0018-unclosed-string-is-unclosed",
+      "title": "A string literal that never closes reaches the end: TOKEN_UNCLOSED",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ \"abc }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_UNCLOSED"
+      },
+      "notes": "The `}}` is inside the unterminated string, so the token has no end."
+    },
+    {
+      "id": "0019-empty-token",
+      "title": "Only whitespace between the braces is TOKEN_EMPTY",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_EMPTY"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0020-newline-in-a-token",
+      "title": "A newline inside a token is TOKEN_SYNTAX",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ a\n}}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": "Tokens are single-line. A newline inside one is almost always a missing `}}` further up, and refusing it points at the right place."
+    },
+    {
+      "id": "0021-dangling-dot",
+      "title": "A path ending in `.` is TOKEN_SYNTAX",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ a. }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0022-triple-braces",
+      "title": "`{{{ a }}}` is TOKEN_SYNTAX, not a token in braces",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{{ a }}}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": "`{{` opens at offset 0 and the inner text begins with `{`. There is no triple-brace form, and inventing a reading of it would be a guess."
+    },
+    {
+      "id": "0023-filter-names-are-lowercase",
+      "title": "A capitalised filter name is TOKEN_SYNTAX",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ a | Upper }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": "The grammar's fname is [a-z]+. Unknown-but-well-formed names are inspect's FILTER_UNKNOWN; this is a different failure, at a different layer."
+    },
+    {
+      "id": "0024-trailing-pipe",
+      "title": "A pipe with no filter is TOKEN_SYNTAX",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ a | }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0025-token-at-the-length-limit",
+      "title": "A token whose inner text is exactly 512 bytes tokenizes",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            ],
+            "filters": []
+          }
+        ]
+      },
+      "notes": "The limit is INCLUSIVE and counts every byte between the braces, whitespace too."
+    },
+    {
+      "id": "0026-token-one-byte-over",
+      "title": "513 bytes between the braces is TOKEN_TOO_LONG",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_TOO_LONG"
+      },
+      "notes": "The off-by-one partner of 0025."
+    },
+    {
+      "id": "0027-long-unclosed-token-is-too-long",
+      "title": "An unclosed token longer than the limit is TOKEN_TOO_LONG, not TOKEN_UNCLOSED",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_TOO_LONG"
+      },
+      "notes": "Pins the ORDER: the scan for `}}` stops at the limit, so a hostile string of a million bytes after `{{` costs 512 bytes of work to refuse. An implementation that found the end first reports TOKEN_UNCLOSED here and scanned everything to do it."
+    },
+    {
+      "id": "0028-unicode-text-is-preserved",
+      "title": "Non-ASCII text around a token is untouched",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "Łódź — {{ city }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "text": "Łódź — "
+          },
+          {
+            "path": [
+              "city"
+            ],
+            "filters": []
+          }
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "id": "0029-a-path-cannot-start-with-digits",
+      "title": "A head of digits is TOKEN_SYNTAX",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ 0 }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": "Digits are only valid after a dot. A bare number would look like a literal that the grammar does not have."
+    },
+    {
+      "id": "0030-whitespace-around-the-colon",
+      "title": "Whitespace is allowed around a filter's colon",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ a | number : 2 }}"
+      },
+      "expected": {
+        "ok": true,
+        "parts": [
+          {
+            "path": [
+              "a"
+            ],
+            "filters": [
+              {
+                "name": "number",
+                "arg": "2"
+              }
+            ]
+          }
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "id": "0031-two-paths-is-syntax",
+      "title": "Two paths in one token is TOKEN_SYNTAX",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ a b }}"
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_SYNTAX"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0032-token-length-is-host-overridable",
+      "title": "options.limits.tokenLength lowers the bound",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "tokenize"
+      ],
+      "fn": "tokenize",
+      "input": {
+        "text": "{{ recipientName }}",
+        "options": {
+          "limits": {
+            "tokenLength": 10
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_TOO_LONG"
+      },
+      "notes": "15 bytes between the braces against a limit of 10."
+    }
+  ]
+}

@@ -1,0 +1,1418 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "template/directives",
+  "cases": [
+    {
+      "id": "0001-each-repeats-an-item",
+      "title": "$each repeats an array item once per element, splicing in order",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Before"
+                  }
+                ]
+              },
+              {
+                "$each": "people",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ item.name }}"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "After"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Before"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Charles"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Mary"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "After"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The default binding name is `item`."
+    },
+    {
+      "id": "0002-as-index-first-last",
+      "title": "$as names the binding; $index, $first and $last are available",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "people",
+                "$as": "p",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ $index }}:{{ p.name }}:{{ $first }}:{{ $last }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "0:Ada:true:false"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1:Charles:false:false"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "2:Mary:false:true"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "$index is 0-based."
+    },
+    {
+      "id": "0003-if-keeps-and-drops",
+      "title": "$if keeps an item when truthy and drops it when not, and is removed from the output",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$if": "title",
+                "type": "heading",
+                "level": 1,
+                "runs": [
+                  {
+                    "text": "{{ title }}"
+                  }
+                ]
+              },
+              {
+                "$if": "showNotes",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Notes"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "title": "Report",
+          "showNotes": false
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 1,
+              "runs": [
+                {
+                  "text": "Report"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0004-each-then-if-per-element",
+      "title": "With both, $each runs first and $if filters each element",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "people",
+                "$if": "item.score >= 50",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ item.name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Mary"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0005-each-on-table-rows",
+      "title": "$each works on any array, here a table's rows",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "table",
+                "rows": [
+                  {
+                    "$each": "people",
+                    "cells": [
+                      {
+                        "blocks": [
+                          {
+                            "type": "paragraph",
+                            "runs": [
+                              {
+                                "text": "{{ item.name }}"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "blocks": [
+                          {
+                            "type": "paragraph",
+                            "runs": [
+                              {
+                                "text": "{{ item.score }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Ada"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "91"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Charles"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "42"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Mary"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "77"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0006-empty-array-renders-nothing",
+      "title": "$each over an empty array leaves no item",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Before"
+                  }
+                ]
+              },
+              {
+                "$each": "people",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ item.name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": []
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Before"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Present and empty is not absent: no error."
+    },
+    {
+      "id": "0007-if-on-an-absent-optional-is-false",
+      "title": "$if on an absent optional variable drops the item, without an error",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$if": "title",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "x"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "kept"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "kept"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "fancy-expr's rule: an absent path is null, and null is falsy. A TOKEN reading an absent variable fails (resolve 0009); a CONDITION asking whether it is there must not."
+    },
+    {
+      "id": "0008-each-over-an-absent-array-is-missing",
+      "title": "$each over an absent optional array is TEMPLATE_MISSING",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "people",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ item.name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_MISSING",
+        "path": "/document/blocks/0/$each"
+      },
+      "notes": "Rendering nothing would be the silent-empty outcome the plan refuses. A template that may have no rows says so with `$if: \"people\"` on a wrapper."
+    },
+    {
+      "id": "0009-directive-keys-stripped-order-kept",
+      "title": "Directive keys are removed wherever they were written; other keys keep their order",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "$each": "people",
+                "align": "center",
+                "runs": [
+                  {
+                    "text": "{{ item.name }}"
+                  }
+                ],
+                "spaceAfter": 0
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "align": "center",
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ],
+              "spaceAfter": 0
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0010-each-on-runs",
+      "title": "$each inside a paragraph's runs",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Team: "
+                  },
+                  {
+                    "$each": "people",
+                    "$as": "p",
+                    "text": "{{ p.name }} ",
+                    "bold": true
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Team: "
+                },
+                {
+                  "text": "Ada ",
+                  "bold": true
+                },
+                {
+                  "text": "Charles ",
+                  "bold": true
+                },
+                {
+                  "text": "Mary ",
+                  "bold": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0011-if-with-first",
+      "title": "A separator with `$if: \"!$first\"`",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "$each": "people",
+                    "text": "{{ item.name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "A"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The simple case; 0012 is the separator."
+    },
+    {
+      "id": "0012-separator-pattern",
+      "title": "Nested arrays let an element carry its own separator run",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "people",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "$if": "!$first",
+                    "text": ", "
+                  },
+                  {
+                    "text": "{{ item.name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "A"
+            },
+            {
+              "name": "B"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": ", "
+                },
+                {
+                  "text": "B"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "$first is the INNERMOST loop's, and an inner array item with only $if is not a loop, so it reads the outer one."
+    },
+    {
+      "id": "0013-each-over-a-nested-path",
+      "title": "$each takes a dotted path",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "program": {
+              "type": "object",
+              "properties": {
+                "modules": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "program.modules",
+                "$as": "m",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ m }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "program": {
+            "modules": [
+              "Intro",
+              "Gears"
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Intro"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Gears"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0014-nested-each-inner-index-wins",
+      "title": "In nested loops, $index is the innermost loop's",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "rows",
+                "$as": "row",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "$each": "row",
+                    "$as": "cell",
+                    "text": "{{ $index }}{{ cell }} "
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "rows": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "c"
+            ]
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "0a "
+                },
+                {
+                  "text": "1b "
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "0c "
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0015-if-reads-item-and-variables",
+      "title": "$if sees the loop binding and the declared variables together",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "people",
+                "$if": "item.name !== title",
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ item.name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ],
+          "title": "Charles"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Mary"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    }
+  ]
+}

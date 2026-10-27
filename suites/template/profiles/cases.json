@@ -1,0 +1,1338 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "template/profiles",
+  "cases": [
+    {
+      "id": "0001-fine-print-band-token",
+      "title": "A token in a band slot renders; the template's own {page} stays",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "left": "{{ name }}",
+                "right": "Page {page} of {pages}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "Ada"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [],
+          "page": {
+            "footer": {
+              "left": "Ada",
+              "right": "Page {page} of {pages}"
+            }
+          }
+        }
+      },
+      "notes": "{page} written by the template author is the writer's feature."
+    },
+    {
+      "id": "0002-fine-print-band-value-with-page-is-refused",
+      "title": "A band VALUE containing {page} is VALUE_PAGE_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "left": "{{ name }}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "see {page}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/page/footer/left"
+      },
+      "notes": "THE NAMED {page} ROW. fine-print replaces {page} in band text with str_replace and has no escape for it, so a recipient named 'see {page}' would print a page number. A refusal is loud; any lookalike substitution prints a different character. The plan said 'escaped'; there is nothing to escape WITH, recorded in SPEC 9."
+    },
+    {
+      "id": "0003-fine-print-band-value-with-pages",
+      "title": "{pages} likewise",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "center": "{{ name }}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "of {pages}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/page/footer/center"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0004-fine-print-link-is-forbidden",
+      "title": "A token in a run's link is TOKEN_FORBIDDEN_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "site",
+                    "link": "{{ url }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "url": "javascript:alert(1)"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_FORBIDDEN_FIELD",
+        "path": "/document/blocks/0/runs/0/link"
+      },
+      "notes": "Links come from the template author, never from data (plan section 2)."
+    },
+    {
+      "id": "0005-fine-print-style-fields-take-no-tokens",
+      "title": "A token in a colour is TOKEN_FORBIDDEN_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "x",
+                    "color": "{{ name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "#000000"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_FORBIDDEN_FIELD",
+        "path": "/document/blocks/0/runs/0/color"
+      },
+      "notes": "The profile is an ALLOWLIST: a field it does not name refuses tokens."
+    },
+    {
+      "id": "0006-fine-print-image-from-an-image-variable",
+      "title": "An image src from a declared image variable renders the data URL",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "image",
+                "src": "{{ logo }}",
+                "alt": "Logo of {{ name }}"
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "Acme",
+          "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "image",
+              "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
+              "alt": "Logo of Acme"
+            }
+          ]
+        }
+      },
+      "notes": "alt is a text field."
+    },
+    {
+      "id": "0007-fine-print-image-from-a-string-is-refused",
+      "title": "An image src from a string variable is TOKEN_IMAGE_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "image",
+                "src": "{{ name }}",
+                "alt": "Logo of {{ name }}"
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "x",
+          "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_IMAGE_FIELD",
+        "path": "/document/blocks/0/src"
+      },
+      "notes": "Only an `image` variable has been through the magic-byte check."
+    },
+    {
+      "id": "0008-fine-print-image-must-be-a-whole-token",
+      "title": "A src with text around the token is TOKEN_IMAGE_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "image",
+                "src": "{{ logo }}#x",
+                "alt": "Logo of {{ name }}"
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "x",
+          "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_IMAGE_FIELD",
+        "path": "/document/blocks/0/src"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0009-fine-print-literal-src-must-be-a-data-url",
+      "title": "A literal src that is not an image data URL is TEMPLATE_IMAGE_INVALID",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "image",
+                "src": "file:///etc/passwd",
+                "alt": "Logo of {{ name }}"
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "x"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_IMAGE_INVALID",
+        "path": "/document/blocks/0/src"
+      },
+      "notes": "THE NAMED FORBIDDEN-SRC ROW, fine-print side. fine-print itself refuses a non-data src too; refusing at inspect means an admin hears it at SAVE time."
+    },
+    {
+      "id": "0010-fine-print-code-text",
+      "title": "A code block's text is a text field",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "code",
+                "text": "print('{{ name }}')"
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "Ada"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "code",
+              "text": "print('Ada')"
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0011-last-word-run-and-band",
+      "title": "last-word: run text and band slots take tokens",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "last-word",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ name }}"
+                  }
+                ]
+              }
+            ],
+            "page": {
+              "header": {
+                "right": "{{ name }} - {page}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "Ada"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "right": "Ada - {page}"
+            }
+          }
+        }
+      },
+      "notes": "last-word and fine-print share the Doc model; the profiles are separate data all the same, pinned to separate schema versions."
+    },
+    {
+      "id": "0012-last-word-chart-option-is-forbidden",
+      "title": "last-word: a token in a chart option is TOKEN_FORBIDDEN_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "last-word",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "chart",
+                "option": {
+                  "title": {
+                    "text": "{{ name }}"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "x"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_FORBIDDEN_FIELD",
+        "path": "/document/blocks/0/option/title/text"
+      },
+      "notes": "Plan section 2: chart `option` is forbidden everywhere."
+    },
+    {
+      "id": "0013-last-word-band-page-refused",
+      "title": "last-word: {page} in a band value is VALUE_PAGE_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "last-word",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "left": "{{ name }}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "{page}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/page/footer/left"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0014-last-word-http-src-is-invalid",
+      "title": "last-word: an http src is TEMPLATE_IMAGE_INVALID",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "last-word",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "image",
+                "src": "https://example.com/x.png"
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_IMAGE_INVALID",
+        "path": "/document/blocks/0/src"
+      },
+      "notes": "A fetch at render time is a request the host did not decide to make."
+    },
+    {
+      "id": "0101-dark-slide-markdown-is-escaped",
+      "title": "dark-slide: a value in markdown content is backslash-escaped",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "dark-slide",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "slides": [
+              {
+                "elements": [
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 0,
+                    "w": 1,
+                    "h": 1,
+                    "content": "Hello {{ name }}",
+                    "format": "markdown"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "*bold* _x_ # [a](javascript:x) `c` \\ 1. <b>&"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "slides": [
+            {
+              "elements": [
+                {
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1,
+                  "h": 1,
+                  "content": "Hello \\*bold\\* \\_x\\_ \\# \\[a\\]\\(javascript\\:x\\) \\`c\\` \\\\ 1\\. \\<b\\>\\&",
+                  "format": "markdown"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "THE NAMED MARKDOWN ROW. The value is never parsed as markup; the template's own `Hello ` is untouched. CommonMark escaping. dark-slide's PPTX MarkdownInline does not yet honour backslash escapes (SPEC 9).",
+      "skip": {
+        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0102-dark-slide-html-is-entity-escaped",
+      "title": "dark-slide: a value in html content is entity-escaped",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "dark-slide",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "slides": [
+              {
+                "elements": [
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 0,
+                    "w": 1,
+                    "h": 1,
+                    "content": "<p>{{ name }}</p>",
+                    "format": "html"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "<script>x</script> & 'q' \"d\""
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "slides": [
+            {
+              "elements": [
+                {
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1,
+                  "h": 1,
+                  "content": "<p>&lt;script&gt;x&lt;/script&gt; &amp; &#39;q&#39; &quot;d&quot;</p>",
+                  "format": "html"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "THE NAMED HTML ROW.",
+      "skip": {
+        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0103-dark-slide-plain-is-raw",
+      "title": "dark-slide: plain or absent format leaves the value as it is",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "dark-slide",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "slides": [
+              {
+                "elements": [
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 0,
+                    "w": 1,
+                    "h": 1,
+                    "content": "{{ name }}"
+                  },
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 0,
+                    "w": 1,
+                    "h": 1,
+                    "content": "{{ name }}",
+                    "format": "plain"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "*x*"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "slides": [
+            {
+              "elements": [
+                {
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1,
+                  "h": 1,
+                  "content": "*x*"
+                },
+                {
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1,
+                  "h": 1,
+                  "content": "*x*",
+                  "format": "plain"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "dark-slide's own default format is plain.",
+      "skip": {
+        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0104-dark-slide-notes-are-markdown",
+      "title": "dark-slide: speaker notes are always markdown-escaped",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "dark-slide",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "slides": [
+              {
+                "elements": [],
+                "notes": "Say {{ name }}"
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "_hi_"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "slides": [
+            {
+              "elements": [],
+              "notes": "Say \\_hi\\_"
+            }
+          ]
+        }
+      },
+      "notes": "",
+      "skip": {
+        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0105-dark-slide-local-path-src-is-invalid",
+      "title": "dark-slide: a literal src that is a local path is TEMPLATE_IMAGE_INVALID",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "dark-slide",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "slides": [
+              {
+                "elements": [
+                  {
+                    "type": "image",
+                    "src": "/etc/passwd",
+                    "x": 0,
+                    "y": 0,
+                    "w": 1,
+                    "h": 1
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_IMAGE_INVALID",
+        "path": "/document/slides/0/elements/0/src"
+      },
+      "notes": "THE NAMED FORBIDDEN-SRC ROW. dark-slide's ImageResolver reads LOCAL PATHS: a src is a file-include primitive, which no template may carry.",
+      "skip": {
+        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0106-dark-slide-href-is-forbidden",
+      "title": "dark-slide: a token in an element href is TOKEN_FORBIDDEN_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "dark-slide",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "slides": [
+              {
+                "elements": [
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 0,
+                    "w": 1,
+                    "h": 1,
+                    "content": "x",
+                    "href": "{{ url }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "url": "https://example.com"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_FORBIDDEN_FIELD",
+        "path": "/document/slides/0/elements/0/href"
+      },
+      "notes": "",
+      "skip": {
+        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0201-holy-sheet-equals-never-becomes-a-formula",
+      "title": "holy-sheet: a string starting with = is written {value: s}",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "s": {
+              "type": "string"
+            },
+            "n": {
+              "type": "number"
+            },
+            "b": {
+              "type": "boolean"
+            },
+            "d": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "Data",
+                "rows": [
+                  [
+                    "{{ s }}"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "s": "=HYPERLINK(\"http://x\",\"click\")"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "Data",
+              "rows": [
+                [
+                  {
+                    "value": "=HYPERLINK(\"http://x\",\"click\")"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "THE NAMED = ROW. holy-sheet promotes a BARE string starting with '=' to a formula (normalizer.ts promoteFormula); `{value: s}` is its documented escape hatch, so user data can never become a formula.",
+      "skip": {
+        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0202-holy-sheet-typed-values-stay-typed",
+      "title": "holy-sheet: a whole-token number, boolean or date stays as it is",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "s": {
+              "type": "string"
+            },
+            "n": {
+              "type": "number"
+            },
+            "b": {
+              "type": "boolean"
+            },
+            "d": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "Data",
+                "rows": [
+                  [
+                    "{{ n }}",
+                    "{{ b }}",
+                    "{{ d }}",
+                    "{{ s }}"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "n": 12.5,
+          "b": true,
+          "d": "2026-10-27",
+          "s": "plain"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "Data",
+              "rows": [
+                [
+                  12.5,
+                  true,
+                  "2026-10-27",
+                  {
+                    "value": "plain"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "A date is validated ISO, which cannot begin with =, so it stays bare and the column's date type formats it. EVERY string result is wrapped, not only those starting with =: a rule keyed on the first character is a rule someone will get wrong.",
+      "skip": {
+        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0203-holy-sheet-mixed-text-is-wrapped",
+      "title": "holy-sheet: text around a token is always written {value: s}",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "s": {
+              "type": "string"
+            },
+            "n": {
+              "type": "number"
+            },
+            "b": {
+              "type": "boolean"
+            },
+            "d": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "Data",
+                "rows": [
+                  [
+                    "Total: {{ n }}"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "n": 3
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "Data",
+              "rows": [
+                [
+                  {
+                    "value": "Total: 3"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "",
+      "skip": {
+        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    },
+    {
+      "id": "0204-holy-sheet-formula-is-forbidden",
+      "title": "holy-sheet: a token in a formula is TOKEN_FORBIDDEN_FIELD",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "s": {
+              "type": "string"
+            },
+            "n": {
+              "type": "number"
+            },
+            "b": {
+              "type": "boolean"
+            },
+            "d": {
+              "type": "date"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "Data",
+                "cells": {
+                  "A1": {
+                    "formula": "SUM({{ s }})"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "data": {
+          "s": "A1:A9"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_FORBIDDEN_FIELD",
+        "path": "/document/sheets/0/cells/A1/formula"
+      },
+      "notes": "",
+      "skip": {
+        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
+      }
+    }
+  ]
+}
