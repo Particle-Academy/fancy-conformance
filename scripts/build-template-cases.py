@@ -433,6 +433,8 @@ def filters_suite() -> Suite:
     f("0035-join-nested-is-input-error", "join of an array holding an array is FILTER_INPUT", "{{ v | join }}", {"v": {"type": "array", "items": {"type": "array", "items": S()}}},
       {"v": [["x"]]}, None, "", error=("FILTER_INPUT", T))
     f("0036-filter-on-a-literal", "Filters apply to a string literal too", '{{ "draft" | upper }}', {}, {}, "DRAFT", "")
+    f("0037-default-keeps-a-present-empty-string", "default keeps a present empty string", "[{{ v | default:\"N/A\" }}]", v, {"v": ""}, "[]",
+      "Present and empty is not absent (SPEC 7: the input unchanged if present). A `default` that also replaced \"\" would quietly turn a deliberate blank into placeholder text. Added after fancy-template's sabotage pass found that no row pinned it: treating \"\" as absent left every other row green.")
     return s
 
 

@@ -1847,6 +1847,58 @@
         }
       },
       "notes": ""
+    },
+    {
+      "id": "0037-default-keeps-a-present-empty-string",
+      "title": "default keeps a present empty string",
+      "since": "0.35.0",
+      "tags": [
+        "template",
+        "filters"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "v": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "[{{ v | default:\"N/A\" }}]"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "v": ""
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "[]"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Present and empty is not absent (SPEC 7: the input unchanged if present). A `default` that also replaced \"\" would quietly turn a deliberate blank into placeholder text. Added after fancy-template's sabotage pass found that no row pinned it: treating \"\" as absent left every other row green."
     }
   ]
 }

@@ -12,10 +12,10 @@ promising otherwise until 1.0.
 
 ### Added
 
-- **`template/*`: seven new suites, 179 rows, the specification of document
+- **`template/*`: seven new suites, 180 rows, the specification of document
   templates** (fancy-template, plan `document-writer-templates.md`), written
   BEFORE any implementation: `template/tokenize` (32), `resolve` (29, including
-  `validateData` and `preview`), `filters` (36), `directives` (15), `limits` (22),
+  `validateData` and `preview`), `filters` (37), `directives` (15), `limits` (22),
   `profiles` (24) and `inspect` (21). Each case maps (template, data) to a writer
   document or an error code with a template path -- never a data value.
 
