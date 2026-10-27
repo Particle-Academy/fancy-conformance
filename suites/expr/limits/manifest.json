@@ -1,0 +1,38 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "expr/limits",
+  "title": "The fancy-expr input bounds -- length in UTF-8 bytes and nesting depth, with stable error codes",
+  "since": "0.35.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "evaluate(expression: string, context: object) -> { ok: true, value: json } | { ok: false, code: 'EXPR_SYNTAX' | 'EXPR_TOO_LONG' | 'EXPR_TOO_DEEP' }",
+    "summary": "The same evaluate() as expr/evaluate, with the failure side carrying the error's stable code. An expression longer than 8192 UTF-8 bytes is EXPR_TOO_LONG, checked before anything else. An expression whose nesting depth exceeds 64 is EXPR_TOO_DEEP, enforced during parsing so that no input can exhaust a runtime's stack. Depth is defined in GRAMMAR.md ('Limits'): every node is one level deeper than its deepest child, a parenthesised group counts as a level, and dot-segments and list width do not. Every other parse failure is EXPR_SYNTAX.",
+    "reference": "node",
+    "referenceNote": "Written BEFORE the implementations, like expr/evaluate. Measured on fancy-expr 0.1.1 before the fix: all 15 out-of-limit rows fail in all three runtimes (Node and Python crash their stacks on 0103, 0104 and 0303; PHP returns a value or a code-less syntax error), and all 12 within-limit rows pass, which is how their goldens were checked.",
+    "implementations": [
+      {
+        "language": "node",
+        "package": "@particle-academy/fancy-expr",
+        "symbol": "evaluate + ExprSyntaxError.code"
+      },
+      {
+        "language": "php",
+        "package": "particle-academy/fancy-expr",
+        "symbol": "FancyExpr\\Expr::evaluate + ExprSyntaxError::$code"
+      },
+      {
+        "language": "python",
+        "package": "fancy-expr",
+        "symbol": "fancy_expr.evaluate + ExprSyntaxError.code"
+      }
+    ]
+  },
+  "notes": [
+    "WHY. fancy-expr's parser is plain recursive descent and had no bound on input length or nesting. `((((...` from an end user or an agent -- the people this grammar exists to accept input from -- overflowed the stack in every runtime, and a stack overflow is not ExprSyntaxError, so a host that validates expressions at save time crashed instead of refusing. document templates (fancy-template) evaluate user-supplied `$if` conditions through this grammar, which is what made it a prerequisite.",
+    "TWO MECHANISMS, ONE DEFINITION. A finished-tree depth check alone cannot work: the parser must finish to build the tree, and finishing is the recursion that overflows (0104). A recursion counter alone is not enough either: a 4000-term sum parses in a loop and only overflows when EVALUATED (0303). So depth is checked both on the way down (a level is refused once it is known to exceed the limit) and on the way up (each finished node's depth). Both measure the same definition, so the verdict is the same whichever fires.",
+    "LENGTH IS UTF-8 BYTES (0004). Each runtime's native string length counts a different unit, and a bound measured three ways is three bounds.",
+    "THE OK ROWS ARE NOT PADDING. Every limit row has an at-the-limit partner that must still evaluate, because 'refuse everything long or nested' passes every out-of-limit row. 0801-0803 pin what does NOT count: dot-segments, width, and that groups and unary count together.",
+    "THE LIMITS ARE FIXED, NOT CONFIGURABLE, in this version. A host that wants a tighter bound (fancy-template's 512-byte token limit) applies it before calling in; a looser one is not offered, because the depth limit is what keeps every runtime's default stack safe."
+  ]
+}
