@@ -1,0 +1,17 @@
+{
+  "suite": "wrong-sha",
+  "cases": [
+    {
+      "id": "0001-x",
+      "title": "0001-x",
+      "since": "0.38.0",
+      "input": {
+        "a": {
+          "file": "fixtures/raw.bin",
+          "sha256": "d3b67f542c667deb11c5dc69ee91732fea6e6ae146c62be3f51859f698ce5b32"
+        }
+      },
+      "expected": null
+    }
+  ]
+}

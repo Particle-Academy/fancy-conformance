@@ -62,6 +62,10 @@ use std::path::{Path, PathBuf};
 
 use fancy_json::Value;
 
+mod fixture;
+
+pub use fixture::{fixture_bytes, is_file_ref, sha256_hex};
+
 /// The environment variable that overrides fixture discovery.
 pub const ROOT_ENV: &str = "FANCY_CONFORMANCE_ROOT";
 
@@ -119,6 +123,8 @@ pub enum Error {
     Malformed(PathBuf, String),
     /// A case table violates one of this repository's load-time invariants.
     InvalidCases(String),
+    /// A file reference could not be resolved to the bytes it names.
+    Fixture(String),
 }
 
 impl fmt::Display for Error {
@@ -139,7 +145,9 @@ impl fmt::Display for Error {
                     path.display()
                 )
             }
-            Self::InvalidCases(message) => write!(f, "fancy-conformance: {message}"),
+            Self::InvalidCases(message) | Self::Fixture(message) => {
+                write!(f, "fancy-conformance: {message}")
+            }
         }
     }
 }
@@ -392,6 +400,8 @@ pub fn cases(suite: &str, root: Option<&Path>) -> Result<Vec<Case>, Error> {
             }
         }
     }
+
+    fixture::assert_file_refs(&base.join("suites").join(suite), suite, rows)?;
 
     Ok(rows.iter().map(|raw| Case { raw: raw.clone() }).collect())
 }

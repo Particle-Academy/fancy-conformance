@@ -1,0 +1,16 @@
+{
+  "suite": "bad-missing-sha",
+  "cases": [
+    {
+      "id": "0001-x",
+      "title": "0001-x",
+      "since": "0.38.0",
+      "input": {
+        "a": {
+          "file": "fixtures/raw.bin"
+        }
+      },
+      "expected": null
+    }
+  ]
+}

@@ -126,8 +126,125 @@ final class Conformance
         }
 
         self::assertUsableCases($suite, $cases);
+        self::assertFileRefs(($root ?? self::root()).'/suites/'.$suite, $suite, $cases);
 
         return array_values($cases);
+    }
+
+    private const FILE_PATTERN = '#^fixtures/[A-Za-z0-9_-][A-Za-z0-9._-]*$#D';
+
+    private const SHA256_PATTERN = '/^[0-9a-f]{64}$/D';
+
+    /**
+     * Is this value a file reference (well formed or not)? An object whose
+     * `file` member is a STRING starting `fixtures/`. Any other `file` member
+     * is ordinary data: a hostile document model carries
+     * `{"type": "launch", "file": "calc.exe"}` for a writer to ignore.
+     */
+    public static function isFileRef(mixed $value): bool
+    {
+        return \is_array($value) && ! array_is_list($value)
+            && \is_string($value['file'] ?? null) && str_starts_with($value['file'], 'fixtures/');
+    }
+
+    /**
+     * Why a reference is malformed, or null when it is well formed. The four
+     * loaders return these exact sentences; testdata/file-refs pins them.
+     *
+     * @param  array<array-key, mixed>  $ref
+     */
+    private static function fileRefProblem(array $ref): ?string
+    {
+        $keys = array_map('strval', array_keys($ref));
+        sort($keys, SORT_STRING);
+        if ($keys !== ['file', 'sha256']) {
+            return 'it must have exactly the members file and sha256';
+        }
+        if (! \is_string($ref['file']) || preg_match(self::FILE_PATTERN, $ref['file']) !== 1) {
+            return 'file must be fixtures/<name>, the name made of A-Z a-z 0-9 . _ - and not starting with a dot';
+        }
+        if (! \is_string($ref['sha256']) || preg_match(self::SHA256_PATTERN, $ref['sha256']) !== 1) {
+            return 'sha256 must be 64 lowercase hex digits';
+        }
+
+        return null;
+    }
+
+    /**
+     * Every file reference in every row is well formed and its file exists, at
+     * LOAD time, in input, expected and artifacts alike. Existence only: the
+     * bytes are hashed by {@see fixtureBytes()}, so loading stays cheap.
+     *
+     * @param  array<int,array<string,mixed>>  $cases
+     */
+    private static function assertFileRefs(string $dir, string $suite, array $cases): void
+    {
+        $walk = function (mixed $value, string $pointer, string $id) use (&$walk, $dir, $suite): void {
+            if (self::isFileRef($value)) {
+                $problem = self::fileRefProblem($value);
+                if ($problem !== null) {
+                    throw new \RuntimeException(
+                        "fancy-conformance: case \"{$suite}/{$id}\" has a malformed file reference at {$pointer}: {$problem}."
+                    );
+                }
+                if (! is_file($dir.'/'.$value['file'])) {
+                    throw new \RuntimeException(
+                        "fancy-conformance: case \"{$suite}/{$id}\" references {$value['file']}, which does not exist in the suite directory."
+                    );
+                }
+
+                return;
+            }
+            if (\is_array($value)) {
+                foreach ($value as $k => $v) {
+                    $walk($v, $pointer.'/'.str_replace(['~', '/'], ['~0', '~1'], (string) $k), $id);
+                }
+            }
+        };
+
+        foreach ($cases as $case) {
+            foreach (['input', 'expected', 'artifacts'] as $member) {
+                if (\array_key_exists($member, $case)) {
+                    $walk($case[$member], '/'.$member, (string) ($case['id'] ?? ''));
+                }
+            }
+        }
+    }
+
+    /**
+     * The bytes a file reference names: read from the suite directory,
+     * gunzipped when the name ends in `.gz`, and checked against the
+     * reference's sha256. A mismatch THROWS: a fixture that is not the bytes
+     * its row names must never be asserted against as if it were.
+     *
+     * @param  array<array-key, mixed>  $ref
+     */
+    public static function fixtureBytes(string $suite, array $ref, ?string $root = null): string
+    {
+        $problem = self::fileRefProblem($ref);
+        if ($problem !== null) {
+            throw new \RuntimeException("fancy-conformance: malformed file reference: {$problem}.");
+        }
+        $path = ($root ?? self::root()).'/suites/'.$suite.'/'.$ref['file'];
+        $bytes = file_get_contents($path);
+        if ($bytes === false) {
+            throw new \RuntimeException("fancy-conformance: cannot read {$path}.");
+        }
+        if (str_ends_with($ref['file'], '.gz')) {
+            $decoded = \strlen($bytes) >= 18 && str_starts_with($bytes, "\x1f\x8b") ? @gzdecode($bytes) : false;
+            if ($decoded === false) {
+                throw new \RuntimeException("fancy-conformance: suite \"{$suite}\" fixture {$ref['file']} is not a gzip file.");
+            }
+            $bytes = $decoded;
+        }
+        $got = hash('sha256', $bytes);
+        if ($got !== $ref['sha256']) {
+            throw new \RuntimeException(
+                "fancy-conformance: suite \"{$suite}\" fixture {$ref['file']} does not match its sha256 (expected {$ref['sha256']}, got {$got})."
+            );
+        }
+
+        return $bytes;
     }
 
     /**

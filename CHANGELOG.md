@@ -10,6 +10,51 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-27
+
+**What a consumer must do: nothing.** No existing suite changed, and the new
+load-time check only looks at objects whose `file` is a string starting
+`fixtures/`, which no existing row contains. A runner that moves its pin to
+0.38.0 sees the same verdicts on every suite it already runs. Rust only: `Error`
+gains a `Fixture` variant, so an exhaustive `match` on it needs an arm.
+
+### Added
+
+- **File references.** `{"file": "fixtures/<name>", "sha256": "<hex>"}`
+  anywhere in a row's `input`, `expected` or the new `artifacts`, for bytes that
+  do not fit a JSON cell. A `.gz` name resolves to its decompressed bytes, and
+  `sha256` is the digest of the resolved bytes. All four loaders check the shape
+  and that the file exists when the suite loads. They return the bytes, after
+  checking the digest, from `fixtureBytes()` (TS, PHP) / `fixture_bytes()`
+  (Python, Rust), and expose `isFileRef` / `is_file_ref`. The Rust loader adds
+  `sha256_hex` and carries its own gunzip and SHA-256, since std has neither
+  and it takes no third-party code.
+- **`testdata/file-refs/`: one set of trees for all four loaders' tests**,
+  written by `scripts/build-file-ref-testdata.py`, with `expected.json` stating
+  every verdict: 6 resolving references across stored, fixed-Huffman and
+  dynamic-Huffman gzip; 9 malformed; 5 `file` members that are DATA, not
+  references; a digest mismatch; a `.gz` that is not gzip.
+- **`artifacts`** on a case: named data that is never compared, such as the
+  reference implementation's own output for diffing a failure. In the schema,
+  with `$defs.fileRef`.
+- **`fine-print/*`, the contract for the fine-print ports** (TypeScript,
+  Python), exported from PHP fine-print 0.5.0 by its
+  `tests/Conformance/Export.php`:
+  `fine-print/php-semantics` (90 rows), `fine-print/writer-model` (57) and
+  `fine-print/writer-bytes` (51, with 55 file references, about 0.9 MB on disk).
+  `suites/fine-print/SPEC.md` is the normative text: file references, `canon()`
+  (inflate every FlateDecode stream, rewrite its `/Length`, drop the xref, blank
+  the md5 `/ID`), the raw and canon tiers, the PHP empty-object rule, and the
+  per-row pixel tolerance the renderer suites will use.
+- `tests/fine-print-canon.test.ts`: `canon()` written from SPEC independently
+  of the exporter, and checked against every writer-bytes row. Each canon-tier
+  artifact is re-deflated by Node's zlib, at two levels, and must come back
+  byte-identical. Three mutants are pinned to exact failing sets.
+- `npm run cross-check` now also requires Node and PHP to find the same file
+  references in every suite and to resolve each to the same sha256 (55 today).
+- `.gitattributes` marks `suites/**/fixtures/**` and `testdata/**` binary, so a
+  `core.autocrlf` checkout cannot rewrite fixture bytes.
+
 ## [0.37.0] - 2026-10-27
 
 **What a consumer must do: nothing yet.** Every row added here is for code

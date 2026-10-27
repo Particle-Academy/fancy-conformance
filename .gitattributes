@@ -1,0 +1,6 @@
+# Fixture bytes are a contract: their sha256 is in the case that names them.
+# This machine family checks out with core.autocrlf=true, which rewrites LF to
+# CRLF in any file git guesses is text -- and an uncompressed PDF often has no
+# NUL byte, so git guesses text. Never let it guess.
+suites/**/fixtures/** binary
+testdata/** binary

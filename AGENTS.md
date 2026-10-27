@@ -20,8 +20,36 @@ src/index.ts             Node loader
 php/src/Conformance.php  PHP loader — same API shape, deliberately
 python/src/fancy_conformance/  Python loader — same again; ships the fixtures in its wheel
 rust/src/lib.rs          Rust loader — same again; reads JSON through first-party `fancy-json`
+rust/src/fixture.rs      file references for Rust: our own gunzip/inflate and SHA-256 (std has neither)
 scripts/cross-check.mjs  runs BOTH loaders and requires identical verdicts
+testdata/file-refs/      ONE set of file-reference trees every loader's tests read (generated)
 ```
+
+## File references (0.38.0)
+
+`{"file": "fixtures/<name>", "sha256": "<hex>"}` anywhere in a row's `input`,
+`expected` or `artifacts`. Rules, each pinned in all four loaders by the shared
+trees in `testdata/file-refs/` (`scripts/build-file-ref-testdata.py` writes
+them and `expected.json` states every verdict):
+
+- **A reference is an object whose `file` is a STRING starting `fixtures/`.**
+  Not "anything with a `file` key": the first draft said that, and the first
+  real suite broke it at once. fine-print's hostile-document row carries
+  `{"type": "launch", "file": "calc.exe"}` as MODEL DATA a writer must ignore,
+  and the loader refused the row. The `data-*` trees pin the boundary.
+- Exactly `file` and `sha256`; a flat name, no leading dot; `sha256` is the
+  digest of the RESOLVED bytes (after gunzip), so the stored compression is
+  never contract. Shape and existence at LOAD time; the digest in
+  `fixtureBytes()`, which throws on a mismatch.
+- `.gitattributes` marks fixtures `binary`. This estate checks out with
+  `core.autocrlf=true`, and an uncompressed PDF often has no NUL byte, so git
+  would otherwise guess "text" and rewrite LF. `raw.bin` in the testdata ends
+  CR LF LF to catch exactly that.
+- **The Rust loader carries its own inflate and SHA-256.** Taking a crate for
+  either would be the third-party conversation this crate exists to avoid. The
+  testdata exercises all three DEFLATE block types (stored, fixed, dynamic) and
+  the FIPS vectors; the fine-print fixtures were gzipped by PHP, so Rust
+  decoding them all is itself a cross-implementation check.
 
 **The Rust loader was added with `fancy-flow-rs`, for the same reason the Python
 one was.** Writing a private copy in the repo under test would have been the
@@ -158,7 +186,11 @@ because the TypeScript and PHP consumers install from them as a dev dependency.
 **`cross-check.mjs` still compares only Node and PHP.** Extending it to the
 Python loader is open work; until it lands, the Python loader is asserted by its
 own suite rather than against a peer's verdict, which is weaker and is recorded
-here so nobody reads three green ticks as a three-way comparison.
+here so nobody reads three green ticks as a three-way comparison. For FILE
+REFERENCES the gap is narrower: all four loaders assert the same
+`testdata/file-refs/expected.json`, and cross-check additionally requires Node
+and PHP to find the same references in every real suite and resolve each to the
+same sha256.
 
 ### Float comparison — CLOSED, and how
 

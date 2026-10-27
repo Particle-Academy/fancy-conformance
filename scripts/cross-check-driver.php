@@ -158,6 +158,48 @@ $mergeReports = function (array $a, array $b): array {
     return $out;
 };
 
+/*
+ * Every file reference in every table suite, keyed "suite/case-id#n" in
+ * document order (input, expected, artifacts), valued with the sha256 of the
+ * bytes this loader resolves it to. Node computes the same map; the two must
+ * be identical, which pins BOTH which values count as references and what
+ * bytes each one is.
+ */
+$fixtureDigests = function (): array {
+    $walk = function (mixed $v, array &$found) use (&$walk): void {
+        if (Conformance::isFileRef($v)) {
+            $found[] = $v;
+
+            return;
+        }
+        if (is_array($v)) {
+            foreach ($v as $item) {
+                $walk($item, $found);
+            }
+        }
+    };
+    $out = [];
+    foreach (Conformance::listSuites() as $suite) {
+        if ((Conformance::manifest($suite)['caseFormat'] ?? null) !== 'table') {
+            continue;
+        }
+        foreach (Conformance::cases($suite) as $case) {
+            $found = [];
+            foreach (['input', 'expected', 'artifacts'] as $member) {
+                if (array_key_exists($member, $case)) {
+                    $walk($case[$member], $found);
+                }
+            }
+            foreach ($found as $n => $ref) {
+                $out[$suite.'/'.$case['id'].'#'.$n] = hash('sha256', Conformance::fixtureBytes($suite, $ref));
+            }
+        }
+    }
+    ksort($out, SORT_STRING);
+
+    return $out;
+};
+
 $out = [
     'shared/satisfies-range' => Conformance::runTable(
         'shared/satisfies-range',
@@ -176,6 +218,7 @@ $out = [
     // so PHP's `[]`/`{}` blind spot (shared/value-equality/0210) cannot hide
     // a disagreement here.
     'exchange/report-kinds' => Conformance::runTable('exchange/report-kinds', fn (array $c) => $c['fn'] === 'classifyKind' ? $classifyKind($c['input']['kind']) : $mergeReports($c['input']['a'], $c['input']['b'])),
+    '__fixtures' => $fixtureDigests(),
     '__version' => Conformance::version(),
     '__suites' => Conformance::listSuites(),
 ];

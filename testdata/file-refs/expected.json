@@ -1,0 +1,47 @@
+{
+  "ok": "ok",
+  "bad-extra-member": {
+    "load": "malformed file reference"
+  },
+  "bad-missing-sha": {
+    "load": "malformed file reference"
+  },
+  "bad-dot-dot": {
+    "load": "malformed file reference"
+  },
+  "bad-nested-dir": {
+    "load": "malformed file reference"
+  },
+  "bad-hidden-name": {
+    "load": "malformed file reference"
+  },
+  "bad-empty-name": {
+    "load": "malformed file reference"
+  },
+  "bad-upper-hex": {
+    "load": "malformed file reference"
+  },
+  "bad-short-hex": {
+    "load": "malformed file reference"
+  },
+  "bad-missing-file": {
+    "load": "which does not exist"
+  },
+  "bad-in-expected": {
+    "load": "malformed file reference"
+  },
+  "bad-in-artifacts": {
+    "load": "which does not exist"
+  },
+  "wrong-sha": {
+    "bytes": "does not match its sha256"
+  },
+  "not-gzip": {
+    "bytes": "is not a gzip file"
+  },
+  "data-launch-action": "data",
+  "data-outside-fixtures": "data",
+  "data-backslash": "data",
+  "data-not-a-string": "data",
+  "data-no-slash": "data"
+}

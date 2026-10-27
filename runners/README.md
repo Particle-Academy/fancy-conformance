@@ -39,7 +39,28 @@ exit($summary['ok'] ? 0 : 1);
 
 For a language with no loader yet, the file format is small enough to read
 directly: `suites/<id>/manifest.json` names the contract, `cases.json` holds
-`{id, title, since, tags?, fn?, input, expected, skip?, notes?}` rows.
+`{id, title, since, tags?, fn?, input, expected, skip?, tolerance?, artifacts?, notes?}` rows.
+
+### File references (0.38.0)
+
+Bytes that do not fit a JSON cell (a PDF, a font) live in the suite's
+`fixtures/` directory, and a row names them:
+
+```json
+{ "file": "fixtures/0041-host-font.pdf.gz", "sha256": "<64 lowercase hex>" }
+```
+
+An object is a reference when its `file` is a STRING starting `fixtures/`;
+any other `file` member is ordinary data. A `.gz` name resolves to its
+decompressed bytes, and `sha256` is the digest of what it resolves to. Every
+loader checks the shape and that the file exists when the suite loads, and
+`fixtureBytes(suite, ref)` (`fixture_bytes` in Python and Rust) returns the
+bytes after checking the digest. Replace each reference in `input` with those
+bytes before calling the implementation. `artifacts` is never compared: it
+holds things like the reference implementation's own output, for diffing a
+failure. The four loaders' tests share one set of trees,
+`testdata/file-refs/`, so they refuse the same references with the same
+messages.
 
 ## Artifact suites (`caseFormat: "directory"`)
 

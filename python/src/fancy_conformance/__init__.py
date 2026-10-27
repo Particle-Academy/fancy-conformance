@@ -27,13 +27,17 @@ Four rules from ``runners/README.md``, all honoured below:
 
 from __future__ import annotations
 
+import gzip
+import hashlib
 import json
 import os
+import re
+import zlib
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any, Literal
 
-__version__ = "0.37.0"
+__version__ = "0.38.0"
 
 Language = Literal["php", "node", "rust", "python", "go"]
 
@@ -41,7 +45,9 @@ __all__ = [
     "Language",
     "cases",
     "equals",
+    "fixture_bytes",
     "format_summary",
+    "is_file_ref",
     "list_suites",
     "manifest",
     "run_table",
@@ -156,7 +162,104 @@ def cases(suite: str, root: Path | str | None = None) -> list[dict[str, Any]]:
         raise RuntimeError(f'fancy-conformance: suite "{suite}" has no cases.')
 
     _assert_usable_cases(suite, rows)
+    _assert_file_refs(base / "suites" / suite, suite, rows)
     return rows
+
+
+_FILE_PATTERN = re.compile(r"fixtures/[A-Za-z0-9_-][A-Za-z0-9._-]*")
+_SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
+
+
+def is_file_ref(value: Any) -> bool:
+    """Is this a file reference (well formed or not)?
+
+    A dict whose ``file`` is a STRING starting ``fixtures/``. Any other ``file``
+    member is ordinary data: a hostile document model carries
+    ``{"type": "launch", "file": "calc.exe"}`` for a writer to ignore.
+    """
+    if not isinstance(value, dict):
+        return False
+    file = value.get("file")
+    return isinstance(file, str) and file.startswith("fixtures/")
+
+
+def _file_ref_problem(ref: Mapping[str, Any]) -> str | None:
+    """Why a reference is malformed, or ``None``. The four loaders return these exact sentences."""
+    if sorted(ref) != ["file", "sha256"]:
+        return "it must have exactly the members file and sha256"
+    file = ref["file"]
+    if not isinstance(file, str) or _FILE_PATTERN.fullmatch(file) is None:
+        return (
+            "file must be fixtures/<name>, the name made of A-Z a-z 0-9 . _ - "
+            "and not starting with a dot"
+        )
+    digest = ref["sha256"]
+    if not isinstance(digest, str) or _SHA256_PATTERN.fullmatch(digest) is None:
+        return "sha256 must be 64 lowercase hex digits"
+    return None
+
+
+def _assert_file_refs(folder: Path, suite: str, rows: list[dict[str, Any]]) -> None:
+    """Every file reference is well formed and its file exists, at LOAD time.
+
+    In input, expected and artifacts alike: where a reference sits must not
+    decide whether it is checked. Existence only; :func:`fixture_bytes` hashes.
+    """
+
+    def walk(value: Any, pointer: str, case_id: str) -> None:
+        if is_file_ref(value):
+            problem = _file_ref_problem(value)
+            if problem is not None:
+                raise RuntimeError(
+                    f'fancy-conformance: case "{suite}/{case_id}" has a malformed file '
+                    f"reference at {pointer}: {problem}."
+                )
+            if not (folder / value["file"]).is_file():
+                raise RuntimeError(
+                    f'fancy-conformance: case "{suite}/{case_id}" references {value["file"]}, '
+                    "which does not exist in the suite directory."
+                )
+            return
+        if isinstance(value, list):
+            for index, item in enumerate(value):
+                walk(item, f"{pointer}/{index}", case_id)
+        elif isinstance(value, dict):
+            for key, item in value.items():
+                walk(item, f"{pointer}/{key.replace('~', '~0').replace('/', '~1')}", case_id)
+
+    for row in rows:
+        for member in ("input", "expected", "artifacts"):
+            if member in row:
+                walk(row[member], "/" + member, str(row.get("id")))
+
+
+def fixture_bytes(suite: str, ref: Mapping[str, Any], root: Path | str | None = None) -> bytes:
+    """The bytes a file reference names: gunzipped for ``.gz``, checked against its sha256.
+
+    A mismatch RAISES: a fixture that is not the bytes its row names must never
+    be asserted against as if it were.
+    """
+    problem = _file_ref_problem(ref)
+    if problem is not None:
+        raise RuntimeError(f"fancy-conformance: malformed file reference: {problem}.")
+    name = str(ref["file"])
+    data = (_root(root) / "suites" / suite / name).read_bytes()
+    if name.endswith(".gz"):
+        try:
+            if len(data) < 18 or data[:2] != b"\x1f\x8b":
+                raise OSError("no gzip magic")
+            data = gzip.decompress(data)
+        except (OSError, EOFError, zlib.error) as exc:
+            raise RuntimeError(
+                f'fancy-conformance: suite "{suite}" fixture {name} is not a gzip file.'
+            ) from exc
+    got = hashlib.sha256(data).hexdigest()
+    if got != ref["sha256"]:
+        raise RuntimeError(
+            f'fancy-conformance: suite "{suite}" fixture {name} does not match its sha256 '
+            f"(expected {ref['sha256']}, got {got})."
+        )
+    return data
 
 
 def _assert_usable_cases(suite: str, rows: list[dict[str, Any]]) -> None:

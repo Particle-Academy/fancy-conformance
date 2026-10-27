@@ -1,0 +1,94 @@
+{
+  "suite": "ok",
+  "cases": [
+    {
+      "id": "0001-raw",
+      "title": "0001-raw",
+      "since": "0.38.0",
+      "input": {
+        "bytes": {
+          "file": "fixtures/raw.bin",
+          "sha256": "ac891a17696e45ad5ff70bce80d1ad6d6ad4603dc48d49c6105deeef6bb74f7d"
+        }
+      },
+      "expected": null
+    },
+    {
+      "id": "0002-gzip-is-transparent",
+      "title": "0002-gzip-is-transparent",
+      "since": "0.38.0",
+      "input": {
+        "bytes": {
+          "file": "fixtures/raw.bin.gz",
+          "sha256": "ac891a17696e45ad5ff70bce80d1ad6d6ad4603dc48d49c6105deeef6bb74f7d"
+        }
+      },
+      "expected": null
+    },
+    {
+      "id": "0003-stored-blocks",
+      "title": "0003-stored-blocks",
+      "since": "0.38.0",
+      "input": {
+        "bytes": {
+          "file": "fixtures/stored.txt.gz",
+          "sha256": "c4f71cc03edad6c375cfe5c9c17df0d1fc4843552bc531e1fe46eaa475d332d2"
+        }
+      },
+      "expected": null
+    },
+    {
+      "id": "0004-fixed-huffman",
+      "title": "0004-fixed-huffman",
+      "since": "0.38.0",
+      "input": {
+        "bytes": {
+          "file": "fixtures/fixed.txt.gz",
+          "sha256": "c7cc96abafd62995227f49e76597f381bfdb67e33c7becf5b330b1429ba046f9"
+        }
+      },
+      "expected": null
+    },
+    {
+      "id": "0005-dynamic-huffman",
+      "title": "0005-dynamic-huffman",
+      "since": "0.38.0",
+      "input": {
+        "bytes": {
+          "file": "fixtures/dynamic.txt.gz",
+          "sha256": "22ee8352301cf62853bed149c8b192be32715896d942cd4c012bc1e086113bfb"
+        }
+      },
+      "expected": null
+    },
+    {
+      "id": "0006-nested-in-expected-and-artifacts",
+      "title": "0006-nested-in-expected-and-artifacts",
+      "since": "0.38.0",
+      "input": {
+        "deep": [
+          {
+            "x": [
+              {
+                "file": "fixtures/raw.bin",
+                "sha256": "ac891a17696e45ad5ff70bce80d1ad6d6ad4603dc48d49c6105deeef6bb74f7d"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "out": {
+          "file": "fixtures/raw.bin.gz",
+          "sha256": "ac891a17696e45ad5ff70bce80d1ad6d6ad4603dc48d49c6105deeef6bb74f7d"
+        }
+      },
+      "artifacts": {
+        "reference": {
+          "file": "fixtures/dynamic.txt.gz",
+          "sha256": "22ee8352301cf62853bed149c8b192be32715896d942cd4c012bc1e086113bfb"
+        }
+      }
+    }
+  ]
+}

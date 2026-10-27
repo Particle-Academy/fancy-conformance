@@ -54,7 +54,28 @@ export interface ConformanceCase {
    * REASON that may not be empty — and every runner prints these.
    */
   skip?: Partial<Record<Language, string>>;
+  /** A row-declared float tolerance; absent means numbers compare exactly. */
+  tolerance?: number;
+  /**
+   * Named data that is NOT compared: typically file references to the
+   * reference implementation's own output, kept so a failing implementation
+   * can diff against it. A runner must never derive its answer from these.
+   */
+  artifacts?: Record<string, unknown>;
   notes?: string;
+}
+
+/**
+ * Bytes too large or too binary for a JSON cell, stored beside the suite.
+ *
+ * `file` is `fixtures/<name>` relative to the suite directory, with a flat
+ * name of `[A-Za-z0-9._-]` not starting with a dot. A name ending in `.gz` is
+ * a gzip file and resolves to its DECOMPRESSED bytes. `sha256` is the
+ * lowercase hex digest of the bytes the reference resolves to (after gunzip).
+ */
+export interface FileRef {
+  file: string;
+  sha256: string;
 }
 
 export interface Suite {

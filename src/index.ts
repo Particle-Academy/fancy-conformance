@@ -1,10 +1,13 @@
+import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 
 import type {
   CaseResult,
   ConformanceCase,
+  FileRef,
   Language,
   RunSummary,
   Suite,
@@ -101,8 +104,122 @@ export function loadSuiteFrom(root: string, id: string): Suite {
   ) as { cases: ConformanceCase[] };
 
   assertUsableCases(id, table.cases);
+  assertFileRefs(dir, id, table.cases);
 
   return { manifest, cases: table.cases };
+}
+
+const FILE_PATTERN = /^fixtures\/[A-Za-z0-9_-][A-Za-z0-9._-]*$/;
+const SHA256_PATTERN = /^[0-9a-f]{64}$/;
+
+/**
+ * Is this value a file reference (well formed or not)?
+ *
+ * An object whose `file` member is a STRING starting `fixtures/`. Any other
+ * `file` member is ordinary data: a hostile document model carries
+ * `{"type": "launch", "file": "calc.exe"}` for a writer to ignore, and a
+ * loader that read every `file` key as a reference would refuse that row --
+ * or hand an implementation bytes where the model was.
+ */
+export function isFileRef(value: unknown): value is FileRef {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+  const file = (value as { file?: unknown }).file;
+  return typeof file === "string" && file.startsWith("fixtures/");
+}
+
+/**
+ * Why a reference is malformed, or null when it is well formed.
+ *
+ * The four loaders return these exact sentences; testdata/file-refs pins them.
+ */
+function fileRefProblem(ref: Record<string, unknown>): string | null {
+  const keys = Object.keys(ref).sort();
+  if (keys.length !== 2 || keys[0] !== "file" || keys[1] !== "sha256") {
+    return "it must have exactly the members file and sha256";
+  }
+  if (typeof ref.file !== "string" || !FILE_PATTERN.test(ref.file)) {
+    return "file must be fixtures/<name>, the name made of A-Z a-z 0-9 . _ - and not starting with a dot";
+  }
+  if (typeof ref.sha256 !== "string" || !SHA256_PATTERN.test(ref.sha256)) {
+    return "sha256 must be 64 lowercase hex digits";
+  }
+  return null;
+}
+
+/**
+ * Every file reference in every row is well formed and its file exists, at
+ * LOAD time -- in input, expected and artifacts alike, because where a
+ * reference sits must not decide whether it is checked.
+ *
+ * Existence only: the bytes are hashed when a runner asks for them
+ * ({@link fixtureBytes}), so loading a suite of large fixtures stays cheap.
+ */
+function assertFileRefs(dir: string, suite: string, cases: ConformanceCase[]): void {
+  const walk = (value: unknown, pointer: string, caseId: string): void => {
+    if (isFileRef(value)) {
+      const problem = fileRefProblem(value as unknown as Record<string, unknown>);
+      if (problem !== null) {
+        throw new Error(
+          `fancy-conformance: case "${suite}/${caseId}" has a malformed file reference at ${pointer}: ${problem}.`,
+        );
+      }
+      let present = false;
+      try {
+        present = statSync(join(dir, ...value.file.split("/"))).isFile();
+      } catch {
+        present = false;
+      }
+      if (!present) {
+        throw new Error(
+          `fancy-conformance: case "${suite}/${caseId}" references ${value.file}, which does not exist in the suite directory.`,
+        );
+      }
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((v, i) => walk(v, `${pointer}/${i}`, caseId));
+    } else if (value !== null && typeof value === "object") {
+      for (const [k, v] of Object.entries(value)) {
+        walk(v, `${pointer}/${k.replace(/~/g, "~0").replace(/\//g, "~1")}`, caseId);
+      }
+    }
+  };
+
+  for (const c of cases) {
+    for (const member of ["input", "expected", "artifacts"] as const) {
+      if (member in c) walk(c[member], `/${member}`, c.id);
+    }
+  }
+}
+
+/**
+ * The bytes a file reference names: read from the suite directory, gunzipped
+ * when the name ends in `.gz`, and checked against the reference's sha256.
+ *
+ * A mismatch THROWS. A fixture that is not the bytes its row names (a CRLF
+ * checkout, a regenerated file nobody re-hashed) would otherwise be asserted
+ * against as if it were.
+ */
+export function fixtureBytes(suite: string, ref: FileRef, root?: string): Uint8Array {
+  const problem = fileRefProblem(ref as unknown as Record<string, unknown>);
+  if (problem !== null) {
+    throw new Error(`fancy-conformance: malformed file reference: ${problem}.`);
+  }
+  const path = join(root ?? packageRoot(), "suites", ...suite.split("/"), ...ref.file.split("/"));
+  let bytes: Uint8Array = readFileSync(path);
+  if (ref.file.endsWith(".gz")) {
+    if (bytes.length < 18 || bytes[0] !== 0x1f || bytes[1] !== 0x8b) {
+      throw new Error(`fancy-conformance: suite "${suite}" fixture ${ref.file} is not a gzip file.`);
+    }
+    bytes = gunzipSync(bytes);
+  }
+  const got = createHash("sha256").update(bytes).digest("hex");
+  if (got !== ref.sha256) {
+    throw new Error(
+      `fancy-conformance: suite "${suite}" fixture ${ref.file} does not match its sha256 (expected ${ref.sha256}, got ${got}).`,
+    );
+  }
+  return new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
 
 /**

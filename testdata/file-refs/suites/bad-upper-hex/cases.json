@@ -1,0 +1,17 @@
+{
+  "suite": "bad-upper-hex",
+  "cases": [
+    {
+      "id": "0001-x",
+      "title": "0001-x",
+      "since": "0.38.0",
+      "input": {
+        "a": {
+          "file": "fixtures/raw.bin",
+          "sha256": "AC891A17696E45AD5FF70BCE80D1AD6D6AD4603DC48D49C6105DEEEF6BB74F7D"
+        }
+      },
+      "expected": null
+    }
+  ]
+}

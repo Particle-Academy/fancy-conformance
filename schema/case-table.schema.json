@@ -38,8 +38,15 @@
           "type": "string",
           "minLength": 1
         },
-        "input": { "type": "object" },
+        "input": {
+          "description": "The arguments. Anywhere inside it (and inside expected and artifacts), an object whose `file` is a string starting `fixtures/` is a FILE REFERENCE, `$defs.fileRef`: bytes stored beside the suite, resolved by the loader's fixtureBytes().",
+          "type": "object"
+        },
         "expected": {},
+        "artifacts": {
+          "description": "Named data that is NOT compared: typically file references to the reference implementation's own output, kept so a failing implementation can diff against it. A runner must never derive its answer from an artifact.",
+          "type": "object"
+        },
         "skip": {
           "description": "The ONLY sanctioned way not to run a case. Keyed by language; the value is a REASON and may not be empty. A runner prints every skip in its summary — a silent skip is what turned two existing parity suites into decoration.",
           "type": "object",
@@ -53,6 +60,16 @@
           "exclusiveMinimum": 0
         },
         "notes": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "fileRef": {
+      "description": "Bytes too large or too binary for a JSON cell. `file` is relative to the suite directory: `fixtures/` plus a flat name of [A-Za-z0-9._-] not starting with a dot. A name ending `.gz` is ONE gzip member and resolves to its decompressed bytes. `sha256` is the lowercase hex digest of the RESOLVED bytes, so how the stored file is compressed is never part of the contract. Shape and existence are checked at load time in every loader; the digest in fixtureBytes().",
+      "type": "object",
+      "required": ["file", "sha256"],
+      "properties": {
+        "file": { "type": "string", "pattern": "^fixtures/[A-Za-z0-9_-][A-Za-z0-9._-]*$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
       },
       "additionalProperties": false
     }

@@ -1,0 +1,17 @@
+{
+  "suite": "data-launch-action",
+  "cases": [
+    {
+      "id": "0001-x",
+      "title": "0001-x",
+      "since": "0.38.0",
+      "input": {
+        "a": {
+          "type": "launch",
+          "file": "calc.exe"
+        }
+      },
+      "expected": null
+    }
+  ]
+}

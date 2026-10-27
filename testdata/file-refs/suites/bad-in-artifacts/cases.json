@@ -1,0 +1,18 @@
+{
+  "suite": "bad-in-artifacts",
+  "cases": [
+    {
+      "id": "0001-x",
+      "title": "0001-x",
+      "since": "0.38.0",
+      "input": {},
+      "expected": null,
+      "artifacts": {
+        "a": {
+          "file": "fixtures/absent.bin",
+          "sha256": "ac891a17696e45ad5ff70bce80d1ad6d6ad4603dc48d49c6105deeef6bb74f7d"
+        }
+      }
+    }
+  ]
+}

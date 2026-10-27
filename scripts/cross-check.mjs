@@ -20,7 +20,9 @@ import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { listSuites, runTable, suiteVersion } from "../src/index.ts";
+import { createHash } from "node:crypto";
+
+import { fixtureBytes, isFileRef, listSuites, loadSuite, runTable, suiteVersion } from "../src/index.ts";
 // The exchange probe is the Node side for the two exchange suites compared
 // here. The PHP side is written independently in cross-check-driver.php, on
 // number_format, so agreement is between two implementations, not one.
@@ -178,6 +180,39 @@ for (const suite of Object.keys(node)) {
   const total = ids.size;
   console.log(`${suite}: ${total} cases, node and php agree on ${total - disagreements}`);
 }
+
+// File references: which values are references, and the bytes each resolves
+// to, must be identical in both loaders -- keyed suite/case#n in document order.
+const nodeFixtures = {};
+for (const suite of nodeSuites) {
+  for (const c of loadSuite(suite).cases) {
+    const found = [];
+    const walk = (v) => {
+      if (isFileRef(v)) return void found.push(v);
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v !== null && typeof v === "object") Object.values(v).forEach(walk);
+    };
+    for (const member of ["input", "expected", "artifacts"]) if (member in c) walk(c[member]);
+    found.forEach((ref, n) => {
+      nodeFixtures[`${suite}/${c.id}#${n}`] = createHash("sha256").update(fixtureBytes(suite, ref)).digest("hex");
+    });
+  }
+}
+const phpFixtures = php.__fixtures ?? {};
+const fixtureKeys = [...new Set([...Object.keys(nodeFixtures), ...Object.keys(phpFixtures)])].sort();
+let fixtureDisagreements = 0;
+for (const key of fixtureKeys) {
+  if (nodeFixtures[key] !== phpFixtures[key]) {
+    console.error(`cross-check: fixture ${key} -- node ${nodeFixtures[key] ?? "(not a reference)"}, php ${phpFixtures[key] ?? "(not a reference)"}`);
+    fixtureDisagreements++;
+  }
+}
+if (fixtureKeys.length === 0) {
+  console.error("cross-check: no file references were compared -- the fine-print suites carry them");
+  problems++;
+}
+problems += fixtureDisagreements;
+console.log(`file references: ${fixtureKeys.length}, node and php agree on ${fixtureKeys.length - fixtureDisagreements}`);
 
 // A run that asserted nothing must not look like a run that asserted
 // everything. This is the guard the two harnesses being replaced did not have.

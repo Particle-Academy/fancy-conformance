@@ -1,0 +1,2814 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "fine-print/php-semantics",
+    "cases": [
+        {
+            "id": "0001-num-int-zero",
+            "title": "Syntax::num(0)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0
+            },
+            "expected": "0"
+        },
+        {
+            "id": "0002-num-int-negative",
+            "title": "Syntax::num(-17)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": -17
+            },
+            "expected": "-17"
+        },
+        {
+            "id": "0003-num-simple",
+            "title": "Syntax::num(72.5)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 72.5
+            },
+            "expected": "72.5"
+        },
+        {
+            "id": "0004-num-trailing-zeros",
+            "title": "Syntax::num(1.5)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 1.5
+            },
+            "expected": "1.5"
+        },
+        {
+            "id": "0005-num-four-decimals",
+            "title": "Syntax::num(595.2756)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 595.2756
+            },
+            "expected": "595.2756"
+        },
+        {
+            "id": "0006-num-round-up",
+            "title": "Syntax::num(0.12346)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.12346
+            },
+            "expected": "0.1235"
+        },
+        {
+            "id": "0007-num-round-down",
+            "title": "Syntax::num(0.12344)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.12344
+            },
+            "expected": "0.1234"
+        },
+        {
+            "id": "0008-num-negative-zero",
+            "title": "Syntax::num(-1.0e-5)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": -1.0e-5
+            },
+            "expected": "0",
+            "notes": "Rounds to -0.0000, which trims to \"-0\" and is written as \"0\"."
+        },
+        {
+            "id": "0009-num-tiny",
+            "title": "Syntax::num(1.0e-9)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 1.0e-9
+            },
+            "expected": "0"
+        },
+        {
+            "id": "0010-num-large",
+            "title": "Syntax::num(123456789.123456)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 123456789.123456
+            },
+            "expected": "123456789.1235"
+        },
+        {
+            "id": "0011-num-exponent-free",
+            "title": "Syntax::num(1.0e+20)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 1.0e+20
+            },
+            "expected": "100000000000000000000",
+            "notes": "No exponent form, ever: PDF numbers have none."
+        },
+        {
+            "id": "0012-num-tie-1-32",
+            "title": "Syntax::num(0.03125)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.03125
+            },
+            "expected": "0.0312",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0013-num-tie-3-32",
+            "title": "Syntax::num(0.09375)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.09375
+            },
+            "expected": "0.0938",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0014-num-tie-5-32",
+            "title": "Syntax::num(0.15625)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.15625
+            },
+            "expected": "0.1562",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0015-num-tie-7-32",
+            "title": "Syntax::num(0.21875)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.21875
+            },
+            "expected": "0.2188",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0016-num-tie-9-32",
+            "title": "Syntax::num(0.28125)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.28125
+            },
+            "expected": "0.2812",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0017-num-tie-11-32",
+            "title": "Syntax::num(0.34375)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.34375
+            },
+            "expected": "0.3438",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0018-num-tie-13-32",
+            "title": "Syntax::num(0.40625)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.40625
+            },
+            "expected": "0.4062",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0019-num-tie-15-32",
+            "title": "Syntax::num(0.46875)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.46875
+            },
+            "expected": "0.4688",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0020-num-tie-17-32",
+            "title": "Syntax::num(0.53125)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.53125
+            },
+            "expected": "0.5312",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0021-num-tie-31-32",
+            "title": "Syntax::num(0.96875)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.96875
+            },
+            "expected": "0.9688",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0022-num-tie-negative",
+            "title": "Syntax::num(-0.03125)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": -0.03125
+            },
+            "expected": "-0.0312",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0023-num-tie-large",
+            "title": "Syntax::num(612.03125)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 612.03125
+            },
+            "expected": "612.0312",
+            "notes": "A dyadic tie: the value is EXACTLY halfway at the fifth decimal, so %.4F decides the direction. PHP rounds these with its own formatter, not the C library; JavaScript toFixed and Python format() each have their own rule."
+        },
+        {
+            "id": "0024-num-tie-1-160000",
+            "title": "Syntax::num(6.25e-5)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 6.25e-5
+            },
+            "expected": "0.0001",
+            "notes": "NOT a tie: 1/160000 is not dyadic, so the nearest double is a little off half."
+        },
+        {
+            "id": "0025-num-inexact-half",
+            "title": "Syntax::num(1.00005)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 1.00005
+            },
+            "expected": "1.0001",
+            "notes": "Not a tie either: 1.00005 has no exact double; the nearest one decides."
+        },
+        {
+            "id": "0026-num-third",
+            "title": "Syntax::num(0.3333333333333333)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 0.3333333333333333
+            },
+            "expected": "0.3333"
+        },
+        {
+            "id": "0027-num-seventh-of-a-page",
+            "title": "Syntax::num(87.42857142857143)",
+            "since": "0.38.0",
+            "tags": [
+                "num"
+            ],
+            "fn": "num",
+            "input": {
+                "value": 87.42857142857143
+            },
+            "expected": "87.4286"
+        },
+        {
+            "id": "0028-rgb-ff0000",
+            "title": "Syntax::rgb(\"#FF0000\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#FF0000"
+            },
+            "expected": [
+                1.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "id": "0029-rgb-000000",
+            "title": "Syntax::rgb(\"#000000\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#000000"
+            },
+            "expected": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "id": "0030-rgb-ffffff",
+            "title": "Syntax::rgb(\"#FFFFFF\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#FFFFFF"
+            },
+            "expected": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "id": "0031-rgb-808080",
+            "title": "Syntax::rgb(\"#808080\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#808080"
+            },
+            "expected": [
+                0.502,
+                0.502,
+                0.502
+            ]
+        },
+        {
+            "id": "0032-rgb-e7e7e7",
+            "title": "Syntax::rgb(\"#E7E7E7\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#E7E7E7"
+            },
+            "expected": [
+                0.9059,
+                0.9059,
+                0.9059
+            ]
+        },
+        {
+            "id": "0033-rgb-1f3a5f",
+            "title": "Syntax::rgb(\"#1F3A5F\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#1F3A5F"
+            },
+            "expected": [
+                0.1216,
+                0.2275,
+                0.3725
+            ]
+        },
+        {
+            "id": "0034-rgb-b08d57",
+            "title": "Syntax::rgb(\"#B08D57\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#B08D57"
+            },
+            "expected": [
+                0.6902,
+                0.5529,
+                0.3412
+            ]
+        },
+        {
+            "id": "0035-rgb-b08d57",
+            "title": "Syntax::rgb(\"B08D57\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "B08D57"
+            },
+            "expected": [
+                0.6902,
+                0.5529,
+                0.3412
+            ]
+        },
+        {
+            "id": "0036-rgb-fdfaf3",
+            "title": "Syntax::rgb(\"#fdfaf3\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#fdfaf3"
+            },
+            "expected": [
+                0.9922,
+                0.9804,
+                0.9529
+            ]
+        },
+        {
+            "id": "0037-rgb-gggggg",
+            "title": "Syntax::rgb(\"#GGGGGG\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#GGGGGG"
+            },
+            "expected": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "id": "0038-rgb-red",
+            "title": "Syntax::rgb(\"red\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "red"
+            },
+            "expected": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "id": "0039-rgb-fff",
+            "title": "Syntax::rgb(\"#FFF\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#FFF"
+            },
+            "expected": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "id": "0040-rgb-1234567",
+            "title": "Syntax::rgb(\"#1234567\")",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgb",
+            "input": {
+                "hex": "#1234567"
+            },
+            "expected": [
+                0.0,
+                0.0,
+                0.0
+            ]
+        },
+        {
+            "id": "0041-rgb-every-channel-value",
+            "title": "Syntax::rgb for every channel value 00-FF",
+            "since": "0.38.0",
+            "tags": [
+                "rgb"
+            ],
+            "fn": "rgbMany",
+            "input": {
+                "hexes": [
+                    "#00FF00",
+                    "#01FE01",
+                    "#02FD02",
+                    "#03FC03",
+                    "#04FB04",
+                    "#05FA05",
+                    "#06F906",
+                    "#07F807",
+                    "#08F708",
+                    "#09F609",
+                    "#0AF50A",
+                    "#0BF40B",
+                    "#0CF30C",
+                    "#0DF20D",
+                    "#0EF10E",
+                    "#0FF00F",
+                    "#10EF10",
+                    "#11EE11",
+                    "#12ED12",
+                    "#13EC13",
+                    "#14EB14",
+                    "#15EA15",
+                    "#16E916",
+                    "#17E817",
+                    "#18E718",
+                    "#19E619",
+                    "#1AE51A",
+                    "#1BE41B",
+                    "#1CE31C",
+                    "#1DE21D",
+                    "#1EE11E",
+                    "#1FE01F",
+                    "#20DF20",
+                    "#21DE21",
+                    "#22DD22",
+                    "#23DC23",
+                    "#24DB24",
+                    "#25DA25",
+                    "#26D926",
+                    "#27D827",
+                    "#28D728",
+                    "#29D629",
+                    "#2AD52A",
+                    "#2BD42B",
+                    "#2CD32C",
+                    "#2DD22D",
+                    "#2ED12E",
+                    "#2FD02F",
+                    "#30CF30",
+                    "#31CE31",
+                    "#32CD32",
+                    "#33CC33",
+                    "#34CB34",
+                    "#35CA35",
+                    "#36C936",
+                    "#37C837",
+                    "#38C738",
+                    "#39C639",
+                    "#3AC53A",
+                    "#3BC43B",
+                    "#3CC33C",
+                    "#3DC23D",
+                    "#3EC13E",
+                    "#3FC03F",
+                    "#40BF40",
+                    "#41BE41",
+                    "#42BD42",
+                    "#43BC43",
+                    "#44BB44",
+                    "#45BA45",
+                    "#46B946",
+                    "#47B847",
+                    "#48B748",
+                    "#49B649",
+                    "#4AB54A",
+                    "#4BB44B",
+                    "#4CB34C",
+                    "#4DB24D",
+                    "#4EB14E",
+                    "#4FB04F",
+                    "#50AF50",
+                    "#51AE51",
+                    "#52AD52",
+                    "#53AC53",
+                    "#54AB54",
+                    "#55AA55",
+                    "#56A956",
+                    "#57A857",
+                    "#58A758",
+                    "#59A659",
+                    "#5AA55A",
+                    "#5BA45B",
+                    "#5CA35C",
+                    "#5DA25D",
+                    "#5EA15E",
+                    "#5FA05F",
+                    "#609F60",
+                    "#619E61",
+                    "#629D62",
+                    "#639C63",
+                    "#649B64",
+                    "#659A65",
+                    "#669966",
+                    "#679867",
+                    "#689768",
+                    "#699669",
+                    "#6A956A",
+                    "#6B946B",
+                    "#6C936C",
+                    "#6D926D",
+                    "#6E916E",
+                    "#6F906F",
+                    "#708F70",
+                    "#718E71",
+                    "#728D72",
+                    "#738C73",
+                    "#748B74",
+                    "#758A75",
+                    "#768976",
+                    "#778877",
+                    "#788778",
+                    "#798679",
+                    "#7A857A",
+                    "#7B847B",
+                    "#7C837C",
+                    "#7D827D",
+                    "#7E817E",
+                    "#7F807F",
+                    "#807F80",
+                    "#817E81",
+                    "#827D82",
+                    "#837C83",
+                    "#847B84",
+                    "#857A85",
+                    "#867986",
+                    "#877887",
+                    "#887788",
+                    "#897689",
+                    "#8A758A",
+                    "#8B748B",
+                    "#8C738C",
+                    "#8D728D",
+                    "#8E718E",
+                    "#8F708F",
+                    "#906F90",
+                    "#916E91",
+                    "#926D92",
+                    "#936C93",
+                    "#946B94",
+                    "#956A95",
+                    "#966996",
+                    "#976897",
+                    "#986798",
+                    "#996699",
+                    "#9A659A",
+                    "#9B649B",
+                    "#9C639C",
+                    "#9D629D",
+                    "#9E619E",
+                    "#9F609F",
+                    "#A05FA0",
+                    "#A15EA1",
+                    "#A25DA2",
+                    "#A35CA3",
+                    "#A45BA4",
+                    "#A55AA5",
+                    "#A659A6",
+                    "#A758A7",
+                    "#A857A8",
+                    "#A956A9",
+                    "#AA55AA",
+                    "#AB54AB",
+                    "#AC53AC",
+                    "#AD52AD",
+                    "#AE51AE",
+                    "#AF50AF",
+                    "#B04FB0",
+                    "#B14EB1",
+                    "#B24DB2",
+                    "#B34CB3",
+                    "#B44BB4",
+                    "#B54AB5",
+                    "#B649B6",
+                    "#B748B7",
+                    "#B847B8",
+                    "#B946B9",
+                    "#BA45BA",
+                    "#BB44BB",
+                    "#BC43BC",
+                    "#BD42BD",
+                    "#BE41BE",
+                    "#BF40BF",
+                    "#C03FC0",
+                    "#C13EC1",
+                    "#C23DC2",
+                    "#C33CC3",
+                    "#C43BC4",
+                    "#C53AC5",
+                    "#C639C6",
+                    "#C738C7",
+                    "#C837C8",
+                    "#C936C9",
+                    "#CA35CA",
+                    "#CB34CB",
+                    "#CC33CC",
+                    "#CD32CD",
+                    "#CE31CE",
+                    "#CF30CF",
+                    "#D02FD0",
+                    "#D12ED1",
+                    "#D22DD2",
+                    "#D32CD3",
+                    "#D42BD4",
+                    "#D52AD5",
+                    "#D629D6",
+                    "#D728D7",
+                    "#D827D8",
+                    "#D926D9",
+                    "#DA25DA",
+                    "#DB24DB",
+                    "#DC23DC",
+                    "#DD22DD",
+                    "#DE21DE",
+                    "#DF20DF",
+                    "#E01FE0",
+                    "#E11EE1",
+                    "#E21DE2",
+                    "#E31CE3",
+                    "#E41BE4",
+                    "#E51AE5",
+                    "#E619E6",
+                    "#E718E7",
+                    "#E817E8",
+                    "#E916E9",
+                    "#EA15EA",
+                    "#EB14EB",
+                    "#EC13EC",
+                    "#ED12ED",
+                    "#EE11EE",
+                    "#EF10EF",
+                    "#F00FF0",
+                    "#F10EF1",
+                    "#F20DF2",
+                    "#F30CF3",
+                    "#F40BF4",
+                    "#F50AF5",
+                    "#F609F6",
+                    "#F708F7",
+                    "#F807F8",
+                    "#F906F9",
+                    "#FA05FA",
+                    "#FB04FB",
+                    "#FC03FC",
+                    "#FD02FD",
+                    "#FE01FE",
+                    "#FF00FF"
+                ]
+            },
+            "expected": [
+                [
+                    0.0,
+                    1.0,
+                    0.0
+                ],
+                [
+                    0.0039,
+                    0.9961,
+                    0.0039
+                ],
+                [
+                    0.0078,
+                    0.9922,
+                    0.0078
+                ],
+                [
+                    0.0118,
+                    0.9882,
+                    0.0118
+                ],
+                [
+                    0.0157,
+                    0.9843,
+                    0.0157
+                ],
+                [
+                    0.0196,
+                    0.9804,
+                    0.0196
+                ],
+                [
+                    0.0235,
+                    0.9765,
+                    0.0235
+                ],
+                [
+                    0.0275,
+                    0.9725,
+                    0.0275
+                ],
+                [
+                    0.0314,
+                    0.9686,
+                    0.0314
+                ],
+                [
+                    0.0353,
+                    0.9647,
+                    0.0353
+                ],
+                [
+                    0.0392,
+                    0.9608,
+                    0.0392
+                ],
+                [
+                    0.0431,
+                    0.9569,
+                    0.0431
+                ],
+                [
+                    0.0471,
+                    0.9529,
+                    0.0471
+                ],
+                [
+                    0.051,
+                    0.949,
+                    0.051
+                ],
+                [
+                    0.0549,
+                    0.9451,
+                    0.0549
+                ],
+                [
+                    0.0588,
+                    0.9412,
+                    0.0588
+                ],
+                [
+                    0.0627,
+                    0.9373,
+                    0.0627
+                ],
+                [
+                    0.0667,
+                    0.9333,
+                    0.0667
+                ],
+                [
+                    0.0706,
+                    0.9294,
+                    0.0706
+                ],
+                [
+                    0.0745,
+                    0.9255,
+                    0.0745
+                ],
+                [
+                    0.0784,
+                    0.9216,
+                    0.0784
+                ],
+                [
+                    0.0824,
+                    0.9176,
+                    0.0824
+                ],
+                [
+                    0.0863,
+                    0.9137,
+                    0.0863
+                ],
+                [
+                    0.0902,
+                    0.9098,
+                    0.0902
+                ],
+                [
+                    0.0941,
+                    0.9059,
+                    0.0941
+                ],
+                [
+                    0.098,
+                    0.902,
+                    0.098
+                ],
+                [
+                    0.102,
+                    0.898,
+                    0.102
+                ],
+                [
+                    0.1059,
+                    0.8941,
+                    0.1059
+                ],
+                [
+                    0.1098,
+                    0.8902,
+                    0.1098
+                ],
+                [
+                    0.1137,
+                    0.8863,
+                    0.1137
+                ],
+                [
+                    0.1176,
+                    0.8824,
+                    0.1176
+                ],
+                [
+                    0.1216,
+                    0.8784,
+                    0.1216
+                ],
+                [
+                    0.1255,
+                    0.8745,
+                    0.1255
+                ],
+                [
+                    0.1294,
+                    0.8706,
+                    0.1294
+                ],
+                [
+                    0.1333,
+                    0.8667,
+                    0.1333
+                ],
+                [
+                    0.1373,
+                    0.8627,
+                    0.1373
+                ],
+                [
+                    0.1412,
+                    0.8588,
+                    0.1412
+                ],
+                [
+                    0.1451,
+                    0.8549,
+                    0.1451
+                ],
+                [
+                    0.149,
+                    0.851,
+                    0.149
+                ],
+                [
+                    0.1529,
+                    0.8471,
+                    0.1529
+                ],
+                [
+                    0.1569,
+                    0.8431,
+                    0.1569
+                ],
+                [
+                    0.1608,
+                    0.8392,
+                    0.1608
+                ],
+                [
+                    0.1647,
+                    0.8353,
+                    0.1647
+                ],
+                [
+                    0.1686,
+                    0.8314,
+                    0.1686
+                ],
+                [
+                    0.1725,
+                    0.8275,
+                    0.1725
+                ],
+                [
+                    0.1765,
+                    0.8235,
+                    0.1765
+                ],
+                [
+                    0.1804,
+                    0.8196,
+                    0.1804
+                ],
+                [
+                    0.1843,
+                    0.8157,
+                    0.1843
+                ],
+                [
+                    0.1882,
+                    0.8118,
+                    0.1882
+                ],
+                [
+                    0.1922,
+                    0.8078,
+                    0.1922
+                ],
+                [
+                    0.1961,
+                    0.8039,
+                    0.1961
+                ],
+                [
+                    0.2,
+                    0.8,
+                    0.2
+                ],
+                [
+                    0.2039,
+                    0.7961,
+                    0.2039
+                ],
+                [
+                    0.2078,
+                    0.7922,
+                    0.2078
+                ],
+                [
+                    0.2118,
+                    0.7882,
+                    0.2118
+                ],
+                [
+                    0.2157,
+                    0.7843,
+                    0.2157
+                ],
+                [
+                    0.2196,
+                    0.7804,
+                    0.2196
+                ],
+                [
+                    0.2235,
+                    0.7765,
+                    0.2235
+                ],
+                [
+                    0.2275,
+                    0.7725,
+                    0.2275
+                ],
+                [
+                    0.2314,
+                    0.7686,
+                    0.2314
+                ],
+                [
+                    0.2353,
+                    0.7647,
+                    0.2353
+                ],
+                [
+                    0.2392,
+                    0.7608,
+                    0.2392
+                ],
+                [
+                    0.2431,
+                    0.7569,
+                    0.2431
+                ],
+                [
+                    0.2471,
+                    0.7529,
+                    0.2471
+                ],
+                [
+                    0.251,
+                    0.749,
+                    0.251
+                ],
+                [
+                    0.2549,
+                    0.7451,
+                    0.2549
+                ],
+                [
+                    0.2588,
+                    0.7412,
+                    0.2588
+                ],
+                [
+                    0.2627,
+                    0.7373,
+                    0.2627
+                ],
+                [
+                    0.2667,
+                    0.7333,
+                    0.2667
+                ],
+                [
+                    0.2706,
+                    0.7294,
+                    0.2706
+                ],
+                [
+                    0.2745,
+                    0.7255,
+                    0.2745
+                ],
+                [
+                    0.2784,
+                    0.7216,
+                    0.2784
+                ],
+                [
+                    0.2824,
+                    0.7176,
+                    0.2824
+                ],
+                [
+                    0.2863,
+                    0.7137,
+                    0.2863
+                ],
+                [
+                    0.2902,
+                    0.7098,
+                    0.2902
+                ],
+                [
+                    0.2941,
+                    0.7059,
+                    0.2941
+                ],
+                [
+                    0.298,
+                    0.702,
+                    0.298
+                ],
+                [
+                    0.302,
+                    0.698,
+                    0.302
+                ],
+                [
+                    0.3059,
+                    0.6941,
+                    0.3059
+                ],
+                [
+                    0.3098,
+                    0.6902,
+                    0.3098
+                ],
+                [
+                    0.3137,
+                    0.6863,
+                    0.3137
+                ],
+                [
+                    0.3176,
+                    0.6824,
+                    0.3176
+                ],
+                [
+                    0.3216,
+                    0.6784,
+                    0.3216
+                ],
+                [
+                    0.3255,
+                    0.6745,
+                    0.3255
+                ],
+                [
+                    0.3294,
+                    0.6706,
+                    0.3294
+                ],
+                [
+                    0.3333,
+                    0.6667,
+                    0.3333
+                ],
+                [
+                    0.3373,
+                    0.6627,
+                    0.3373
+                ],
+                [
+                    0.3412,
+                    0.6588,
+                    0.3412
+                ],
+                [
+                    0.3451,
+                    0.6549,
+                    0.3451
+                ],
+                [
+                    0.349,
+                    0.651,
+                    0.349
+                ],
+                [
+                    0.3529,
+                    0.6471,
+                    0.3529
+                ],
+                [
+                    0.3569,
+                    0.6431,
+                    0.3569
+                ],
+                [
+                    0.3608,
+                    0.6392,
+                    0.3608
+                ],
+                [
+                    0.3647,
+                    0.6353,
+                    0.3647
+                ],
+                [
+                    0.3686,
+                    0.6314,
+                    0.3686
+                ],
+                [
+                    0.3725,
+                    0.6275,
+                    0.3725
+                ],
+                [
+                    0.3765,
+                    0.6235,
+                    0.3765
+                ],
+                [
+                    0.3804,
+                    0.6196,
+                    0.3804
+                ],
+                [
+                    0.3843,
+                    0.6157,
+                    0.3843
+                ],
+                [
+                    0.3882,
+                    0.6118,
+                    0.3882
+                ],
+                [
+                    0.3922,
+                    0.6078,
+                    0.3922
+                ],
+                [
+                    0.3961,
+                    0.6039,
+                    0.3961
+                ],
+                [
+                    0.4,
+                    0.6,
+                    0.4
+                ],
+                [
+                    0.4039,
+                    0.5961,
+                    0.4039
+                ],
+                [
+                    0.4078,
+                    0.5922,
+                    0.4078
+                ],
+                [
+                    0.4118,
+                    0.5882,
+                    0.4118
+                ],
+                [
+                    0.4157,
+                    0.5843,
+                    0.4157
+                ],
+                [
+                    0.4196,
+                    0.5804,
+                    0.4196
+                ],
+                [
+                    0.4235,
+                    0.5765,
+                    0.4235
+                ],
+                [
+                    0.4275,
+                    0.5725,
+                    0.4275
+                ],
+                [
+                    0.4314,
+                    0.5686,
+                    0.4314
+                ],
+                [
+                    0.4353,
+                    0.5647,
+                    0.4353
+                ],
+                [
+                    0.4392,
+                    0.5608,
+                    0.4392
+                ],
+                [
+                    0.4431,
+                    0.5569,
+                    0.4431
+                ],
+                [
+                    0.4471,
+                    0.5529,
+                    0.4471
+                ],
+                [
+                    0.451,
+                    0.549,
+                    0.451
+                ],
+                [
+                    0.4549,
+                    0.5451,
+                    0.4549
+                ],
+                [
+                    0.4588,
+                    0.5412,
+                    0.4588
+                ],
+                [
+                    0.4627,
+                    0.5373,
+                    0.4627
+                ],
+                [
+                    0.4667,
+                    0.5333,
+                    0.4667
+                ],
+                [
+                    0.4706,
+                    0.5294,
+                    0.4706
+                ],
+                [
+                    0.4745,
+                    0.5255,
+                    0.4745
+                ],
+                [
+                    0.4784,
+                    0.5216,
+                    0.4784
+                ],
+                [
+                    0.4824,
+                    0.5176,
+                    0.4824
+                ],
+                [
+                    0.4863,
+                    0.5137,
+                    0.4863
+                ],
+                [
+                    0.4902,
+                    0.5098,
+                    0.4902
+                ],
+                [
+                    0.4941,
+                    0.5059,
+                    0.4941
+                ],
+                [
+                    0.498,
+                    0.502,
+                    0.498
+                ],
+                [
+                    0.502,
+                    0.498,
+                    0.502
+                ],
+                [
+                    0.5059,
+                    0.4941,
+                    0.5059
+                ],
+                [
+                    0.5098,
+                    0.4902,
+                    0.5098
+                ],
+                [
+                    0.5137,
+                    0.4863,
+                    0.5137
+                ],
+                [
+                    0.5176,
+                    0.4824,
+                    0.5176
+                ],
+                [
+                    0.5216,
+                    0.4784,
+                    0.5216
+                ],
+                [
+                    0.5255,
+                    0.4745,
+                    0.5255
+                ],
+                [
+                    0.5294,
+                    0.4706,
+                    0.5294
+                ],
+                [
+                    0.5333,
+                    0.4667,
+                    0.5333
+                ],
+                [
+                    0.5373,
+                    0.4627,
+                    0.5373
+                ],
+                [
+                    0.5412,
+                    0.4588,
+                    0.5412
+                ],
+                [
+                    0.5451,
+                    0.4549,
+                    0.5451
+                ],
+                [
+                    0.549,
+                    0.451,
+                    0.549
+                ],
+                [
+                    0.5529,
+                    0.4471,
+                    0.5529
+                ],
+                [
+                    0.5569,
+                    0.4431,
+                    0.5569
+                ],
+                [
+                    0.5608,
+                    0.4392,
+                    0.5608
+                ],
+                [
+                    0.5647,
+                    0.4353,
+                    0.5647
+                ],
+                [
+                    0.5686,
+                    0.4314,
+                    0.5686
+                ],
+                [
+                    0.5725,
+                    0.4275,
+                    0.5725
+                ],
+                [
+                    0.5765,
+                    0.4235,
+                    0.5765
+                ],
+                [
+                    0.5804,
+                    0.4196,
+                    0.5804
+                ],
+                [
+                    0.5843,
+                    0.4157,
+                    0.5843
+                ],
+                [
+                    0.5882,
+                    0.4118,
+                    0.5882
+                ],
+                [
+                    0.5922,
+                    0.4078,
+                    0.5922
+                ],
+                [
+                    0.5961,
+                    0.4039,
+                    0.5961
+                ],
+                [
+                    0.6,
+                    0.4,
+                    0.6
+                ],
+                [
+                    0.6039,
+                    0.3961,
+                    0.6039
+                ],
+                [
+                    0.6078,
+                    0.3922,
+                    0.6078
+                ],
+                [
+                    0.6118,
+                    0.3882,
+                    0.6118
+                ],
+                [
+                    0.6157,
+                    0.3843,
+                    0.6157
+                ],
+                [
+                    0.6196,
+                    0.3804,
+                    0.6196
+                ],
+                [
+                    0.6235,
+                    0.3765,
+                    0.6235
+                ],
+                [
+                    0.6275,
+                    0.3725,
+                    0.6275
+                ],
+                [
+                    0.6314,
+                    0.3686,
+                    0.6314
+                ],
+                [
+                    0.6353,
+                    0.3647,
+                    0.6353
+                ],
+                [
+                    0.6392,
+                    0.3608,
+                    0.6392
+                ],
+                [
+                    0.6431,
+                    0.3569,
+                    0.6431
+                ],
+                [
+                    0.6471,
+                    0.3529,
+                    0.6471
+                ],
+                [
+                    0.651,
+                    0.349,
+                    0.651
+                ],
+                [
+                    0.6549,
+                    0.3451,
+                    0.6549
+                ],
+                [
+                    0.6588,
+                    0.3412,
+                    0.6588
+                ],
+                [
+                    0.6627,
+                    0.3373,
+                    0.6627
+                ],
+                [
+                    0.6667,
+                    0.3333,
+                    0.6667
+                ],
+                [
+                    0.6706,
+                    0.3294,
+                    0.6706
+                ],
+                [
+                    0.6745,
+                    0.3255,
+                    0.6745
+                ],
+                [
+                    0.6784,
+                    0.3216,
+                    0.6784
+                ],
+                [
+                    0.6824,
+                    0.3176,
+                    0.6824
+                ],
+                [
+                    0.6863,
+                    0.3137,
+                    0.6863
+                ],
+                [
+                    0.6902,
+                    0.3098,
+                    0.6902
+                ],
+                [
+                    0.6941,
+                    0.3059,
+                    0.6941
+                ],
+                [
+                    0.698,
+                    0.302,
+                    0.698
+                ],
+                [
+                    0.702,
+                    0.298,
+                    0.702
+                ],
+                [
+                    0.7059,
+                    0.2941,
+                    0.7059
+                ],
+                [
+                    0.7098,
+                    0.2902,
+                    0.7098
+                ],
+                [
+                    0.7137,
+                    0.2863,
+                    0.7137
+                ],
+                [
+                    0.7176,
+                    0.2824,
+                    0.7176
+                ],
+                [
+                    0.7216,
+                    0.2784,
+                    0.7216
+                ],
+                [
+                    0.7255,
+                    0.2745,
+                    0.7255
+                ],
+                [
+                    0.7294,
+                    0.2706,
+                    0.7294
+                ],
+                [
+                    0.7333,
+                    0.2667,
+                    0.7333
+                ],
+                [
+                    0.7373,
+                    0.2627,
+                    0.7373
+                ],
+                [
+                    0.7412,
+                    0.2588,
+                    0.7412
+                ],
+                [
+                    0.7451,
+                    0.2549,
+                    0.7451
+                ],
+                [
+                    0.749,
+                    0.251,
+                    0.749
+                ],
+                [
+                    0.7529,
+                    0.2471,
+                    0.7529
+                ],
+                [
+                    0.7569,
+                    0.2431,
+                    0.7569
+                ],
+                [
+                    0.7608,
+                    0.2392,
+                    0.7608
+                ],
+                [
+                    0.7647,
+                    0.2353,
+                    0.7647
+                ],
+                [
+                    0.7686,
+                    0.2314,
+                    0.7686
+                ],
+                [
+                    0.7725,
+                    0.2275,
+                    0.7725
+                ],
+                [
+                    0.7765,
+                    0.2235,
+                    0.7765
+                ],
+                [
+                    0.7804,
+                    0.2196,
+                    0.7804
+                ],
+                [
+                    0.7843,
+                    0.2157,
+                    0.7843
+                ],
+                [
+                    0.7882,
+                    0.2118,
+                    0.7882
+                ],
+                [
+                    0.7922,
+                    0.2078,
+                    0.7922
+                ],
+                [
+                    0.7961,
+                    0.2039,
+                    0.7961
+                ],
+                [
+                    0.8,
+                    0.2,
+                    0.8
+                ],
+                [
+                    0.8039,
+                    0.1961,
+                    0.8039
+                ],
+                [
+                    0.8078,
+                    0.1922,
+                    0.8078
+                ],
+                [
+                    0.8118,
+                    0.1882,
+                    0.8118
+                ],
+                [
+                    0.8157,
+                    0.1843,
+                    0.8157
+                ],
+                [
+                    0.8196,
+                    0.1804,
+                    0.8196
+                ],
+                [
+                    0.8235,
+                    0.1765,
+                    0.8235
+                ],
+                [
+                    0.8275,
+                    0.1725,
+                    0.8275
+                ],
+                [
+                    0.8314,
+                    0.1686,
+                    0.8314
+                ],
+                [
+                    0.8353,
+                    0.1647,
+                    0.8353
+                ],
+                [
+                    0.8392,
+                    0.1608,
+                    0.8392
+                ],
+                [
+                    0.8431,
+                    0.1569,
+                    0.8431
+                ],
+                [
+                    0.8471,
+                    0.1529,
+                    0.8471
+                ],
+                [
+                    0.851,
+                    0.149,
+                    0.851
+                ],
+                [
+                    0.8549,
+                    0.1451,
+                    0.8549
+                ],
+                [
+                    0.8588,
+                    0.1412,
+                    0.8588
+                ],
+                [
+                    0.8627,
+                    0.1373,
+                    0.8627
+                ],
+                [
+                    0.8667,
+                    0.1333,
+                    0.8667
+                ],
+                [
+                    0.8706,
+                    0.1294,
+                    0.8706
+                ],
+                [
+                    0.8745,
+                    0.1255,
+                    0.8745
+                ],
+                [
+                    0.8784,
+                    0.1216,
+                    0.8784
+                ],
+                [
+                    0.8824,
+                    0.1176,
+                    0.8824
+                ],
+                [
+                    0.8863,
+                    0.1137,
+                    0.8863
+                ],
+                [
+                    0.8902,
+                    0.1098,
+                    0.8902
+                ],
+                [
+                    0.8941,
+                    0.1059,
+                    0.8941
+                ],
+                [
+                    0.898,
+                    0.102,
+                    0.898
+                ],
+                [
+                    0.902,
+                    0.098,
+                    0.902
+                ],
+                [
+                    0.9059,
+                    0.0941,
+                    0.9059
+                ],
+                [
+                    0.9098,
+                    0.0902,
+                    0.9098
+                ],
+                [
+                    0.9137,
+                    0.0863,
+                    0.9137
+                ],
+                [
+                    0.9176,
+                    0.0824,
+                    0.9176
+                ],
+                [
+                    0.9216,
+                    0.0784,
+                    0.9216
+                ],
+                [
+                    0.9255,
+                    0.0745,
+                    0.9255
+                ],
+                [
+                    0.9294,
+                    0.0706,
+                    0.9294
+                ],
+                [
+                    0.9333,
+                    0.0667,
+                    0.9333
+                ],
+                [
+                    0.9373,
+                    0.0627,
+                    0.9373
+                ],
+                [
+                    0.9412,
+                    0.0588,
+                    0.9412
+                ],
+                [
+                    0.9451,
+                    0.0549,
+                    0.9451
+                ],
+                [
+                    0.949,
+                    0.051,
+                    0.949
+                ],
+                [
+                    0.9529,
+                    0.0471,
+                    0.9529
+                ],
+                [
+                    0.9569,
+                    0.0431,
+                    0.9569
+                ],
+                [
+                    0.9608,
+                    0.0392,
+                    0.9608
+                ],
+                [
+                    0.9647,
+                    0.0353,
+                    0.9647
+                ],
+                [
+                    0.9686,
+                    0.0314,
+                    0.9686
+                ],
+                [
+                    0.9725,
+                    0.0275,
+                    0.9725
+                ],
+                [
+                    0.9765,
+                    0.0235,
+                    0.9765
+                ],
+                [
+                    0.9804,
+                    0.0196,
+                    0.9804
+                ],
+                [
+                    0.9843,
+                    0.0157,
+                    0.9843
+                ],
+                [
+                    0.9882,
+                    0.0118,
+                    0.9882
+                ],
+                [
+                    0.9922,
+                    0.0078,
+                    0.9922
+                ],
+                [
+                    0.9961,
+                    0.0039,
+                    0.9961
+                ],
+                [
+                    1.0,
+                    0.0,
+                    1.0
+                ]
+            ],
+            "notes": "All 256 channel values in one row, both directions: the full table a port needs for round(x / 255, 4)."
+        },
+        {
+            "id": "0042-number-format-0-0",
+            "title": "number_format(0, 0)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 0,
+                "decimals": 0
+            },
+            "expected": "0"
+        },
+        {
+            "id": "0043-number-format-1234567-0",
+            "title": "number_format(1234567, 0)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 1234567,
+                "decimals": 0
+            },
+            "expected": "1,234,567"
+        },
+        {
+            "id": "0044-number-format-1234567p891-2",
+            "title": "number_format(1234567.891, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 1234567.891,
+                "decimals": 2
+            },
+            "expected": "1,234,567.89"
+        },
+        {
+            "id": "0045-number-format-2p675-2",
+            "title": "number_format(2.675, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 2.675,
+                "decimals": 2
+            },
+            "expected": "2.68"
+        },
+        {
+            "id": "0046-number-format-1p005-2",
+            "title": "number_format(1.005, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 1.005,
+                "decimals": 2
+            },
+            "expected": "1.01"
+        },
+        {
+            "id": "0047-number-format-0p5-0",
+            "title": "number_format(0.5, 0)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 0.5,
+                "decimals": 0
+            },
+            "expected": "1"
+        },
+        {
+            "id": "0048-number-format-1p5-0",
+            "title": "number_format(1.5, 0)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 1.5,
+                "decimals": 0
+            },
+            "expected": "2"
+        },
+        {
+            "id": "0049-number-format-2p5-0",
+            "title": "number_format(2.5, 0)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 2.5,
+                "decimals": 0
+            },
+            "expected": "3"
+        },
+        {
+            "id": "0050-number-format-m0p5-0",
+            "title": "number_format(-0.5, 0)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": -0.5,
+                "decimals": 0
+            },
+            "expected": "-1"
+        },
+        {
+            "id": "0051-number-format-m0p004-2",
+            "title": "number_format(-0.004, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": -0.004,
+                "decimals": 2
+            },
+            "expected": "0.00"
+        },
+        {
+            "id": "0052-number-format-m1234p5-2",
+            "title": "number_format(-1234.5, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": -1234.5,
+                "decimals": 2
+            },
+            "expected": "-1,234.50"
+        },
+        {
+            "id": "0053-number-format-1000000000000000-2",
+            "title": "number_format(1.0E+15, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 1000000000000000.0,
+                "decimals": 2
+            },
+            "expected": "1,000,000,000,000,000.00"
+        },
+        {
+            "id": "0054-number-format-0p045-2",
+            "title": "number_format(0.045, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 0.045,
+                "decimals": 2
+            },
+            "expected": "0.05"
+        },
+        {
+            "id": "0055-number-format-1p255-2",
+            "title": "number_format(1.255, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 1.255,
+                "decimals": 2
+            },
+            "expected": "1.26"
+        },
+        {
+            "id": "0056-number-format-34566-2",
+            "title": "number_format(34566, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 34566.0,
+                "decimals": 2
+            },
+            "expected": "34,566.00"
+        },
+        {
+            "id": "0057-number-format-35800p5-2",
+            "title": "number_format(35800.5, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 35800.5,
+                "decimals": 2
+            },
+            "expected": "35,800.50"
+        },
+        {
+            "id": "0058-number-format-99p995-2",
+            "title": "number_format(99.995, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": 99.995,
+                "decimals": 2
+            },
+            "expected": "100.00"
+        },
+        {
+            "id": "0059-number-format-m99p995-2",
+            "title": "number_format(-99.995, 2)",
+            "since": "0.38.0",
+            "tags": [
+                "number-format"
+            ],
+            "fn": "numberFormat",
+            "input": {
+                "value": -99.995,
+                "decimals": 2
+            },
+            "expected": "-100.00"
+        },
+        {
+            "id": "0060-text-ascii",
+            "title": "Syntax::text of ascii bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "TWVtbw=="
+            },
+            "expected": "<FEFF004D0065006D006F>"
+        },
+        {
+            "id": "0061-text-latin",
+            "title": "Syntax::text of latin bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "Q2Fmw6k="
+            },
+            "expected": "<FEFF00430061006600E9>"
+        },
+        {
+            "id": "0062-text-astral",
+            "title": "Syntax::text of astral bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "c21pbGUg8J+YgA=="
+            },
+            "expected": "<FEFF0073006D0069006C00650020D83DDE00>"
+        },
+        {
+            "id": "0063-text-controls-dropped",
+            "title": "Syntax::text of controls-dropped bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "YQBiB2MJZAplG2Z/Zw=="
+            },
+            "expected": "<FEFF00610062006300090064000A006500660067>"
+        },
+        {
+            "id": "0064-text-bad-lead",
+            "title": "Syntax::text of bad-lead bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "wyg="
+            },
+            "expected": "<FEFF003F0028>"
+        },
+        {
+            "id": "0065-text-truncated",
+            "title": "Syntax::text of truncated bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "b2vigg=="
+            },
+            "expected": "<FEFF006F006B003F>"
+        },
+        {
+            "id": "0066-text-overlong",
+            "title": "Syntax::text of overlong bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "wK8="
+            },
+            "expected": "<FEFF003F003F>"
+        },
+        {
+            "id": "0067-text-surrogate",
+            "title": "Syntax::text of surrogate bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "7aCA"
+            },
+            "expected": "<FEFF003F003F003F>"
+        },
+        {
+            "id": "0068-text-above-max",
+            "title": "Syntax::text of above-max bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "9JCAgA=="
+            },
+            "expected": "<FEFF003F003F003F003F>"
+        },
+        {
+            "id": "0069-text-lone-continuation",
+            "title": "Syntax::text of lone-continuation bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "YYBi"
+            },
+            "expected": "<FEFF0061003F0062>"
+        },
+        {
+            "id": "0070-text-bom-in-text",
+            "title": "Syntax::text of bom-in-text bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "77u/eA=="
+            },
+            "expected": "<FEFFFEFF0078>"
+        },
+        {
+            "id": "0071-text-hostile",
+            "title": "Syntax::text of hostile bytes",
+            "since": "0.38.0",
+            "tags": [
+                "text"
+            ],
+            "fn": "text",
+            "input": {
+                "utf8Base64": "KSA+PiAvT3BlbkFjdGlvbiA8PCAvUyAvSmF2YVNjcmlwdCAvSlMgKGFwcC5hbGVydCgxKSkgPj4gL0FBIDw8ID4+ICg="
+            },
+            "expected": "<FEFF00290020003E003E0020002F004F00700065006E0041006300740069006F006E0020003C003C0020002F00530020002F004A0061007600610053006300720069007000740020002F004A005300200028006100700070002E0061006C00650072007400280031002900290020003E003E0020002F004100410020003C003C0020003E003E00200028>"
+        },
+        {
+            "id": "0072-name-plain",
+            "title": "Syntax::name of plain",
+            "since": "0.38.0",
+            "tags": [
+                "name"
+            ],
+            "fn": "name",
+            "input": {
+                "bytesBase64": "SGVsdmV0aWNh"
+            },
+            "expected": "/Helvetica"
+        },
+        {
+            "id": "0073-name-space",
+            "title": "Syntax::name of space",
+            "since": "0.38.0",
+            "tags": [
+                "name"
+            ],
+            "fn": "name",
+            "input": {
+                "bytesBase64": "Rm9vIEJhcg=="
+            },
+            "expected": "/Foo#20Bar"
+        },
+        {
+            "id": "0074-name-hash",
+            "title": "Syntax::name of hash",
+            "since": "0.38.0",
+            "tags": [
+                "name"
+            ],
+            "fn": "name",
+            "input": {
+                "bytesBase64": "QSNC"
+            },
+            "expected": "/A#23B"
+        },
+        {
+            "id": "0075-name-delimiters",
+            "title": "Syntax::name of delimiters",
+            "since": "0.38.0",
+            "tags": [
+                "name"
+            ],
+            "fn": "name",
+            "input": {
+                "bytesBase64": "KHgpPHk+W3pde3d9LyU="
+            },
+            "expected": "/#28x#29#3Cy#3E#5Bz#5D#7Bw#7D#2F#25"
+        },
+        {
+            "id": "0076-name-high-bytes",
+            "title": "Syntax::name of high-bytes",
+            "since": "0.38.0",
+            "tags": [
+                "name"
+            ],
+            "fn": "name",
+            "input": {
+                "bytesBase64": "w6kA/w=="
+            },
+            "expected": "/#C3#A9#00#FF"
+        },
+        {
+            "id": "0077-name-empty",
+            "title": "Syntax::name of empty",
+            "since": "0.38.0",
+            "tags": [
+                "name"
+            ],
+            "fn": "name",
+            "input": {
+                "bytesBase64": ""
+            },
+            "expected": "/"
+        },
+        {
+            "id": "0078-valid-utf8-valid",
+            "title": "Syntax::validUtf8 of valid",
+            "since": "0.38.0",
+            "tags": [
+                "utf8"
+            ],
+            "fn": "validUtf8",
+            "input": {
+                "bytesBase64": "Q2Fmw6kg8J+YgA=="
+            },
+            "expected": "Q2Fmw6kg8J+YgA==",
+            "notes": "mb_convert_encoding substitutes \"?\" (not U+FFFD) for each bad sequence; how many \"?\" a sequence becomes is the contract."
+        },
+        {
+            "id": "0079-valid-utf8-bad-lead",
+            "title": "Syntax::validUtf8 of bad-lead",
+            "since": "0.38.0",
+            "tags": [
+                "utf8"
+            ],
+            "fn": "validUtf8",
+            "input": {
+                "bytesBase64": "wyg="
+            },
+            "expected": "Pyg=",
+            "notes": "mb_convert_encoding substitutes \"?\" (not U+FFFD) for each bad sequence; how many \"?\" a sequence becomes is the contract."
+        },
+        {
+            "id": "0080-valid-utf8-truncated",
+            "title": "Syntax::validUtf8 of truncated",
+            "since": "0.38.0",
+            "tags": [
+                "utf8"
+            ],
+            "fn": "validUtf8",
+            "input": {
+                "bytesBase64": "b2vigg=="
+            },
+            "expected": "b2s/",
+            "notes": "mb_convert_encoding substitutes \"?\" (not U+FFFD) for each bad sequence; how many \"?\" a sequence becomes is the contract."
+        },
+        {
+            "id": "0081-valid-utf8-overlong",
+            "title": "Syntax::validUtf8 of overlong",
+            "since": "0.38.0",
+            "tags": [
+                "utf8"
+            ],
+            "fn": "validUtf8",
+            "input": {
+                "bytesBase64": "wK8="
+            },
+            "expected": "Pz8=",
+            "notes": "mb_convert_encoding substitutes \"?\" (not U+FFFD) for each bad sequence; how many \"?\" a sequence becomes is the contract."
+        },
+        {
+            "id": "0082-valid-utf8-surrogate",
+            "title": "Syntax::validUtf8 of surrogate",
+            "since": "0.38.0",
+            "tags": [
+                "utf8"
+            ],
+            "fn": "validUtf8",
+            "input": {
+                "bytesBase64": "7aCA"
+            },
+            "expected": "Pz8/",
+            "notes": "mb_convert_encoding substitutes \"?\" (not U+FFFD) for each bad sequence; how many \"?\" a sequence becomes is the contract."
+        },
+        {
+            "id": "0083-valid-utf8-mixed",
+            "title": "Syntax::validUtf8 of mixed",
+            "since": "0.38.0",
+            "tags": [
+                "utf8"
+            ],
+            "fn": "validUtf8",
+            "input": {
+                "bytesBase64": "Yf9iw6ljgA=="
+            },
+            "expected": "YT9iw6ljPw==",
+            "notes": "mb_convert_encoding substitutes \"?\" (not U+FFFD) for each bad sequence; how many \"?\" a sequence becomes is the contract."
+        },
+        {
+            "id": "0084-win-ansi-ascii",
+            "title": "WinAnsi encoding of ascii",
+            "since": "0.38.0",
+            "tags": [
+                "win-ansi"
+            ],
+            "fn": "winAnsi",
+            "input": {
+                "text": "Hello, world!"
+            },
+            "expected": "48656c6c6f2c20776f726c6421",
+            "notes": "The standard fonts' encoder: WinAnsiEncoding by table (never a platform cp1252 codec), the FOLD map, then \"?\" for anything else."
+        },
+        {
+            "id": "0085-win-ansi-latin1",
+            "title": "WinAnsi encoding of latin1",
+            "since": "0.38.0",
+            "tags": [
+                "win-ansi"
+            ],
+            "fn": "winAnsi",
+            "input": {
+                "text": "Café über ñ"
+            },
+            "expected": "436166e920fc62657220f1",
+            "notes": "The standard fonts' encoder: WinAnsiEncoding by table (never a platform cp1252 codec), the FOLD map, then \"?\" for anything else."
+        },
+        {
+            "id": "0086-win-ansi-cp1252-extras",
+            "title": "WinAnsi encoding of cp1252-extras",
+            "since": "0.38.0",
+            "tags": [
+                "win-ansi"
+            ],
+            "fn": "winAnsi",
+            "input": {
+                "text": "€ “q” • – — ™ Œ"
+            },
+            "expected": "80209371942095209620972099208c",
+            "notes": "The standard fonts' encoder: WinAnsiEncoding by table (never a platform cp1252 codec), the FOLD map, then \"?\" for anything else."
+        },
+        {
+            "id": "0087-win-ansi-folded",
+            "title": "WinAnsi encoding of folded",
+            "since": "0.38.0",
+            "tags": [
+                "win-ansi"
+            ],
+            "fn": "winAnsi",
+            "input": {
+                "text": "a‐b‑c−d e f g h"
+            },
+            "expected": "612d622d632d64206520662067a068",
+            "notes": "The standard fonts' encoder: WinAnsiEncoding by table (never a platform cp1252 codec), the FOLD map, then \"?\" for anything else."
+        },
+        {
+            "id": "0088-win-ansi-nbsp-soft-hyphen",
+            "title": "WinAnsi encoding of nbsp-soft-hyphen",
+            "since": "0.38.0",
+            "tags": [
+                "win-ansi"
+            ],
+            "fn": "winAnsi",
+            "input": {
+                "text": "a b­c"
+            },
+            "expected": "61a0622d63",
+            "notes": "The standard fonts' encoder: WinAnsiEncoding by table (never a platform cp1252 codec), the FOLD map, then \"?\" for anything else."
+        },
+        {
+            "id": "0089-win-ansi-unencodable",
+            "title": "WinAnsi encoding of unencodable",
+            "since": "0.38.0",
+            "tags": [
+                "win-ansi"
+            ],
+            "fn": "winAnsi",
+            "input": {
+                "text": "Ж α 中 😀"
+            },
+            "expected": "3f203f203f203f",
+            "notes": "The standard fonts' encoder: WinAnsiEncoding by table (never a platform cp1252 codec), the FOLD map, then \"?\" for anything else."
+        },
+        {
+            "id": "0090-win-ansi-controls",
+            "title": "WinAnsi encoding of controls",
+            "since": "0.38.0",
+            "tags": [
+                "win-ansi"
+            ],
+            "fn": "winAnsi",
+            "input": {
+                "text": "a\tb"
+            },
+            "expected": "613f62",
+            "notes": "The standard fonts' encoder: WinAnsiEncoding by table (never a platform cp1252 codec), the FOLD map, then \"?\" for anything else."
+        }
+    ]
+}
