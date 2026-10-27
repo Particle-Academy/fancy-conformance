@@ -1413,6 +1413,814 @@
         }
       },
       "notes": ""
+    },
+    {
+      "id": "0016-value-splices-one-copy-per-element",
+      "title": "A $value splice is replaced in place by one rendered copy of $value per element",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  [
+                    "Name"
+                  ],
+                  {
+                    "$each": "people",
+                    "$value": [
+                      "{{ item.name }}"
+                    ]
+                  },
+                  [
+                    "End"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  "Name"
+                ],
+                [
+                  {
+                    "value": "Ada"
+                  }
+                ],
+                [
+                  {
+                    "value": "Charles"
+                  }
+                ],
+                [
+                  {
+                    "value": "Mary"
+                  }
+                ],
+                [
+                  "End"
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The splice exists because a holy-sheet row is an ARRAY and a directive sits only on an object, so before it a row could not repeat. The splice object itself is not output."
+    },
+    {
+      "id": "0017-value-any-json-falsy-values-are-copied",
+      "title": "$value may be any JSON value: 0, false and null are copied, not treated as missing",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  [
+                    {
+                      "$each": "people",
+                      "$value": 0
+                    },
+                    {
+                      "$each": "people",
+                      "$value": false
+                    },
+                    {
+                      "$each": "people",
+                      "$value": null
+                    }
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "A"
+            },
+            {
+              "name": "B"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  0,
+                  0,
+                  false,
+                  false,
+                  null,
+                  null
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Catches an implementation that tests `$value` for truthiness or uses an isset-style check: null is a value here (an empty cell)."
+    },
+    {
+      "id": "0018-value-empty-array-produces-nothing",
+      "title": "A splice over an empty array produces nothing",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  [
+                    "Name"
+                  ],
+                  {
+                    "$each": "people",
+                    "$value": [
+                      "{{ item.name }}"
+                    ]
+                  },
+                  [
+                    "End"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": []
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  "Name"
+                ],
+                [
+                  "End"
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Present and empty is not absent: no error, as for $each (0006)."
+    },
+    {
+      "id": "0019-value-with-if-per-element",
+      "title": "$if on a splice is evaluated once per element, as with $each",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "people",
+                    "$if": "item.score >= 50",
+                    "$value": [
+                      "{{ item.name }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  {
+                    "value": "Ada"
+                  }
+                ],
+                [
+                  {
+                    "value": "Mary"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0020-value-key-order-does-not-matter",
+      "title": "$value and $if written before $each behave exactly as written after it",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$value": [
+                      "{{ item.name }}"
+                    ],
+                    "$if": "item.score >= 50",
+                    "$each": "people"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  {
+                    "value": "Ada"
+                  }
+                ],
+                [
+                  {
+                    "value": "Mary"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "JSON key order is not something an author should have to get right (SPEC 8). Catches an inspector that only creates the binding when it reaches $each."
+    },
+    {
+      "id": "0021-value-may-be-an-object",
+      "title": "$value may be an object: the splice then behaves like an object $each",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Before"
+                  }
+                ]
+              },
+              {
+                "$each": "people",
+                "$value": {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "{{ item.name }}"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Before"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Charles"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Mary"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The same output as 0001, written the other way. The object is matched by the element's path, blocks.*, so its runs are text fields."
+    },
+    {
+      "id": "0022-value-contains-directives",
+      "title": "$value may contain directives: a splice inside a splice, inner $index winning",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "rows",
+                    "$as": "row",
+                    "$value": [
+                      {
+                        "$each": "row",
+                        "$as": "cell",
+                        "$value": "{{ $index }}{{ cell }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "rows": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "c"
+            ]
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  {
+                    "value": "0a"
+                  },
+                  {
+                    "value": "1b"
+                  }
+                ],
+                [
+                  {
+                    "value": "0c"
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "SPEC 8 decision: arrays inside $value take directive elements and splices like any other array, under the same limits.directiveDepth (limits 0028/0029)."
+    },
+    {
+      "id": "0023-value-over-an-absent-array-is-missing",
+      "title": "A splice over an absent optional array is TEMPLATE_MISSING at its $each",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "people",
+                    "$value": [
+                      "{{ item.name }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {}
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_MISSING",
+        "path": "/document/sheets/0/rows/0/$each"
+      },
+      "notes": "As for $each (0008): rendering nothing would be the silent-empty outcome."
+    },
+    {
+      "id": "0024-value-error-path-points-into-value",
+      "title": "An error inside a spliced value is reported at its template path, through $value",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "people",
+                    "$value": [
+                      "{{ item.name }}",
+                      "{{ item.score }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 1
+            },
+            {
+              "name": "Charles"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_MISSING",
+        "path": "/document/sheets/0/rows/0/$value/1"
+      },
+      "notes": "A JSON Pointer into the TEMPLATE (SPEC 6), never an index into the expanded output: the second copy fails, and its path is the one cell the author wrote."
     }
   ]
 }

@@ -10,8 +10,40 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-10-27
+
+**What a consumer must do.** fancy-template moves its pin with the fix for each
+item below; nobody else runs `template/*`. A `shared/strings` runner must take
+dark-slide's backslash-escape fix with this pin (first entry under Added).
+
 ### Added
 
+- **`template/*`: the `$value` splice, 23 rows** (owner ruling 2026-10-27,
+  "Agent: add $value splice"). `{"$each": "<path>", "$as": "<name>", "$value":
+  <any JSON>}` may stand as an item of any array and is replaced in place by one
+  rendered copy of `$value` per element, so a holy-sheet ROW, a cell or a string
+  in a list can now repeat; before it, a directive could only sit on an object.
+  Specified in fancy-template `SPEC.md` section 8.
+  - `template/directives` 0016-0024: one copy per element, `0`/`false`/`null`
+    copied rather than read as missing, empty array produces nothing, `$if` per
+    element and in any key order, `$value` as an object, a splice inside
+    `$value` (directives are allowed there, under the same nesting bound), an
+    absent array, and an error path that points through `$value` into the
+    template.
+  - `template/limits` 0023-0029: the same bounds as `$each` -- iterations (at,
+    over, and shared with every other loop), output nodes (at and over: the
+    splice object itself counts nothing), and `directiveDepth` (8 nested
+    splices render, 9 do not).
+  - `template/inspect` 0022-0025: `$value` without `$each` is
+    `DIRECTIVE_INVALID` at `$value` (as `$as` without `$each` is); a key not
+    starting with `$` beside `$value` is the new code `DIRECTIVE_SPLICE_KEY`;
+    the issue order of a splice; a `$`-key on the top of `$value` is
+    `DIRECTIVE_MISPLACED`; and the profile matches `$value` at the ELEMENT's
+    path.
+  - `template/profiles` 0107 (a dark-slide list of strings), 0205 (one
+    holy-sheet row per invoice line: typed cells, and every string result --
+    including a hostile `=HYPERLINK(...)` -- still written `{value: s}`) and
+    0206 (a splice of cells inside a row).
 - **`shared/strings` 0009-0014: CommonMark backslash escapes.** A backslash
   before any ASCII punctuation character makes that character literal and is
   removed; before anything else (a letter, a space, non-ASCII, the end of the
@@ -25,6 +57,27 @@ promising otherwise until 1.0.
   their backslash-escape fix; an older engine fails 0009-0011, 0013 and 0014.
   Move the pin together with that fix. The suite manifest now also lists the
   Python implementation, which already ran these rows.
+
+### Changed
+
+- **BREAKING for fancy-template only: `template/profiles` 0104 now expects
+  dark-slide speaker notes as plain text** (owner ruling 2026-10-27, "Agent:
+  notes are plain"). It expected the markdown escape; dark-slide's PPTX writer
+  writes notes as plain text in all three of its languages and fancy-slides
+  edits them in a plain textarea, so the backslashes showed in both. Edited in
+  place: the id keeps its number AND its old slug
+  (`0104-dark-slide-notes-are-markdown`), because ids are never renumbered or
+  renamed; the title and notes state the current claim. fancy-template's
+  dark-slide profile changes `slides.*.notes` from `markdown` to `text` to
+  match.
+
+### Removed
+
+- **The 11 `skip.php` markers on the dark-slide and holy-sheet template rows**
+  (`template/profiles` 0101-0106 and 0201-0204, `template/inspect` 0021). They
+  were written before phase 6 built those profiles; fancy-template's PHP leg
+  passes every one, and ran them explicitly against 0.35.0 to prove it. No
+  `template/*` row is skipped for any language.
 
 ## [0.35.0] - 2026-10-27
 

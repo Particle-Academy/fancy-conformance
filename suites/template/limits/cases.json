@@ -11345,6 +11345,615 @@
         "path": "/document/blocks/0/$if"
       },
       "notes": "144 bytes, under the token-length limit, and 71 levels deep: fancy-expr's EXPR_TOO_DEEP, surfaced as the directive's code (expr/limits)."
+    },
+    {
+      "id": "0023-value-iterations-at-limit",
+      "title": "A splice over exactly limits.iterations elements renders",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "xs",
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        "options": {
+          "limits": {
+            "iterations": 5
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  1
+                ],
+                [
+                  2
+                ],
+                [
+                  3
+                ],
+                [
+                  4
+                ],
+                [
+                  5
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0024-value-iterations-over",
+      "title": "One more is RENDER_TOO_MANY_ITERATIONS at the splice's $each",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "xs",
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "options": {
+          "limits": {
+            "iterations": 5
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "RENDER_TOO_MANY_ITERATIONS",
+        "path": "/document/sheets/0/rows/0/$each"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0025-value-iterations-are-shared-with-every-loop",
+      "title": "Iterations are counted across every splice and $each together: 3 + 3 over a limit of 5",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "xs",
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  },
+                  {
+                    "$each": "xs",
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2,
+            3
+          ]
+        },
+        "options": {
+          "limits": {
+            "iterations": 5
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "RENDER_TOO_MANY_ITERATIONS",
+        "path": "/document/sheets/0/rows/1/$each"
+      },
+      "notes": "One counter per render, not one per loop: the first splice spends 3, the second fails on its third element."
+    },
+    {
+      "id": "0026-value-output-nodes-at-limit",
+      "title": "A spliced output of exactly limits.outputNodes values renders: the splice object counts nothing",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "xs",
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2
+          ]
+        },
+        "options": {
+          "limits": {
+            "outputNodes": 9
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  1
+                ],
+                [
+                  2
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "9 values, computed from SPEC 10 on the OUTPUT. An implementation that counted the splice object, or $value's own array once more, fails here."
+    },
+    {
+      "id": "0027-value-output-nodes-over",
+      "title": "One fewer allowed is RENDER_TOO_MANY_NODES",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "xs",
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2
+          ]
+        },
+        "options": {
+          "limits": {
+            "outputNodes": 8
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "RENDER_TOO_MANY_NODES",
+        "path": ""
+      },
+      "notes": "An implementation that did not count spliced copies at all passes 0026 and fails here."
+    },
+    {
+      "id": "0028-value-directive-depth-at-limit",
+      "title": "8 nested splices render",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "one": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "one",
+                "$value": {
+                  "type": "quote",
+                  "blocks": [
+                    {
+                      "$each": "one",
+                      "$value": {
+                        "type": "quote",
+                        "blocks": [
+                          {
+                            "$each": "one",
+                            "$value": {
+                              "type": "quote",
+                              "blocks": [
+                                {
+                                  "$each": "one",
+                                  "$value": {
+                                    "type": "quote",
+                                    "blocks": [
+                                      {
+                                        "$each": "one",
+                                        "$value": {
+                                          "type": "quote",
+                                          "blocks": [
+                                            {
+                                              "$each": "one",
+                                              "$value": {
+                                                "type": "quote",
+                                                "blocks": [
+                                                  {
+                                                    "$each": "one",
+                                                    "$value": {
+                                                      "type": "quote",
+                                                      "blocks": [
+                                                        {
+                                                          "$each": "one",
+                                                          "$value": {
+                                                            "type": "quote",
+                                                            "blocks": [
+                                                              {
+                                                                "type": "paragraph",
+                                                                "runs": [
+                                                                  {
+                                                                    "text": "deep"
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "data": {
+          "one": [
+            1
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "quote",
+              "blocks": [
+                {
+                  "type": "quote",
+                  "blocks": [
+                    {
+                      "type": "quote",
+                      "blocks": [
+                        {
+                          "type": "quote",
+                          "blocks": [
+                            {
+                              "type": "quote",
+                              "blocks": [
+                                {
+                                  "type": "quote",
+                                  "blocks": [
+                                    {
+                                      "type": "quote",
+                                      "blocks": [
+                                        {
+                                          "type": "quote",
+                                          "blocks": [
+                                            {
+                                              "type": "paragraph",
+                                              "runs": [
+                                                {
+                                                  "text": "deep"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Each splice is a directive object and counts one level, and a splice inside $value counts one more (SPEC 8: $value may contain directives, under the same bound)."
+    },
+    {
+      "id": "0029-value-directive-depth-over",
+      "title": "9 nested splices is DIRECTIVE_TOO_DEEP at the ninth",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "one": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "one",
+                "$value": {
+                  "type": "quote",
+                  "blocks": [
+                    {
+                      "$each": "one",
+                      "$value": {
+                        "type": "quote",
+                        "blocks": [
+                          {
+                            "$each": "one",
+                            "$value": {
+                              "type": "quote",
+                              "blocks": [
+                                {
+                                  "$each": "one",
+                                  "$value": {
+                                    "type": "quote",
+                                    "blocks": [
+                                      {
+                                        "$each": "one",
+                                        "$value": {
+                                          "type": "quote",
+                                          "blocks": [
+                                            {
+                                              "$each": "one",
+                                              "$value": {
+                                                "type": "quote",
+                                                "blocks": [
+                                                  {
+                                                    "$each": "one",
+                                                    "$value": {
+                                                      "type": "quote",
+                                                      "blocks": [
+                                                        {
+                                                          "$each": "one",
+                                                          "$value": {
+                                                            "type": "quote",
+                                                            "blocks": [
+                                                              {
+                                                                "$each": "one",
+                                                                "$value": {
+                                                                  "type": "quote",
+                                                                  "blocks": [
+                                                                    {
+                                                                      "type": "paragraph",
+                                                                      "runs": [
+                                                                        {
+                                                                          "text": "deep"
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        }
+                                                      ]
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "data": {
+          "one": [
+            1
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "DIRECTIVE_TOO_DEEP",
+        "path": "/document/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0"
+      },
+      "notes": "Without the bound a splice would be a way round the one $each has."
     }
   ]
 }

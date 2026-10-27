@@ -191,11 +191,12 @@ class Suite:
         notes: str,
         skip: dict[str, str] | None = None,
         tags: list[str] | None = None,
+        since: str = SINCE,
     ) -> None:
         row: dict[str, Any] = {
             "id": id_,
             "title": title,
-            "since": SINCE,
+            "since": since,
             "tags": tags or ["template", self.name.split("/")[1]],
             "fn": fn,
             "input": input_,
@@ -223,12 +224,8 @@ class Suite:
         self.add(id_, title, "render", inp, expected, notes, **kw)
 
 
-PHASE6_DS = {
-    "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-}
-PHASE6_HS = {
-    "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-}
+# Rows added for the `$value` splice and the plain-notes ruling (owner, 2026-10-27).
+SPLICE = "0.36.0"
 
 # ---------------------------------------------------------------------------
 # template/tokenize
@@ -1501,6 +1498,126 @@ def directives_suite() -> Suite:
         ok_doc(doc(para("Ada"), para("Mary"))),
         "",
     )
+
+    # -- the $value splice (0.36.0) -----------------------------------------
+    def rows_doc(*rows: Any) -> dict[str, Any]:
+        return {"sheets": [{"name": "S", "rows": list(rows)}]}
+
+    def hs_env(*rows: Any, vars_: Any = people) -> dict[str, Any]:
+        return env(rows_doc(*rows), vars_, writer="holy-sheet")
+
+    name_rows = {"$each": "people", "$value": ["{{ item.name }}"]}
+    s.render(
+        "0016-value-splices-one-copy-per-element",
+        "A $value splice is replaced in place by one rendered copy of $value per element",
+        hs_env(["Name"], name_rows, ["End"]),
+        data,
+        ok_doc(
+            rows_doc(
+                ["Name"],
+                [{"value": "Ada"}],
+                [{"value": "Charles"}],
+                [{"value": "Mary"}],
+                ["End"],
+            )
+        ),
+        "The splice exists because a holy-sheet row is an ARRAY and a directive sits only on an object, so before it a row could not repeat. The splice object itself is not output.",
+        since=SPLICE,
+    )
+    s.render(
+        "0017-value-any-json-falsy-values-are-copied",
+        "$value may be any JSON value: 0, false and null are copied, not treated as missing",
+        hs_env(
+            [
+                {"$each": "people", "$value": 0},
+                {"$each": "people", "$value": False},
+                {"$each": "people", "$value": None},
+            ]
+        ),
+        {"people": [{"name": "A"}, {"name": "B"}]},
+        ok_doc(rows_doc([0, 0, False, False, None, None])),
+        "Catches an implementation that tests `$value` for truthiness or uses an isset-style check: null is a value here (an empty cell).",
+        since=SPLICE,
+    )
+    s.render(
+        "0018-value-empty-array-produces-nothing",
+        "A splice over an empty array produces nothing",
+        hs_env(["Name"], name_rows, ["End"]),
+        {"people": []},
+        ok_doc(rows_doc(["Name"], ["End"])),
+        "Present and empty is not absent: no error, as for $each (0006).",
+        since=SPLICE,
+    )
+    s.render(
+        "0019-value-with-if-per-element",
+        "$if on a splice is evaluated once per element, as with $each",
+        hs_env({"$each": "people", "$if": "item.score >= 50", "$value": ["{{ item.name }}"]}),
+        data,
+        ok_doc(rows_doc([{"value": "Ada"}], [{"value": "Mary"}])),
+        "",
+        since=SPLICE,
+    )
+    s.render(
+        "0020-value-key-order-does-not-matter",
+        "$value and $if written before $each behave exactly as written after it",
+        hs_env({"$value": ["{{ item.name }}"], "$if": "item.score >= 50", "$each": "people"}),
+        data,
+        ok_doc(rows_doc([{"value": "Ada"}], [{"value": "Mary"}])),
+        "JSON key order is not something an author should have to get right (SPEC 8). Catches an inspector that only creates the binding when it reaches $each.",
+        since=SPLICE,
+    )
+    s.render(
+        "0021-value-may-be-an-object",
+        "$value may be an object: the splice then behaves like an object $each",
+        env(
+            doc(
+                para("Before"),
+                {
+                    "$each": "people",
+                    "$value": {"type": "paragraph", "runs": [{"text": "{{ item.name }}"}]},
+                },
+            ),
+            people,
+        ),
+        data,
+        ok_doc(doc(para("Before"), para("Ada"), para("Charles"), para("Mary"))),
+        "The same output as 0001, written the other way. The object is matched by the element's path, blocks.*, so its runs are text fields.",
+        since=SPLICE,
+    )
+    s.render(
+        "0022-value-contains-directives",
+        "$value may contain directives: a splice inside a splice, inner $index winning",
+        hs_env(
+            {
+                "$each": "rows",
+                "$as": "row",
+                "$value": [{"$each": "row", "$as": "cell", "$value": "{{ $index }}{{ cell }}"}],
+            },
+            vars_=grid,
+        ),
+        {"rows": [["a", "b"], ["c"]]},
+        ok_doc(rows_doc([{"value": "0a"}, {"value": "1b"}], [{"value": "0c"}])),
+        "SPEC 8 decision: arrays inside $value take directive elements and splices like any other array, under the same limits.directiveDepth (limits 0028/0029).",
+        since=SPLICE,
+    )
+    s.render(
+        "0023-value-over-an-absent-array-is-missing",
+        "A splice over an absent optional array is TEMPLATE_MISSING at its $each",
+        hs_env(name_rows),
+        {},
+        err("TEMPLATE_MISSING", "/document/sheets/0/rows/0/$each"),
+        "As for $each (0008): rendering nothing would be the silent-empty outcome.",
+        since=SPLICE,
+    )
+    s.render(
+        "0024-value-error-path-points-into-value",
+        "An error inside a spliced value is reported at its template path, through $value",
+        hs_env({"$each": "people", "$value": ["{{ item.name }}", "{{ item.score }}"]}),
+        {"people": [{"name": "Ada", "score": 1}, {"name": "Charles"}]},
+        err("TEMPLATE_MISSING", "/document/sheets/0/rows/0/$value/1"),
+        "A JSON Pointer into the TEMPLATE (SPEC 6), never an index into the expanded output: the second copy fails, and its path is the one cell the author wrote.",
+        since=SPLICE,
+    )
     return s
 
 
@@ -1752,6 +1869,99 @@ def limits_suite() -> Suite:
         err("DIRECTIVE_EXPR", "/document/blocks/0/$if"),
         "144 bytes, under the token-length limit, and 71 levels deep: fancy-expr's EXPR_TOO_DEEP, surfaced as the directive's code (expr/limits).",
     )
+
+    # -- the $value splice obeys the same bounds as $each (0.36.0) -----------
+    def sheet_rows(*rows: Any) -> dict[str, Any]:
+        return {"sheets": [{"name": "S", "rows": list(rows)}]}
+
+    splice = env(sheet_rows({"$each": "xs", "$value": ["{{ item }}"]}), nums, writer="holy-sheet")
+    s.render(
+        "0023-value-iterations-at-limit",
+        "A splice over exactly limits.iterations elements renders",
+        splice,
+        {"xs": [1, 2, 3, 4, 5]},
+        ok_doc(sheet_rows(*[[k] for k in range(1, 6)])),
+        "",
+        options={"limits": {"iterations": 5}},
+        since=SPLICE,
+    )
+    s.render(
+        "0024-value-iterations-over",
+        "One more is RENDER_TOO_MANY_ITERATIONS at the splice's $each",
+        splice,
+        {"xs": [1, 2, 3, 4, 5, 6]},
+        err("RENDER_TOO_MANY_ITERATIONS", "/document/sheets/0/rows/0/$each"),
+        "",
+        options={"limits": {"iterations": 5}},
+        since=SPLICE,
+    )
+    shared = env(
+        sheet_rows(
+            {"$each": "xs", "$value": ["{{ item }}"]},
+            {"$each": "xs", "$value": ["{{ item }}"]},
+        ),
+        nums,
+        writer="holy-sheet",
+    )
+    s.render(
+        "0025-value-iterations-are-shared-with-every-loop",
+        "Iterations are counted across every splice and $each together: 3 + 3 over a limit of 5",
+        shared,
+        {"xs": [1, 2, 3]},
+        err("RENDER_TOO_MANY_ITERATIONS", "/document/sheets/0/rows/1/$each"),
+        "One counter per render, not one per loop: the first splice spends 3, the second fails on its third element.",
+        options={"limits": {"iterations": 5}},
+        since=SPLICE,
+    )
+    splice_out = sheet_rows([1], [2])
+    splice_nodes = output_nodes(splice_out)
+    s.render(
+        "0026-value-output-nodes-at-limit",
+        "A spliced output of exactly limits.outputNodes values renders: the splice object counts nothing",
+        splice,
+        {"xs": [1, 2]},
+        ok_doc(splice_out),
+        f"{splice_nodes} values, computed from SPEC 10 on the OUTPUT. An implementation that counted the splice object, or $value's own array once more, fails here.",
+        options={"limits": {"outputNodes": splice_nodes}},
+        since=SPLICE,
+    )
+    s.render(
+        "0027-value-output-nodes-over",
+        "One fewer allowed is RENDER_TOO_MANY_NODES",
+        splice,
+        {"xs": [1, 2]},
+        err("RENDER_TOO_MANY_NODES", ""),
+        "An implementation that did not count spliced copies at all passes 0026 and fails here.",
+        options={"limits": {"outputNodes": splice_nodes - 1}},
+        since=SPLICE,
+    )
+
+    one = {"one": {"type": "array", "items": {"type": "integer"}}}
+
+    def nested_splices(levels: int) -> dict[str, Any]:
+        inner: Any = para("deep")
+        for _ in range(levels):
+            inner = {"$each": "one", "$value": {"type": "quote", "blocks": [inner]}}
+        return inner
+
+    s.render(
+        "0028-value-directive-depth-at-limit",
+        "8 nested splices render",
+        env(doc(nested_splices(8)), one),
+        {"one": [1]},
+        ok_doc(doc(plain_quotes(8))),
+        "Each splice is a directive object and counts one level, and a splice inside $value counts one more (SPEC 8: $value may contain directives, under the same bound).",
+        since=SPLICE,
+    )
+    s.render(
+        "0029-value-directive-depth-over",
+        "9 nested splices is DIRECTIVE_TOO_DEEP at the ninth",
+        env(doc(nested_splices(9)), one),
+        {"one": [1]},
+        err("DIRECTIVE_TOO_DEEP", "/document/blocks/0" + "/$value/blocks/0" * 8),
+        "Without the bound a splice would be a way round the one $each has.",
+        since=SPLICE,
+    )
     return s
 
 
@@ -1897,7 +2107,6 @@ def profiles_suite() -> Suite:
             }
         ),
         "THE NAMED MARKDOWN ROW. The value is never parsed as markup; the template's own `Hello ` is untouched. CommonMark escaping. dark-slide's PPTX MarkdownInline does not yet honour backslash escapes (SPEC 9).",
-        skip=PHASE6_DS,
     )
     s.render(
         "0102-dark-slide-html-is-entity-escaped",
@@ -1921,7 +2130,6 @@ def profiles_suite() -> Suite:
             }
         ),
         "THE NAMED HTML ROW.",
-        skip=PHASE6_DS,
     )
     s.render(
         "0103-dark-slide-plain-is-raw",
@@ -1941,16 +2149,14 @@ def profiles_suite() -> Suite:
         {"name": "*x*"},
         ok_doc({"slides": [{"elements": [el(content="*x*"), el(content="*x*", format="plain")]}]}),
         "dark-slide's own default format is plain.",
-        skip=PHASE6_DS,
     )
     s.render(
         "0104-dark-slide-notes-are-markdown",
-        "dark-slide: speaker notes are always markdown-escaped",
+        "dark-slide: speaker notes are plain text, so a value is written exactly as given",
         ds({"slides": [{"elements": [], "notes": "Say {{ name }}"}]}),
-        {"name": "_hi_"},
-        ok_doc({"slides": [{"elements": [], "notes": "Say " + md_escape("_hi_")}]}),
-        "",
-        skip=PHASE6_DS,
+        {"name": hostile},
+        ok_doc({"slides": [{"elements": [], "notes": "Say " + hostile}]}),
+        "CHANGED in 0.36.0 (owner ruling 2026-10-27, 'notes are plain'): this row used to expect the markdown escape. dark-slide's PPTX writer writes notes as plain text in all three languages and fancy-slides edits them in a plain textarea, so the escape printed its backslashes in both. The id keeps its old slug because ids are never renumbered or renamed; the title is the current claim.",
     )
     s.render(
         "0105-dark-slide-local-path-src-is-invalid",
@@ -1969,7 +2175,6 @@ def profiles_suite() -> Suite:
         {},
         err("TEMPLATE_IMAGE_INVALID", "/document/slides/0/elements/0/src"),
         "THE NAMED FORBIDDEN-SRC ROW. dark-slide's ImageResolver reads LOCAL PATHS: a src is a file-include primitive, which no template may carry.",
-        skip=PHASE6_DS,
     )
     s.render(
         "0106-dark-slide-href-is-forbidden",
@@ -1978,7 +2183,34 @@ def profiles_suite() -> Suite:
         {"url": "https://example.com"},
         err("TOKEN_FORBIDDEN_FIELD", "/document/slides/0/elements/0/href"),
         "",
-        skip=PHASE6_DS,
+    )
+    s.render(
+        "0107-dark-slide-splice-repeats-list-items",
+        "dark-slide: a $value splice repeats a string in a list of strings, as plain text",
+        ds(
+            {
+                "slides": [
+                    {
+                        "elements": [
+                            el(
+                                items=[
+                                    "Agenda",
+                                    {"$each": "topics", "$as": "t", "$value": "{{ t }}"},
+                                    "Questions",
+                                ]
+                            )
+                        ]
+                    }
+                ]
+            },
+            {"topics": {"type": "array", "items": S()}},
+        ),
+        {"topics": ["Gears", "*Levers*"]},
+        ok_doc(
+            {"slides": [{"elements": [el(items=["Agenda", "Gears", "*Levers*", "Questions"])]}]}
+        ),
+        "A list of strings could not repeat before the splice (an element must be an object to carry $each). The spliced string is matched by the ELEMENT's path, slides.*.elements.*.items.*, a text field: no escape.",
+        since=SPLICE,
     )
 
     hs = lambda d, vars_: env(d, vars_, writer="holy-sheet")  # noqa: E731
@@ -1991,7 +2223,6 @@ def profiles_suite() -> Suite:
         {"s": '=HYPERLINK("http://x","click")'},
         ok_doc(sheet({"value": '=HYPERLINK("http://x","click")'})),
         "THE NAMED = ROW. holy-sheet promotes a BARE string starting with '=' to a formula (normalizer.ts promoteFormula); `{value: s}` is its documented escape hatch, so user data can never become a formula.",
-        skip=PHASE6_HS,
     )
     s.render(
         "0202-holy-sheet-typed-values-stay-typed",
@@ -2000,7 +2231,6 @@ def profiles_suite() -> Suite:
         {"n": 12.5, "b": True, "d": "2026-10-27", "s": "plain"},
         ok_doc(sheet(12.5, True, "2026-10-27", {"value": "plain"})),
         "A date is validated ISO, which cannot begin with =, so it stays bare and the column's date type formats it. EVERY string result is wrapped, not only those starting with =: a rule keyed on the first character is a rule someone will get wrong.",
-        skip=PHASE6_HS,
     )
     s.render(
         "0203-holy-sheet-mixed-text-is-wrapped",
@@ -2009,7 +2239,6 @@ def profiles_suite() -> Suite:
         {"n": 3},
         ok_doc(sheet({"value": "Total: 3"})),
         "",
-        skip=PHASE6_HS,
     )
     s.render(
         "0204-holy-sheet-formula-is-forbidden",
@@ -2018,7 +2247,110 @@ def profiles_suite() -> Suite:
         {"s": "A1:A9"},
         err("TOKEN_FORBIDDEN_FIELD", "/document/sheets/0/cells/A1/formula"),
         "",
-        skip=PHASE6_HS,
+    )
+    invoice_vars = {
+        "lines": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "desc": S(required=True),
+                    "qty": {"type": "integer", "required": True},
+                    "price": {"type": "number", "required": True},
+                    "shipped": {"type": "date", "required": True},
+                    "paid": {"type": "boolean", "required": True},
+                },
+            },
+        }
+    }
+    hostile_desc = '=HYPERLINK("http://x","click")'
+    s.render(
+        "0205-holy-sheet-splice-one-row-per-invoice-line",
+        "holy-sheet: a $value splice writes one row per invoice line, cells typed and strings wrapped",
+        hs(
+            {
+                "sheets": [
+                    {
+                        "name": "Invoice",
+                        "rows": [
+                            ["#", "Description", "Qty", "Price", "Shipped", "Paid", "Note"],
+                            {
+                                "$each": "lines",
+                                "$as": "line",
+                                "$value": [
+                                    "{{ $index }}",
+                                    "{{ line.desc }}",
+                                    "{{ line.qty }}",
+                                    "{{ line.price }}",
+                                    "{{ line.shipped }}",
+                                    "{{ line.paid }}",
+                                    "{{ line.qty }} x {{ line.desc }}",
+                                ],
+                            },
+                            ["Total", "=SUM(D2:D3)"],
+                        ],
+                    }
+                ]
+            },
+            invoice_vars,
+        ),
+        {
+            "lines": [
+                {
+                    "desc": hostile_desc,
+                    "qty": 2,
+                    "price": 12.5,
+                    "shipped": "2026-10-27",
+                    "paid": True,
+                },
+                {"desc": "Bolt", "qty": 10, "price": 0.25, "shipped": "2026-10-28", "paid": False},
+            ]
+        },
+        ok_doc(
+            {
+                "sheets": [
+                    {
+                        "name": "Invoice",
+                        "rows": [
+                            ["#", "Description", "Qty", "Price", "Shipped", "Paid", "Note"],
+                            [
+                                0,
+                                {"value": hostile_desc},
+                                2,
+                                12.5,
+                                "2026-10-27",
+                                True,
+                                {"value": "2 x " + hostile_desc},
+                            ],
+                            [
+                                1,
+                                {"value": "Bolt"},
+                                10,
+                                0.25,
+                                "2026-10-28",
+                                False,
+                                {"value": "10 x Bolt"},
+                            ],
+                            ["Total", "=SUM(D2:D3)"],
+                        ],
+                    }
+                ]
+            }
+        ),
+        "THE NAMED = ROW, for spliced cells. Each spliced cell is matched by the row's path (sheets.*.rows.*.*), so the cell encoding applies exactly as to a written row: a whole-token number, boolean or declared date stays bare and every string result is {value: s}. The template author's literal `=SUM` row is the author's and stays a formula.",
+        since=SPLICE,
+    )
+    s.render(
+        "0206-holy-sheet-splice-cells-inside-a-row",
+        "holy-sheet: a $value splice inside a row repeats cells, each one still wrapped",
+        hs(
+            sheet("Tags", {"$each": "tags", "$value": "{{ item }}"}, "end"),
+            {"tags": {"type": "array", "items": S()}},
+        ),
+        {"tags": ["=1+1", "b"]},
+        ok_doc(sheet("Tags", {"value": "=1+1"}, {"value": "b"}, "end")),
+        "A splice at cell level: the spliced string sits at the cell's path, so the guard applies to it and to nothing the author wrote.",
+        since=SPLICE,
     )
     return s
 
@@ -2289,7 +2621,113 @@ def inspect_suite() -> Suite:
         ),
         [],
         "The plan's one route for images: a declared image variable, magic-byte checked, in an image-capable field.",
-        skip=PHASE6_DS,
+    )
+
+    # -- the $value splice (0.36.0) -----------------------------------------
+    def ins_new(
+        id_: str, title: str, template: Any, issues: list[tuple[str, str]], notes: str
+    ) -> None:
+        s.add(
+            id_,
+            title,
+            "inspect",
+            {"template": template},
+            {"issues": [{"code": c, "path": p} for c, p in issues]},
+            notes,
+            since=SPLICE,
+        )
+
+    ins_new(
+        "0022-value-without-each",
+        "$value without $each is DIRECTIVE_INVALID at $value, and its content is not inspected",
+        env(
+            {
+                "sheets": [
+                    {
+                        "name": "S",
+                        "rows": [
+                            {"$value": ["{{ item }}"]},
+                            {"$if": "true", "$value": ["{{ item }}"]},
+                        ],
+                    }
+                ]
+            },
+            CERT_VARS,
+            writer="holy-sheet",
+        ),
+        [
+            ("DIRECTIVE_INVALID", "/document/sheets/0/rows/0/$value"),
+            ("DIRECTIVE_INVALID", "/document/sheets/0/rows/1/$value"),
+        ],
+        "The same rule as $as without $each. A lone $if does not make a splice: there is nothing to repeat over. The content names `item`, which nothing binds; it is NOT also reported, so the author hears one error, not a cascade.",
+    )
+    ins_new(
+        "0023-value-extra-keys",
+        "A key not starting with $ beside $value is DIRECTIVE_SPLICE_KEY, in written order",
+        env(
+            doc(
+                {
+                    "type": "paragraph",
+                    "$each": "tags",
+                    "$value": para("{{ item }}"),
+                    "align": "{{ nope }}",
+                }
+            ),
+            CERT_VARS,
+        ),
+        [
+            ("DIRECTIVE_SPLICE_KEY", "/document/blocks/0/type"),
+            ("DIRECTIVE_SPLICE_KEY", "/document/blocks/0/align"),
+        ],
+        "There is no object left to put them on: the splice is replaced by its $value. Their values are not inspected (`align` holds an undeclared token in a forbidden field, and neither is reported).",
+    )
+    ins_new(
+        "0024-value-issue-order",
+        "A splice reports its $ keys, then its other keys, then the content of $value",
+        env(
+            doc(
+                {
+                    "type": "paragraph",
+                    "runs": [
+                        {
+                            "$value": {"$if": "true", "text": "{{ nope }}"},
+                            "extra": 1,
+                            "$each": "tags",
+                            "$if": "nope2",
+                        }
+                    ],
+                }
+            ),
+            CERT_VARS,
+        ),
+        [
+            ("DIRECTIVE_UNDECLARED", "/document/blocks/0/runs/0/$if"),
+            ("DIRECTIVE_SPLICE_KEY", "/document/blocks/0/runs/0/extra"),
+            ("DIRECTIVE_MISPLACED", "/document/blocks/0/runs/0/$value/$if"),
+            ("TOKEN_UNDECLARED", "/document/blocks/0/runs/0/$value/text"),
+        ],
+        "SPEC 8 and 11. The top of $value is not an array element, so a $-key there is DIRECTIVE_MISPLACED: a condition belongs on the splice.",
+    )
+    ins_new(
+        "0025-value-is-matched-at-the-elements-path",
+        "Inside $value the profile sees the element's path: text stays a text field, a link stays forbidden",
+        env(
+            doc(
+                {
+                    "type": "paragraph",
+                    "runs": [
+                        {"$each": "tags", "$value": {"text": "{{ item }}", "link": "{{ item }}"}},
+                        {"text": "{{ item }}"},
+                    ],
+                }
+            ),
+            CERT_VARS,
+        ),
+        [
+            ("TOKEN_FORBIDDEN_FIELD", "/document/blocks/0/runs/0/$value/link"),
+            ("TOKEN_UNDECLARED", "/document/blocks/0/runs/1/text"),
+        ],
+        "`$value` is not a path segment for the profile (an implementation that added it would refuse the text as a forbidden field), and the binding is scoped to the splice.",
     )
     return s
 
@@ -2341,13 +2779,14 @@ CONTRACTS: dict[str, tuple[str, dict[str, str], list[str]]] = {
         ],
     ),
     "template/directives": (
-        "JSON directives: $each, $as, $if",
+        "JSON directives: $each, $as, $if and the $value splice",
         {
             "render": "render(template, data, options?) -> { ok: true, document } | { ok: false, code, path }",
         },
         [
             "Structure is never text syntax (plan section 2). A directive is a key on an array element and is removed from the output.",
             "A TOKEN reading an absent variable throws (resolve 0009); a CONDITION asking whether one is there does not (0007). Both are deliberate and they are the same rule seen from two sides.",
+            "0016-0024 (0.36.0): the $value splice, `{ $each, $as?, $if?, $value }`, which repeats ANY value -- a holy-sheet row, a cell, a string -- where $each alone can only repeat an object. Its bounds are in template/limits 0023-0029 and its static errors in template/inspect 0022-0025.",
         ],
     ),
     "template/limits": (
@@ -2367,7 +2806,8 @@ CONTRACTS: dict[str, tuple[str, dict[str, str], list[str]]] = {
         },
         [
             "The named security rows from the plan: holy-sheet `=` (0201), dark-slide markdown and html escaping (0101, 0102), forbidden image src (0009, 0014, 0105), and {page} (0002, 0003, 0013).",
-            "dark-slide and holy-sheet rows are skipped for PHP with the reason stated: those profiles are phase 6. They are written now so the phase-6 implementation is built against them rather than the other way round.",
+            "No row is skipped. The dark-slide and holy-sheet rows carried a PHP skip until 0.36.0 (written before phase 6 built those profiles in every leg); the skips were dropped once the PHP leg passed them.",
+            "0104 CHANGED in 0.36.0: dark-slide speaker notes are plain text (owner ruling 2026-10-27), so a value is no longer markdown-escaped there. 0107, 0205 and 0206 pin the $value splice against the profiles: a spliced value is matched by the element's path.",
             "FINDING, not covered by any row: dark-slide's PPTX MarkdownInline has no backslash escapes and writes `format: html` as plain text, so 0101/0102's correct encodings print their escapes in a .pptx today (SPEC 9).",
         ],
     ),

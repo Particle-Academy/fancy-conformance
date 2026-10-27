@@ -1470,10 +1470,361 @@
       "expected": {
         "issues": []
       },
-      "notes": "The plan's one route for images: a declared image variable, magic-byte checked, in an image-capable field.",
-      "skip": {
-        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "The plan's one route for images: a declared image variable, magic-byte checked, in an image-capable field."
+    },
+    {
+      "id": "0022-value-without-each",
+      "title": "$value without $each is DIRECTIVE_INVALID at $value, and its content is not inspected",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  },
+                  {
+                    "$if": "true",
+                    "$value": [
+                      "{{ item }}"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_INVALID",
+            "path": "/document/sheets/0/rows/0/$value"
+          },
+          {
+            "code": "DIRECTIVE_INVALID",
+            "path": "/document/sheets/0/rows/1/$value"
+          }
+        ]
+      },
+      "notes": "The same rule as $as without $each. A lone $if does not make a splice: there is nothing to repeat over. The content names `item`, which nothing binds; it is NOT also reported, so the author hears one error, not a cascade."
+    },
+    {
+      "id": "0023-value-extra-keys",
+      "title": "A key not starting with $ beside $value is DIRECTIVE_SPLICE_KEY, in written order",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "$each": "tags",
+                "$value": {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "{{ item }}"
+                    }
+                  ]
+                },
+                "align": "{{ nope }}"
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_SPLICE_KEY",
+            "path": "/document/blocks/0/type"
+          },
+          {
+            "code": "DIRECTIVE_SPLICE_KEY",
+            "path": "/document/blocks/0/align"
+          }
+        ]
+      },
+      "notes": "There is no object left to put them on: the splice is replaced by its $value. Their values are not inspected (`align` holds an undeclared token in a forbidden field, and neither is reported)."
+    },
+    {
+      "id": "0024-value-issue-order",
+      "title": "A splice reports its $ keys, then its other keys, then the content of $value",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "$value": {
+                      "$if": "true",
+                      "text": "{{ nope }}"
+                    },
+                    "extra": 1,
+                    "$each": "tags",
+                    "$if": "nope2"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_UNDECLARED",
+            "path": "/document/blocks/0/runs/0/$if"
+          },
+          {
+            "code": "DIRECTIVE_SPLICE_KEY",
+            "path": "/document/blocks/0/runs/0/extra"
+          },
+          {
+            "code": "DIRECTIVE_MISPLACED",
+            "path": "/document/blocks/0/runs/0/$value/$if"
+          },
+          {
+            "code": "TOKEN_UNDECLARED",
+            "path": "/document/blocks/0/runs/0/$value/text"
+          }
+        ]
+      },
+      "notes": "SPEC 8 and 11. The top of $value is not an array element, so a $-key there is DIRECTIVE_MISPLACED: a condition belongs on the splice."
+    },
+    {
+      "id": "0025-value-is-matched-at-the-elements-path",
+      "title": "Inside $value the profile sees the element's path: text stays a text field, a link stays forbidden",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "$each": "tags",
+                    "$value": {
+                      "text": "{{ item }}",
+                      "link": "{{ item }}"
+                    }
+                  },
+                  {
+                    "text": "{{ item }}"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "TOKEN_FORBIDDEN_FIELD",
+            "path": "/document/blocks/0/runs/0/$value/link"
+          },
+          {
+            "code": "TOKEN_UNDECLARED",
+            "path": "/document/blocks/0/runs/1/text"
+          }
+        ]
+      },
+      "notes": "`$value` is not a path segment for the profile (an implementation that added it would refuse the text as a forbidden field), and the binding is scoped to the splice."
     }
   ]
 }

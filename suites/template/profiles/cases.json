@@ -748,10 +748,7 @@
           ]
         }
       },
-      "notes": "THE NAMED MARKDOWN ROW. The value is never parsed as markup; the template's own `Hello ` is untouched. CommonMark escaping. dark-slide's PPTX MarkdownInline does not yet honour backslash escapes (SPEC 9).",
-      "skip": {
-        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "THE NAMED MARKDOWN ROW. The value is never parsed as markup; the template's own `Hello ` is untouched. CommonMark escaping. dark-slide's PPTX MarkdownInline does not yet honour backslash escapes (SPEC 9)."
     },
     {
       "id": "0102-dark-slide-html-is-entity-escaped",
@@ -819,10 +816,7 @@
           ]
         }
       },
-      "notes": "THE NAMED HTML ROW.",
-      "skip": {
-        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "THE NAMED HTML ROW."
     },
     {
       "id": "0103-dark-slide-plain-is-raw",
@@ -906,14 +900,11 @@
           ]
         }
       },
-      "notes": "dark-slide's own default format is plain.",
-      "skip": {
-        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "dark-slide's own default format is plain."
     },
     {
       "id": "0104-dark-slide-notes-are-markdown",
-      "title": "dark-slide: speaker notes are always markdown-escaped",
+      "title": "dark-slide: speaker notes are plain text, so a value is written exactly as given",
       "since": "0.35.0",
       "tags": [
         "template",
@@ -945,7 +936,7 @@
           }
         },
         "data": {
-          "name": "_hi_"
+          "name": "*bold* _x_ # [a](javascript:x) `c` \\ 1. <b>&"
         }
       },
       "expected": {
@@ -954,15 +945,12 @@
           "slides": [
             {
               "elements": [],
-              "notes": "Say \\_hi\\_"
+              "notes": "Say *bold* _x_ # [a](javascript:x) `c` \\ 1. <b>&"
             }
           ]
         }
       },
-      "notes": "",
-      "skip": {
-        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "CHANGED in 0.36.0 (owner ruling 2026-10-27, 'notes are plain'): this row used to expect the markdown escape. dark-slide's PPTX writer writes notes as plain text in all three languages and fancy-slides edits them in a plain textarea, so the escape printed its backslashes in both. The id keeps its old slug because ids are never renumbered or renamed; the title is the current claim."
     },
     {
       "id": "0105-dark-slide-local-path-src-is-invalid",
@@ -1012,10 +1000,7 @@
         "code": "TEMPLATE_IMAGE_INVALID",
         "path": "/document/slides/0/elements/0/src"
       },
-      "notes": "THE NAMED FORBIDDEN-SRC ROW. dark-slide's ImageResolver reads LOCAL PATHS: a src is a file-include primitive, which no template may carry.",
-      "skip": {
-        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "THE NAMED FORBIDDEN-SRC ROW. dark-slide's ImageResolver reads LOCAL PATHS: a src is a file-include primitive, which no template may carry."
     },
     {
       "id": "0106-dark-slide-href-is-forbidden",
@@ -1068,10 +1053,86 @@
         "code": "TOKEN_FORBIDDEN_FIELD",
         "path": "/document/slides/0/elements/0/href"
       },
-      "notes": "",
-      "skip": {
-        "php": "The dark-slide profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": ""
+    },
+    {
+      "id": "0107-dark-slide-splice-repeats-list-items",
+      "title": "dark-slide: a $value splice repeats a string in a list of strings, as plain text",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "dark-slide",
+          "variables": {
+            "topics": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "document": {
+            "slides": [
+              {
+                "elements": [
+                  {
+                    "type": "text",
+                    "x": 0,
+                    "y": 0,
+                    "w": 1,
+                    "h": 1,
+                    "items": [
+                      "Agenda",
+                      {
+                        "$each": "topics",
+                        "$as": "t",
+                        "$value": "{{ t }}"
+                      },
+                      "Questions"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "topics": [
+            "Gears",
+            "*Levers*"
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "slides": [
+            {
+              "elements": [
+                {
+                  "type": "text",
+                  "x": 0,
+                  "y": 0,
+                  "w": 1,
+                  "h": 1,
+                  "items": [
+                    "Agenda",
+                    "Gears",
+                    "*Levers*",
+                    "Questions"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "A list of strings could not repeat before the splice (an element must be an object to carry $each). The spliced string is matched by the ELEMENT's path, slides.*.elements.*.items.*, a text field: no escape."
     },
     {
       "id": "0201-holy-sheet-equals-never-becomes-a-formula",
@@ -1134,10 +1195,7 @@
           ]
         }
       },
-      "notes": "THE NAMED = ROW. holy-sheet promotes a BARE string starting with '=' to a formula (normalizer.ts promoteFormula); `{value: s}` is its documented escape hatch, so user data can never become a formula.",
-      "skip": {
-        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "THE NAMED = ROW. holy-sheet promotes a BARE string starting with '=' to a formula (normalizer.ts promoteFormula); `{value: s}` is its documented escape hatch, so user data can never become a formula."
     },
     {
       "id": "0202-holy-sheet-typed-values-stay-typed",
@@ -1209,10 +1267,7 @@
           ]
         }
       },
-      "notes": "A date is validated ISO, which cannot begin with =, so it stays bare and the column's date type formats it. EVERY string result is wrapped, not only those starting with =: a rule keyed on the first character is a rule someone will get wrong.",
-      "skip": {
-        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": "A date is validated ISO, which cannot begin with =, so it stays bare and the column's date type formats it. EVERY string result is wrapped, not only those starting with =: a rule keyed on the first character is a rule someone will get wrong."
     },
     {
       "id": "0203-holy-sheet-mixed-text-is-wrapped",
@@ -1275,10 +1330,7 @@
           ]
         }
       },
-      "notes": "",
-      "skip": {
-        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": ""
     },
     {
       "id": "0204-holy-sheet-formula-is-forbidden",
@@ -1329,10 +1381,228 @@
         "code": "TOKEN_FORBIDDEN_FIELD",
         "path": "/document/sheets/0/cells/A1/formula"
       },
-      "notes": "",
-      "skip": {
-        "php": "The holy-sheet profile is phase 6 of the plan (TS + Python legs; holy-sheet and dark-slide profiles). The PHP leg implements fine-print and last-word only; this row is the spec it will be built against."
-      }
+      "notes": ""
+    },
+    {
+      "id": "0205-holy-sheet-splice-one-row-per-invoice-line",
+      "title": "holy-sheet: a $value splice writes one row per invoice line, cells typed and strings wrapped",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "lines": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "desc": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "qty": {
+                    "type": "integer",
+                    "required": true
+                  },
+                  "price": {
+                    "type": "number",
+                    "required": true
+                  },
+                  "shipped": {
+                    "type": "date",
+                    "required": true
+                  },
+                  "paid": {
+                    "type": "boolean",
+                    "required": true
+                  }
+                }
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "Invoice",
+                "rows": [
+                  [
+                    "#",
+                    "Description",
+                    "Qty",
+                    "Price",
+                    "Shipped",
+                    "Paid",
+                    "Note"
+                  ],
+                  {
+                    "$each": "lines",
+                    "$as": "line",
+                    "$value": [
+                      "{{ $index }}",
+                      "{{ line.desc }}",
+                      "{{ line.qty }}",
+                      "{{ line.price }}",
+                      "{{ line.shipped }}",
+                      "{{ line.paid }}",
+                      "{{ line.qty }} x {{ line.desc }}"
+                    ]
+                  },
+                  [
+                    "Total",
+                    "=SUM(D2:D3)"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "lines": [
+            {
+              "desc": "=HYPERLINK(\"http://x\",\"click\")",
+              "qty": 2,
+              "price": 12.5,
+              "shipped": "2026-10-27",
+              "paid": true
+            },
+            {
+              "desc": "Bolt",
+              "qty": 10,
+              "price": 0.25,
+              "shipped": "2026-10-28",
+              "paid": false
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "Invoice",
+              "rows": [
+                [
+                  "#",
+                  "Description",
+                  "Qty",
+                  "Price",
+                  "Shipped",
+                  "Paid",
+                  "Note"
+                ],
+                [
+                  0,
+                  {
+                    "value": "=HYPERLINK(\"http://x\",\"click\")"
+                  },
+                  2,
+                  12.5,
+                  "2026-10-27",
+                  true,
+                  {
+                    "value": "2 x =HYPERLINK(\"http://x\",\"click\")"
+                  }
+                ],
+                [
+                  1,
+                  {
+                    "value": "Bolt"
+                  },
+                  10,
+                  0.25,
+                  "2026-10-28",
+                  false,
+                  {
+                    "value": "10 x Bolt"
+                  }
+                ],
+                [
+                  "Total",
+                  "=SUM(D2:D3)"
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "THE NAMED = ROW, for spliced cells. Each spliced cell is matched by the row's path (sheets.*.rows.*.*), so the cell encoding applies exactly as to a written row: a whole-token number, boolean or declared date stays bare and every string result is {value: s}. The template author's literal `=SUM` row is the author's and stays a formula."
+    },
+    {
+      "id": "0206-holy-sheet-splice-cells-inside-a-row",
+      "title": "holy-sheet: a $value splice inside a row repeats cells, each one still wrapped",
+      "since": "0.36.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "Data",
+                "rows": [
+                  [
+                    "Tags",
+                    {
+                      "$each": "tags",
+                      "$value": "{{ item }}"
+                    },
+                    "end"
+                  ]
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "tags": [
+            "=1+1",
+            "b"
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "Data",
+              "rows": [
+                [
+                  "Tags",
+                  {
+                    "value": "=1+1"
+                  },
+                  {
+                    "value": "b"
+                  },
+                  "end"
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "A splice at cell level: the spliced string sits at the cell's path, so the guard applies to it and to nothing the author wrote."
     }
   ]
 }
