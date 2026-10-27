@@ -288,6 +288,167 @@
         }
       ],
       "notes": "An unterminated backtick falls through as literal text rather than erroring. The remainder is taken as one slice to end-of-string, so a byte-indexed implementation must land on a char boundary."
+    },
+    {
+      "id": "0009-escaped-bold-markers",
+      "title": "Escaped asterisks are literal and lose their backslash",
+      "since": "0.36.0",
+      "tags": [
+        "tokenize",
+        "escape",
+        "regression"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "\\*\\*not bold\\*\\*"
+      },
+      "expected": [
+        {
+          "text": "**not bold**",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "CommonMark backslash escape. Before the fix that added this row, all three dark-slide engines printed the backslash AND the asterisk still opened emphasis."
+    },
+    {
+      "id": "0010-escaped-backticks",
+      "title": "Escaped backticks do not open a code span",
+      "since": "0.36.0",
+      "tags": [
+        "tokenize",
+        "escape",
+        "regression"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "\\`not code\\` and `code`"
+      },
+      "expected": [
+        {
+          "text": "`not code` and ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "code",
+          "b": false,
+          "i": false,
+          "code": true
+        }
+      ],
+      "notes": "An escaped backtick is a literal backtick; the unescaped pair after it still makes a code span."
+    },
+    {
+      "id": "0011-escaped-backslash",
+      "title": "An escaped backslash does not escape what follows it",
+      "since": "0.36.0",
+      "tags": [
+        "tokenize",
+        "escape",
+        "edge"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "\\\\*x*"
+      },
+      "expected": [
+        {
+          "text": "\\",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "x",
+          "b": false,
+          "i": true,
+          "code": false
+        }
+      ],
+      "notes": "Two backslashes are one literal backslash, and the asterisk after them is a live marker. An implementation that only looks one character back to decide whether a marker is escaped gets this wrong."
+    },
+    {
+      "id": "0012-backslash-before-non-punctuation",
+      "title": "A backslash before a letter, a space, non-ASCII or the end is literal",
+      "since": "0.36.0",
+      "tags": [
+        "tokenize",
+        "escape",
+        "edge"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "C:\\path, a \\ b, \\é and end\\"
+      },
+      "expected": [
+        {
+          "text": "C:\\path, a \\ b, \\é and end\\",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "Only ASCII punctuation is escapable. Before a UTF-8 lead byte (PHP), a UTF-16 unit (Node) or a codepoint (Python) above 127 the backslash stays, so the three index schemes still agree."
+    },
+    {
+      "id": "0013-backslash-inside-code-span",
+      "title": "Nothing is an escape inside a code span",
+      "since": "0.36.0",
+      "tags": [
+        "tokenize",
+        "escape",
+        "code-span"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "`a\\*b` and **x \\* y**"
+      },
+      "expected": [
+        {
+          "text": "a\\*b",
+          "b": false,
+          "i": false,
+          "code": true
+        },
+        {
+          "text": " and ",
+          "b": false,
+          "i": false,
+          "code": false
+        },
+        {
+          "text": "x * y",
+          "b": true,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "The code span is sliced raw, so its backslash stays; the escaped asterisk inside bold is literal and does not close it."
+    },
+    {
+      "id": "0014-every-ascii-punctuation",
+      "title": "Every ASCII punctuation character is escapable",
+      "since": "0.36.0",
+      "tags": [
+        "tokenize",
+        "escape"
+      ],
+      "fn": "tokenizeInlineMarkdown",
+      "input": {
+        "text": "\\!\\\"\\#\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\_\\`\\{\\|\\}\\~"
+      },
+      "expected": [
+        {
+          "text": "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+          "b": false,
+          "i": false,
+          "code": false
+        }
+      ],
+      "notes": "All 32 characters of CommonMark's ASCII punctuation set, each escaped once. The output is the set itself, with no backslash left over but the one that was escaped."
     }
   ]
 }

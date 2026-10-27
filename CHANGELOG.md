@@ -10,6 +10,22 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- **`shared/strings` 0009-0014: CommonMark backslash escapes.** A backslash
+  before any ASCII punctuation character makes that character literal and is
+  removed; before anything else (a letter, a space, non-ASCII, the end of the
+  text) it is a literal backslash; inside a code span it is always literal.
+  Goldens were taken by running the PHP reference (`dark-slide`'s
+  `Helpers\MarkdownInline::tokenize`) after its fix. Two new discrimination
+  mutants pin the exact rows that catch a tokenizer with no escapes (0009,
+  0010, 0011, 0013, 0014) and one that escapes non-punctuation (0012).
+  **What a consumer must do:** a runner that pins this release runs six new
+  rows. dark-slide, dark-slide-js and fancy-dark-slide pass them only with
+  their backslash-escape fix; an older engine fails 0009-0011, 0013 and 0014.
+  Move the pin together with that fix. The suite manifest now also lists the
+  Python implementation, which already ran these rows.
+
 ## [0.35.0] - 2026-10-27
 
 ### Added

@@ -293,7 +293,20 @@ interface Run {
   code: boolean;
 }
 
-function tokenizeProbe(text: string, opts: { nonAsciiBreaksRun?: boolean } = {}): Run[] {
+interface StringsProbeOpts {
+  nonAsciiBreaksRun?: boolean;
+  /** Mutant: no backslash escapes at all (every dark-slide engine before rows 0009-0014). */
+  noEscapes?: boolean;
+  /** Mutant: a backslash escapes ANY following character, not only ASCII punctuation. */
+  escapeAnything?: boolean;
+}
+
+const isAsciiPunct = (ch: string): boolean => {
+  const o = ch.charCodeAt(0);
+  return (o >= 33 && o <= 47) || (o >= 58 && o <= 64) || (o >= 91 && o <= 96) || (o >= 123 && o <= 126);
+};
+
+function tokenizeProbe(text: string, opts: StringsProbeOpts = {}): Run[] {
   const runs: Run[] = [];
   let i = 0;
   let buf = "";
@@ -312,6 +325,19 @@ function tokenizeProbe(text: string, opts: { nonAsciiBreaksRun?: boolean } = {})
   while (i < text.length) {
     const c = text[i]!;
     const next2 = text.slice(i, i + 2);
+
+    // CommonMark backslash escape: before ASCII punctuation the backslash is
+    // dropped and the character is literal.
+    if (
+      !opts.noEscapes &&
+      c === "\\" &&
+      i + 1 < text.length &&
+      (opts.escapeAnything || isAsciiPunct(text[i + 1]!))
+    ) {
+      buf += text[i + 1]!;
+      i += 2;
+      continue;
+    }
 
     if (c === "`") {
       flush();
@@ -372,7 +398,7 @@ function tokenizeProbe(text: string, opts: { nonAsciiBreaksRun?: boolean } = {})
 }
 
 const runStrings =
-  (opts: { nonAsciiBreaksRun?: boolean }) =>
+  (opts: StringsProbeOpts) =>
   (c: ConformanceCase): unknown =>
     tokenizeProbe(c.input.text as string, opts);
 
@@ -393,6 +419,26 @@ test("the strings table catches an ASCII-only run classifier", () => {
     !failed.includes("0001-ascii-baseline"),
     "the ASCII control must still pass, or the mutant proves nothing about Unicode",
   );
+});
+
+test("the strings table catches a tokenizer with no backslash escapes", () => {
+  // The shape every dark-slide engine had before rows 0009-0014: the backslash
+  // printed and the escaped marker still opened a span.
+  assert.deepEqual(idsFailedBy("shared/strings", runStrings({ noEscapes: true })), [
+    "0009-escaped-bold-markers",
+    "0010-escaped-backticks",
+    "0011-escaped-backslash",
+    "0013-backslash-inside-code-span",
+    "0014-every-ascii-punctuation",
+  ]);
+});
+
+test("the strings table catches a backslash that escapes non-punctuation", () => {
+  // CommonMark escapes ASCII punctuation only. Dropping the backslash in
+  // `C:\path` or before a non-ASCII character is the over-eager mistake.
+  assert.deepEqual(idsFailedBy("shared/strings", runStrings({ escapeAnything: true })), [
+    "0012-backslash-before-non-punctuation",
+  ]);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
