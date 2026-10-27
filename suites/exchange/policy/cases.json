@@ -1,0 +1,707 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/policy",
+  "cases": [
+    {
+      "id": "0001-null-policy",
+      "title": "A null policy allows nothing",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "csv",
+        "policy": null,
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_disabled",
+          "target": "csv"
+        }
+      },
+      "notes": "Owner decision 2: off for every target by default."
+    },
+    {
+      "id": "0002-unsupported",
+      "title": "holy-sheet has no pptx export",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "pptx",
+        "policy": {
+          "allow": [
+            "pptx"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unsupported",
+          "target": "pptx"
+        }
+      }
+    },
+    {
+      "id": "0003-unsupported-before-disabled",
+      "title": "Unsupported is checked before disabled",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "pptx",
+        "policy": null,
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unsupported",
+          "target": "pptx"
+        }
+      }
+    },
+    {
+      "id": "0004-allowed",
+      "title": "csv allowed and supported",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "csv",
+        "policy": {
+          "allow": [
+            "csv"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "id": "0005-pdf-module-absent",
+      "title": "pdf allowed, fine-print not installed",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "pdf",
+        "policy": {
+          "allow": [
+            "pdf"
+          ]
+        },
+        "environment": {
+          "fine-print": false,
+          "last-word": false
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unavailable",
+          "target": "pdf",
+          "missing": "fine-print"
+        }
+      }
+    },
+    {
+      "id": "0006-pdf-injected-absent",
+      "title": "Injected absence beats a present module",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "last-word",
+        "target": "pdf",
+        "policy": {
+          "allow": [
+            "pdf"
+          ],
+          "modules": {
+            "fine-print": false
+          }
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unavailable",
+          "target": "pdf",
+          "missing": "fine-print"
+        }
+      },
+      "notes": "How every leg tests the absent case without uninstalling anything (plan section 6)."
+    },
+    {
+      "id": "0007-input-refused",
+      "title": "The input was refused: export_refused with the reader's code",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "pdf",
+        "policy": {
+          "allow": [
+            "pdf"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        },
+        "inputRefused": "archive_too_large"
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_refused",
+          "target": "pdf",
+          "cause": "archive_too_large"
+        }
+      }
+    },
+    {
+      "id": "0008-disabled-before-unavailable",
+      "title": "Disabled is checked before unavailable",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "pdf",
+        "policy": {
+          "allow": [
+            "csv"
+          ]
+        },
+        "environment": {
+          "fine-print": false,
+          "last-word": false
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_disabled",
+          "target": "pdf"
+        }
+      },
+      "notes": "An agent learns nothing about what is installed from a disabled target."
+    },
+    {
+      "id": "0009-unavailable-before-refused",
+      "title": "Unavailable before refused",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "pdf",
+        "policy": {
+          "allow": [
+            "pdf"
+          ]
+        },
+        "environment": {
+          "fine-print": false,
+          "last-word": false
+        },
+        "inputRefused": "archive_too_large"
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unavailable",
+          "target": "pdf",
+          "missing": "fine-print"
+        }
+      }
+    },
+    {
+      "id": "0010-refused-before-limit",
+      "title": "Refused before a limit",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "csv",
+        "policy": {
+          "allow": [
+            "csv"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        },
+        "inputRefused": "not_a_workbook",
+        "limitCode": "content_too_many_rows"
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_refused",
+          "target": "csv",
+          "cause": "not_a_workbook"
+        }
+      }
+    },
+    {
+      "id": "0011-limit",
+      "title": "A limit code last",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "csv",
+        "policy": {
+          "allow": [
+            "csv"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        },
+        "limitCode": "content_too_many_rows"
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "content_too_many_rows",
+          "target": "csv"
+        }
+      }
+    },
+    {
+      "id": "0012-agent-cannot-enable",
+      "title": "allow in the agent's options throws; it never enables",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "csv",
+        "policy": null,
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        },
+        "options": {
+          "allow": [
+            "csv"
+          ]
+        }
+      },
+      "expected": {
+        "throws": "options_invalid"
+      },
+      "notes": "Plan section 5.2: host-held, never agent-supplied."
+    },
+    {
+      "id": "0013-unknown-policy-key",
+      "title": "An unknown policy key throws",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "csv",
+        "policy": {
+          "allow": [
+            "csv"
+          ],
+          "allowAll": true
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "throws": "options_invalid"
+      }
+    },
+    {
+      "id": "0014-unknown-target-in-allow",
+      "title": "An unknown target name in allow throws",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "csv",
+        "policy": {
+          "allow": [
+            "csv",
+            "exe"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "throws": "options_invalid"
+      }
+    },
+    {
+      "id": "0015-known-but-unsupported-in-allow",
+      "title": "A known target this reader lacks is allowed in the policy and unsupported at the call",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "ods",
+        "policy": {
+          "allow": [
+            "ods"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unsupported",
+          "target": "ods"
+        }
+      },
+      "notes": "ods is deferred (owner decision 8)."
+    },
+    {
+      "id": "0016-docx-needs-last-word",
+      "title": "holy-sheet docx needs last-word",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "holy-sheet",
+        "target": "docx",
+        "policy": {
+          "allow": [
+            "docx"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": false
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unavailable",
+          "target": "docx",
+          "missing": "last-word"
+        }
+      }
+    },
+    {
+      "id": "0017-last-word-docx-needs-nothing",
+      "title": "last-word's own docx needs no module",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "last-word",
+        "target": "docx",
+        "policy": {
+          "allow": [
+            "docx"
+          ]
+        },
+        "environment": {
+          "fine-print": false,
+          "last-word": false
+        }
+      },
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "id": "0018-fine-print-docx",
+      "title": "fine-print docx is not in v1",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "fine-print",
+        "target": "docx",
+        "policy": {
+          "allow": [
+            "docx"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_unsupported",
+          "target": "docx"
+        }
+      }
+    },
+    {
+      "id": "0019-empty-allow",
+      "title": "An empty allow list allows nothing",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "dark-slide",
+        "target": "text",
+        "policy": {
+          "allow": []
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_disabled",
+          "target": "text"
+        }
+      }
+    },
+    {
+      "id": "0020-allow-not-array",
+      "title": "allow must be an array",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "dark-slide",
+        "target": "text",
+        "policy": {
+          "allow": "text"
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "throws": "options_invalid"
+      }
+    },
+    {
+      "id": "0021-policy-without-allow",
+      "title": "A policy with no allow allows nothing",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "checkExport",
+      "input": {
+        "reader": "dark-slide",
+        "target": "text",
+        "policy": {
+          "limits": {
+            "rows": 10
+          }
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "export_disabled",
+          "target": "text"
+        }
+      }
+    },
+    {
+      "id": "0101-in-reader-order",
+      "title": "Allowed, supported and available, in the reader's order",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "enabledTargets",
+      "input": {
+        "reader": "holy-sheet",
+        "policy": {
+          "allow": [
+            "pdf",
+            "docx",
+            "csv"
+          ]
+        },
+        "environment": {
+          "fine-print": false,
+          "last-word": true
+        }
+      },
+      "expected": [
+        "csv",
+        "docx"
+      ]
+    },
+    {
+      "id": "0102-null-policy",
+      "title": "A null policy shows the agent nothing",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "enabledTargets",
+      "input": {
+        "reader": "last-word",
+        "policy": null,
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0103-everything",
+      "title": "Everything allowed and present",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "enabledTargets",
+      "input": {
+        "reader": "dark-slide",
+        "policy": {
+          "allow": [
+            "pdf",
+            "pptx",
+            "text",
+            "outline",
+            "markdown",
+            "csv"
+          ]
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": [
+        "markdown",
+        "outline",
+        "text",
+        "pptx",
+        "pdf"
+      ]
+    },
+    {
+      "id": "0104-injected-absent",
+      "title": "An injected-absent module hides pdf",
+      "since": "0.37.0",
+      "tags": [
+        "policy"
+      ],
+      "fn": "enabledTargets",
+      "input": {
+        "reader": "last-word",
+        "policy": {
+          "allow": [
+            "pdf",
+            "html"
+          ],
+          "modules": {
+            "fine-print": false
+          }
+        },
+        "environment": {
+          "fine-print": true,
+          "last-word": true
+        }
+      },
+      "expected": [
+        "html"
+      ]
+    }
+  ]
+}

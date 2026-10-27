@@ -1,0 +1,2025 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/content",
+  "cases": [
+    {
+      "id": "0001-minimal-envelope",
+      "title": "The smallest valid content: version and an empty item list",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "id": "0002-the-plan-example",
+      "title": "The plan's section 3.1 example validates as written",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "kind": "xlsx",
+            "package": "holy-sheet",
+            "version": "2.11.0",
+            "selector": {
+              "sheet": "Q4",
+              "range": "A1:D20"
+            },
+            "sourceKind": "document"
+          },
+          "items": [
+            {
+              "type": "table",
+              "caption": "Q4 revenue",
+              "headerRows": 1,
+              "columns": [
+                {
+                  "width": 0.3
+                },
+                {
+                  "width": 0.7,
+                  "align": "right"
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Region"
+                    },
+                    {
+                      "t": "string",
+                      "v": "Revenue"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "NA",
+                      "runs": [
+                        {
+                          "text": "NA",
+                          "bold": true
+                        }
+                      ]
+                    },
+                    {
+                      "t": "number",
+                      "v": 4820000,
+                      "text": "$4,820,000.00",
+                      "format": {
+                        "kind": "currency",
+                        "currency": "USD",
+                        "decimals": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Total"
+                    },
+                    {
+                      "t": "number",
+                      "v": 12180000,
+                      "text": "$12,180,000.00",
+                      "formula": "SUM(B2:B4)"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Notes",
+                      "colSpan": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Method"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "See ",
+                  "italic": true
+                },
+                {
+                  "text": "the site",
+                  "link": "https://example.com"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "ordered": false,
+              "items": [
+                {
+                  "runs": [
+                    {
+                      "text": "a"
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "image",
+              "ref": "img1",
+              "alt": "Logo",
+              "widthPx": 240
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            }
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "chart",
+                "count": 1
+              }
+            ],
+            "approximated": [
+              {
+                "kind": "format-approximated",
+                "count": 3
+              }
+            ],
+            "guard": {
+              "findings": [
+                {
+                  "rule": "invisible-chars",
+                  "count": 2
+                }
+              ]
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true
+      },
+      "notes": "Every key the plan shows is in the spec, including source.kind/version/sourceKind, a formula on a typed number, a bold run on a string and a colSpan of 2."
+    },
+    {
+      "id": "0003-wrong-version",
+      "title": "fancyContent 2 is not version 1",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 2,
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/fancyContent"
+      }
+    },
+    {
+      "id": "0004-missing-version",
+      "title": "No fancyContent key",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/fancyContent"
+      }
+    },
+    {
+      "id": "0005-unknown-envelope-key",
+      "title": "An unknown envelope key is refused, not carried",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [],
+          "script": "x"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/script"
+      },
+      "notes": "SPEC 2: every object is closed."
+    },
+    {
+      "id": "0006-items-not-array",
+      "title": "items must be an array",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": {}
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items"
+      }
+    },
+    {
+      "id": "0007-unknown-item-type",
+      "title": "An item type outside the four",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "html",
+              "html": "<b>x</b>"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/type"
+      }
+    },
+    {
+      "id": "0008-unknown-cell-key",
+      "title": "A cell key outside the spec (style) is refused",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "x",
+                      "style": {
+                        "color": "red"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/style"
+      }
+    },
+    {
+      "id": "0009-number-with-string-value",
+      "title": "t number requires a JSON number",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": "12"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/v"
+      }
+    },
+    {
+      "id": "0010-empty-with-value",
+      "title": "t empty must not carry v",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "empty",
+                      "v": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/v"
+      }
+    },
+    {
+      "id": "0011-date-not-a-calendar-date",
+      "title": "2026-02-30 matches the pattern and is not a date",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "date",
+                      "v": "2026-02-30"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/v"
+      }
+    },
+    {
+      "id": "0012-datetime-without-z",
+      "title": "A datetime must end in Z",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "datetime",
+                      "v": "2026-10-27T14:05:09"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/v"
+      }
+    },
+    {
+      "id": "0013-error-without-hash",
+      "title": "An error value begins with #",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "error",
+                      "v": "DIV/0"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/v"
+      }
+    },
+    {
+      "id": "0014-currency-on-number-kind",
+      "title": "currency is allowed only with kind currency",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 1,
+                      "format": {
+                        "kind": "number",
+                        "currency": "USD"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/format/currency"
+      }
+    },
+    {
+      "id": "0015-decimals-over-ten",
+      "title": "decimals is 0-10",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 1,
+                      "format": {
+                        "kind": "number",
+                        "decimals": 11
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/format/decimals"
+      }
+    },
+    {
+      "id": "0016-runs-disagree-with-value",
+      "title": "Runs must concatenate to the display string",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Revenue",
+                      "runs": [
+                        {
+                          "text": "Rev"
+                        },
+                        {
+                          "text": "enew"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/runs"
+      },
+      "notes": "Otherwise the runs can carry text the value does not, and a consumer reading v sees a different document from one reading runs."
+    },
+    {
+      "id": "0017-bold-number-runs-on-display",
+      "title": "Runs on a number concatenate to its display text",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 1234.5,
+                      "text": "$1,234.50",
+                      "format": {
+                        "kind": "currency"
+                      },
+                      "runs": [
+                        {
+                          "text": "$1,234.50",
+                          "bold": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true
+      },
+      "notes": "SPEC 17.4: runs are allowed on any cell, so a bold figure stays bold."
+    },
+    {
+      "id": "0018-javascript-link",
+      "title": "A javascript: link is refused",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "link": "javascript:alert(1)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/runs/0/link"
+      }
+    },
+    {
+      "id": "0019-uppercase-scheme",
+      "title": "The link pattern is case-sensitive, as fine-print's is",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "link": "HTTP://example.com"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/runs/0/link"
+      }
+    },
+    {
+      "id": "0020-link-with-space",
+      "title": "A space is outside printable ASCII 0x21-0x7E",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "link": "https://example.com/a b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/runs/0/link"
+      }
+    },
+    {
+      "id": "0021-mailto-link",
+      "title": "mailto: is allowed",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "link": "mailto:team@example.com"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "id": "0022-ragged-table",
+      "title": "A row narrower than row 0 is not a grid",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/1"
+      }
+    },
+    {
+      "id": "0023-span-below-last-row",
+      "title": "A rowSpan past the last row",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a",
+                      "rowSpan": 3
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0"
+      },
+      "notes": "The path is the row holding the spanning cell (SPEC 3.1)."
+    },
+    {
+      "id": "0024-html-style-spans",
+      "title": "HTML-style spans: covered slots are absent",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a",
+                      "rowSpan": 2
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "wide",
+                      "colSpan": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "id": "0025-columns-length-mismatch",
+      "title": "columns must match the grid width",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "width": 1
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/columns"
+      }
+    },
+    {
+      "id": "0026-header-rows-over-row-count",
+      "title": "headerRows may not exceed the rows",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 2,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/headerRows"
+      }
+    },
+    {
+      "id": "0027-heading-without-level",
+      "title": "A heading needs a level",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "heading",
+              "runs": [
+                {
+                  "text": "H"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/level"
+      }
+    },
+    {
+      "id": "0028-paragraph-with-level",
+      "title": "A paragraph may not carry a level",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "P"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/level"
+      }
+    },
+    {
+      "id": "0029-image-ref-missing",
+      "title": "An image item must name an images entry",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "nope"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/ref"
+      }
+    },
+    {
+      "id": "0030-png-label-jpeg-bytes",
+      "title": "The magic bytes must agree with the mime",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "/9j/4AAAAAAAAAAAAAAAAA=="
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/images/img1/data"
+      }
+    },
+    {
+      "id": "0031-gif-mime",
+      "title": "Only PNG and JPEG",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/gif",
+              "data": "R0lGODlhAAAAAAAAAAAAAA=="
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/images/img1/mime"
+      }
+    },
+    {
+      "id": "0032-bad-base64",
+      "title": "base64 with a character outside the alphabet",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "iVBO*w0K"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/images/img1/data"
+      }
+    },
+    {
+      "id": "0033-unreferenced-image",
+      "title": "Image bytes nothing references are refused",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            },
+            "img2": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/images/img2"
+      }
+    },
+    {
+      "id": "0034-image-key-with-slash",
+      "title": "A bad key is located with RFC 6901 escaping",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "../x"
+            }
+          ],
+          "images": {
+            "../x": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/images/..~1x"
+      },
+      "notes": "The slash in the key is ~1 in the pointer. A runner that builds paths by string concatenation without escaping fails this row."
+    },
+    {
+      "id": "0035-unknown-report-kind",
+      "title": "A report kind outside the closed list",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "report": {
+            "dropped": [
+              {
+                "kind": "secret",
+                "count": 1
+              }
+            ],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/report/dropped/0/kind"
+      }
+    },
+    {
+      "id": "0036-kind-in-wrong-list",
+      "title": "chart is a dropped kind, not an approximated one",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "chart",
+                "count": 1
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/report/approximated/0/kind"
+      }
+    },
+    {
+      "id": "0037-report-count-zero",
+      "title": "A report entry counts at least 1",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "report": {
+            "dropped": [
+              {
+                "kind": "chart",
+                "count": 0
+              }
+            ],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/report/dropped/0/count"
+      }
+    },
+    {
+      "id": "0038-unknown-source-key",
+      "title": "source is closed too",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "holy-sheet",
+            "token": "x"
+          },
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/source/token"
+      }
+    },
+    {
+      "id": "0039-too-many-items",
+      "title": "content_too_many_items",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "limits": {
+            "items": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_too_many_items",
+        "path": "/items"
+      }
+    },
+    {
+      "id": "0040-too-many-rows",
+      "title": "content_too_many_rows",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "limits": {
+            "rows": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_too_many_rows",
+        "path": "/items/0"
+      }
+    },
+    {
+      "id": "0041-too-many-columns",
+      "title": "content_too_many_columns",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "limits": {
+            "columns": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_too_many_columns",
+        "path": "/items/0"
+      }
+    },
+    {
+      "id": "0042-too-many-cells",
+      "title": "content_too_many_cells",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "limits": {
+            "cells": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_too_many_cells",
+        "path": "/items"
+      }
+    },
+    {
+      "id": "0043-too-many-images",
+      "title": "content_too_many_images",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "a"
+            },
+            {
+              "type": "image",
+              "ref": "b"
+            }
+          ],
+          "images": {
+            "a": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            },
+            "b": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            }
+          }
+        },
+        "options": {
+          "limits": {
+            "images": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_too_many_images",
+        "path": "/images"
+      }
+    },
+    {
+      "id": "0044-image-too-large",
+      "title": "image_too_large",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            }
+          }
+        },
+        "options": {
+          "limits": {
+            "imageBytes": 16
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "image_too_large",
+        "path": "/images/img1"
+      },
+      "notes": "The fixture PNG decodes to 69 bytes."
+    },
+    {
+      "id": "0045-content-too-large",
+      "title": "content_too_large",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "abcd"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "limits": {
+            "stringBytes": 4
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_too_large",
+        "path": ""
+      },
+      "notes": "type and role are string values too: 4 + 9 + 4 = 17 bytes."
+    },
+    {
+      "id": "0046-unknown-limit-throws",
+      "title": "An unknown limit name throws: bad options are not content",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": []
+        },
+        "options": {
+          "limits": {
+            "pages": 1
+          }
+        }
+      },
+      "expected": {
+        "throws": "options_invalid"
+      }
+    },
+    {
+      "id": "0047-nested-list",
+      "title": "A nested list validates",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "list",
+              "ordered": true,
+              "items": [
+                {
+                  "runs": [
+                    {
+                      "text": "a"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "runs": [
+                        {
+                          "text": "a.1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "id": "0048-empty-list",
+      "title": "A list needs at least one item",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "list",
+              "items": []
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/items"
+      }
+    },
+    {
+      "id": "0049-unknown-text-role",
+      "title": "role is heading or paragraph",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "notes",
+              "runs": []
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/role"
+      }
+    },
+    {
+      "id": "0050-version-as-float",
+      "title": "1.0 is the number 1",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1.0,
+          "items": []
+        }
+      },
+      "expected": {
+        "ok": true
+      },
+      "notes": "JSON has one number type; a validator comparing types rather than values refuses a valid envelope."
+    },
+    {
+      "id": "0051-envelope-keys-before-items",
+      "title": "Check order: an unknown envelope key is found before a bad item",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "zz": 1,
+          "items": [
+            {
+              "type": "html"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/zz"
+      }
+    },
+    {
+      "id": "0052-images-before-items",
+      "title": "Check order: the images map is checked before the items",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "html"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/gif",
+              "data": "R0lGODlhAAAAAAAAAAAAAA=="
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/images/img1/mime"
+      }
+    },
+    {
+      "id": "0053-structure-before-limits",
+      "title": "Check order: structure first, then limits",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "html"
+            }
+          ]
+        },
+        "options": {
+          "limits": {
+            "items": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/1/type"
+      }
+    },
+    {
+      "id": "0054-datetime-hour-24",
+      "title": "Hour 24 is not a time",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "datetime",
+                      "v": "2026-10-27T24:00:00Z"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/0/cells/0/v"
+      }
+    },
+    {
+      "id": "0055-leap-day",
+      "title": "2028-02-29 is a date",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "date",
+                      "v": "2028-02-29"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true
+      }
+    },
+    {
+      "id": "0056-integer-as-float",
+      "title": "colSpan 2.0 is an integer; 1.5 is not",
+      "since": "0.37.0",
+      "tags": [
+        "content"
+      ],
+      "fn": "validateContent",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a",
+                      "colSpan": 2.0
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "b",
+                      "colSpan": 1.5
+                    },
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "content_invalid",
+        "path": "/items/0/rows/1/cells/0/colSpan"
+      }
+    }
+  ]
+}

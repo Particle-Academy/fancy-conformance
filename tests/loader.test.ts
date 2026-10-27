@@ -255,8 +255,23 @@ test("no golden carries an integer this REFERENCE LANGUAGE cannot represent", ()
   //
   // The corpus is JSON on disk, so the check reads the TEXT. Parsing it here
   // would destroy the evidence with the very defect being looked for.
+  //
+  // A WHOLE JSON number token is read, and only an integer literal is judged.
+  // Until 0.37.0 the scan matched bare digit runs, so the fractional part of a
+  // float golden (`0.30000000000000004`, `0.19999999999999998`) read as an
+  // unsafe integer and failed the corpus. A fraction or an exponent form is a
+  // double literal, which every runtime parses to the same double; only an
+  // integer literal can be rounded by the reader without anyone noticing.
   const stripStrings = (json: string) => json.replace(/"(?:[^"\\]|\\.)*"/g, '""');
   const MAX_SAFE = 9007199254740991n;
+  const unsafeIntegers = (json: string): string[] =>
+    [...stripStrings(json).matchAll(/-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g)]
+      .map((t) => t[0])
+      .filter((t) => /^-?\d+$/.test(t) && (BigInt(t) > MAX_SAFE || BigInt(t) < -MAX_SAFE));
+
+  // The scanner itself, both ways, so a future edit cannot quietly blind it.
+  assert.deepEqual(unsafeIntegers('{"a": 9007199254740993, "b": -9007199254740993}'), ["9007199254740993", "-9007199254740993"]);
+  assert.deepEqual(unsafeIntegers('{"a": 0.30000000000000004, "b": 1e+300, "c": 9007199254740991, "d": "9007199254740993"}'), []);
 
   const offenders: string[] = [];
 
@@ -269,12 +284,7 @@ test("no golden carries an integer this REFERENCE LANGUAGE cannot represent", ()
       continue; // a directory-format suite has no case table
     }
 
-    for (const token of stripStrings(raw).matchAll(/-?\d+/g)) {
-      const value = BigInt(token[0]);
-      if (value > MAX_SAFE || value < -MAX_SAFE) {
-        offenders.push(`${suite}: ${token[0]}`);
-      }
-    }
+    for (const token of unsafeIntegers(raw)) offenders.push(`${suite}: ${token}`);
   }
 
   assert.deepEqual(
@@ -286,4 +296,35 @@ test("no golden carries an integer this REFERENCE LANGUAGE cannot represent", ()
       "implementation parse it, the way shared/decimal already does for its " +
       "numeric-string rows.",
   );
+});
+
+test("the exchange suites and doc-model/shared load, every row with a function", () => {
+  // Exact counts on purpose: a row QUIETLY LOST between the generator and a
+  // loader is the failure this catches. Move the numbers with the suites.
+  const expected: Record<string, number> = {
+    "doc-model/shared": 20,
+    "exchange/content": 56,
+    "exchange/csv": 12,
+    "exchange/from-dark-slide": 18,
+    "exchange/from-fine-print": 9,
+    "exchange/from-holy-sheet": 32,
+    "exchange/from-last-word": 22,
+    "exchange/limits": 32,
+    "exchange/number-display": 44,
+    "exchange/policy": 25,
+    "exchange/range": 51,
+    "exchange/report-kinds": 40,
+    "exchange/to-dark-slide": 13,
+    "exchange/to-fine-print": 11,
+    "exchange/to-holy-sheet": 9,
+    "exchange/to-last-word": 11,
+  };
+  const found = listSuites().filter((s) => s.startsWith("exchange/") || s.startsWith("doc-model/"));
+  assert.deepEqual(found, Object.keys(expected).sort());
+  for (const [suite, n] of Object.entries(expected)) {
+    const { manifest, cases } = loadSuite(suite);
+    assert.equal(cases.length, n, suite);
+    const fns = Object.keys(manifest.contract.functions ?? {});
+    for (const c of cases) assert.ok(c.fn && fns.includes(c.fn), `${suite}/${c.id} names no declared function`);
+  }
 });

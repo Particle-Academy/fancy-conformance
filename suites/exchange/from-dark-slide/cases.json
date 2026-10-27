@@ -1,0 +1,1904 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/from-dark-slide",
+  "cases": [
+    {
+      "id": "0001-plain-text",
+      "title": "Plain text: paragraphs on blank lines, CRLF normalised",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "Line one\r\nline two\n  \nNext",
+                  "format": "plain"
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Line one\nline two"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Next"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "A line of two spaces is blank (SPEC 10, paragraph split)."
+    },
+    {
+      "id": "0002-markdown-literal",
+      "title": "Markdown is kept literally and reported",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "**Bold** claim",
+                  "format": "markdown"
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              },
+              {
+                "kind": "markup-as-text",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "**Bold** claim"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0003-table",
+      "title": "A table: labels are the header, scalars typed by JSON type, fractions with the remainder shared",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "plan",
+                      "label": "Plan",
+                      "width": 0.25
+                    },
+                    {
+                      "key": "price",
+                      "align": "right"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "plan": "Starter",
+                      "price": 49
+                    },
+                    {
+                      "plan": null,
+                      "price": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "columns": [
+                {
+                  "width": 0.25
+                },
+                {
+                  "width": 0.75,
+                  "align": "right"
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Plan"
+                    },
+                    {
+                      "t": "string",
+                      "v": "price"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Starter"
+                    },
+                    {
+                      "t": "number",
+                      "v": 49
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "empty"
+                    },
+                    {
+                      "t": "bool",
+                      "v": true
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "price has no label: the key is the header text."
+    },
+    {
+      "id": "0004-positional-and-spec",
+      "title": "Positional rows, a cell spec with a span, a value under the span",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A"
+                    },
+                    {
+                      "key": "b",
+                      "label": "B"
+                    }
+                  ],
+                  "rows": [
+                    [
+                      "x",
+                      "y"
+                    ],
+                    {
+                      "a": {
+                        "text": "wide",
+                        "colSpan": 2,
+                        "bold": true,
+                        "fill": "#FF0000"
+                      },
+                      "b": "under the span"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "cell-style-dropped",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0/rows/1/a"
+                ]
+              },
+              {
+                "kind": "hidden-element",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0/rows/1/b"
+                ]
+              }
+            ],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "A"
+                    },
+                    {
+                      "t": "string",
+                      "v": "B"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "x"
+                    },
+                    {
+                      "t": "string",
+                      "v": "y"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "wide",
+                      "colSpan": 2,
+                      "runs": [
+                        {
+                          "text": "wide",
+                          "bold": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "No widths anywhere is an equal split, so columns is omitted."
+    },
+    {
+      "id": "0005-no-header",
+      "title": "style.header false: no header row",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "a": "v"
+                    }
+                  ],
+                  "style": {
+                    "header": false
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "v"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0006-images",
+      "title": "A data URI is carried; a path and a URL are never opened",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "i1",
+                  "type": "image",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
+                  "alt": "Logo"
+                },
+                {
+                  "id": "i2",
+                  "type": "image",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "src": "/etc/passwd"
+                },
+                {
+                  "id": "i3",
+                  "type": "image",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "src": "https://example.com/a.png"
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "image",
+                "count": 2,
+                "where": [
+                  "/slides/0/elements/1",
+                  "/slides/0/elements/2"
+                ]
+              }
+            ],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1",
+              "alt": "Logo"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            }
+          }
+        }
+      },
+      "notes": "Plan section 8: dark-slide's local-path and file:// reads are never reached from an extract."
+    },
+    {
+      "id": "0007-other-elements",
+      "title": "chart, shape, embed, kpiBand and code",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "c",
+                  "type": "chart",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "option": {}
+                },
+                {
+                  "id": "sh",
+                  "type": "shape",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "shape": "rect"
+                },
+                {
+                  "id": "e",
+                  "type": "embed",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "src": "x"
+                },
+                {
+                  "id": "k",
+                  "type": "kpiBand",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "items": []
+                },
+                {
+                  "id": "cd",
+                  "type": "code",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "code": "x = 1",
+                  "language": "py"
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "chart",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              },
+              {
+                "kind": "composite-element",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/3"
+                ]
+              },
+              {
+                "kind": "embedded-object",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/2"
+                ]
+              },
+              {
+                "kind": "shape",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/1"
+                ]
+              }
+            ],
+            "approximated": [
+              {
+                "kind": "code-as-text",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/4"
+                ]
+              },
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/4"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x = 1",
+                  "code": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0008-hidden",
+      "title": "Hidden elements and slides are skipped and reported",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "seen",
+                  "format": "plain"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "hidden",
+                  "format": "plain",
+                  "hidden": true
+                }
+              ]
+            },
+            {
+              "id": "s2",
+              "elements": [
+                {
+                  "id": "t3",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "secret",
+                  "format": "plain"
+                }
+              ],
+              "hidden": true
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "hidden-element",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/1"
+                ]
+              },
+              {
+                "kind": "hidden-slide",
+                "count": 1,
+                "where": [
+                  "/slides/1"
+                ]
+              }
+            ],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "seen"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0009-notes",
+      "title": "Notes follow the slide's elements as paragraphs",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "body",
+                  "format": "plain"
+                }
+              ],
+              "notes": "Say *this*\n\nthen that"
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              },
+              {
+                "kind": "markup-as-text",
+                "count": 1,
+                "where": [
+                  "/slides/0/notes"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "body"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Say *this*"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "then that"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0010-slide-and-element",
+      "title": "{slide, element} picks one element by id",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "one",
+                  "format": "plain"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "two",
+                  "format": "plain"
+                }
+              ]
+            },
+            {
+              "id": "s2",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A"
+                    }
+                  ],
+                  "rows": []
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "elements": [
+                {
+                  "id": "t3",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "three",
+                  "format": "plain"
+                }
+              ],
+              "hidden": true
+            }
+          ]
+        },
+        "selector": {
+          "slide": 0,
+          "element": "t2"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide",
+            "selector": {
+              "slide": 0,
+              "element": "t2"
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/1"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "two"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0011-slide-and-table",
+      "title": "{slide, table} picks the slide's k-th table",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "one",
+                  "format": "plain"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "two",
+                  "format": "plain"
+                }
+              ]
+            },
+            {
+              "id": "s2",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A"
+                    }
+                  ],
+                  "rows": []
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "elements": [
+                {
+                  "id": "t3",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "three",
+                  "format": "plain"
+                }
+              ],
+              "hidden": true
+            }
+          ]
+        },
+        "selector": {
+          "slide": 1,
+          "table": 0
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide",
+            "selector": {
+              "slide": 1,
+              "table": 0
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/1/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "A"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0012-slide-range",
+      "title": "{slides: [a, b]} inclusive",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "one",
+                  "format": "plain"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "two",
+                  "format": "plain"
+                }
+              ]
+            },
+            {
+              "id": "s2",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A"
+                    }
+                  ],
+                  "rows": []
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "elements": [
+                {
+                  "id": "t3",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "three",
+                  "format": "plain"
+                }
+              ],
+              "hidden": true
+            }
+          ]
+        },
+        "selector": {
+          "slides": [
+            0,
+            1
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide",
+            "selector": {
+              "slides": [
+                0,
+                1
+              ]
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 3,
+                "where": [
+                  "/slides/0/elements/0",
+                  "/slides/0/elements/1",
+                  "/slides/1/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "one"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "two"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headerRows": 1,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "A"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0013-hidden-slide-selected",
+      "title": "Naming a hidden slide is refused",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "one",
+                  "format": "plain"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "two",
+                  "format": "plain"
+                }
+              ]
+            },
+            {
+              "id": "s2",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A"
+                    }
+                  ],
+                  "rows": []
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "elements": [
+                {
+                  "id": "t3",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "three",
+                  "format": "plain"
+                }
+              ],
+              "hidden": true
+            }
+          ]
+        },
+        "selector": {
+          "slide": 2
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_hidden"
+        }
+      }
+    },
+    {
+      "id": "0014-slide-out-of-range",
+      "title": "No such slide",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "one",
+                  "format": "plain"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "two",
+                  "format": "plain"
+                }
+              ]
+            },
+            {
+              "id": "s2",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A"
+                    }
+                  ],
+                  "rows": []
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "elements": [
+                {
+                  "id": "t3",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "three",
+                  "format": "plain"
+                }
+              ],
+              "hidden": true
+            }
+          ]
+        },
+        "selector": {
+          "slide": 9
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_not_found"
+        }
+      }
+    },
+    {
+      "id": "0015-weights",
+      "title": "Any width over 1 makes weights; unset columns weigh 1",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "width": 2
+                    },
+                    {
+                      "key": "b"
+                    },
+                    {
+                      "key": "c",
+                      "width": 1
+                    }
+                  ],
+                  "rows": []
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "columns": [
+                {
+                  "width": 0.5
+                },
+                {
+                  "width": 0.25
+                },
+                {
+                  "width": 0.25
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    },
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0016-styled-text",
+      "title": "A text element with a style reports run-style-dropped",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "x",
+                  "format": "plain",
+                  "style": {
+                    "fontSize": 40,
+                    "color": "#FF0000"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "run-style-dropped",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0017-invisible-in-a-cell",
+      "title": "Invisible characters in a table cell",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "tb",
+                  "type": "table",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "columns": [
+                    {
+                      "key": "a",
+                      "label": "A​"
+                    }
+                  ],
+                  "rows": [
+                    {
+                      "a": "v󠁩"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/slides/0/elements/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": [
+                {
+                  "rule": "invisible-chars",
+                  "count": 2
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "A"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "v"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0018-include-hidden",
+      "title": "includeHidden includes a hidden element",
+      "since": "0.37.0",
+      "tags": [
+        "from-dark-slide"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Deck",
+          "slides": [
+            {
+              "id": "s1",
+              "elements": [
+                {
+                  "id": "t1",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "seen",
+                  "format": "plain"
+                },
+                {
+                  "id": "t2",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "hidden",
+                  "format": "plain",
+                  "hidden": true
+                }
+              ]
+            },
+            {
+              "id": "s2",
+              "elements": [
+                {
+                  "id": "t3",
+                  "type": "text",
+                  "x": 0.1,
+                  "y": 0.1,
+                  "w": 0.8,
+                  "h": 0.6,
+                  "content": "secret",
+                  "format": "plain"
+                }
+              ],
+              "hidden": true
+            }
+          ]
+        },
+        "selector": {
+          "slide": 0
+        },
+        "options": {
+          "includeHidden": true
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "dark-slide",
+            "selector": {
+              "slide": 0
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 2,
+                "where": [
+                  "/slides/0/elements/0",
+                  "/slides/0/elements/1"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "seen"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "hidden"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

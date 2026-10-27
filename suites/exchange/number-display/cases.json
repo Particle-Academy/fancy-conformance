@@ -1,0 +1,776 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/number-display",
+  "cases": [
+    {
+      "id": "0001-number-two-places",
+      "title": "Grouped, two places",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234.5,
+        "format": {
+          "kind": "number",
+          "decimals": 2
+        }
+      },
+      "expected": "1,234.50"
+    },
+    {
+      "id": "0002-number-default-zero-places",
+      "title": "number defaults to 0 places, half away from zero",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234.5,
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "1,235",
+      "notes": "NumFmtBuilder writes #,##0 when decimals is absent."
+    },
+    {
+      "id": "0003-negative-half",
+      "title": "-1234.5 at 0 places rounds away from zero",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": -1234.5,
+        "format": {
+          "kind": "number",
+          "decimals": 0
+        }
+      },
+      "expected": "-1,235",
+      "notes": "Math.round gives -1234."
+    },
+    {
+      "id": "0004-1-005",
+      "title": "1.005 at 2 places is 1.01",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1.005,
+        "format": {
+          "kind": "number",
+          "decimals": 2
+        }
+      },
+      "expected": "1.01",
+      "notes": "The double is 1.00499999999999989...; a binary toFixed gives 1.00. The spec rounds the shortest decimal, which is what PHP's number_format gives."
+    },
+    {
+      "id": "0005-2-675",
+      "title": "2.675 at 2 places is 2.68",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 2.675,
+        "format": {
+          "kind": "number",
+          "decimals": 2
+        }
+      },
+      "expected": "2.68",
+      "notes": "toFixed gives 2.67."
+    },
+    {
+      "id": "0006-half-to-one",
+      "title": "0.5 at 0 places is 1",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 0.5,
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "1",
+      "notes": "Half-even gives 0."
+    },
+    {
+      "id": "0007-negative-half-to-one",
+      "title": "-0.5 at 0 places is -1",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": -0.5,
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "-1"
+    },
+    {
+      "id": "0008-two-and-a-half",
+      "title": "2.5 at 0 places is 3",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 2.5,
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "3",
+      "notes": "Half-even gives 2."
+    },
+    {
+      "id": "0009-negative-rounds-to-zero",
+      "title": "-0.004 at 2 places has no minus sign",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": -0.004,
+        "format": {
+          "kind": "number",
+          "decimals": 2
+        }
+      },
+      "expected": "0.00",
+      "notes": "SPEC 6.2 step 4."
+    },
+    {
+      "id": "0010-carry-through-grouping",
+      "title": "999999.995 carries into a new group",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 999999.995,
+        "format": {
+          "kind": "number",
+          "decimals": 2
+        }
+      },
+      "expected": "1,000,000.00"
+    },
+    {
+      "id": "0011-1e21",
+      "title": "1e21 is written out, never in exponent form",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1e+21,
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "1,000,000,000,000,000,000,000",
+      "notes": "String(1e21) is '1e+21'."
+    },
+    {
+      "id": "0012-tiny-to-zero",
+      "title": "1.5e-7 at 2 places",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1.5e-07,
+        "format": {
+          "kind": "number",
+          "decimals": 2
+        }
+      },
+      "expected": "0.00"
+    },
+    {
+      "id": "0013-tiny-ten-places",
+      "title": "1.5e-7 at 10 places",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1.5e-07,
+        "format": {
+          "kind": "number",
+          "decimals": 10
+        }
+      },
+      "expected": "0.0000001500",
+      "notes": "String(1.5e-7) is '1.5e-7'."
+    },
+    {
+      "id": "0014-three-places-padded",
+      "title": "Padding to 3 places",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234567,
+        "format": {
+          "kind": "number",
+          "decimals": 3
+        }
+      },
+      "expected": "1,234,567.000"
+    },
+    {
+      "id": "0015-small-integer",
+      "title": "123 with no decimals",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 123,
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "123"
+    },
+    {
+      "id": "0101-currency-usd",
+      "title": "USD",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234.5,
+        "format": {
+          "kind": "currency",
+          "currency": "USD",
+          "decimals": 2
+        }
+      },
+      "expected": "$1,234.50"
+    },
+    {
+      "id": "0102-currency-defaults",
+      "title": "No currency is USD; currency defaults to 2 places",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234.5,
+        "format": {
+          "kind": "currency"
+        }
+      },
+      "expected": "$1,234.50"
+    },
+    {
+      "id": "0103-currency-negative-eur",
+      "title": "Minus before the symbol",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": -1234.5,
+        "format": {
+          "kind": "currency",
+          "currency": "EUR"
+        }
+      },
+      "expected": "-€1,234.50",
+      "notes": "NumFmtBuilder writes -\"€\"#,##0.00."
+    },
+    {
+      "id": "0104-currency-chf",
+      "title": "CHF has no space",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1,
+        "format": {
+          "kind": "currency",
+          "currency": "CHF"
+        }
+      },
+      "expected": "CHF1.00"
+    },
+    {
+      "id": "0105-currency-unknown-code",
+      "title": "An unknown code is the code and a space",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 5,
+        "format": {
+          "kind": "currency",
+          "currency": "SEK"
+        }
+      },
+      "expected": "SEK 5.00"
+    },
+    {
+      "id": "0106-currency-jpy-zero-places",
+      "title": "JPY at 0 places",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234.5,
+        "format": {
+          "kind": "currency",
+          "currency": "JPY",
+          "decimals": 0
+        }
+      },
+      "expected": "¥1,235"
+    },
+    {
+      "id": "0107-currency-negative-to-zero",
+      "title": "-0.001 is $0.00",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": -0.001,
+        "format": {
+          "kind": "currency"
+        }
+      },
+      "expected": "$0.00"
+    },
+    {
+      "id": "0108-currency-aud",
+      "title": "AUD is A$",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1000000,
+        "format": {
+          "kind": "currency",
+          "currency": "AUD"
+        }
+      },
+      "expected": "A$1,000,000.00"
+    },
+    {
+      "id": "0109-currency-zero",
+      "title": "Zero",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 0,
+        "format": {
+          "kind": "currency"
+        }
+      },
+      "expected": "$0.00"
+    },
+    {
+      "id": "0201-percent",
+      "title": "0.125 at 1 place",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 0.125,
+        "format": {
+          "kind": "percent",
+          "decimals": 1
+        }
+      },
+      "expected": "12.5%"
+    },
+    {
+      "id": "0202-percent-default",
+      "title": "percent defaults to 1 place",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 0.125,
+        "format": {
+          "kind": "percent"
+        }
+      },
+      "expected": "12.5%"
+    },
+    {
+      "id": "0203-percent-no-float-multiply",
+      "title": "0.145 at 0 places is 15%",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 0.145,
+        "format": {
+          "kind": "percent",
+          "decimals": 0
+        }
+      },
+      "expected": "15%",
+      "notes": "0.145 * 100 is 14.499999999999998 in binary, which rounds to 14%. SPEC 6.2 step 2 moves the decimal point."
+    },
+    {
+      "id": "0204-percent-not-grouped",
+      "title": "Percent is not grouped",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 12.345,
+        "format": {
+          "kind": "percent",
+          "decimals": 0
+        }
+      },
+      "expected": "1235%",
+      "notes": "NumFmtBuilder writes 0%, with no #,##."
+    },
+    {
+      "id": "0205-percent-negative-half",
+      "title": "-0.0005 at 1 place is -0.1%",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": -0.0005,
+        "format": {
+          "kind": "percent"
+        }
+      },
+      "expected": "-0.1%"
+    },
+    {
+      "id": "0206-percent-one",
+      "title": "1 is 100%",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1,
+        "format": {
+          "kind": "percent",
+          "decimals": 0
+        }
+      },
+      "expected": "100%"
+    },
+    {
+      "id": "0301-date",
+      "title": "A date as a date",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "date",
+        "v": "2026-10-27",
+        "format": {
+          "kind": "date"
+        }
+      },
+      "expected": "2026-10-27"
+    },
+    {
+      "id": "0302-datetime",
+      "title": "A datetime as a datetime",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "datetime",
+        "v": "2026-10-27T14:05:09Z",
+        "format": {
+          "kind": "datetime"
+        }
+      },
+      "expected": "2026-10-27 14:05:09"
+    },
+    {
+      "id": "0303-datetime-as-date",
+      "title": "A datetime shown as a date",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "datetime",
+        "v": "2026-10-27T14:05:09Z",
+        "format": {
+          "kind": "date"
+        }
+      },
+      "expected": "2026-10-27"
+    },
+    {
+      "id": "0304-date-as-datetime",
+      "title": "A date shown as a datetime",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "date",
+        "v": "2026-10-27",
+        "format": {
+          "kind": "datetime"
+        }
+      },
+      "expected": "2026-10-27 00:00:00"
+    },
+    {
+      "id": "0305-number-with-date-kind",
+      "title": "A number with a date kind is canonical",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 45000,
+        "format": {
+          "kind": "date"
+        }
+      },
+      "expected": "45000",
+      "notes": "No serial-date conversion: the reader already turned serials into ISO strings."
+    },
+    {
+      "id": "0306-date-with-number-kind",
+      "title": "A date with a number kind is canonical",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "date",
+        "v": "2026-10-27",
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "2026-10-27"
+    },
+    {
+      "id": "0401-no-format",
+      "title": "No format: canonical",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234.5
+      },
+      "expected": "1234.5"
+    },
+    {
+      "id": "0402-no-format-float-noise",
+      "title": "Canonical is shared/decimal formatFloat",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 0.30000000000000004
+      },
+      "expected": "0.3",
+      "notes": "formatFloat keeps 14 places: 0.3."
+    },
+    {
+      "id": "0403-text-kind",
+      "title": "kind text: canonical",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": 1234.5,
+        "format": {
+          "kind": "text"
+        }
+      },
+      "expected": "1234.5"
+    },
+    {
+      "id": "0404-bool",
+      "title": "A bool ignores the format",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "bool",
+        "v": true,
+        "format": {
+          "kind": "currency"
+        }
+      },
+      "expected": "TRUE"
+    },
+    {
+      "id": "0405-empty",
+      "title": "empty is the empty string",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "empty"
+      },
+      "expected": ""
+    },
+    {
+      "id": "0406-error",
+      "title": "An error is itself",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "error",
+        "v": "#N/A",
+        "format": {
+          "kind": "number"
+        }
+      },
+      "expected": "#N/A"
+    },
+    {
+      "id": "0407-string",
+      "title": "A string ignores the format",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "string",
+        "v": "abc",
+        "format": {
+          "kind": "currency"
+        }
+      },
+      "expected": "abc"
+    },
+    {
+      "id": "0408-negative-zero-canonical",
+      "title": "-0 is 0",
+      "since": "0.37.0",
+      "tags": [
+        "number-display"
+      ],
+      "fn": "display",
+      "input": {
+        "t": "number",
+        "v": -0.0
+      },
+      "expected": "0"
+    }
+  ]
+}

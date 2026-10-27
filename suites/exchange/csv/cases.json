@@ -1,0 +1,579 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/csv",
+  "cases": [
+    {
+      "id": "0001-simple",
+      "title": "Every record ends in CRLF",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "headerRows": 1,
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "a"
+                },
+                {
+                  "t": "string",
+                  "v": "b"
+                }
+              ]
+            },
+            {
+              "cells": [
+                {
+                  "t": "number",
+                  "v": 1
+                },
+                {
+                  "t": "number",
+                  "v": 2.5
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "a,b\r\n1,2.5\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0002-quoting",
+      "title": "Quote on comma, quote, LF and CR; double the quote",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "a,b"
+                },
+                {
+                  "t": "string",
+                  "v": "say \"hi\""
+                },
+                {
+                  "t": "string",
+                  "v": "l1\nl2"
+                },
+                {
+                  "t": "string",
+                  "v": "c\r"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "\"a,b\",\"say \"\"hi\"\"\",\"l1\nl2\",\"c\r\"\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0003-formula-injection",
+      "title": "= + - @ TAB CR are prefixed with ', on by default",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "=SUM(A1)"
+                },
+                {
+                  "t": "string",
+                  "v": "+1"
+                },
+                {
+                  "t": "string",
+                  "v": "-x"
+                },
+                {
+                  "t": "string",
+                  "v": "@x"
+                },
+                {
+                  "t": "string",
+                  "v": "\tx"
+                },
+                {
+                  "t": "string",
+                  "v": "\rx"
+                },
+                {
+                  "t": "string",
+                  "v": "ok"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "'=SUM(A1),'+1,'-x,'@x,'\tx,\"'\rx\",ok\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "csv-escaped",
+              "count": 6,
+              "where": [
+                "/rows/0/cells/0",
+                "/rows/0/cells/1",
+                "/rows/0/cells/2",
+                "/rows/0/cells/3",
+                "/rows/0/cells/4",
+                "/rows/0/cells/5"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "Owner decision 6. The CR field is escaped, then quoted."
+    },
+    {
+      "id": "0004-numbers-not-escaped",
+      "title": "A negative number is a number, not a formula",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "number",
+                  "v": -5
+                },
+                {
+                  "t": "string",
+                  "v": "-5"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "-5,'-5\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "csv-escaped",
+              "count": 1,
+              "where": [
+                "/rows/0/cells/1"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "Escaping numbers would corrupt every negative figure in an export."
+    },
+    {
+      "id": "0005-escaping-off",
+      "title": "The host may turn escaping off",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "=SUM(A1)"
+                },
+                {
+                  "t": "string",
+                  "v": "+1"
+                },
+                {
+                  "t": "string",
+                  "v": "-x"
+                },
+                {
+                  "t": "string",
+                  "v": "@x"
+                },
+                {
+                  "t": "string",
+                  "v": "\tx"
+                },
+                {
+                  "t": "string",
+                  "v": "\rx"
+                },
+                {
+                  "t": "string",
+                  "v": "ok"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "escapeFormulas": false
+        }
+      },
+      "expected": {
+        "text": "=SUM(A1),+1,-x,@x,\tx,\"\rx\",ok\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0006-canonical-by-default",
+      "title": "Canonical values by default",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "number",
+                  "v": 1234.5,
+                  "format": {
+                    "kind": "currency"
+                  },
+                  "text": "$1,234.50"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "1234.5\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0007-display",
+      "title": "display: true writes the display string (and quotes it)",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "number",
+                  "v": 1234.5,
+                  "format": {
+                    "kind": "currency"
+                  },
+                  "text": "$1,234.50"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "display": true
+        }
+      },
+      "expected": {
+        "text": "\"$1,234.50\"\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0008-spans",
+      "title": "A span writes empty fields in its covered slots",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "wide",
+                  "colSpan": 2,
+                  "rowSpan": 2
+                },
+                {
+                  "t": "string",
+                  "v": "c"
+                }
+              ]
+            },
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "d"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "wide,,c\r\n,,d\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "merge-flattened",
+              "count": 1,
+              "where": [
+                "/rows/0/cells/0"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0009-typed",
+      "title": "bool, empty, date and error",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "bool",
+                  "v": true
+                },
+                {
+                  "t": "empty"
+                },
+                {
+                  "t": "date",
+                  "v": "2026-10-27"
+                },
+                {
+                  "t": "error",
+                  "v": "#N/A"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "TRUE,,2026-10-27,#N/A\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0010-unicode",
+      "title": "UTF-8 text passes through",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "日本"
+                },
+                {
+                  "t": "string",
+                  "v": "é"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "日本,é\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0011-escape-then-quote",
+      "title": "An escaped field that needs quoting is escaped first",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "string",
+                  "v": "=a,b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "\"'=a,b\"\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "csv-escaped",
+              "count": 1,
+              "where": [
+                "/rows/0/cells/0"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0012-formula-metadata-ignored",
+      "title": "A formula cell writes its value",
+      "since": "0.37.0",
+      "tags": [
+        "csv"
+      ],
+      "fn": "toCsv",
+      "input": {
+        "table": {
+          "type": "table",
+          "rows": [
+            {
+              "cells": [
+                {
+                  "t": "number",
+                  "v": 30,
+                  "formula": "SUM(A1:A2)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "text": "30\r\n",
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "The value, not the formula: computed values only (plan section 5.1)."
+    }
+  ]
+}

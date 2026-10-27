@@ -395,3 +395,54 @@ fn the_graph_runs_error_goldens_are_exact_strings_not_substrings() {
         "the golden must carry the em dash the runtimes must agree on"
     );
 }
+
+#[test]
+fn the_exchange_suites_load_with_exact_counts() {
+    // Exact on purpose: a row QUIETLY LOST between the generator and this
+    // loader is the failure this catches. Move the numbers with the suites.
+    let expected: [(&str, usize); 16] = [
+        ("doc-model/shared", 20),
+        ("exchange/content", 56),
+        ("exchange/csv", 12),
+        ("exchange/from-dark-slide", 18),
+        ("exchange/from-fine-print", 9),
+        ("exchange/from-holy-sheet", 32),
+        ("exchange/from-last-word", 22),
+        ("exchange/limits", 32),
+        ("exchange/number-display", 44),
+        ("exchange/policy", 25),
+        ("exchange/range", 51),
+        ("exchange/report-kinds", 40),
+        ("exchange/to-dark-slide", 13),
+        ("exchange/to-fine-print", 11),
+        ("exchange/to-holy-sheet", 9),
+        ("exchange/to-last-word", 11),
+    ];
+    let found: Vec<String> = list_suites()
+        .unwrap()
+        .into_iter()
+        .filter(|s| s.starts_with("exchange/") || s.starts_with("doc-model/"))
+        .collect();
+    let names: Vec<String> = expected.iter().map(|(s, _)| (*s).to_string()).collect();
+    assert_eq!(found, names);
+
+    for (suite, count) in expected {
+        let rows = cases(suite, None).unwrap_or_else(|e| panic!("{suite}: {e}"));
+        assert_eq!(rows.len(), count, "{suite}");
+        let meta = manifest(suite, None).unwrap();
+        let functions = meta
+            .get("contract")
+            .and_then(|c| c.get("functions"))
+            .unwrap_or_else(|| panic!("{suite} declares no functions"));
+        for row in &rows {
+            let name = row
+                .function()
+                .unwrap_or_else(|| panic!("{} names no function", row.id()));
+            assert!(
+                functions.get(name).is_some(),
+                "{suite}/{} names an undeclared function",
+                row.id()
+            );
+        }
+    }
+}

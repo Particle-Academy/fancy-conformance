@@ -1,0 +1,2351 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/from-last-word",
+  "cases": [
+    {
+      "id": "0001-heading-paragraph-list",
+      "title": "Headings, paragraphs and lists; false flags are omitted; title and page are not content",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 1,
+              "runs": [
+                {
+                  "text": "Q4"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Revenue ",
+                  "bold": true
+                },
+                {
+                  "text": "grew",
+                  "italic": false
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "ordered": true,
+              "items": [
+                {
+                  "runs": [
+                    {
+                      "text": "a"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "runs": [
+                        {
+                          "text": "a.1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "page": {
+            "size": "a4"
+          }
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "heading",
+              "level": 1,
+              "runs": [
+                {
+                  "text": "Q4"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Revenue ",
+                  "bold": true
+                },
+                {
+                  "text": "grew"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "ordered": true,
+              "items": [
+                {
+                  "runs": [
+                    {
+                      "text": "a"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "runs": [
+                        {
+                          "text": "a.1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0002-run-style-dropped",
+      "title": "Colour and size are dropped, counted per run",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a",
+                  "color": "#FF0000"
+                },
+                {
+                  "text": "b",
+                  "size": 14,
+                  "bold": true
+                },
+                {
+                  "text": "c"
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "run-style-dropped",
+                "count": 2,
+                "where": [
+                  "/blocks/0/runs/0",
+                  "/blocks/0/runs/1"
+                ]
+              }
+            ],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                },
+                {
+                  "text": "b",
+                  "bold": true
+                },
+                {
+                  "text": "c"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0003-disallowed-link",
+      "title": "A javascript: link is removed, its text kept",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "click",
+                  "link": "javascript:alert(1)"
+                },
+                {
+                  "text": " site",
+                  "link": "https://example.com"
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "link",
+                "count": 1,
+                "where": [
+                  "/blocks/0/runs/0"
+                ]
+              }
+            ],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "click"
+                },
+                {
+                  "text": " site",
+                  "link": "https://example.com"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "last-word accepts any link (a deliberate delta, doc-model/shared); portable content does not."
+    },
+    {
+      "id": "0004-table",
+      "title": "A table: header rows, cell text, a styled run kept, widths normalised, shading reported",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Plan"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Price"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "header": true
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Starter"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "$49",
+                              "bold": true
+                            }
+                          ]
+                        }
+                      ],
+                      "shading": "#EEEEEE"
+                    }
+                  ]
+                }
+              ],
+              "widths": [
+                1,
+                3
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "cell-style-dropped",
+                "count": 1,
+                "where": [
+                  "/blocks/0/rows/1/cells/1"
+                ]
+              }
+            ],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "columns": [
+                {
+                  "width": 0.25
+                },
+                {
+                  "width": 0.75
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Plan"
+                    },
+                    {
+                      "t": "string",
+                      "v": "Price"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Starter"
+                    },
+                    {
+                      "t": "string",
+                      "v": "$49",
+                      "runs": [
+                        {
+                          "text": "$49",
+                          "bold": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0005-multi-paragraph-cell",
+      "title": "Paragraphs in a cell join with LF; runs only when something is styled",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a",
+                              "bold": true
+                            }
+                          ]
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "x"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "y"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a\nb",
+                      "runs": [
+                        {
+                          "text": "a",
+                          "bold": true
+                        },
+                        {
+                          "text": "\n"
+                        },
+                        {
+                          "text": "b"
+                        }
+                      ]
+                    },
+                    {
+                      "t": "string",
+                      "v": "x\ny"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0006-late-header-row",
+      "title": "A header row after a body row is a body row",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "h"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "header": true
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "H2"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "header": true
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "header-rows-flattened",
+                "count": 1,
+                "where": [
+                  "/blocks/0/rows/2"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "h"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "H2"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0007-nested-block",
+      "title": "A table inside a cell is dropped and reported",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "outer"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "table",
+                          "rows": [
+                            {
+                              "cells": [
+                                {
+                                  "blocks": [
+                                    {
+                                      "type": "paragraph",
+                                      "runs": [
+                                        {
+                                          "text": "inner"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "nested-block",
+                "count": 1,
+                "where": [
+                  "/blocks/0/rows/0/cells/0/blocks/1"
+                ]
+              }
+            ],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "outer"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0008-ragged-rows-padded",
+      "title": "Short rows are padded with empty cells, silently: nothing is lost",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "c"
+                    },
+                    {
+                      "t": "empty"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0009-code-quote-break-rule-chart",
+      "title": "code, quote, pageBreak, hr and chart",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "code",
+              "language": "php",
+              "text": "echo 1;"
+            },
+            {
+              "type": "quote",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "quoted"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "pageBreak"
+            },
+            {
+              "type": "hr"
+            },
+            {
+              "type": "chart",
+              "option": {
+                "series": []
+              }
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "chart",
+                "count": 1,
+                "where": [
+                  "/blocks/4"
+                ]
+              }
+            ],
+            "approximated": [
+              {
+                "kind": "code-as-text",
+                "count": 1,
+                "where": [
+                  "/blocks/0"
+                ]
+              },
+              {
+                "kind": "layout-not-preserved",
+                "count": 2,
+                "where": [
+                  "/blocks/2",
+                  "/blocks/3"
+                ]
+              },
+              {
+                "kind": "quote-flattened",
+                "count": 1,
+                "where": [
+                  "/blocks/1"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "echo 1;",
+                  "code": true
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "quoted"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0010-images",
+      "title": "PNG and JPEG become image items; a GIF is reported",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "image",
+              "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
+              "alt": "Logo",
+              "widthPx": 120
+            },
+            {
+              "type": "image",
+              "src": "data:image/gif;base64,R0lGODlhAAAAAAAAAAAAAA=="
+            },
+            {
+              "type": "image",
+              "src": "data:image/jpg;base64,/9j/4AAAAAAAAAAAAAAAAA=="
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [
+              {
+                "kind": "image",
+                "count": 1,
+                "where": [
+                  "/blocks/1"
+                ]
+              }
+            ],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1",
+              "alt": "Logo",
+              "widthPx": 120
+            },
+            {
+              "type": "image",
+              "ref": "img2"
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            },
+            "img2": {
+              "mime": "image/jpeg",
+              "data": "/9j/4AAAAAAAAAAAAAAAAA=="
+            }
+          }
+        }
+      },
+      "notes": "image/jpg is normalised to image/jpeg. Keys count carried images, so the JPEG is img2."
+    },
+    {
+      "id": "0011-table-by-index",
+      "title": "{table: 1} is the second top-level table",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "first"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "second"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Appendix"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "third"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": {
+          "table": 1
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word",
+            "selector": {
+              "table": 1
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "second"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0012-table-index-out-of-range",
+      "title": "{table: 5}",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "first"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "second"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Appendix"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "third"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": {
+          "table": 5
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_not_found"
+        }
+      }
+    },
+    {
+      "id": "0013-under-heading",
+      "title": "underHeading matches case-insensitively",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "first"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "second"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Appendix"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "third"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": {
+          "underHeading": "results",
+          "nth": 0
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word",
+            "selector": {
+              "underHeading": "results",
+              "nth": 0
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "second"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0014-under-heading-section-ends",
+      "title": "The section ends at the next heading of the same level",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "first"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "second"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Appendix"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "third"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": {
+          "underHeading": "Results",
+          "nth": 1
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_not_found"
+        }
+      },
+      "notes": "A third table exists, under Appendix; a reader that does not end the section returns it."
+    },
+    {
+      "id": "0015-block-range",
+      "title": "{blocks: [a, b]} is inclusive",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "first"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "second"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Appendix"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "third"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": {
+          "blocks": [
+            1,
+            2
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word",
+            "selector": {
+              "blocks": [
+                1,
+                2
+              ]
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "second"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0016-block-range-reversed",
+      "title": "a > b is invalid",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "first"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "second"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Appendix"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "third"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": {
+          "blocks": [
+            2,
+            1
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_invalid"
+        }
+      }
+    },
+    {
+      "id": "0017-block-range-past-end",
+      "title": "b past the last block",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "first"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Results"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "second"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Appendix"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "third"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": {
+          "blocks": [
+            0,
+            9
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_not_found"
+        }
+      }
+    },
+    {
+      "id": "0018-paragraph-properties",
+      "title": "Paragraph alignment and spacing are layout",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ],
+              "align": "center",
+              "spaceAfter": 0
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/blocks/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0019-invisible-characters",
+      "title": "Invisible characters are stripped from runs and cells",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a​b"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "c‮"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": [
+                {
+                  "rule": "invisible-chars",
+                  "count": 2
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "ab"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0020-spans-and-table-geometry",
+      "title": "Spans are copied; table width and borders are layout",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "wide"
+                            }
+                          ]
+                        }
+                      ],
+                      "colSpan": 2
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "a"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "b"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "width": 80,
+              "borders": {
+                "insideV": {
+                  "style": "none"
+                }
+              }
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "layout-not-preserved",
+                "count": 1,
+                "where": [
+                  "/blocks/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "wide",
+                      "colSpan": 2
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0021-empty-cell",
+      "title": "A cell with no text is empty",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": []
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": ""
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 0,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "empty"
+                    },
+                    {
+                      "t": "empty"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0022-invisible-run-counts-once",
+      "title": "Two adjacent invisible characters are one finding",
+      "since": "0.37.0",
+      "tags": [
+        "from-last-word"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "title": "Report",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a​​b󠁩"
+                }
+              ]
+            }
+          ]
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "last-word"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [],
+            "guard": {
+              "findings": [
+                {
+                  "rule": "invisible-chars",
+                  "count": 2
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "ab"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Two maximal runs (the pair of ZWSPs, and the tag character). Counting characters gives 3."
+    }
+  ]
+}

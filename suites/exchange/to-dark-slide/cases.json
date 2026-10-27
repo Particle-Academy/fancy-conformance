@@ -1,0 +1,1297 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/to-dark-slide",
+  "cases": [
+    {
+      "id": "0001-table",
+      "title": "Columns col1..colN, labels from the header row, display strings in the body",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "headerRows": 1,
+                "columns": [
+                  {
+                    "width": 0.3
+                  },
+                  {
+                    "width": 0.7,
+                    "align": "right"
+                  }
+                ],
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "Plan"
+                      },
+                      {
+                        "t": "string",
+                        "v": "Price"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "Starter"
+                      },
+                      {
+                        "t": "number",
+                        "v": 49,
+                        "format": {
+                          "kind": "currency"
+                        },
+                        "text": "$49.00"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.6,
+            "columns": [
+              {
+                "key": "col1",
+                "label": "Plan",
+                "width": 0.3
+              },
+              {
+                "key": "col2",
+                "label": "Price",
+                "width": 0.7,
+                "align": "right"
+              }
+            ],
+            "rows": [
+              {
+                "col1": "Starter",
+                "col2": "$49.00"
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "typed-as-text",
+              "count": 1,
+              "where": [
+                "/items/0/rows/1/cells/1"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0002-no-header",
+      "title": "headerRows 0 turns the generated header off",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "a"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.6,
+            "columns": [
+              {
+                "key": "col1",
+                "label": ""
+              }
+            ],
+            "rows": [
+              {
+                "col1": "a"
+              }
+            ],
+            "style": {
+              "header": false
+            }
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0003-extra-header-rows",
+      "title": "Header rows after the first become bold body rows",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "headerRows": 2,
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "H1"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "H2"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "v"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.6,
+            "columns": [
+              {
+                "key": "col1",
+                "label": "H1"
+              }
+            ],
+            "rows": [
+              {
+                "col1": {
+                  "text": "H2",
+                  "bold": true
+                }
+              },
+              {
+                "col1": "v"
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "header-rows-flattened",
+              "count": 1,
+              "where": [
+                "/items/0/rows/1"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0004-body-spans",
+      "title": "A body span is a cell spec; covered slots are left out",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "headerRows": 1,
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "a"
+                      },
+                      {
+                        "t": "string",
+                        "v": "b"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "wide",
+                        "colSpan": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.6,
+            "columns": [
+              {
+                "key": "col1",
+                "label": "a"
+              },
+              {
+                "key": "col2",
+                "label": "b"
+              }
+            ],
+            "rows": [
+              {
+                "col1": {
+                  "text": "wide",
+                  "colSpan": 2
+                }
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0005-header-span",
+      "title": "A header span cannot be a label: the covered label is empty",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "headerRows": 1,
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "Both",
+                        "colSpan": 2
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "a"
+                      },
+                      {
+                        "t": "string",
+                        "v": "b"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.6,
+            "columns": [
+              {
+                "key": "col1",
+                "label": "Both"
+              },
+              {
+                "key": "col2",
+                "label": ""
+              }
+            ],
+            "rows": [
+              {
+                "col1": "a",
+                "col2": "b"
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "merge-flattened",
+              "count": 1,
+              "where": [
+                "/items/0/rows/0/cells/0"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0006-two-items-share-the-frame",
+      "title": "Two items split the frame top to bottom; run styles are dropped in plain text",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "text",
+                "role": "heading",
+                "level": 1,
+                "runs": [
+                  {
+                    "text": "Title"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "a ",
+                    "bold": true
+                  },
+                  {
+                    "text": "b"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.3,
+            "format": "plain",
+            "content": "Title"
+          },
+          {
+            "id": "p1-1",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.5,
+            "w": 0.8,
+            "h": 0.3,
+            "format": "plain",
+            "content": "a b"
+          }
+        ],
+        "report": {
+          "dropped": [
+            {
+              "kind": "run-style-dropped",
+              "count": 1,
+              "where": [
+                "/items/1"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "y + i * (h / n), computed in that order (SPEC 11.3)."
+    },
+    {
+      "id": "0007-list",
+      "title": "A list is plain lines, numbered, two spaces per depth",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "list",
+                "ordered": true,
+                "items": [
+                  {
+                    "runs": [
+                      {
+                        "text": "one"
+                      }
+                    ],
+                    "children": [
+                      {
+                        "runs": [
+                          {
+                            "text": "sub"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "runs": [
+                      {
+                        "text": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.6,
+            "format": "plain",
+            "content": "1. one\n  1. sub\n2. two"
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "layout-not-preserved",
+              "count": 1,
+              "where": [
+                "/items/0"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "Numbering restarts per level."
+    },
+    {
+      "id": "0008-image-data-uri",
+      "title": "An image is always a data URI, fit contain",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "image",
+                "ref": "img1",
+                "alt": "Logo"
+              }
+            ],
+            "images": {
+              "img1": {
+                "mime": "image/png",
+                "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "image",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.6,
+            "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
+            "fit": "contain",
+            "alt": "Logo"
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "Plan section 8: a portable image can never become a path or URL src."
+    },
+    {
+      "id": "0009-table-clipped",
+      "title": "7 rows in a frame of height 0.3 holds 6: one over, reported, nothing removed",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 0.3,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "headerRows": 1,
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r0"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r1"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r2"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r3"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r4"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r5"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r6"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 0.3,
+            "columns": [
+              {
+                "key": "col1",
+                "label": "r0"
+              }
+            ],
+            "rows": [
+              {
+                "col1": "r1"
+              },
+              {
+                "col1": "r2"
+              },
+              {
+                "col1": "r3"
+              },
+              {
+                "col1": "r4"
+              },
+              {
+                "col1": "r5"
+              },
+              {
+                "col1": "r6"
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [
+            {
+              "kind": "table-clipped",
+              "count": 1,
+              "where": [
+                "/items/0"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "floor(0.3 x 20 + 1e-9) = 6. (0.3 x 20 is exactly 6 in binary; 0012 is the row where the 1e-9 matters.)"
+    },
+    {
+      "id": "0010-table-at-capacity",
+      "title": "6 rows in the same frame: not clipped",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 0.3,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "headerRows": 1,
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r0"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r1"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r2"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r3"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r4"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r5"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0,
+            "y": 0,
+            "w": 1,
+            "h": 0.3,
+            "columns": [
+              {
+                "key": "col1",
+                "label": "r0"
+              }
+            ],
+            "rows": [
+              {
+                "col1": "r1"
+              },
+              {
+                "col1": "r2"
+              },
+              {
+                "col1": "r3"
+              },
+              {
+                "col1": "r4"
+              },
+              {
+                "col1": "r5"
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0011-invalid-content",
+      "title": "Invalid content is refused",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "image",
+                "ref": "img9"
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "content_invalid",
+          "path": "/items/0/ref"
+        }
+      }
+    },
+    {
+      "id": "0012-capacity-needs-the-epsilon",
+      "title": "A third of a 0.6 frame holds 4 rows, although third x 20 is 3.9999999999999996",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.6,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "table",
+                "headerRows": 1,
+                "rows": [
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r0"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r1"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r2"
+                      }
+                    ]
+                  },
+                  {
+                    "cells": [
+                      {
+                        "t": "string",
+                        "v": "r3"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "b"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "c"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "table",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.19999999999999998,
+            "columns": [
+              {
+                "key": "col1",
+                "label": "r0"
+              }
+            ],
+            "rows": [
+              {
+                "col1": "r1"
+              },
+              {
+                "col1": "r2"
+              },
+              {
+                "col1": "r3"
+              }
+            ]
+          },
+          {
+            "id": "p1-1",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.4,
+            "w": 0.8,
+            "h": 0.19999999999999998,
+            "format": "plain",
+            "content": "b"
+          },
+          {
+            "id": "p1-2",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.6,
+            "w": 0.8,
+            "h": 0.19999999999999998,
+            "format": "plain",
+            "content": "c"
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "0.6 / 3 is 0.19999999999999998 in binary, so a floor without the 1e-9 gives 3 and reports a clip that is not there."
+    },
+    {
+      "id": "0013-frame-arithmetic-order",
+      "title": "y is y + i x (h / n), in that order",
+      "since": "0.37.0",
+      "tags": [
+        "to-dark-slide"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "element": {
+          "id": "p1",
+          "x": 0.1,
+          "y": 0.2,
+          "w": 0.8,
+          "h": 0.9,
+          "content": {
+            "fancyContent": 1,
+            "items": [
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "0"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "1"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "2"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "3"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "4"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "5"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "role": "paragraph",
+                "runs": [
+                  {
+                    "text": "6"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "elements": [
+          {
+            "id": "p1-0",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.2,
+            "w": 0.8,
+            "h": 0.1285714285714286,
+            "format": "plain",
+            "content": "0"
+          },
+          {
+            "id": "p1-1",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.3285714285714286,
+            "w": 0.8,
+            "h": 0.1285714285714286,
+            "format": "plain",
+            "content": "1"
+          },
+          {
+            "id": "p1-2",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.4571428571428572,
+            "w": 0.8,
+            "h": 0.1285714285714286,
+            "format": "plain",
+            "content": "2"
+          },
+          {
+            "id": "p1-3",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.5857142857142859,
+            "w": 0.8,
+            "h": 0.1285714285714286,
+            "format": "plain",
+            "content": "3"
+          },
+          {
+            "id": "p1-4",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.7142857142857144,
+            "w": 0.8,
+            "h": 0.1285714285714286,
+            "format": "plain",
+            "content": "4"
+          },
+          {
+            "id": "p1-5",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.842857142857143,
+            "w": 0.8,
+            "h": 0.1285714285714286,
+            "format": "plain",
+            "content": "5"
+          },
+          {
+            "id": "p1-6",
+            "type": "text",
+            "x": 0.1,
+            "y": 0.9714285714285715,
+            "w": 0.8,
+            "h": 0.1285714285714286,
+            "format": "plain",
+            "content": "6"
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "At i = 3, 0.2 + 3 x (0.9 / 7) and 0.2 + (3 x 0.9) / 7 differ in the last bit. Goldens compare exactly, so the order is part of the contract."
+    }
+  ]
+}

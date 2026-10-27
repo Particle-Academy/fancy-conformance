@@ -10,6 +10,80 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-10-27
+
+**What a consumer must do: nothing yet.** Every row added here is for code
+that does not exist. No existing suite changed, so a runner that moves its pin
+to 0.37.0 sees the same verdicts on every suite it already runs. holy-sheet,
+last-word, dark-slide and fine-print pick these suites up as they build the
+exchange layer (plan steps 2-8), and run them red-first.
+
+### Added
+
+- **`suites/exchange/SPEC.md`: the normative text for portable content
+  (`fancyContent: 1`)**, step 1 of the approved document exchange plan
+  (`.ai/plans/document-exchange-and-export.md`; the owner accepted every
+  section 10 recommendation on 2026-10-27). It covers the envelope, cells,
+  table/text/list/image items and the `images` map; the report and its CLOSED
+  list of 32 kinds; validation order and codes; the selector and A1 range
+  grammar; the limits and their codes; English-only number display; each
+  reader's mapping into portable content and each writer's mapping out of it;
+  CSV with formula-injection escaping; the export policy, its refusal codes
+  and their check order; and the security rules. Section 17 lists every
+  judgement the plan left open and how it was decided.
+- **15 `exchange/*` suites and `doc-model/shared`, 405 rows**, all hand-written
+  from the spec before any implementation (measurements alone are computed),
+  by `scripts/build-exchange-cases.py`:
+  `exchange/content` (56), `limits` (32), `range` (51), `number-display` (44),
+  `from-holy-sheet` (32), `from-last-word` (22), `from-dark-slide` (18),
+  `from-fine-print` (9), `to-holy-sheet` (9), `to-last-word` (11),
+  `to-fine-print` (11), `to-dark-slide` (13), `report-kinds` (40),
+  `policy` (25), `csv` (12), and `doc-model/shared` (20). Model JSON in and
+  out; no binary fixtures. The named security rows: holy-sheet strings as
+  `{value: s}` so `=` never promotes (`to-holy-sheet/0002`); formulas never
+  written (`to-holy-sheet/0003`) nor evaluated (`from-holy-sheet/0003`,
+  `0032`); dark-slide images as data URIs only (`to-dark-slide/0008`,
+  `from-dark-slide/0006`); links limited to http, https and mailto
+  (`content/0018`-`0021`, `from-last-word/0003`); hidden sheets, rows,
+  columns, slides, elements and values under a merge skipped and reported;
+  `export_unavailable` with an injected-absent optional module
+  (`policy/0006`, `0104`).
+- **`doc-model/shared` fails for last-word on purpose** (rows 0002 and 0003):
+  it is written to owner decision 11's target state, where last-word gains
+  `page.background` and `page.border`. Two model deltas the plan did not list
+  (the run/band/default size minimums) are pinned as deliberate alongside the
+  chart and link-scheme deltas.
+- **Discrimination probes for all 16 suites**
+  (`tests/discrimination-exchange.test.ts`, probe in
+  `tests/exchange-probe.ts`): a faithful control passes every row of every
+  suite, and 94 mutants each fail an exact set of ids. Writing them found
+  four hazards no row caught, each now has one: a stale `value` trusted on an
+  uncached formula (`from-holy-sheet/0032`), invisible characters counted per
+  character rather than per run (`from-last-word/0022`), a slide-frame capacity
+  floored without its epsilon (`to-dark-slide/0012`: 0.6 / 3 x 20 is
+  3.9999999999999996), and frame arithmetic in the wrong order
+  (`to-dark-slide/0013`).
+- **`npm run cross-check` compares `exchange/number-display` and
+  `exchange/report-kinds`** between the probe and an independent PHP leg
+  written on `number_format`. It found that PHP's `number_format(0.145 * 100, 0)`
+  is `14`, where the spec shows `15%`: a PHP implementation must scale a
+  percent on the decimal string, never multiply (`number-display/0203`,
+  SPEC 17.10). 119 cases, identical verdicts.
+- Every loader (Node, PHP, Python, Rust) asserts the 16 new suites load with
+  their exact row counts and that every row names a declared function.
+
+### Fixed
+
+- **The "no unsafe integer golden" guard read the fraction of a float as an
+  integer.** It matched bare digit runs, so `0.30000000000000004` reported
+  `30000000000000004` as an integer JavaScript cannot hold. It now reads whole
+  JSON number tokens and judges only integer literals (a fraction or exponent
+  form is a double literal, which every runtime parses identically). The
+  scanner is asserted both ways in the test itself. Found because the first
+  float golden with 17 fractional digits failed it.
+- A compiled `python/tests/__pycache__/*.pyc` was tracked again despite the
+  `.gitignore` entry that untracked bytecode on 2026-08-23; it is untracked.
+
 ## [0.36.0] - 2026-10-27
 
 **What a consumer must do.** fancy-template moves its pin with the fix for each

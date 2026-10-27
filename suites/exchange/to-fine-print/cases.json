@@ -1,0 +1,1045 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/to-fine-print",
+  "cases": [
+    {
+      "id": "0001-text-and-list",
+      "title": "Headings, paragraphs and lists map across",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "H"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "a",
+                  "bold": true
+                },
+                {
+                  "text": "b",
+                  "link": "https://example.com"
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "items": [
+                {
+                  "runs": [
+                    {
+                      "text": "x"
+                    }
+                  ],
+                  "children": [
+                    {
+                      "runs": [
+                        {
+                          "text": "y"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "heading",
+            "level": 2,
+            "runs": [
+              {
+                "text": "H"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "a",
+                "bold": true
+              },
+              {
+                "text": "b",
+                "link": "https://example.com"
+              }
+            ]
+          },
+          {
+            "type": "list",
+            "ordered": false,
+            "items": [
+              {
+                "runs": [
+                  {
+                    "text": "x"
+                  }
+                ],
+                "children": [
+                  {
+                    "runs": [
+                      {
+                        "text": "y"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0002-table-numeric-column",
+      "title": "A numeric column is right-aligned, header included; typed cells become text",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "columns": [
+                {
+                  "width": 0.4
+                },
+                {
+                  "width": 0.6
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Item"
+                    },
+                    {
+                      "t": "string",
+                      "v": "Amount"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "A"
+                    },
+                    {
+                      "t": "number",
+                      "v": 1234.5,
+                      "format": {
+                        "kind": "currency"
+                      },
+                      "text": "$1,234.50"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "B"
+                    },
+                    {
+                      "t": "empty"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "table",
+            "widths": [
+              0.4,
+              0.6
+            ],
+            "rows": [
+              {
+                "header": true,
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Item"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Amount"
+                          }
+                        ],
+                        "align": "right"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "A"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "$1,234.50"
+                          }
+                        ],
+                        "align": "right"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "B"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [],
+                        "align": "right"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "typed-as-text",
+              "count": 1,
+              "where": [
+                "/items/0/rows/1/cells/1"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "Tabulator's rule: every non-empty BODY cell is a number, so the column is numeric, and alignment applies to every cell of it."
+    },
+    {
+      "id": "0003-caption",
+      "title": "A caption is a paragraph before the table",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "caption": "Figure 1",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "x"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Figure 1"
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "x"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0004-formula",
+      "title": "A formula is never carried: the value is written",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 30,
+                      "formula": "SUM(A1:A2)"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "30"
+                          }
+                        ],
+                        "align": "right"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "formula-as-value",
+              "count": 1,
+              "where": [
+                "/items/0/rows/0/cells/0"
+              ]
+            },
+            {
+              "kind": "typed-as-text",
+              "count": 1,
+              "where": [
+                "/items/0/rows/0/cells/0"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0005-image",
+      "title": "An image becomes a data URI",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "image",
+              "ref": "img1",
+              "alt": "Logo",
+              "widthPx": 120
+            }
+          ],
+          "images": {
+            "img1": {
+              "mime": "image/png",
+              "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "image",
+            "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
+            "alt": "Logo",
+            "widthPx": 120
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0006-cell-runs-and-empty",
+      "title": "Cell runs are kept; an empty cell is a paragraph with no runs",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "ab",
+                      "runs": [
+                        {
+                          "text": "a",
+                          "bold": true
+                        },
+                        {
+                          "text": "b"
+                        }
+                      ]
+                    },
+                    {
+                      "t": "empty"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "a",
+                            "bold": true
+                          },
+                          {
+                            "text": "b"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0007-cell-align-wins",
+      "title": "A cell's own align beats the numeric default",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 1,
+                      "align": "center"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "1"
+                          }
+                        ],
+                        "align": "center"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "2"
+                          }
+                        ],
+                        "align": "right"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "typed-as-text",
+              "count": 2,
+              "where": [
+                "/items/0/rows/0/cells/0",
+                "/items/0/rows/1/cells/0"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0008-invalid-content",
+      "title": "Invalid content is refused with the validator's code and path",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x",
+                  "link": "file:///etc/passwd"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "content_invalid",
+          "path": "/items/0/runs/0/link"
+        }
+      }
+    },
+    {
+      "id": "0009-partial-widths",
+      "title": "Widths only when every column has one",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "width": 1
+                },
+                {
+                  "align": "left"
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "a"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "b"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "A column align does not become a paragraph align in this direction: the spec maps a cell's align only."
+    },
+    {
+      "id": "0010-spans",
+      "title": "Spans are copied; a spanning number counts for its anchor column",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "h",
+                      "colSpan": 2
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 1
+                    },
+                    {
+                      "t": "number",
+                      "v": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "header": true,
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "h"
+                          }
+                        ],
+                        "align": "right"
+                      }
+                    ],
+                    "colSpan": 2
+                  }
+                ]
+              },
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "1"
+                          }
+                        ],
+                        "align": "right"
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "2"
+                          }
+                        ],
+                        "align": "right"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "typed-as-text",
+              "count": 2,
+              "where": [
+                "/items/0/rows/1/cells/0",
+                "/items/0/rows/1/cells/1"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0011-typed-values",
+      "title": "bool, date, error and display text",
+      "since": "0.37.0",
+      "tags": [
+        "to-fine-print"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "bool",
+                      "v": false
+                    },
+                    {
+                      "t": "date",
+                      "v": "2026-10-27"
+                    },
+                    {
+                      "t": "error",
+                      "v": "#N/A"
+                    },
+                    {
+                      "t": "string",
+                      "v": "s"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "blocks": [
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "FALSE"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "2026-10-27"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "#N/A"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "s"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "typed-as-text",
+              "count": 3,
+              "where": [
+                "/items/0/rows/0/cells/0",
+                "/items/0/rows/0/cells/1",
+                "/items/0/rows/0/cells/2"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "Not numeric columns: alignment is only for number cells."
+    }
+  ]
+}

@@ -1,0 +1,505 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "doc-model/shared",
+  "cases": [
+    {
+      "id": "0001-document",
+      "title": "Document properties",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "document"
+      },
+      "expected": {
+        "both": [
+          "blocks",
+          "defaultFont",
+          "defaultSize",
+          "page",
+          "title"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0002-page",
+      "title": "page: background and border are SHARED",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "page"
+      },
+      "expected": {
+        "both": [
+          "background",
+          "border",
+          "footer",
+          "header",
+          "margins",
+          "orientation",
+          "size"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      },
+      "notes": "Owner decision 11: last-word gains page.background and page.border. This row FAILS for last-word until it does; that is the point."
+    },
+    {
+      "id": "0003-page-border",
+      "title": "The page frame's properties",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "pageBorder"
+      },
+      "expected": {
+        "both": [
+          "color",
+          "inset",
+          "style",
+          "width"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      },
+      "notes": "Absent from last-word today, so its field set is empty there and this row fails with 0002."
+    },
+    {
+      "id": "0004-band",
+      "title": "Running header and footer",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "band"
+      },
+      "expected": {
+        "both": [
+          "center",
+          "color",
+          "left",
+          "right",
+          "size"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0005-block-types",
+      "title": "Block types: chart is last-word's alone",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "blockTypes"
+      },
+      "expected": {
+        "both": [
+          "code",
+          "heading",
+          "hr",
+          "image",
+          "list",
+          "pageBreak",
+          "paragraph",
+          "quote",
+          "table"
+        ],
+        "lastWordOnly": [
+          "chart"
+        ],
+        "finePrintOnly": []
+      },
+      "notes": "Deliberate delta: fine-print draws no charts yet."
+    },
+    {
+      "id": "0006-run",
+      "title": "Run properties",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "run"
+      },
+      "expected": {
+        "both": [
+          "bold",
+          "code",
+          "color",
+          "font",
+          "highlight",
+          "italic",
+          "letterSpacing",
+          "link",
+          "size",
+          "smallCaps",
+          "strike",
+          "text",
+          "underline"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0007-paragraph",
+      "title": "Paragraph properties",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "paragraph"
+      },
+      "expected": {
+        "both": [
+          "align",
+          "borders",
+          "indentLeft",
+          "indentRight",
+          "keepNext",
+          "lineHeight",
+          "runs",
+          "shading",
+          "spaceAfter",
+          "spaceBefore",
+          "type"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0008-heading",
+      "title": "Heading properties",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "heading"
+      },
+      "expected": {
+        "both": [
+          "align",
+          "borders",
+          "indentLeft",
+          "indentRight",
+          "keepNext",
+          "level",
+          "lineHeight",
+          "runs",
+          "shading",
+          "spaceAfter",
+          "spaceBefore",
+          "type"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0009-list-item",
+      "title": "List item properties",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "listItem"
+      },
+      "expected": {
+        "both": [
+          "align",
+          "borders",
+          "children",
+          "indentLeft",
+          "indentRight",
+          "keepNext",
+          "lineHeight",
+          "runs",
+          "shading",
+          "spaceAfter",
+          "spaceBefore"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0010-table",
+      "title": "Table properties",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "table"
+      },
+      "expected": {
+        "both": [
+          "align",
+          "borders",
+          "cellPadding",
+          "rows",
+          "type",
+          "width",
+          "widths"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0011-table-row",
+      "title": "Table row",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "tableRow"
+      },
+      "expected": {
+        "both": [
+          "cells",
+          "header"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0012-table-cell",
+      "title": "Table cell",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "tableCell"
+      },
+      "expected": {
+        "both": [
+          "blocks",
+          "borders",
+          "colSpan",
+          "padding",
+          "rowSpan",
+          "shading",
+          "valign"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0013-image",
+      "title": "Image block",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "image"
+      },
+      "expected": {
+        "both": [
+          "alt",
+          "heightPx",
+          "src",
+          "type",
+          "widthPx"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0014-border",
+      "title": "One border edge",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "border"
+      },
+      "expected": {
+        "both": [
+          "color",
+          "style",
+          "width"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0101-run-link",
+      "title": "run.link: any string in last-word, http/https/mailto in fine-print",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "run.link"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "string"
+        },
+        "finePrint": {
+          "type": "string",
+          "pattern": "^(https?://|mailto:)"
+        }
+      },
+      "notes": "Deliberate delta: a PDF link is an action. Portable content uses the stricter rule both ways."
+    },
+    {
+      "id": "0102-run-size",
+      "title": "run.size: fine-print refuses text under 1pt",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "run.size"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "finePrint": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 400
+        }
+      },
+      "notes": "Not in the plan's list; found while writing this suite and pinned as deliberate (SPEC 17.16)."
+    },
+    {
+      "id": "0103-default-size",
+      "title": "defaultSize: the same rule",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "defaultSize"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "finePrint": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 400
+        }
+      }
+    },
+    {
+      "id": "0104-band-size",
+      "title": "band.size",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "band.size"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "finePrint": {
+          "type": "number",
+          "minimum": 1
+        }
+      }
+    },
+    {
+      "id": "0105-image-src",
+      "title": "image.src is the same data-URI rule in both",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "image.src"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "string",
+          "pattern": "^data:image/(png|jpe?g);base64,"
+        },
+        "finePrint": {
+          "type": "string",
+          "pattern": "^data:image/(png|jpe?g);base64,"
+        }
+      }
+    },
+    {
+      "id": "0106-page-size",
+      "title": "page.size is the same enum in both",
+      "since": "0.37.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "page.size"
+      },
+      "expected": {
+        "lastWord": {
+          "enum": [
+            "letter",
+            "legal",
+            "a4"
+          ]
+        },
+        "finePrint": {
+          "enum": [
+            "letter",
+            "legal",
+            "a4"
+          ]
+        }
+      }
+    }
+  ]
+}

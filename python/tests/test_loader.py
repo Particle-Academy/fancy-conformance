@@ -393,3 +393,36 @@ def test_every_shipped_table_suite_loads(tmp_path: Path) -> None:
         assert cases(suite), suite
         loaded += 1
     assert loaded >= 3
+
+
+EXCHANGE_COUNTS = {
+    "doc-model/shared": 20,
+    "exchange/content": 56,
+    "exchange/csv": 12,
+    "exchange/from-dark-slide": 18,
+    "exchange/from-fine-print": 9,
+    "exchange/from-holy-sheet": 32,
+    "exchange/from-last-word": 22,
+    "exchange/limits": 32,
+    "exchange/number-display": 44,
+    "exchange/policy": 25,
+    "exchange/range": 51,
+    "exchange/report-kinds": 40,
+    "exchange/to-dark-slide": 13,
+    "exchange/to-fine-print": 11,
+    "exchange/to-holy-sheet": 9,
+    "exchange/to-last-word": 11,
+}
+
+
+def test_the_exchange_suites_load_with_exact_counts() -> None:
+    # Exact on purpose: a row quietly lost between the generator and this
+    # loader is the failure this catches. Move the numbers with the suites.
+    found = [s for s in list_suites() if s.startswith(("exchange/", "doc-model/"))]
+    assert found == sorted(EXCHANGE_COUNTS)
+    for suite, count in EXCHANGE_COUNTS.items():
+        rows = cases(suite)
+        assert len(rows) == count, suite
+        functions = set(manifest(suite)["contract"]["functions"])
+        for row in rows:
+            assert row.get("fn") in functions, f"{suite}/{row['id']} names no declared function"

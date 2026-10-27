@@ -1,0 +1,974 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/range",
+  "cases": [
+    {
+      "id": "0001-basic",
+      "title": "parseCell 'B12'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "B12"
+      },
+      "expected": {
+        "ok": true,
+        "column": 2,
+        "row": 12
+      }
+    },
+    {
+      "id": "0002-absolute",
+      "title": "parseCell '$A$1'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "$A$1"
+      },
+      "expected": {
+        "ok": true,
+        "column": 1,
+        "row": 1
+      },
+      "notes": "$ markers are dropped."
+    },
+    {
+      "id": "0003-lowercase",
+      "title": "parseCell 'aa10'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "aa10"
+      },
+      "expected": {
+        "ok": true,
+        "column": 27,
+        "row": 10
+      },
+      "notes": "AA is the 27th column."
+    },
+    {
+      "id": "0004-last-cell",
+      "title": "parseCell 'XFD1048576'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "XFD1048576"
+      },
+      "expected": {
+        "ok": true,
+        "column": 16384,
+        "row": 1048576
+      }
+    },
+    {
+      "id": "0005-column-past-xfd",
+      "title": "parseCell 'XFE1'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "XFE1"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0006-row-zero",
+      "title": "parseCell 'A0'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "A0"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0007-leading-zero",
+      "title": "parseCell 'A01'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "A01"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0008-row-past-limit",
+      "title": "parseCell 'A1048577'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "A1048577"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0009-empty",
+      "title": "parseCell ''",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": ""
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0010-row-first",
+      "title": "parseCell '1A'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "1A"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0011-column-boundary-z-aa",
+      "title": "parseCell 'Z1'",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseCell",
+      "input": {
+        "ref": "Z1"
+      },
+      "expected": {
+        "ok": true,
+        "column": 26,
+        "row": 1
+      },
+      "notes": "The base-26 off-by-one: Z is 26, not 0."
+    },
+    {
+      "id": "0101-sheet-range",
+      "title": "Bare sheet and range: the plan's example",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Q4!A1:D20"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Q4",
+          "start": "A1",
+          "end": "D20"
+        }
+      },
+      "notes": "Q4 also reads as a cell; a sheet before ! is a sheet (SPEC 8.2)."
+    },
+    {
+      "id": "0102-quoted-sheet",
+      "title": "A quoted sheet name with a space",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "'Q4 2026'!A1:D20"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Q4 2026",
+          "start": "A1",
+          "end": "D20"
+        }
+      }
+    },
+    {
+      "id": "0103-doubled-quote",
+      "title": "'' inside quotes is one quote",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "'Bob''s'!B2"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Bob's",
+          "start": "B2",
+          "end": "B2"
+        }
+      },
+      "notes": "A single cell is the range B2:B2."
+    },
+    {
+      "id": "0104-unquoted-space",
+      "title": "A name with a space must be quoted before !",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Q4 2026!A1"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0105-bare-sheet",
+      "title": "Without ! it is a sheet, never a cell",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Q4"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "sheet",
+          "sheet": "Q4"
+        }
+      },
+      "notes": "The ambiguity the plan leaves: Q4 is a valid cell reference."
+    },
+    {
+      "id": "0106-bare-quoted-sheet",
+      "title": "A quoted whole-sheet selector",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "'Q4 2026'"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "sheet",
+          "sheet": "Q4 2026"
+        }
+      }
+    },
+    {
+      "id": "0107-bare-unquoted-with-space",
+      "title": "Without ! the whole string is the sheet name",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Q4 2026"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "sheet",
+          "sheet": "Q4 2026"
+        }
+      }
+    },
+    {
+      "id": "0108-reversed-range",
+      "title": "D20:A1 normalises to A1:D20",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Sheet1!D20:A1"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Sheet1",
+          "start": "A1",
+          "end": "D20"
+        }
+      }
+    },
+    {
+      "id": "0109-mixed-corners",
+      "title": "B5:D2 normalises to B2:D5",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Sheet1!B5:D2"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Sheet1",
+          "start": "B2",
+          "end": "D5"
+        }
+      },
+      "notes": "Swapping the two cells is not enough: the corners are taken per axis."
+    },
+    {
+      "id": "0110-absolute-lowercase",
+      "title": "$a$1:$b$2",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Sheet1!$a$1:$b$2"
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Sheet1",
+          "start": "A1",
+          "end": "B2"
+        }
+      }
+    },
+    {
+      "id": "0111-whole-column",
+      "title": "Whole-column ranges are not accepted",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Sheet1!A:C"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0112-sheet-too-long",
+      "title": "A sheet name is at most 31 characters",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'!A1"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0113-sheet-with-colon",
+      "title": "A sheet name may not contain :",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "'a:b'!A1"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0114-unterminated-quote",
+      "title": "An unterminated quote",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "'Q4!A1"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0115-sheet-leading-digit",
+      "title": "A bare sheet name may not start with a digit",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "2026!A1"
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0116-empty",
+      "title": "The empty string",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": ""
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0201-object-range",
+      "title": "{sheet, range}",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "sheet": "Q4 2026",
+          "range": "A1:B2"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Q4 2026",
+          "start": "A1",
+          "end": "B2"
+        }
+      },
+      "notes": "No quoting inside the object form: the name is a JSON string."
+    },
+    {
+      "id": "0202-object-sheet",
+      "title": "{sheet}",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "sheet": "Q4"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "sheet",
+          "sheet": "Q4"
+        }
+      }
+    },
+    {
+      "id": "0203-object-range-with-sheet",
+      "title": "A range in the object form may not name a sheet",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "sheet": "Q4",
+          "range": "Q4!A1"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0204-name",
+      "title": "{name}",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "name": "Revenue"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "name",
+          "name": "Revenue"
+        }
+      }
+    },
+    {
+      "id": "0205-name-is-a-cell",
+      "title": "A name that reads as a cell is not a name",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "name": "AB12"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0206-name-r",
+      "title": "R and C are reserved (R1C1)",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "name": "r"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0207-name-leading-digit",
+      "title": "A name may not start with a digit",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "name": "1st"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0208-table",
+      "title": "{table}",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "table": "Table1"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "table",
+          "table": "Table1"
+        }
+      }
+    },
+    {
+      "id": "0209-header-rows-in-object",
+      "title": "headerRows in an object selector is kept",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "sheet": "Q4",
+          "range": "A1:B2",
+          "headerRows": 1
+        }
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Q4",
+          "start": "A1",
+          "end": "B2",
+          "headerRows": 1
+        }
+      }
+    },
+    {
+      "id": "0210-header-rows-option",
+      "title": "headerRows as an option joins the normalised selector",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": "Q4!A1:B2",
+        "options": {
+          "headerRows": 2
+        }
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "range",
+          "sheet": "Q4",
+          "start": "A1",
+          "end": "B2",
+          "headerRows": 2
+        }
+      }
+    },
+    {
+      "id": "0211-header-rows-twice",
+      "title": "headerRows in both places is refused, not guessed",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "sheet": "Q4",
+          "headerRows": 1
+        },
+        "options": {
+          "headerRows": 1
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0212-unknown-key",
+      "title": "An unknown key in an object selector",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "sheet": "Q4",
+          "cols": "A:B"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0213-negative-header-rows",
+      "title": "headerRows is >= 0",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "sheet": "Q4",
+          "headerRows": -1
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0214-two-kinds",
+      "title": "{name} and {table} together",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "name": "A_B",
+          "table": "T"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0215-name-with-dot",
+      "title": "A dotted name is a name",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "parseSelector",
+      "input": {
+        "selector": {
+          "name": "Q4.Revenue"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "selector": {
+          "kind": "name",
+          "name": "Q4.Revenue"
+        }
+      }
+    },
+    {
+      "id": "0301-selector-wins",
+      "title": "The selector's headerRows beats a table's",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "selector": 2,
+        "table": 1,
+        "frozenRows": 3,
+        "startRow": 1,
+        "rowCount": 10
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 2,
+        "from": "selector"
+      }
+    },
+    {
+      "id": "0302-selector-over-row-count",
+      "title": "An explicit headerRows over the row count is refused",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "selector": 5,
+        "startRow": 1,
+        "rowCount": 3
+      },
+      "expected": {
+        "ok": false,
+        "code": "selector_invalid"
+      }
+    },
+    {
+      "id": "0303-table-beats-frozen",
+      "title": "A table's header count beats frozenRows",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "table": 1,
+        "frozenRows": 2,
+        "startRow": 1,
+        "rowCount": 10
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 1,
+        "from": "table"
+      }
+    },
+    {
+      "id": "0304-table-zero",
+      "title": "A table with no header row says 0, and that is final",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "table": 0,
+        "frozenRows": 2,
+        "startRow": 1,
+        "rowCount": 10
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 0,
+        "from": "table"
+      }
+    },
+    {
+      "id": "0305-frozen-on-row-1",
+      "title": "frozenRows when the range starts on row 1",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "frozenRows": 1,
+        "startRow": 1,
+        "rowCount": 10
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 1,
+        "from": "frozenRows"
+      }
+    },
+    {
+      "id": "0306-frozen-not-row-1",
+      "title": "frozenRows ignored when the range starts below row 1",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "frozenRows": 1,
+        "startRow": 2,
+        "rowCount": 10
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 0,
+        "from": "default"
+      }
+    },
+    {
+      "id": "0307-frozen-clamped",
+      "title": "frozenRows over the row count is clamped, not refused",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "frozenRows": 5,
+        "startRow": 1,
+        "rowCount": 3
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 3,
+        "from": "frozenRows"
+      }
+    },
+    {
+      "id": "0308-nothing",
+      "title": "No hint at all",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "startRow": 1,
+        "rowCount": 3
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 0,
+        "from": "default"
+      }
+    },
+    {
+      "id": "0309-frozen-zero",
+      "title": "frozenRows 0 is no hint",
+      "since": "0.37.0",
+      "tags": [
+        "range"
+      ],
+      "fn": "headerRowsFor",
+      "input": {
+        "frozenRows": 0,
+        "startRow": 1,
+        "rowCount": 3
+      },
+      "expected": {
+        "ok": true,
+        "headerRows": 0,
+        "from": "default"
+      }
+    }
+  ]
+}

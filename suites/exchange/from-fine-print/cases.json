@@ -1,0 +1,599 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/from-fine-print",
+  "cases": [
+    {
+      "id": "0001-pages-to-paragraphs",
+      "title": "Each page's text splits into paragraphs; each page is structure-not-recovered",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 2,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "Title\r\n\r\nFirst para\ncontinues\n\n\nSecond"
+            },
+            {
+              "page": 2,
+              "width": 612,
+              "height": 792,
+              "text": "Page two"
+            }
+          ],
+          "guard": {
+            "policy": "redact",
+            "threshold": "medium",
+            "discarded": false,
+            "findings": []
+          }
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "fine-print"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "structure-not-recovered",
+                "count": 2,
+                "where": [
+                  "/pages/0",
+                  "/pages/1"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Title"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "First para\ncontinues"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Second"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Page two"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0002-page-range",
+      "title": "{pages: [2, 2]} is page 2, located at index 1",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 2,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "Title\r\n\r\nFirst para\ncontinues\n\n\nSecond"
+            },
+            {
+              "page": 2,
+              "width": 612,
+              "height": 792,
+              "text": "Page two"
+            }
+          ],
+          "guard": {
+            "policy": "redact",
+            "threshold": "medium",
+            "discarded": false,
+            "findings": []
+          }
+        },
+        "selector": {
+          "pages": [
+            2,
+            2
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "fine-print",
+            "selector": {
+              "pages": [
+                2,
+                2
+              ]
+            }
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "structure-not-recovered",
+                "count": 1,
+                "where": [
+                  "/pages/1"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "Page two"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Pages are 1-based; the pointer is into the pages array, which is 0-based."
+    },
+    {
+      "id": "0003-guard-findings",
+      "title": "The read's guard findings are counted by rule; excerpts never pass through",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 1,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "ok"
+            }
+          ],
+          "guard": {
+            "policy": "redact",
+            "threshold": "medium",
+            "discarded": false,
+            "findings": [
+              {
+                "rule": "instruction",
+                "severity": "high",
+                "pattern": "ignore-previous",
+                "location": {
+                  "source": "page",
+                  "page": 1
+                },
+                "excerpt": "ignore previous"
+              },
+              {
+                "rule": "invisible-chars",
+                "severity": "low",
+                "chars": [
+                  "U+200B"
+                ],
+                "location": {
+                  "source": "page",
+                  "page": 1
+                }
+              },
+              {
+                "rule": "instruction",
+                "severity": "medium",
+                "pattern": "role-play",
+                "location": {
+                  "source": "page",
+                  "page": 1
+                }
+              }
+            ]
+          }
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "fine-print"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "structure-not-recovered",
+                "count": 1,
+                "where": [
+                  "/pages/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": [
+                {
+                  "rule": "instruction",
+                  "count": 2
+                },
+                {
+                  "rule": "invisible-chars",
+                  "count": 1
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "ok"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0004-source-refused",
+      "title": "A refused read is refused with its cause",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": false,
+          "refused": {
+            "reason": "encrypted"
+          }
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "source_refused",
+          "cause": "encrypted"
+        }
+      }
+    },
+    {
+      "id": "0005-source-discarded",
+      "title": "A discarded read is refused",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 1,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "x"
+            }
+          ],
+          "guard": {
+            "policy": "discard",
+            "threshold": "medium",
+            "discarded": true,
+            "findings": []
+          }
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "source_discarded"
+        }
+      }
+    },
+    {
+      "id": "0006-page-zero",
+      "title": "Pages are 1-based: 0 is invalid",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 2,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "Title\r\n\r\nFirst para\ncontinues\n\n\nSecond"
+            },
+            {
+              "page": 2,
+              "width": 612,
+              "height": 792,
+              "text": "Page two"
+            }
+          ],
+          "guard": {
+            "policy": "redact",
+            "threshold": "medium",
+            "discarded": false,
+            "findings": []
+          }
+        },
+        "selector": {
+          "pages": [
+            0,
+            1
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_invalid"
+        }
+      }
+    },
+    {
+      "id": "0007-pages-past-end",
+      "title": "Pages past the end",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 2,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "Title\r\n\r\nFirst para\ncontinues\n\n\nSecond"
+            },
+            {
+              "page": 2,
+              "width": 612,
+              "height": 792,
+              "text": "Page two"
+            }
+          ],
+          "guard": {
+            "policy": "redact",
+            "threshold": "medium",
+            "discarded": false,
+            "findings": []
+          }
+        },
+        "selector": {
+          "pages": [
+            3,
+            4
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "selector_not_found"
+        }
+      }
+    },
+    {
+      "id": "0008-blank-page",
+      "title": "A blank page yields no item and is still reported",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 2,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "\n \t\n"
+            },
+            {
+              "page": 2,
+              "width": 612,
+              "height": 792,
+              "text": "x"
+            }
+          ],
+          "guard": {
+            "policy": "redact",
+            "threshold": "medium",
+            "discarded": false,
+            "findings": []
+          }
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "fine-print"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "structure-not-recovered",
+                "count": 2,
+                "where": [
+                  "/pages/0",
+                  "/pages/1"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": []
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0009-own-strip",
+      "title": "The extract strips what the read left and adds it to the count",
+      "since": "0.37.0",
+      "tags": [
+        "from-fine-print"
+      ],
+      "fn": "toPortable",
+      "input": {
+        "model": {
+          "ok": true,
+          "pageCount": 1,
+          "pages": [
+            {
+              "page": 1,
+              "width": 612,
+              "height": 792,
+              "text": "a​b"
+            }
+          ],
+          "guard": {
+            "policy": "redact",
+            "threshold": "medium",
+            "discarded": false,
+            "findings": [
+              {
+                "rule": "invisible-chars",
+                "severity": "low",
+                "location": {
+                  "source": "outline"
+                }
+              }
+            ]
+          }
+        },
+        "selector": null
+      },
+      "expected": {
+        "ok": true,
+        "content": {
+          "fancyContent": 1,
+          "source": {
+            "package": "fine-print"
+          },
+          "report": {
+            "dropped": [],
+            "approximated": [
+              {
+                "kind": "structure-not-recovered",
+                "count": 1,
+                "where": [
+                  "/pages/0"
+                ]
+              }
+            ],
+            "guard": {
+              "findings": [
+                {
+                  "rule": "invisible-chars",
+                  "count": 2
+                }
+              ]
+            }
+          },
+          "items": [
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "ab"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "A read under the flag policy leaves the characters in place; the extract still removes them."
+    }
+  ]
+}

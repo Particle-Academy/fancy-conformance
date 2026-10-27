@@ -21,6 +21,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { listSuites, runTable, suiteVersion } from "../src/index.ts";
+// The exchange probe is the Node side for the two exchange suites compared
+// here. The PHP side is written independently in cross-check-driver.php, on
+// number_format, so agreement is between two implementations, not one.
+import { classifyKind, display, mergeReports } from "../tests/exchange-probe.ts";
 
 function nodeSide() {
   const satisfies = (version, range) => {
@@ -77,6 +81,16 @@ function nodeSide() {
         c.fn === "formatFloat" ? formatFloat(c.input.value)
         : c.fn === "numericStringToNumber" ? Number(c.input.value)
         : roundMoney(c.input.value),
+      { language: "node" },
+    ),
+    "exchange/number-display": runTable(
+      "exchange/number-display",
+      (c) => display(c.input.t, c.input.v, c.input.format),
+      { language: "node" },
+    ),
+    "exchange/report-kinds": runTable(
+      "exchange/report-kinds",
+      (c) => (c.fn === "classifyKind" ? classifyKind(c.input.kind) : mergeReports(c.input.a, c.input.b)),
       { language: "node" },
     ),
   };

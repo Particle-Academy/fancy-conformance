@@ -1,0 +1,765 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/report-kinds",
+  "cases": [
+    {
+      "id": "0001-cell-style-dropped",
+      "title": "cell-style-dropped is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "cell-style-dropped"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0002-chart",
+      "title": "chart is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "chart"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0003-comment",
+      "title": "comment is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "comment"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0004-composite-element",
+      "title": "composite-element is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "composite-element"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0005-embedded-object",
+      "title": "embedded-object is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "embedded-object"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0006-hidden-column",
+      "title": "hidden-column is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "hidden-column"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0007-hidden-element",
+      "title": "hidden-element is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "hidden-element"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0008-hidden-row",
+      "title": "hidden-row is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "hidden-row"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0009-hidden-sheet",
+      "title": "hidden-sheet is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "hidden-sheet"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0010-hidden-slide",
+      "title": "hidden-slide is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "hidden-slide"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0011-image",
+      "title": "image is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "image"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0012-link",
+      "title": "link is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "link"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0013-nested-block",
+      "title": "nested-block is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "nested-block"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0014-non-table-item",
+      "title": "non-table-item is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "non-table-item"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0015-run-style-dropped",
+      "title": "run-style-dropped is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "run-style-dropped"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0016-shape",
+      "title": "shape is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "shape"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0017-table-clipped",
+      "title": "table-clipped is a dropped kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "table-clipped"
+      },
+      "expected": "dropped"
+    },
+    {
+      "id": "0018-cell-truncated",
+      "title": "cell-truncated is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "cell-truncated"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0019-chart-as-table",
+      "title": "chart-as-table is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "chart-as-table"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0020-code-as-text",
+      "title": "code-as-text is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "code-as-text"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0021-csv-escaped",
+      "title": "csv-escaped is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "csv-escaped"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0022-format-approximated",
+      "title": "format-approximated is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "format-approximated"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0023-formula-as-value",
+      "title": "formula-as-value is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "formula-as-value"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0024-formula-uncomputed",
+      "title": "formula-uncomputed is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "formula-uncomputed"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0025-header-rows-flattened",
+      "title": "header-rows-flattened is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "header-rows-flattened"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0026-layout-not-preserved",
+      "title": "layout-not-preserved is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "layout-not-preserved"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0027-markup-as-text",
+      "title": "markup-as-text is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "markup-as-text"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0028-merge-flattened",
+      "title": "merge-flattened is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "merge-flattened"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0029-merge-unread",
+      "title": "merge-unread is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "merge-unread"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0030-quote-flattened",
+      "title": "quote-flattened is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "quote-flattened"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0031-structure-not-recovered",
+      "title": "structure-not-recovered is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "structure-not-recovered"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0032-typed-as-text",
+      "title": "typed-as-text is an approximated kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "typed-as-text"
+      },
+      "expected": "approximated"
+    },
+    {
+      "id": "0101-unknown",
+      "title": "'secret' is not a kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "secret"
+      },
+      "expected": null
+    },
+    {
+      "id": "0102-case",
+      "title": "'Chart' is not a kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "Chart"
+      },
+      "expected": null,
+      "notes": "Kinds are case-sensitive."
+    },
+    {
+      "id": "0103-empty",
+      "title": "'' is not a kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": ""
+      },
+      "expected": null
+    },
+    {
+      "id": "0104-guard-rule-is-not-a-kind",
+      "title": "'invisible-chars' is not a kind",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "invisible-chars"
+      },
+      "expected": null,
+      "notes": "Guard rules live in guard.findings, not in the kind lists."
+    },
+    {
+      "id": "0201-merge",
+      "title": "Counts add, where lists concatenate a then b, entries stay sorted",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "mergeReports",
+      "input": {
+        "a": {
+          "dropped": [
+            {
+              "kind": "chart",
+              "count": 1,
+              "where": [
+                "/a/0"
+              ]
+            }
+          ],
+          "approximated": [
+            {
+              "kind": "typed-as-text",
+              "count": 2,
+              "where": [
+                "/a/1",
+                "/a/2"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": [
+              {
+                "rule": "invisible-chars",
+                "count": 1
+              }
+            ]
+          }
+        },
+        "b": {
+          "dropped": [
+            {
+              "kind": "chart",
+              "count": 2,
+              "where": [
+                "/b/0",
+                "/b/1"
+              ]
+            },
+            {
+              "kind": "comment",
+              "count": 1,
+              "where": [
+                "/b/2"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": [
+              {
+                "rule": "hidden-text",
+                "count": 1
+              },
+              {
+                "rule": "invisible-chars",
+                "count": 3
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "dropped": [
+          {
+            "kind": "chart",
+            "count": 3,
+            "where": [
+              "/a/0",
+              "/b/0",
+              "/b/1"
+            ]
+          },
+          {
+            "kind": "comment",
+            "count": 1,
+            "where": [
+              "/b/2"
+            ]
+          }
+        ],
+        "approximated": [
+          {
+            "kind": "typed-as-text",
+            "count": 2,
+            "where": [
+              "/a/1",
+              "/a/2"
+            ]
+          }
+        ],
+        "guard": {
+          "findings": [
+            {
+              "rule": "hidden-text",
+              "count": 1
+            },
+            {
+              "rule": "invisible-chars",
+              "count": 4
+            }
+          ]
+        }
+      },
+      "notes": "This is how an export joins its reader's report to fine-print's repair notes."
+    },
+    {
+      "id": "0202-where-capped-at-16",
+      "title": "where keeps the first 16 locations; count keeps counting",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "mergeReports",
+      "input": {
+        "a": {
+          "dropped": [
+            {
+              "kind": "chart",
+              "count": 10,
+              "where": [
+                "/a/0",
+                "/a/1",
+                "/a/2",
+                "/a/3",
+                "/a/4",
+                "/a/5",
+                "/a/6",
+                "/a/7",
+                "/a/8",
+                "/a/9"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        },
+        "b": {
+          "dropped": [
+            {
+              "kind": "chart",
+              "count": 10,
+              "where": [
+                "/b/0",
+                "/b/1",
+                "/b/2",
+                "/b/3",
+                "/b/4",
+                "/b/5",
+                "/b/6",
+                "/b/7",
+                "/b/8",
+                "/b/9"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "expected": {
+        "dropped": [
+          {
+            "kind": "chart",
+            "count": 20,
+            "where": [
+              "/a/0",
+              "/a/1",
+              "/a/2",
+              "/a/3",
+              "/a/4",
+              "/a/5",
+              "/a/6",
+              "/a/7",
+              "/a/8",
+              "/a/9",
+              "/b/0",
+              "/b/1",
+              "/b/2",
+              "/b/3",
+              "/b/4",
+              "/b/5"
+            ]
+          }
+        ],
+        "approximated": [],
+        "guard": {
+          "findings": []
+        }
+      }
+    },
+    {
+      "id": "0203-empty",
+      "title": "Two empty reports",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "mergeReports",
+      "input": {
+        "a": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        },
+        "b": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "expected": {
+        "dropped": [],
+        "approximated": [],
+        "guard": {
+          "findings": []
+        }
+      }
+    },
+    {
+      "id": "0204-where-absent",
+      "title": "An entry without where merges with one that has it",
+      "since": "0.37.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "mergeReports",
+      "input": {
+        "a": {
+          "dropped": [
+            {
+              "kind": "chart",
+              "count": 1
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        },
+        "b": {
+          "dropped": [
+            {
+              "kind": "chart",
+              "count": 1,
+              "where": [
+                "/b/0"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "expected": {
+        "dropped": [
+          {
+            "kind": "chart",
+            "count": 2,
+            "where": [
+              "/b/0"
+            ]
+          }
+        ],
+        "approximated": [],
+        "guard": {
+          "findings": []
+        }
+      }
+    }
+  ]
+}

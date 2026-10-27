@@ -1,0 +1,691 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "exchange/to-holy-sheet",
+  "cases": [
+    {
+      "id": "0001-basic",
+      "title": "Strings as {value: s}; numbers keep value and format",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "headerRows": 1,
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "Region"
+                    },
+                    {
+                      "t": "string",
+                      "v": "Revenue"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "NA"
+                    },
+                    {
+                      "t": "number",
+                      "v": 4820000,
+                      "format": {
+                        "kind": "currency",
+                        "currency": "USD",
+                        "decimals": 2
+                      },
+                      "text": "$4,820,000.00"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "A1": {
+              "value": "Region"
+            },
+            "B1": {
+              "value": "Revenue"
+            },
+            "A2": {
+              "value": "NA"
+            },
+            "B2": {
+              "value": 4820000,
+              "format": {
+                "displayFormat": "currency",
+                "currency": "USD",
+                "decimals": 2
+              }
+            }
+          }
+        },
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0002-formula-strings-stay-strings",
+      "title": "Strings beginning = + - @ are written as {value: s}, so = never promotes",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "=HYPERLINK(\"http://example.com\",\"x\")"
+                    },
+                    {
+                      "t": "string",
+                      "v": "+cmd"
+                    },
+                    {
+                      "t": "string",
+                      "v": "-1+1"
+                    },
+                    {
+                      "t": "string",
+                      "v": "@SUM(A1)"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "A1": {
+              "value": "=HYPERLINK(\"http://example.com\",\"x\")"
+            },
+            "B1": {
+              "value": "+cmd"
+            },
+            "C1": {
+              "value": "-1+1"
+            },
+            "D1": {
+              "value": "@SUM(A1)"
+            }
+          }
+        },
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "Plan section 8. holy-sheet's normaliser promotes a BARE string starting = to a formula; the object form stays literal."
+    },
+    {
+      "id": "0003-formula-never-written",
+      "title": "A formula is written as its value",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "number",
+                      "v": 30,
+                      "formula": "SUM(A1:A2)"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "empty",
+                      "formula": "NOW()"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "A1": {
+              "value": 30
+            }
+          }
+        },
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "formula-as-value",
+              "count": 2,
+              "where": [
+                "/items/0/rows/0/cells/0",
+                "/items/0/rows/1/cells/0"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "An uncomputed formula writes no cell and no formula."
+    },
+    {
+      "id": "0004-offset-spans-widths",
+      "title": "at offsets everything; spans become mergedRegions; widths become px",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "width": 1
+                },
+                {
+                  "width": 1
+                },
+                {
+                  "width": 2
+                }
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "wide",
+                      "colSpan": 2
+                    },
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    },
+                    {
+                      "t": "string",
+                      "v": "d"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "C5"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "C5": {
+              "value": "wide"
+            },
+            "E5": {
+              "value": "c"
+            },
+            "C6": {
+              "value": "a"
+            },
+            "D6": {
+              "value": "b"
+            },
+            "E6": {
+              "value": "d"
+            }
+          },
+          "mergedRegions": [
+            {
+              "start": "C5",
+              "end": "D5"
+            }
+          ],
+          "columnWidths": {
+            "2": 48,
+            "3": 48,
+            "4": 96
+          }
+        },
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "floor(w / sum x 64 x 3 + 0.5): 48, 48, 96. Keys are absolute 0-based columns."
+    },
+    {
+      "id": "0005-stacking",
+      "title": "Tables stack with a blank row; captions sit above; other items are reported",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "role": "paragraph",
+              "runs": [
+                {
+                  "text": "note"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "caption": "Second",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "A1": {
+              "value": "a"
+            },
+            "A3": {
+              "value": "Second"
+            },
+            "A4": {
+              "value": "b"
+            }
+          }
+        },
+        "report": {
+          "dropped": [
+            {
+              "kind": "non-table-item",
+              "count": 1,
+              "where": [
+                "/items/1"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0006-runs-and-align",
+      "title": "Run styles are dropped; align becomes textAlign",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "x",
+                      "align": "right",
+                      "runs": [
+                        {
+                          "text": "x",
+                          "bold": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "A1": {
+              "value": "x",
+              "format": {
+                "textAlign": "right"
+              }
+            }
+          }
+        },
+        "report": {
+          "dropped": [
+            {
+              "kind": "run-style-dropped",
+              "count": 1,
+              "where": [
+                "/items/0/rows/0/cells/0"
+              ]
+            }
+          ],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    },
+    {
+      "id": "0007-typed",
+      "title": "date, datetime, bool, error, empty and percent",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "date",
+                      "v": "2026-10-27",
+                      "format": {
+                        "kind": "date"
+                      }
+                    },
+                    {
+                      "t": "datetime",
+                      "v": "2026-10-27T14:05:09Z"
+                    },
+                    {
+                      "t": "bool",
+                      "v": true
+                    },
+                    {
+                      "t": "error",
+                      "v": "#N/A"
+                    },
+                    {
+                      "t": "empty"
+                    },
+                    {
+                      "t": "number",
+                      "v": 0.125,
+                      "format": {
+                        "kind": "percent",
+                        "decimals": 1
+                      },
+                      "text": "12.5%"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "A1": {
+              "value": "2026-10-27",
+              "format": {
+                "displayFormat": "date"
+              }
+            },
+            "B1": {
+              "value": "2026-10-27T14:05:09Z",
+              "format": {
+                "displayFormat": "datetime"
+              }
+            },
+            "C1": {
+              "value": true
+            },
+            "D1": {
+              "value": "#N/A"
+            },
+            "F1": {
+              "value": 0.125,
+              "format": {
+                "displayFormat": "percentage",
+                "decimals": 1
+              }
+            }
+          }
+        },
+        "report": {
+          "dropped": [],
+          "approximated": [
+            {
+              "kind": "typed-as-text",
+              "count": 1,
+              "where": [
+                "/items/0/rows/0/cells/3"
+              ]
+            }
+          ],
+          "guard": {
+            "findings": []
+          }
+        }
+      },
+      "notes": "A date or datetime takes its displayFormat from t when it has no format."
+    },
+    {
+      "id": "0008-invalid-content",
+      "title": "Invalid content is refused",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "c"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": false,
+        "refused": {
+          "reason": "content_invalid",
+          "path": "/items/0/rows/1"
+        }
+      }
+    },
+    {
+      "id": "0009-partial-widths",
+      "title": "No columnWidths unless every column has a width",
+      "since": "0.37.0",
+      "tags": [
+        "to-holy-sheet"
+      ],
+      "fn": "fromPortable",
+      "input": {
+        "content": {
+          "fancyContent": 1,
+          "items": [
+            {
+              "type": "table",
+              "columns": [
+                {
+                  "width": 1
+                },
+                {}
+              ],
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "t": "string",
+                      "v": "a"
+                    },
+                    {
+                      "t": "string",
+                      "v": "b"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "at": "A1"
+      },
+      "expected": {
+        "ok": true,
+        "sheet": {
+          "cells": {
+            "A1": {
+              "value": "a"
+            },
+            "B1": {
+              "value": "b"
+            }
+          }
+        },
+        "report": {
+          "dropped": [],
+          "approximated": [],
+          "guard": {
+            "findings": []
+          }
+        }
+      }
+    }
+  ]
+}

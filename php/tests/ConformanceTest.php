@@ -170,3 +170,40 @@ it('agrees with the fixtures on the satisfies-range table', function () {
     expect($summary['ok'])->toBeTrue(Conformance::formatSummary($summary));
     expect($summary['skipped'])->toBe(0);
 });
+
+it('loads the exchange suites and doc-model/shared, every row with a declared function', function () {
+    // Exact counts on purpose: a row quietly lost between the generator and
+    // this loader is the failure this catches. Move them with the suites.
+    $expected = [
+        'doc-model/shared' => 20,
+        'exchange/content' => 56,
+        'exchange/csv' => 12,
+        'exchange/from-dark-slide' => 18,
+        'exchange/from-fine-print' => 9,
+        'exchange/from-holy-sheet' => 32,
+        'exchange/from-last-word' => 22,
+        'exchange/limits' => 32,
+        'exchange/number-display' => 44,
+        'exchange/policy' => 25,
+        'exchange/range' => 51,
+        'exchange/report-kinds' => 40,
+        'exchange/to-dark-slide' => 13,
+        'exchange/to-fine-print' => 11,
+        'exchange/to-holy-sheet' => 9,
+        'exchange/to-last-word' => 11,
+    ];
+    $found = array_values(array_filter(
+        Conformance::listSuites(),
+        fn (string $s): bool => str_starts_with($s, 'exchange/') || str_starts_with($s, 'doc-model/'),
+    ));
+    expect($found)->toBe(array_keys($expected));
+
+    foreach ($expected as $suite => $count) {
+        $rows = Conformance::cases($suite);
+        expect(count($rows))->toBe($count, $suite);
+        $functions = array_keys(Conformance::manifest($suite)['contract']['functions']);
+        foreach ($rows as $row) {
+            expect(in_array($row['fn'] ?? null, $functions, true))->toBeTrue("{$suite}/{$row['id']} names no declared function");
+        }
+    }
+});

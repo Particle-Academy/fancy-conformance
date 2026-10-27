@@ -112,6 +112,15 @@ out — an unset or wrong value still fails the run.
    therefore guard DRIFT between four runtimes but do not prove they
    discriminate; the manifest's `notes` says so, so nobody reads its green tick
    as the stronger claim.
+
+   **`exchange/*` and `doc-model/shared` DO have probes**, unlike the
+   `template/*` suites, because the functions are small enough to carry:
+   `tests/exchange-probe.ts` is a mutable reading of
+   `suites/exchange/SPEC.md` (a helper module, not a test file, and not
+   exported), and `tests/discrimination-exchange.test.ts` pins the control and
+   every mutant. Rows come from `scripts/build-exchange-cases.py`; edit the
+   generator, regenerate, and re-run both. A mutant whose set goes EMPTY is a
+   hazard no row catches any more: add a row, never delete the mutant.
 4. If the suite emits documents rather than values, use `caseFormat: "directory"`
    and declare the normalisation in the manifest. Never byte-compare a zip
    container as shipped — PHP writes DEFLATE with real mtimes, the JS ports
