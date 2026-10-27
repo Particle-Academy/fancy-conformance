@@ -10,6 +10,8 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-27
+
 ### Added
 
 - **`template/*`: seven new suites, 180 rows, the specification of document
