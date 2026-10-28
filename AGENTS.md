@@ -155,6 +155,15 @@ out — an unset or wrong value still fails the run.
    it cannot trust; a row is never typed by hand. An empty suite does not load
    (the Python and Rust loaders and the Node metadata test all refuse zero
    cases), so no `formula/*` directory exists until the first capture lands.
+
+   **A per-row check cannot see lost INPUTS.** Capture v1 lost 184 input cells
+   in Sheets (out-of-order cells in a row; Sheets kept the first and dropped
+   the rest), and every affected row was still internally consistent. So the
+   generator takes the UPLOADED workbook (`--workbook`, digest-checked) and
+   requires every literal cell to come back unchanged. Never make that
+   argument optional: it is the only guard against a capture computed over the
+   wrong data. Sheets also exports a formula ERROR as `t="str"` text; it is
+   read as an error only when TYPE (16) and ERROR.TYPE agree.
 5. If the suite emits documents rather than values, use `caseFormat: "directory"`
    and declare the normalisation in the manifest. Never byte-compare a zip
    container as shipped — PHP writes DEFLATE with real mtimes, the JS ports

@@ -36,7 +36,9 @@ def _load() -> ModuleType:
 
 bfc = _load()
 
-INPUT_SHA = "a" * 64
+# Set below, once make_export exists: the digest of the synthetic UPLOADED
+# workbook, which request.json's workbookSha256 and provenance's inputSha256 name.
+INPUT_SHA = ""
 
 # Synthetic: (id, row, suite, formula, value kind, value).
 ROWS: list[tuple[str, int, str | None, str, str, Any]] = [
@@ -48,7 +50,10 @@ ROWS: list[tuple[str, int, str | None, str, str, Any]] = [
     ("A-0001", 7, "formula/pricing", "=Inputs!X2>0", "b", True),
 ]
 
-TYPE_OF = {"n": 1, "str": 2, "b": 4, "e": 16}
+TYPE_OF = {"n": 1, "str": 2, "b": 4, "e": 16, "estr": 16}
+
+# ERROR.TYPE codes for the literals the synthetic rows use.
+ERROR_TYPE_OF = {"#N/A": 7, "#NUM!": 6, "#DIV/0!": 2}
 
 
 def request() -> dict[str, Any]:
@@ -105,6 +110,10 @@ def _cell(ref: str, kind: str | None, value: Any, formula: str | None, shared: l
         return f'<c r="{ref}" t="b">{f}<v>{1 if value else 0}</v></c>'
     if kind in ("str", "e"):
         return f'<c r="{ref}" t="{kind}">{f}<v>{_esc(str(value))}</v></c>'
+    if kind == "estr":
+        # How Google Sheets' xlsx download stores a formula's ERROR result:
+        # t="str" with the literal, never t="e" (seen in capture v1, row P-0004).
+        return f'<c r="{ref}" t="str">{f}<v>{_esc(str(value))}</v></c>'
     return f'<c r="{ref}">{f}<v>{value!r}</v></c>'
 
 
@@ -119,6 +128,8 @@ def make_export(
     uncached: str | None = None,
     as_value: str | None = None,
     bad_type: str | None = None,
+    error_type: dict[str, int] | None = None,
+    input_x2: Any = 30,
 ) -> Path:
     """Write a SYNTHETIC export shaped like a Google Sheets xlsx download."""
     shared: list[str] = []
@@ -133,7 +144,9 @@ def make_export(
             cells.append(_cell(f"B{row}", kind, value, formula, shared))
         type_code = 2 if case_id == bad_type else TYPE_OF[kind]
         cells.append(_cell(f"C{row}", "n", type_code, f"=TYPE(B{row})", shared))
-        err = {"#N/A": 7}.get(value, "") if kind == "e" else ""
+        err = ERROR_TYPE_OF.get(value, "") if kind in ("e", "estr") else ""
+        if error_type and case_id in error_type:
+            err = error_type[case_id]
         cells.append(
             _cell(f"D{row}", "n" if err else "str", err, f'=IFERROR(ERROR.TYPE(B{row}),"")', shared)
         )
@@ -156,7 +169,8 @@ def make_export(
     )
     inputs = (
         f'<worksheet xmlns="{main}"><sheetData>'
-        '<row r="2"><c r="X2"><v>30</v></c></row></sheetData></worksheet>'
+        + ("" if input_x2 is None else f'<row r="2"><c r="X2"><v>{input_x2}</v></c></row>')
+        + "</sheetData></worksheet>"
     )
     with zipfile.ZipFile(path, "w") as z:
         z.writestr("xl/workbook.xml", workbook)
@@ -165,6 +179,19 @@ def make_export(
         z.writestr("xl/worksheets/sheet1.xml", sheet)
         z.writestr("xl/worksheets/sheet2.xml", inputs)
     return path
+
+
+_UPLOAD_DIR = Path(__import__("tempfile").mkdtemp(prefix="bfc-upload-"))
+# The synthetic UPLOADED workbook. Its literal cells (case ids, Inputs!X2) are
+# what every export must return intact; its formula cells are not compared.
+UPLOADED = make_export(_UPLOAD_DIR / "uploaded.xlsx")
+INPUT_SHA = hashlib.sha256(UPLOADED.read_bytes()).hexdigest()
+
+
+def _build(
+    export: Path, req: dict[str, Any], prov: dict[str, Any], workbook: Path = UPLOADED
+) -> dict[str, dict[str, Any]]:
+    return bfc.build(export, req, prov, "0.39.0", workbook=workbook)
 
 
 def provenance(export: Path, **override: str) -> dict[str, Any]:
@@ -187,7 +214,7 @@ def provenance(export: Path, **override: str) -> dict[str, Any]:
 
 def test_a_trustworthy_export_becomes_one_suite_per_category(tmp_path: Path) -> None:
     export = make_export(tmp_path / "export.xlsx")
-    suites = bfc.build(export, request(), provenance(export), "0.39.0")
+    suites = _build(export, request(), provenance(export))
 
     assert sorted(suites) == [
         "formula/eval-info",
@@ -215,7 +242,7 @@ def test_a_trustworthy_export_becomes_one_suite_per_category(tmp_path: Path) -> 
 
 def test_canaries_are_guards_not_rows(tmp_path: Path) -> None:
     export = make_export(tmp_path / "export.xlsx")
-    suites = bfc.build(export, request(), provenance(export), "0.39.0")
+    suites = _build(export, request(), provenance(export))
     tags = [t for s in suites.values() for c in s["cases"] for t in c["tags"]]
     assert "K-0001" not in tags
     assert "K-0002" not in tags
@@ -223,7 +250,7 @@ def test_canaries_are_guards_not_rows(tmp_path: Path) -> None:
 
 def test_the_manifest_names_google_sheets_and_the_capture(tmp_path: Path) -> None:
     export = make_export(tmp_path / "export.xlsx")
-    manifest = bfc.build(export, request(), provenance(export), "0.39.0")["formula/eval-math"][
+    manifest = _build(export, request(), provenance(export))["formula/eval-math"][
         "manifest"
     ]
     contract = manifest["contract"]
@@ -236,11 +263,53 @@ def test_the_manifest_names_google_sheets_and_the_capture(tmp_path: Path) -> Non
 def test_a_15_digit_export_declares_a_tolerance_on_every_nonzero_number(tmp_path: Path) -> None:
     rows = [r if r[0] != "K-0002" else (*r[:5], 0.3) for r in ROWS]
     export = make_export(tmp_path / "export.xlsx", rows)
-    suites = bfc.build(export, request(), provenance(export), "0.39.0")
+    suites = _build(export, request(), provenance(export))
     row = suites["formula/eval-math"]["cases"][0]
     assert row["tolerance"] == pytest.approx(5e-15)
     assert "tolerance" not in suites["formula/eval-info"]["cases"][0]
     assert "15 significant digits" in suites["formula/eval-math"]["manifest"]["notes"][0]
+
+
+def _with_e0002(kind: str, value: Any) -> list[tuple[str, int, str | None, str, str, Any]]:
+    return [r if r[0] != "E-0002" else (*r[:4], kind, value) for r in ROWS]
+
+
+def test_an_error_sheets_stored_as_text_is_read_as_the_error(tmp_path: Path) -> None:
+    # Google Sheets' xlsx download writes a formula's error result as t="str"
+    # with the literal. TYPE (16) and ERROR.TYPE (6 for #NUM!) both vouch for it.
+    export = make_export(tmp_path / "export.xlsx", _with_e0002("estr", "#NUM!"))
+    suites = _build(export, request(), provenance(export))
+    assert suites["formula/eval-info"]["cases"][0]["expected"] == {
+        "value": {"t": "error", "v": "#NUM!"}
+    }
+
+
+def test_text_that_merely_looks_like_an_error_stays_text(tmp_path: Path) -> None:
+    # ="#NUM!" is a 5-character string: TYPE says 2, so it must not become an error.
+    export = make_export(tmp_path / "export.xlsx", _with_e0002("str", "#NUM!"))
+    suites = _build(export, request(), provenance(export))
+    assert suites["formula/eval-info"]["cases"][0]["expected"] == {
+        "value": {"t": "string", "v": "#NUM!"}
+    }
+
+
+def test_refuses_a_text_error_whose_error_type_disagrees(tmp_path: Path) -> None:
+    export = make_export(
+        tmp_path / "x.xlsx", _with_e0002("estr", "#NUM!"), error_type={"E-0002": 7}
+    )
+    refused(tmp_path, export, provenance(export), "ERROR.TYPE")
+
+
+def test_refuses_a_text_error_with_no_error_type(tmp_path: Path) -> None:
+    export = make_export(
+        tmp_path / "x.xlsx", _with_e0002("estr", "#NUM!"), error_type={"E-0002": ""}
+    )
+    refused(tmp_path, export, provenance(export), "ERROR.TYPE")
+
+
+def test_refuses_a_text_error_that_is_not_a_known_literal(tmp_path: Path) -> None:
+    export = make_export(tmp_path / "x.xlsx", _with_e0002("estr", "#BOGUS!"))
+    refused(tmp_path, export, provenance(export), "TYPE says")
 
 
 def test_main_writes_suites_and_the_raw_artifacts(tmp_path: Path) -> None:
@@ -250,7 +319,7 @@ def test_main_writes_suites_and_the_raw_artifacts(tmp_path: Path) -> None:
     prov = tmp_path / "provenance.json"
     prov.write_text(json.dumps(provenance(export)), encoding="utf-8")
     out = tmp_path / "out"
-    argv = ["--capture", str(export), "--request", str(req), "--provenance", str(prov)]
+    argv = ["--capture", str(export), "--request", str(req), "--provenance", str(prov), "--workbook", str(UPLOADED)]
     code = bfc.main([*argv, "--since", "0.39.0", "--out", str(out)])
     assert code == 0
     table = json.loads((out / "eval-math" / "cases.json").read_text(encoding="utf-8"))
@@ -271,7 +340,7 @@ def refused(
     req: dict[str, Any] | None = None,
 ) -> None:
     with pytest.raises(bfc.CaptureRefusedError, match=match):
-        bfc.build(export, req or request(), prov, "0.39.0")
+        _build(export, req or request(), prov)
 
 
 def test_refuses_a_formula_cell_with_no_cached_value(tmp_path: Path) -> None:
@@ -292,7 +361,11 @@ def test_refuses_a_wrong_canary(tmp_path: Path) -> None:
 
 def test_refuses_a_missing_case_id(tmp_path: Path) -> None:
     export = make_export(tmp_path / "x.xlsx", [r for r in ROWS if r[0] != "E-0002"])
-    refused(tmp_path, export, provenance(export), "do not match request.json")
+    # build() stops at the literal-survival guard first: the id is a literal cell.
+    refused(tmp_path, export, provenance(export), r"did not survive.*Cases!A5")
+    # The id guard itself, which build() reaches only after that one.
+    with pytest.raises(bfc.CaptureRefusedError, match="do not match request.json"):
+        bfc.collect(bfc.read_xlsx(export), request())
 
 
 def test_refuses_an_unexpected_case_id(tmp_path: Path) -> None:
@@ -310,12 +383,39 @@ def test_refuses_a_duplicate_case_id(tmp_path: Path) -> None:
 def test_refuses_a_case_on_the_wrong_row(tmp_path: Path) -> None:
     rows = [r if r[0] != "E-0001" else (r[0], 9, *r[2:]) for r in ROWS]
     export = make_export(tmp_path / "x.xlsx", rows)
-    refused(tmp_path, export, provenance(export), "is on row 9")
+    refused(tmp_path, export, provenance(export), r"did not survive.*Cases!A4")
+    with pytest.raises(bfc.CaptureRefusedError, match="is on row 9"):
+        bfc.collect(bfc.read_xlsx(export), request())
 
 
 def test_refuses_a_type_probe_that_disagrees(tmp_path: Path) -> None:
     export = make_export(tmp_path / "x.xlsx", bad_type="E-0001")
     refused(tmp_path, export, provenance(export), "TYPE says")
+
+
+def test_refuses_an_input_cell_sheets_dropped(tmp_path: Path) -> None:
+    # Capture v1: Sheets kept A1 of an out-of-order row and silently dropped the
+    # rest, so every formula reading them computed over blanks.
+    export = make_export(tmp_path / "x.xlsx", input_x2=None)
+    refused(tmp_path, export, provenance(export), r"did not survive.*Inputs!X2")
+
+
+def test_refuses_an_input_cell_sheets_changed(tmp_path: Path) -> None:
+    export = make_export(tmp_path / "x.xlsx", input_x2=31)
+    refused(tmp_path, export, provenance(export), r"did not survive.*Inputs!X2")
+
+
+def test_an_input_number_within_15_digits_survives(tmp_path: Path) -> None:
+    # Sheets writes 30 as "30.0"; equal value, so it survives.
+    export = make_export(tmp_path / "x.xlsx", input_x2="30.0")
+    assert _build(export, request(), provenance(export))
+
+
+def test_refuses_a_workbook_that_is_not_the_one_uploaded(tmp_path: Path) -> None:
+    other = make_export(tmp_path / "other.xlsx", input_x2=99)
+    export = make_export(tmp_path / "x.xlsx")
+    with pytest.raises(bfc.CaptureRefusedError, match="sha256 mismatch"):
+        _build(export, request(), provenance(export), workbook=other)
 
 
 def test_refuses_the_wrong_locale(tmp_path: Path) -> None:
@@ -359,6 +459,6 @@ def test_a_refusal_writes_nothing(tmp_path: Path) -> None:
     prov = tmp_path / "provenance.json"
     prov.write_text(json.dumps(provenance(export)), encoding="utf-8")
     out = tmp_path / "out"
-    argv = ["--capture", str(export), "--request", str(req), "--provenance", str(prov)]
+    argv = ["--capture", str(export), "--request", str(req), "--provenance", str(prov), "--workbook", str(UPLOADED)]
     assert bfc.main([*argv, "--since", "0.39.0", "--out", str(out)]) == 1
     assert not out.exists()

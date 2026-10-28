@@ -30,6 +30,20 @@ only gains a value; every existing manifest still validates.
   export puts a declared tolerance on every numeric row. Each guard has a test,
   run against a SYNTHETIC workbook the test writes itself; no capture exists
   yet, so no `formula/*` suite ships in this release.
+- **`build-formula-cases.py --workbook <uploaded.xlsx>` (required): every
+  literal cell of the uploaded workbook must survive the round trip through
+  Sheets.** The digest must match `request.json`. Learned from capture v1, the
+  first real one: holy-sheet wrote a row's cells out of column order, Google
+  Sheets kept only the first and silently dropped the other **184** input
+  cells, and every formula reading them computed over blanks. Each such row
+  was still internally consistent (TYPE agreed with its value), so no per-row
+  guard could see it; the generator refused v1 only by luck, on one blank
+  lookup. This guard names the loss directly.
+- **Google Sheets' encoding of a formula ERROR is read correctly.** Its xlsx
+  download stores the result as `t="str"` holding the literal (`#NUM!`), never
+  `t="e"`. It is read as the error only when TYPE says 16 AND ERROR.TYPE gives
+  exactly that literal's code; text that merely looks like an error (TYPE 2)
+  stays text, and a missing or disagreeing ERROR.TYPE refuses the export.
 
 ### Fixed
 

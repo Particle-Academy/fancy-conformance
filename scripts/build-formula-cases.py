@@ -212,6 +212,46 @@ def check_provenance(provenance: dict[str, Any], request: dict[str, Any], captur
         )
 
 
+# ERROR.TYPE() codes in Google Sheets. #ERROR! (8) is Sheets' parse-error value.
+ERROR_TYPE_CODE = {
+    "#NULL!": 1,
+    "#DIV/0!": 2,
+    "#VALUE!": 3,
+    "#REF!": 4,
+    "#NAME?": 5,
+    "#NUM!": 6,
+    "#N/A": 7,
+    "#ERROR!": 8,
+}
+
+
+def _sheets_text_error(case_id: str, cell: Cell, type_cell: Cell | None, err_cell: Cell | None) -> Cell:
+    """Google Sheets' xlsx download stores a formula's ERROR result as t="str"
+    holding the literal, never t="e" (observed in capture v1, row P-0004:
+    `-2^0.5` came back as t="str" "#NUM!" beside TYPE 16 and ERROR.TYPE 6).
+
+    Read it as the error only when BOTH probes vouch for it: TYPE says 16 and
+    ERROR.TYPE gives exactly that literal's code. A string that merely looks
+    like an error (`="#NUM!"`) has TYPE 2 and stays text; a disagreeing or
+    missing ERROR.TYPE refuses the export rather than guessing.
+    """
+    if not (
+        cell.kind == "string"
+        and cell.value in ERROR_VALUES
+        and type_cell is not None
+        and type_cell.kind == "number"
+        and int(type_cell.value) == TYPE_CODE["error"]
+    ):
+        return cell
+    want = ERROR_TYPE_CODE[cell.value]
+    got = None if err_cell is None or err_cell.kind != "number" else int(err_cell.value)
+    if got != want:
+        raise CaptureRefusedError(
+            f"{case_id}: the value is the text {cell.value!r} and TYPE says error, but ERROR.TYPE gives {got!r}, not {want}."
+        )
+    return Cell("error", cell.value, cell.formula, cell.cached)
+
+
 def scalar(cell: Cell) -> dict[str, Any]:
     """The exchange cell for a captured value."""
     if cell.kind == "number":
@@ -293,6 +333,7 @@ def collect(
                 f"{case_id}: {cols['formula']}{row} is no longer a formula; a value replaced it."
             )
         type_cell = sheet.get(f"{cols['type']}{row}")
+        cell = _sheets_text_error(case_id, cell, type_cell, sheet.get(f"{cols['errorType']}{row}"))
         expected_type = TYPE_CODE.get(cell.kind)
         if (
             type_cell is None
@@ -343,12 +384,57 @@ def tolerance_at_15_digits(v: float) -> float:
     return 0.5 * 10 ** (math.floor(math.log10(abs(v))) - 14)
 
 
+def check_literals_survived(workbook: Path, request: dict[str, Any], export: dict[str, dict[str, Cell]]) -> None:
+    """Every literal (non-formula, non-empty) cell of the uploaded workbook must
+    come back from Sheets with the same kind and value.
+
+    Capture v1 is why: holy-sheet wrote a row's cells out of column order
+    (A1, AA1, ..., B1), Google Sheets kept A1 and silently dropped the rest, and
+    every formula reading those inputs computed over blanks. Each such row was
+    still internally consistent (TYPE agreed with its value), so no per-row
+    guard could see it. Only comparing the inputs themselves can.
+    """
+    if sha256_file(workbook) != request["workbookSha256"]:
+        raise CaptureRefusedError(
+            f"{workbook} is not the workbook request.json describes (sha256 mismatch)."
+        )
+    original = read_xlsx(workbook)
+    lost: list[str] = []
+    for name, cells in sorted(original.items()):
+        got_sheet = export.get(name, {})
+        for ref, cell in sorted(cells.items()):
+            if cell.formula is not None or cell.kind == "empty":
+                continue
+            got = got_sheet.get(ref)
+            same = got is not None and got.formula is None and got.kind == cell.kind
+            if same and cell.kind == "number":
+                same = abs(float(got.value) - float(cell.value)) <= tolerance_at_15_digits(float(cell.value))
+            elif same:
+                same = got.value == cell.value
+            if not same:
+                shown = "nothing" if got is None or got.kind == "empty" else f"{got.kind} {got.value!r}"
+                lost.append(f"{name}!{ref} ({cell.kind} {cell.value!r} came back as {shown})")
+    if lost:
+        more = f" (and {len(lost) - 5} more)" if len(lost) > 5 else ""
+        raise CaptureRefusedError(
+            f"{len(lost)} literal cells of the uploaded workbook did not survive the round trip through Sheets, "
+            f"so formulas reading them computed over different inputs: {'; '.join(lost[:5])}{more}."
+        )
+
+
 def build(
-    capture: Path, request: dict[str, Any], provenance: dict[str, Any], since: str
+    capture: Path,
+    request: dict[str, Any],
+    provenance: dict[str, Any],
+    since: str,
+    *,
+    workbook: Path,
 ) -> dict[str, dict[str, Any]]:
     """Suite id -> {"manifest": ..., "cases": ...}. Raises CaptureRefusedError; writes nothing."""
     check_provenance(provenance, request, capture)
-    values = collect(read_xlsx(capture), request)
+    sheets = read_xlsx(capture)
+    check_literals_survived(workbook, request, sheets)
+    values = collect(sheets, request)
 
     k2 = values.get("K-0002", {}).get("v")
     full_precision = k2 == 0.30000000000000004
@@ -456,6 +542,12 @@ def main(argv: list[str] | None = None) -> int:
         "--request", type=Path, required=True, help="the request.json the workbook was built with"
     )
     parser.add_argument(
+        "--workbook",
+        type=Path,
+        required=True,
+        help="the xlsx that was UPLOADED (its sha256 must match request.json); every literal cell must survive",
+    )
+    parser.add_argument(
         "--provenance", type=Path, required=True, help="provenance.json recorded at capture time"
     )
     parser.add_argument(
@@ -467,7 +559,7 @@ def main(argv: list[str] | None = None) -> int:
     request = json.loads(args.request.read_text(encoding="utf-8"))
     provenance = json.loads(args.provenance.read_text(encoding="utf-8"))
     try:
-        suites = build(args.capture, request, provenance, args.since)
+        suites = build(args.capture, request, provenance, args.since, workbook=args.workbook)
     except CaptureRefusedError as e:
         print(f"REFUSED: {e}", file=sys.stderr)
         return 1
