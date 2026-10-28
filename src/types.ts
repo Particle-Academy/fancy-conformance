@@ -12,8 +12,12 @@ export interface SuiteContract {
   function?: string;
   functions?: Record<string, string>;
   runShape?: Record<string, unknown>;
-  /** Whose behaviour the goldens were taken from. */
-  reference?: Language;
+  /**
+   * Whose behaviour the goldens were taken from: a language's runtime,
+   * `authored` (decided by the suite's author), or `google-sheets` (captured
+   * from Google Sheets; `referenceNote` is then required and names the capture).
+   */
+  reference?: Language | "authored" | "google-sheets";
   referenceNote?: string;
   implementations: ImplementationRef[];
 }

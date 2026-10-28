@@ -149,7 +149,13 @@ out — an unset or wrong value still fails the run.
    every mutant. Rows come from `scripts/build-exchange-cases.py`; edit the
    generator, regenerate, and re-run both. A mutant whose set goes EMPTY is a
    hazard no row catches any more: add a row, never delete the mutant.
-4. If the suite emits documents rather than values, use `caseFormat: "directory"`
+4. **Goldens captured from Google Sheets** (`formula/*`, for fancy-formula)
+   use `reference: "google-sheets"` with a `referenceNote` naming the capture.
+   They come ONLY from `scripts/build-formula-cases.py`, which refuses an export
+   it cannot trust; a row is never typed by hand. An empty suite does not load
+   (the Python and Rust loaders and the Node metadata test all refuse zero
+   cases), so no `formula/*` directory exists until the first capture lands.
+5. If the suite emits documents rather than values, use `caseFormat: "directory"`
    and declare the normalisation in the manifest. Never byte-compare a zip
    container as shipped — PHP writes DEFLATE with real mtimes, the JS ports
    write STORE with a fixed 1980 date, and those files can never match.

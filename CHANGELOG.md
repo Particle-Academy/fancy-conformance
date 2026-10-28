@@ -10,6 +10,32 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+**What a consumer must do: nothing.** No suite changed. The manifest schema
+only gains a value; every existing manifest still validates.
+
+### Added
+
+- **`google-sheets` in the manifest's `contract.reference` enum** (fancy-formula
+  decision D4), for goldens CAPTURED from Google Sheets. `authored` would be
+  false for such a suite. With it, `referenceNote` is REQUIRED and non-empty:
+  it must name the capture artifact, its date and who captured it.
+  `tests/manifest-reference.test.ts` pins the schema rule and checks every
+  shipped manifest that uses it.
+- **`scripts/build-formula-cases.py`**: turns a Google Sheets export of the
+  fancy-formula capture workbook into `formula/*` suites, and REFUSES the export
+  (writing nothing) when a formula cell has no cached value, a case formula was
+  replaced by a value, a canary is wrong, the case ids or rows differ from
+  `request.json`, a TYPE probe disagrees with its value, or `provenance.json` is
+  incomplete or records the wrong locale, time zone or file digests. A 15-digit
+  export puts a declared tolerance on every numeric row. Each guard has a test,
+  run against a SYNTHETIC workbook the test writes itself; no capture exists
+  yet, so no `formula/*` suite ships in this release.
+
+### Fixed
+
+- `SuiteContract.reference` in the TypeScript types now admits `authored`,
+  which the schema has always allowed and the type did not.
+
 ## [0.38.0] - 2026-10-27
 
 **What a consumer must do: nothing.** No existing suite changed, and the new
