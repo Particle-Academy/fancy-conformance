@@ -73,7 +73,7 @@ PROVENANCE_FIELDS = (
 )
 
 # TYPE() codes, keyed by the kind of a scalar value.
-TYPE_CODE = {"number": 1, "string": 2, "bool": 4, "error": 16}
+TYPE_CODE = {"number": 1, "string": 2, "bool": 4, "error": 16, "empty": 1}
 
 ERROR_VALUES = {"#N/A", "#DIV/0!", "#VALUE!", "#REF!", "#NAME?", "#NUM!", "#NULL!", "#ERROR!"}
 
@@ -252,6 +252,31 @@ def _sheets_text_error(case_id: str, cell: Cell, type_cell: Cell | None, err_cel
     return Cell("error", cell.value, cell.formula, cell.cached)
 
 
+def _sheets_blank(case_id: str, cell: Cell, type_cell: Cell | None, len_cell: Cell | None) -> Cell:
+    """Google Sheets' xlsx download stores a formula's BLANK result as t="str"
+    with an empty value (observed in capture v2, row E-0186: `=IFERROR(NA())`
+    came back empty beside TYPE 1 and LEN 0). TYPE of a blank is 1 in Sheets,
+    while a real zero-length string (`=""`) has TYPE 2 and stays a string.
+
+    Read it as empty only when TYPE says 1 AND the LEN probe says exactly 0;
+    a missing or disagreeing LEN refuses the export rather than guessing.
+    """
+    if not (
+        cell.kind == "string"
+        and cell.value == ""
+        and type_cell is not None
+        and type_cell.kind == "number"
+        and int(type_cell.value) == TYPE_CODE["number"]
+    ):
+        return cell
+    got = None if len_cell is None or len_cell.kind != "number" else int(len_cell.value)
+    if got != 0:
+        raise CaptureRefusedError(
+            f"{case_id}: the value is empty text and TYPE says 1 (a blank), but LEN gives {got!r}, not 0."
+        )
+    return Cell("empty", None, cell.formula, cell.cached)
+
+
 def scalar(cell: Cell) -> dict[str, Any]:
     """The exchange cell for a captured value."""
     if cell.kind == "number":
@@ -334,6 +359,7 @@ def collect(
             )
         type_cell = sheet.get(f"{cols['type']}{row}")
         cell = _sheets_text_error(case_id, cell, type_cell, sheet.get(f"{cols['errorType']}{row}"))
+        cell = _sheets_blank(case_id, cell, type_cell, sheet.get(f"{cols['length']}{row}"))
         expected_type = TYPE_CODE.get(cell.kind)
         if (
             type_cell is None

@@ -1,0 +1,1111 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/eval-info",
+  "cases": [
+    {
+      "id": "0259-e-isblank",
+      "title": "=ISBLANK(Inputs!O1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0259"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISBLANK(Inputs!O1)"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0260-e-isblank",
+      "title": "=ISBLANK(\"\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0260"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISBLANK(\"\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0261-e-isblank",
+      "title": "=ISBLANK(Inputs!B1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0261"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISBLANK(Inputs!B1)"
+        },
+        "inputs": {
+          "Inputs!B1": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0262-e-iserror",
+      "title": "=ISERROR(1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0262"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISERROR(1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0263-e-iserror",
+      "title": "=ISERROR(NA())",
+      "since": "0.39.0",
+      "tags": [
+        "E-0263"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISERROR(NA())"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0264-e-iserror",
+      "title": "=ISERROR(1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0264"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISERROR(1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0265-e-iserr",
+      "title": "=ISERR(NA())",
+      "since": "0.39.0",
+      "tags": [
+        "E-0265"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISERR(NA())"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0266-e-iserr",
+      "title": "=ISERR(1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0266"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISERR(1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0267-e-iserr",
+      "title": "=ISERR(\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0267"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISERR(\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0268-e-isna",
+      "title": "=ISNA(NA())",
+      "since": "0.39.0",
+      "tags": [
+        "E-0268"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNA(NA())"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0269-e-isna",
+      "title": "=ISNA(1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0269"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNA(1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0270-e-isna",
+      "title": "=ISNA(VLOOKUP(51,Inputs!C2:D5,2,FALSE))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0270"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNA(VLOOKUP(51,Inputs!C2:D5,2,FALSE))"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0271-e-isnumber",
+      "title": "=ISNUMBER(1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0271"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNUMBER(1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0272-e-isnumber",
+      "title": "=ISNUMBER(\"1\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0272"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNUMBER(\"1\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0273-e-isnumber",
+      "title": "=ISNUMBER(Inputs!A2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0273"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNUMBER(Inputs!A2)"
+        },
+        "inputs": {
+          "Inputs!A2": {
+            "type": "text",
+            "value": "20"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0274-e-isnumber",
+      "title": "=ISNUMBER(DATE(2026,1,1))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0274"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNUMBER(DATE(2026,1,1))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0275-e-istext",
+      "title": "=ISTEXT(\"a\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0275"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISTEXT(\"a\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0276-e-istext",
+      "title": "=ISTEXT(1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0276"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISTEXT(1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0277-e-istext",
+      "title": "=ISTEXT(Inputs!O1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0277"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISTEXT(Inputs!O1)"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0278-e-islogical",
+      "title": "=ISLOGICAL(TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0278"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISLOGICAL(TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0279-e-islogical",
+      "title": "=ISLOGICAL(1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0279"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISLOGICAL(1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0280-e-islogical",
+      "title": "=ISLOGICAL(\"TRUE\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0280"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISLOGICAL(\"TRUE\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0281-e-na",
+      "title": "=NA()",
+      "since": "0.39.0",
+      "tags": [
+        "E-0281"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NA()"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0282-e-na",
+      "title": "=NA()+1",
+      "since": "0.39.0",
+      "tags": [
+        "E-0282"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NA()+1"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0283-e-na",
+      "title": "=IFNA(NA(),0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0283"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFNA(NA(),0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0284-e-n",
+      "title": "=N(TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0284"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=N(TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0285-e-n",
+      "title": "=N(\"5\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0285"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=N(\"5\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0286-e-n",
+      "title": "=N(7)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0286"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=N(7)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0287-e-n",
+      "title": "=N(Inputs!O1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0287"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=N(Inputs!O1)"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0288-e-type",
+      "title": "=TYPE(1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0288"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TYPE(1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0289-e-type",
+      "title": "=TYPE(\"a\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0289"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TYPE(\"a\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0290-e-type",
+      "title": "=TYPE(TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0290"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TYPE(TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0291-e-type",
+      "title": "=TYPE(1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0291",
+        "H-35"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TYPE(1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 16
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0292-e-type",
+      "title": "=TYPE({1,2})",
+      "since": "0.39.0",
+      "tags": [
+        "E-0292",
+        "H-35"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TYPE({1,2})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 64
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0293-e-error-type",
+      "title": "=ERROR.TYPE(1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0293"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0294-e-error-type",
+      "title": "=ERROR.TYPE(NA())",
+      "since": "0.39.0",
+      "tags": [
+        "E-0294"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(NA())"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0295-e-error-type",
+      "title": "=ERROR.TYPE(1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0295"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0296-e-error-type",
+      "title": "=ERROR.TYPE(SQRT(-1))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0296"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(SQRT(-1))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 6
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0297-e-error-type",
+      "title": "=ERROR.TYPE(#REF!)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0297"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(#REF!)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0298-e-error-type",
+      "title": "=ERROR.TYPE(#VALUE!)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0298"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(#VALUE!)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0299-e-error-type",
+      "title": "=ERROR.TYPE(#NAME?)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0299"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(#NAME?)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "tolerance": 5e-15
+    }
+  ]
+}

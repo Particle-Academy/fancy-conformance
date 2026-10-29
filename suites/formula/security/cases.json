@@ -1,0 +1,923 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/security",
+  "cases": [
+    {
+      "id": "0001-s",
+      "title": "=Inputs!J1",
+      "since": "0.39.0",
+      "tags": [
+        "S-0001"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!J1"
+        },
+        "inputs": {
+          "Inputs!J1": {
+            "type": "text",
+            "value": "=1+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "=1+1"
+        }
+      },
+      "notes": "Text \"=1+1\" stays text."
+    },
+    {
+      "id": "0002-s",
+      "title": "=Inputs!J1&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "S-0002"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!J1&\"\""
+        },
+        "inputs": {
+          "Inputs!J1": {
+            "type": "text",
+            "value": "=1+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "=1+1"
+        }
+      }
+    },
+    {
+      "id": "0003-s",
+      "title": "=LEN(Inputs!J1)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0003"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(Inputs!J1)"
+        },
+        "inputs": {
+          "Inputs!J1": {
+            "type": "text",
+            "value": "=1+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0004-s",
+      "title": "=ISTEXT(Inputs!J1)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0004"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISTEXT(Inputs!J1)"
+        },
+        "inputs": {
+          "Inputs!J1": {
+            "type": "text",
+            "value": "=1+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0005-s",
+      "title": "=Inputs!J2&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "S-0005"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!J2&\"\""
+        },
+        "inputs": {
+          "Inputs!J2": {
+            "type": "text",
+            "value": "+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "+1"
+        }
+      },
+      "notes": "Text \"+1\"."
+    },
+    {
+      "id": "0006-s",
+      "title": "=ISNUMBER(Inputs!J2)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0006"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISNUMBER(Inputs!J2)"
+        },
+        "inputs": {
+          "Inputs!J2": {
+            "type": "text",
+            "value": "+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0007-s",
+      "title": "=Inputs!J3",
+      "since": "0.39.0",
+      "tags": [
+        "S-0007"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!J3"
+        },
+        "inputs": {
+          "Inputs!J3": {
+            "type": "text",
+            "value": "@SUM(A1)"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "@SUM(A1)"
+        }
+      },
+      "notes": "Text \"@SUM(A1)\"."
+    },
+    {
+      "id": "0008-s",
+      "title": "=Inputs!J4+0",
+      "since": "0.39.0",
+      "tags": [
+        "S-0008",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!J4+0"
+        },
+        "inputs": {
+          "Inputs!J4": {
+            "type": "text",
+            "value": "-1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -1
+        }
+      },
+      "notes": "Text \"-1\" in arithmetic coerces like any numeric text.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0009-s",
+      "title": "=LEN(Inputs!J5)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0009"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(Inputs!J5)"
+        },
+        "inputs": {
+          "Inputs!J5": {
+            "type": "text",
+            "value": "\tx"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "Text starting with TAB.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0010-s",
+      "title": "=LEN(CHAR(13)&\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "S-0010"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(CHAR(13)&\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "Text starting with CR.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0011-s",
+      "title": "=COUNTIF(Inputs!J1:J6,\"=1+1\")",
+      "since": "0.39.0",
+      "tags": [
+        "S-0011",
+        "H-28"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!J1:J6,\"=1+1\")"
+        },
+        "inputs": {
+          "Inputs!J1:J6": {
+            "type": "range",
+            "rows": [
+              [
+                "=1+1"
+              ],
+              [
+                "+1"
+              ],
+              [
+                "@SUM(A1)"
+              ],
+              [
+                "-1"
+              ],
+              [
+                "\tx"
+              ],
+              [
+                "=HYPERLINK(\"x\")"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "Criteria \"=1+1\" means equals the text 1+1."
+    },
+    {
+      "id": "0012-s",
+      "title": "=COUNTIF(Inputs!J1:J6,\"==1+1\")",
+      "since": "0.39.0",
+      "tags": [
+        "S-0012",
+        "H-28"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!J1:J6,\"==1+1\")"
+        },
+        "inputs": {
+          "Inputs!J1:J6": {
+            "type": "range",
+            "rows": [
+              [
+                "=1+1"
+              ],
+              [
+                "+1"
+              ],
+              [
+                "@SUM(A1)"
+              ],
+              [
+                "-1"
+              ],
+              [
+                "\tx"
+              ],
+              [
+                "=HYPERLINK(\"x\")"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Criteria \"==1+1\" means equals the text =1+1.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0013-s",
+      "title": "=COUNTIF(Inputs!P1:P4,Inputs!P2)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0013",
+        "H-28"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!P1:P4,Inputs!P2)"
+        },
+        "inputs": {
+          "Inputs!P1:P4": {
+            "type": "range",
+            "rows": [
+              [
+                ">=200"
+              ],
+              [
+                "=SUM(A1)"
+              ],
+              [
+                "a*"
+              ],
+              [
+                "0.00"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "Criteria read from an input: \"=SUM(A1)\"."
+    },
+    {
+      "id": "0014-s",
+      "title": "=SUMIF(Inputs!G1:G4,Inputs!P2,Inputs!H1:H4)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0014",
+        "H-28"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUMIF(Inputs!G1:G4,Inputs!P2,Inputs!H1:H4)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          },
+          "Inputs!P2": {
+            "type": "text",
+            "value": "=SUM(A1)"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0015-s",
+      "title": "=COUNTIF(Inputs!G1:G4,Inputs!P3)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0015"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!G1:G4,Inputs!P3)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!P3": {
+            "type": "text",
+            "value": "a*"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "A wildcard criteria from an input.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0016-s",
+      "title": "=SUMIF(Inputs!H1:H4,Inputs!P1)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0016"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUMIF(Inputs!H1:H4,Inputs!P1)"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          },
+          "Inputs!P1": {
+            "type": "text",
+            "value": ">=200"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 900
+        }
+      },
+      "notes": "A comparison criteria from an input.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0017-s",
+      "title": "=VLOOKUP(Inputs!J1,Inputs!J1:J6,1,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0017"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(Inputs!J1,Inputs!J1:J6,1,FALSE)"
+        },
+        "inputs": {
+          "Inputs!J1:J6": {
+            "type": "range",
+            "rows": [
+              [
+                "=1+1"
+              ],
+              [
+                "+1"
+              ],
+              [
+                "@SUM(A1)"
+              ],
+              [
+                "-1"
+              ],
+              [
+                "\tx"
+              ],
+              [
+                "=HYPERLINK(\"x\")"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "=1+1"
+        }
+      },
+      "notes": "Formula-looking text as a lookup key."
+    },
+    {
+      "id": "0018-s",
+      "title": "=MATCH(Inputs!J6,Inputs!J1:J6,0)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0018"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(Inputs!J6,Inputs!J1:J6,0)"
+        },
+        "inputs": {
+          "Inputs!J1:J6": {
+            "type": "range",
+            "rows": [
+              [
+                "=1+1"
+              ],
+              [
+                "+1"
+              ],
+              [
+                "@SUM(A1)"
+              ],
+              [
+                "-1"
+              ],
+              [
+                "\tx"
+              ],
+              [
+                "=HYPERLINK(\"x\")"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 6
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0019-s",
+      "title": "=HYPERLINK(\"http://example.com\",\"label\")",
+      "since": "0.39.0",
+      "tags": [
+        "S-0019"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=HYPERLINK(\"http://example.com\",\"label\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "label"
+        }
+      },
+      "notes": "HYPERLINK is pure: it returns its label."
+    },
+    {
+      "id": "0020-s",
+      "title": "=VALUE(Inputs!J1)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0020"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(Inputs!J1)"
+        },
+        "inputs": {
+          "Inputs!J1": {
+            "type": "text",
+            "value": "=1+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0021-s",
+      "title": "=Inputs!J1=\"=1+1\"",
+      "since": "0.39.0",
+      "tags": [
+        "S-0021"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!J1=\"=1+1\""
+        },
+        "inputs": {
+          "Inputs!J1": {
+            "type": "text",
+            "value": "=1+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0022-s",
+      "title": "=TEXT(5,Inputs!P4)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0022"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(5,Inputs!P4)"
+        },
+        "inputs": {
+          "Inputs!P4": {
+            "type": "text",
+            "value": "0.00"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "5.00"
+        }
+      },
+      "notes": "A format code read from an input."
+    },
+    {
+      "id": "0023-s",
+      "title": "=IFERROR(Inputs!J1+0,\"refused\")",
+      "since": "0.39.0",
+      "tags": [
+        "S-0023"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFERROR(Inputs!J1+0,\"refused\")"
+        },
+        "inputs": {
+          "Inputs!J1": {
+            "type": "text",
+            "value": "=1+1"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "refused"
+        }
+      }
+    },
+    {
+      "id": "0024-s",
+      "title": "=LEN(Inputs!J6)",
+      "since": "0.39.0",
+      "tags": [
+        "S-0024"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(Inputs!J6)"
+        },
+        "inputs": {
+          "Inputs!J6": {
+            "type": "text",
+            "value": "=HYPERLINK(\"x\")"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 15
+        }
+      },
+      "tolerance": 5e-14
+    }
+  ]
+}

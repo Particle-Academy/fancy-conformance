@@ -1,0 +1,3234 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/eval-lookup",
+  "cases": [
+    {
+      "id": "0001-l",
+      "title": "=VLOOKUP(25,Inputs!E1:F5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0001",
+        "H-09"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(25,Inputs!E1:F5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!E1:F5": {
+            "type": "range",
+            "rows": [
+              [
+                30,
+                "c"
+              ],
+              [
+                10,
+                "a"
+              ],
+              [
+                50,
+                "e"
+              ],
+              [
+                20,
+                "b"
+              ],
+              [
+                40,
+                "d"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a"
+        }
+      },
+      "notes": "Unsorted keys 30,10,50,20,40: binary search lands on a different row from a linear scan."
+    },
+    {
+      "id": "0002-l",
+      "title": "=VLOOKUP(45,Inputs!E1:F5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0002",
+        "H-09"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(45,Inputs!E1:F5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!E1:F5": {
+            "type": "range",
+            "rows": [
+              [
+                30,
+                "c"
+              ],
+              [
+                10,
+                "a"
+              ],
+              [
+                50,
+                "e"
+              ],
+              [
+                20,
+                "b"
+              ],
+              [
+                40,
+                "d"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a"
+        }
+      }
+    },
+    {
+      "id": "0003-l",
+      "title": "=MATCH(35,Inputs!E1:E5,1)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0003",
+        "H-09"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(35,Inputs!E1:E5,1)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0004-l",
+      "title": "=MATCH(5,Inputs!E1:E5,1)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0004",
+        "H-09"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(5,Inputs!E1:E5,1)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      },
+      "notes": "Below every key."
+    },
+    {
+      "id": "0005-l",
+      "title": "=LOOKUP(25,Inputs!E1:E5,Inputs!F1:F5)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0005",
+        "H-09"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LOOKUP(25,Inputs!E1:E5,Inputs!F1:F5)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          },
+          "Inputs!F1:F5": {
+            "type": "range",
+            "rows": [
+              [
+                "c"
+              ],
+              [
+                "a"
+              ],
+              [
+                "e"
+              ],
+              [
+                "b"
+              ],
+              [
+                "d"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a"
+        }
+      }
+    },
+    {
+      "id": "0006-l",
+      "title": "=XLOOKUP(25,Inputs!E1:E5,Inputs!F1:F5,,-1)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0006",
+        "H-09"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(25,Inputs!E1:E5,Inputs!F1:F5,,-1)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          },
+          "Inputs!F1:F5": {
+            "type": "range",
+            "rows": [
+              [
+                "c"
+              ],
+              [
+                "a"
+              ],
+              [
+                "e"
+              ],
+              [
+                "b"
+              ],
+              [
+                "d"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "b"
+        }
+      },
+      "notes": "XLOOKUP next-smaller is a linear scan: the control."
+    },
+    {
+      "id": "0007-l",
+      "title": "=MATCH(TRUE,Inputs!A1:A6,0)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0007",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(TRUE,Inputs!A1:A6,0)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Exact match on a boolean in a mixed column.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0008-l",
+      "title": "=MATCH(\"20\",Inputs!A1:A6,0)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0008",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(\"20\",Inputs!A1:A6,0)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "Text key against numeric text.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0009-l",
+      "title": "=MATCH(20,Inputs!A1:A6,0)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0009",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(20,Inputs!A1:A6,0)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      },
+      "notes": "Number key against numeric TEXT: no match expected."
+    },
+    {
+      "id": "0010-l",
+      "title": "=VLOOKUP(Inputs!O1,Inputs!C2:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0010",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(Inputs!O1,Inputs!C2:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          },
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      },
+      "notes": "An empty key."
+    },
+    {
+      "id": "0011-l",
+      "title": "=MATCH(\"apple\",Inputs!G1:G4,0)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0011"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(\"apple\",Inputs!G1:G4,0)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "The first of two duplicates.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0012-l",
+      "title": "=XLOOKUP(\"apple\",Inputs!G1:G4,Inputs!H1:H4,,0,-1)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0012"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(\"apple\",Inputs!G1:G4,Inputs!H1:H4,,0,-1)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 400
+        }
+      },
+      "notes": "Search from the end: the last duplicate.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0013-l",
+      "title": "=VLOOKUP(\"*an*\",Inputs!G1:H4,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0013"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(\"*an*\",Inputs!G1:H4,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!G1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple",
+                100
+              ],
+              [
+                "Banana",
+                200
+              ],
+              [
+                "cherry",
+                300
+              ],
+              [
+                "apple",
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 200
+        }
+      },
+      "notes": "Wildcards in an exact VLOOKUP.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0014-l",
+      "title": "=MATCH(100,Inputs!C2:C5,0)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0014"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(100,Inputs!C2:C5,0)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0015-l",
+      "title": "=VLOOKUP(99.99999999999999,Inputs!C2:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0015",
+        "H-03"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(99.99999999999999,Inputs!C2:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 11
+        }
+      },
+      "notes": "A key a hair below a breakpoint.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0016-l",
+      "title": "=ROWS(Inputs!B:B)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0016",
+        "H-25"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROWS(Inputs!B:B)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1000
+        }
+      },
+      "notes": "An open range is sized by the grid in Sheets.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0017-l",
+      "title": "=COUNTA(Inputs!B:B)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0017",
+        "H-25"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTA(Inputs!B:B)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0018-l",
+      "title": "=MATCH(10,{30,20,10},-1)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0018"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(10,{30,20,10},-1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Descending match.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0019-l",
+      "title": "=MATCH(25,{30,20,10},-1)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0019"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(25,{30,20,10},-1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0020-l",
+      "title": "=VLOOKUP(\"BANANA\",Inputs!G1:H4,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0020",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(\"BANANA\",Inputs!G1:H4,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!G1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple",
+                100
+              ],
+              [
+                "Banana",
+                200
+              ],
+              [
+                "cherry",
+                300
+              ],
+              [
+                "apple",
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 200
+        }
+      },
+      "notes": "Case-insensitive key.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0021-l",
+      "title": "=HLOOKUP(\"C\",Inputs!K1:N2,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0021",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=HLOOKUP(\"C\",Inputs!K1:N2,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0022-l",
+      "title": "=VLOOKUP(500,Inputs!C2:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "L-0022"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(500,Inputs!C2:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 8.4
+        }
+      },
+      "notes": "Exactly the last breakpoint.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0214-e-vlookup",
+      "title": "=VLOOKUP(120,Inputs!C2:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0214"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(120,Inputs!C2:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9.75
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0215-e-vlookup",
+      "title": "=VLOOKUP(100,Inputs!C2:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0215"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(100,Inputs!C2:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9.75
+        }
+      },
+      "notes": "Exactly on a breakpoint.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0216-e-vlookup",
+      "title": "=VLOOKUP(0,Inputs!C2:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0216"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(0,Inputs!C2:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      },
+      "notes": "Below the first key."
+    },
+    {
+      "id": "0217-e-vlookup",
+      "title": "=VLOOKUP(1000,Inputs!C2:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0217"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(1000,Inputs!C2:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 8.4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0218-e-vlookup",
+      "title": "=VLOOKUP(50,Inputs!C2:D5,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0218"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(50,Inputs!C2:D5,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 11
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0219-e-vlookup",
+      "title": "=VLOOKUP(51,Inputs!C2:D5,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0219"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(51,Inputs!C2:D5,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0220-e-vlookup",
+      "title": "=VLOOKUP(50,Inputs!C2:D5,3,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0220"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(50,Inputs!C2:D5,3,FALSE)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#REF!"
+        }
+      },
+      "notes": "Column index past the range."
+    },
+    {
+      "id": "0221-e-vlookup",
+      "title": "=VLOOKUP(\"min_qty\",Inputs!C1:D5,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0221"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(\"min_qty\",Inputs!C1:D5,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!C1:D5": {
+            "type": "range",
+            "rows": [
+              [
+                "min_qty",
+                "unit_price"
+              ],
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "unit_price"
+        }
+      },
+      "notes": "A header row is just a row."
+    },
+    {
+      "id": "0222-e-vlookup",
+      "title": "=VLOOKUP(120,Inputs!C1:D5,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0222",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VLOOKUP(120,Inputs!C1:D5,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!C1:D5": {
+            "type": "range",
+            "rows": [
+              [
+                "min_qty",
+                "unit_price"
+              ],
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9.75
+        }
+      },
+      "notes": "Approximate match with a text header in the key column.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0223-e-hlookup",
+      "title": "=HLOOKUP(\"b\",Inputs!K1:N2,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0223"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=HLOOKUP(\"b\",Inputs!K1:N2,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0224-e-hlookup",
+      "title": "=HLOOKUP(\"z\",Inputs!K1:N2,2,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0224"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=HLOOKUP(\"z\",Inputs!K1:N2,2,FALSE)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0225-e-hlookup",
+      "title": "=HLOOKUP(\"bb\",Inputs!K1:N2,2,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0225"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=HLOOKUP(\"bb\",Inputs!K1:N2,2,TRUE)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0226-e-hlookup",
+      "title": "=HLOOKUP(\"a\",Inputs!K1:N2,3,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0226"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=HLOOKUP(\"a\",Inputs!K1:N2,3,FALSE)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#REF!"
+        }
+      }
+    },
+    {
+      "id": "0227-e-xlookup",
+      "title": "=XLOOKUP(50,Inputs!C2:C5,Inputs!D2:D5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0227"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(50,Inputs!C2:C5,Inputs!D2:D5)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          },
+          "Inputs!D2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                12.5
+              ],
+              [
+                11
+              ],
+              [
+                9.75
+              ],
+              [
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 11
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0228-e-xlookup",
+      "title": "=XLOOKUP(51,Inputs!C2:C5,Inputs!D2:D5,\"none\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0228"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(51,Inputs!C2:C5,Inputs!D2:D5,\"none\")"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          },
+          "Inputs!D2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                12.5
+              ],
+              [
+                11
+              ],
+              [
+                9.75
+              ],
+              [
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "none"
+        }
+      }
+    },
+    {
+      "id": "0229-e-xlookup",
+      "title": "=XLOOKUP(120,Inputs!C2:C5,Inputs!D2:D5,,-1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0229"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(120,Inputs!C2:C5,Inputs!D2:D5,,-1)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          },
+          "Inputs!D2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                12.5
+              ],
+              [
+                11
+              ],
+              [
+                9.75
+              ],
+              [
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9.75
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0230-e-xlookup",
+      "title": "=XLOOKUP(120,Inputs!C2:C5,Inputs!D2:D5,,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0230"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(120,Inputs!C2:C5,Inputs!D2:D5,,1)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          },
+          "Inputs!D2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                12.5
+              ],
+              [
+                11
+              ],
+              [
+                9.75
+              ],
+              [
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 8.4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0231-e-xlookup",
+      "title": "=XLOOKUP(51,Inputs!C2:C5,Inputs!D2:D5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0231"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(51,Inputs!C2:C5,Inputs!D2:D5)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          },
+          "Inputs!D2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                12.5
+              ],
+              [
+                11
+              ],
+              [
+                9.75
+              ],
+              [
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0232-e-xlookup",
+      "title": "=XLOOKUP(\"a?ple\",Inputs!G1:G4,Inputs!H1:H4,,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0232"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XLOOKUP(\"a?ple\",Inputs!G1:G4,Inputs!H1:H4,,2)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 100
+        }
+      },
+      "notes": "Wildcard match mode.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0233-e-index",
+      "title": "=INDEX(Inputs!C1:D5,3,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0233"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX(Inputs!C1:D5,3,2)"
+        },
+        "inputs": {
+          "Inputs!C1:D5": {
+            "type": "range",
+            "rows": [
+              [
+                "min_qty",
+                "unit_price"
+              ],
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 11
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0234-e-index",
+      "title": "=INDEX(Inputs!B1:B5,4)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0234"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX(Inputs!B1:B5,4)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0235-e-index",
+      "title": "=INDEX(Inputs!B1:B5,9)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0235",
+        "H-22"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX(Inputs!B1:B5,9)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      },
+      "notes": "Past the range."
+    },
+    {
+      "id": "0236-e-index",
+      "title": "=SUM(INDEX(Inputs!C2:D5,0,2))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0236"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(INDEX(Inputs!C2:D5,0,2))"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 41.65
+        }
+      },
+      "notes": "Row 0 is the whole column.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0237-e-index",
+      "title": "=SUM(INDEX(Inputs!C2:D5,,2))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0237",
+        "H-27"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(INDEX(Inputs!C2:D5,,2))"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 41.65
+        }
+      },
+      "notes": "An omitted row argument.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0238-e-index",
+      "title": "=INDEX(Inputs!K1:N2,2,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0238"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX(Inputs!K1:N2,2,3)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0239-e-match",
+      "title": "=MATCH(120,Inputs!C2:C5,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0239"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(120,Inputs!C2:C5,1)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0240-e-match",
+      "title": "=MATCH(50,Inputs!C2:C5,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0240"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(50,Inputs!C2:C5,0)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0241-e-match",
+      "title": "=MATCH(\"BANANA\",Inputs!G1:G4,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0241",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(\"BANANA\",Inputs!G1:G4,0)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0242-e-match",
+      "title": "=MATCH(0,Inputs!C2:C5,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0242"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(0,Inputs!C2:C5,1)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0243-e-match",
+      "title": "=MATCH(15,{30,20,10},-1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0243"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(15,{30,20,10},-1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0244-e-match",
+      "title": "=MATCH(\"b*\",Inputs!G1:G4,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0244"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(\"b*\",Inputs!G1:G4,0)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "Wildcards in exact MATCH.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0245-e-match",
+      "title": "=MATCH(120,Inputs!C2:C5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0245"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MATCH(120,Inputs!C2:C5)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Match type omitted defaults to 1.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0246-e-lookup",
+      "title": "=LOOKUP(120,Inputs!C2:C5,Inputs!D2:D5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0246"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LOOKUP(120,Inputs!C2:C5,Inputs!D2:D5)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          },
+          "Inputs!D2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                12.5
+              ],
+              [
+                11
+              ],
+              [
+                9.75
+              ],
+              [
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9.75
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0247-e-lookup",
+      "title": "=LOOKUP(0,Inputs!C2:C5,Inputs!D2:D5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0247"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LOOKUP(0,Inputs!C2:C5,Inputs!D2:D5)"
+        },
+        "inputs": {
+          "Inputs!C2:C5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                50
+              ],
+              [
+                100
+              ],
+              [
+                500
+              ]
+            ]
+          },
+          "Inputs!D2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                12.5
+              ],
+              [
+                11
+              ],
+              [
+                9.75
+              ],
+              [
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0248-e-lookup",
+      "title": "=LOOKUP(120,Inputs!C2:D5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0248"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LOOKUP(120,Inputs!C2:D5)"
+        },
+        "inputs": {
+          "Inputs!C2:D5": {
+            "type": "range",
+            "rows": [
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9.75
+        }
+      },
+      "notes": "The array form.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0249-e-choose",
+      "title": "=CHOOSE(2,\"a\",\"b\",\"c\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0249"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CHOOSE(2,\"a\",\"b\",\"c\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "b"
+        }
+      }
+    },
+    {
+      "id": "0250-e-choose",
+      "title": "=CHOOSE(4,\"a\",\"b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0250"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CHOOSE(4,\"a\",\"b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0251-e-choose",
+      "title": "=CHOOSE(1.9,\"a\",\"b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0251"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CHOOSE(1.9,\"a\",\"b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a"
+        }
+      },
+      "notes": "Truncation."
+    },
+    {
+      "id": "0252-e-choose",
+      "title": "=CHOOSE(0,\"a\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0252"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CHOOSE(0,\"a\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0253-e-rows",
+      "title": "=ROWS(Inputs!C1:D5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0253"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROWS(Inputs!C1:D5)"
+        },
+        "inputs": {
+          "Inputs!C1:D5": {
+            "type": "range",
+            "rows": [
+              [
+                "min_qty",
+                "unit_price"
+              ],
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0254-e-rows",
+      "title": "=ROWS({1;2;3})",
+      "since": "0.39.0",
+      "tags": [
+        "E-0254"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROWS({1;2;3})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0255-e-rows",
+      "title": "=ROWS(Inputs!K1:N2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0255"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROWS(Inputs!K1:N2)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0256-e-columns",
+      "title": "=COLUMNS(Inputs!C1:D5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0256"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COLUMNS(Inputs!C1:D5)"
+        },
+        "inputs": {
+          "Inputs!C1:D5": {
+            "type": "range",
+            "rows": [
+              [
+                "min_qty",
+                "unit_price"
+              ],
+              [
+                1,
+                12.5
+              ],
+              [
+                50,
+                11
+              ],
+              [
+                100,
+                9.75
+              ],
+              [
+                500,
+                8.4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0257-e-columns",
+      "title": "=COLUMNS({1,2,3,4})",
+      "since": "0.39.0",
+      "tags": [
+        "E-0257"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COLUMNS({1,2,3,4})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0258-e-columns",
+      "title": "=COLUMNS(Inputs!K1:N2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0258"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COLUMNS(Inputs!K1:N2)"
+        },
+        "inputs": {
+          "Inputs!K1:N2": {
+            "type": "range",
+            "rows": [
+              [
+                "a",
+                "b",
+                "c",
+                "d"
+              ],
+              [
+                1,
+                2,
+                3,
+                4
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    }
+  ]
+}

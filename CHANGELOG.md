@@ -10,10 +10,30 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
-**What a consumer must do: nothing.** No suite changed. The manifest schema
-only gains a value; every existing manifest still validates.
+## [0.39.0] - 2026-10-29
+
+**What a consumer must do: nothing.** No existing suite changed. The manifest
+schema only gains a value; every existing manifest still validates. Thirteen
+NEW `formula/*` suites appear, which only fancy-formula reads.
 
 ### Added
+
+- **The first Google Sheets goldens: 687 rows in 13 `formula/*` suites**
+  (coerce, dates, float, eval-date, eval-info, eval-logical, eval-lookup,
+  eval-math, eval-operators, eval-stat, eval-text, pricing, security), from
+  capture v1 of fancy-formula's workbook, recalculated by Google Sheets on
+  2026-10-29 in locale en_US and time zone UTC. The raw export, `request.json`
+  and `provenance.json` are under `suites/formula/captures/v1/`. Every guard
+  passed, including the new literal-survival check: all input cells came back
+  unchanged. The export kept 15 significant digits (canary K-0002 read `0.3`),
+  so every non-zero numeric row declares a tolerance of half a unit in the 15th
+  digit. A row whose golden is exactly `0` cannot tell "Sheets snapped a tiny
+  result to zero" from "the export rounded it"; F-0002 is one, and is not
+  evidence for that hypothesis.
+- **`build-formula-cases.py` reads Sheets' BLANK result**, which its xlsx
+  download stores as `t="str"` with an empty value (capture v2, row E-0186,
+  `=IFERROR(NA())`). It is read as empty only when TYPE says 1 AND LEN says 0;
+  `=""` (TYPE 2) stays a zero-length string, and a disagreeing LEN refuses.
 
 - **`google-sheets` in the manifest's `contract.reference` enum** (fancy-formula
   decision D4), for goldens CAPTURED from Google Sheets. `authored` would be

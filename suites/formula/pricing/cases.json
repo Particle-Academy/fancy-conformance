@@ -1,0 +1,4814 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/pricing",
+  "cases": [
+    {
+      "id": "0001-a-a-total-units",
+      "title": "=SUM(Inputs!X2,Inputs!X3,Inputs!X4)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0001"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!X2,Inputs!X3,Inputs!X4)"
+        },
+        "inputs": {
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 40
+        }
+      },
+      "notes": "Appendix A case A: total_units.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0002-a-a-grid-discount-vlookup",
+      "title": "=IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0002"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.05
+        }
+      },
+      "notes": "Appendix A case A: grid_discount.vlookup.",
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0003-a-a-grid-discount-xlookup",
+      "title": "=IF(Inputs!X1=3,XLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0003",
+        "H-27"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!X1=3,XLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.05
+        }
+      },
+      "notes": "Appendix A case A: grid_discount.xlookup.",
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0004-a-a-grid-discount-index-match",
+      "title": "=IF(Inputs!X1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!U1:V5,,1),1),2))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0004"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!X1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!X2+Inputs!X3+Inputs!X4),INDEX(Inputs!U1:V5,,1),1),2))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.05
+        }
+      },
+      "notes": "Appendix A case A: grid_discount.index_match.",
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0005-a-a-accel-pct",
+      "title": "=INDEX(Inputs!W1:W5,Inputs!X8)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0005"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX(Inputs!W1:W5,Inputs!X8)"
+        },
+        "inputs": {
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.05
+        }
+      },
+      "notes": "Appendix A case A: accel_pct.",
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0006-a-a-total-discount",
+      "title": "=(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0006"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.1
+        }
+      },
+      "notes": "Appendix A case A: total_discount.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0007-a-a-line-core",
+      "title": "=ROUND(Inputs!X2*Inputs!X5*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0007"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!X2*Inputs!X5*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!X5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 27000
+        }
+      },
+      "notes": "Appendix A case A: line_core.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0008-a-a-line-adv-a",
+      "title": "=ROUND(Inputs!X3*Inputs!X6*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0008"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!X3*Inputs!X6*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!X6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3600
+        }
+      },
+      "notes": "Appendix A case A: line_adv_a.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0009-a-a-line-adv-b",
+      "title": "=ROUND(Inputs!X4*Inputs!X7*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0009"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!X4*Inputs!X7*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!X7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "Appendix A case A: line_adv_b."
+    },
+    {
+      "id": "0010-a-a-admin-price",
+      "title": "=IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0010"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))"
+        },
+        "inputs": {
+          "Inputs!X5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!X6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!X7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!X9": {
+            "type": "text",
+            "value": "entered"
+          },
+          "Inputs!X10": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!X12": {
+            "type": "boolean",
+            "value": false
+          },
+          "Inputs!X13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 200
+        }
+      },
+      "notes": "Appendix A case A: admin_price.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0011-a-a-admin-price-sumproduct",
+      "title": "=IF(Inputs!X9=\"entered\",Inputs!X10,SUMPRODUCT({TRUE,Inputs!X12,Inputs!X13}*1,{Inputs!X5,Inputs!X6,Inputs!X7}))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0011",
+        "H-21"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!X9=\"entered\",Inputs!X10,SUMPRODUCT({TRUE,Inputs!X12,Inputs!X13}*1,{Inputs!X5,Inputs!X6,Inputs!X7}))"
+        },
+        "inputs": {
+          "Inputs!X5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!X6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!X7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!X9": {
+            "type": "text",
+            "value": "entered"
+          },
+          "Inputs!X10": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!X12": {
+            "type": "boolean",
+            "value": false
+          },
+          "Inputs!X13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 200
+        }
+      },
+      "notes": "Appendix A case A: admin_price.sumproduct.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0012-a-a-line-admin",
+      "title": "=ROUND(Inputs!X11*IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0012"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!X11*IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!X5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!X6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!X7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          },
+          "Inputs!X9": {
+            "type": "text",
+            "value": "entered"
+          },
+          "Inputs!X10": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!X11": {
+            "type": "number",
+            "value": 2
+          },
+          "Inputs!X12": {
+            "type": "boolean",
+            "value": false
+          },
+          "Inputs!X13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 360
+        }
+      },
+      "notes": "Appendix A case A: line_admin.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0013-a-a-annual-total",
+      "title": "=SUM(ROUND(Inputs!X2*Inputs!X5*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X3*Inputs!X6*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X4*Inputs!X7*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X11*IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0013"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(ROUND(Inputs!X2*Inputs!X5*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X3*Inputs!X6*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X4*Inputs!X7*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X11*IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!X5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!X6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!X7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          },
+          "Inputs!X9": {
+            "type": "text",
+            "value": "entered"
+          },
+          "Inputs!X10": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!X11": {
+            "type": "number",
+            "value": 2
+          },
+          "Inputs!X12": {
+            "type": "boolean",
+            "value": false
+          },
+          "Inputs!X13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 30960
+        }
+      },
+      "notes": "Appendix A case A: annual_total.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0014-a-a-contract-total",
+      "title": "=SUM(ROUND(Inputs!X2*Inputs!X5*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X3*Inputs!X6*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X4*Inputs!X7*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X11*IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2))*Inputs!X1",
+      "since": "0.39.0",
+      "tags": [
+        "A-0014"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(ROUND(Inputs!X2*Inputs!X5*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X3*Inputs!X6*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X4*Inputs!X7*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2),ROUND(Inputs!X11*IF(Inputs!X9=\"entered\",Inputs!X10,Inputs!X5+Inputs!X6*N(Inputs!X12)+Inputs!X7*N(Inputs!X13))*(1-(IF(Inputs!X1=3,VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!X2+Inputs!X3+Inputs!X4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!X8))),2))*Inputs!X1"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!X1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!X5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!X6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!X7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!X8": {
+            "type": "number",
+            "value": 2
+          },
+          "Inputs!X9": {
+            "type": "text",
+            "value": "entered"
+          },
+          "Inputs!X10": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!X11": {
+            "type": "number",
+            "value": 2
+          },
+          "Inputs!X12": {
+            "type": "boolean",
+            "value": false
+          },
+          "Inputs!X13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 92880
+        }
+      },
+      "notes": "Appendix A case A: contract_total.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0015-a-a-needs-core",
+      "title": "=IF(AND(Inputs!X3+Inputs!X4>0,Inputs!X2=0),\"Advanced modules need Core\",\"\")",
+      "since": "0.39.0",
+      "tags": [
+        "A-0015"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(AND(Inputs!X3+Inputs!X4>0,Inputs!X2=0),\"Advanced modules need Core\",\"\")"
+        },
+        "inputs": {
+          "Inputs!X2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!X3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!X4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": ""
+        }
+      },
+      "notes": "Appendix A case A: needs_core."
+    },
+    {
+      "id": "0016-a-b-grid-discount-vlookup",
+      "title": "=IF(Inputs!Y1=3,VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!U1:V5,2,TRUE))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0016"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!Y1=3,VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!U1:V5,2,TRUE))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Y1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!Y2": {
+            "type": "number",
+            "value": 100
+          },
+          "Inputs!Y3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Y4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.16
+        }
+      },
+      "notes": "Appendix A case B: grid_discount.vlookup.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0017-a-b-grid-discount-xlookup",
+      "title": "=IF(Inputs!Y1=3,XLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0017",
+        "H-27"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!Y1=3,XLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Y1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!Y2": {
+            "type": "number",
+            "value": 100
+          },
+          "Inputs!Y3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Y4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.16
+        }
+      },
+      "notes": "Appendix A case B: grid_discount.xlookup.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0018-a-b-grid-discount-index-match",
+      "title": "=IF(Inputs!Y1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!U1:V5,,1),1),2))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0018"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!Y1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!Y2+Inputs!Y3+Inputs!Y4),INDEX(Inputs!U1:V5,,1),1),2))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Y1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!Y2": {
+            "type": "number",
+            "value": 100
+          },
+          "Inputs!Y3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Y4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.16
+        }
+      },
+      "notes": "Appendix A case B: grid_discount.index_match.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0019-a-b-total-discount",
+      "title": "=(IF(Inputs!Y1=3,VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!Y8))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0019"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=(IF(Inputs!Y1=3,VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!Y8))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Y1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!Y2": {
+            "type": "number",
+            "value": 100
+          },
+          "Inputs!Y3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Y4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Y8": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.16
+        }
+      },
+      "notes": "Appendix A case B: total_discount.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0020-a-b-line-core",
+      "title": "=ROUND(Inputs!Y2*Inputs!Y5*(1-(IF(Inputs!Y1=3,VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!Y8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0020"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!Y2*Inputs!Y5*(1-(IF(Inputs!Y1=3,VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Y2+Inputs!Y3+Inputs!Y4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!Y8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Y1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!Y2": {
+            "type": "number",
+            "value": 100
+          },
+          "Inputs!Y3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Y4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Y5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!Y8": {
+            "type": "number",
+            "value": 1
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 84000
+        }
+      },
+      "notes": "Appendix A case B: line_core.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0021-a-c-grid-discount-vlookup",
+      "title": "=IF(Inputs!Z1=3,VLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),Inputs!U1:V5,2,TRUE))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0021"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!Z1=3,VLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),Inputs!U1:V5,2,TRUE))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Z1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!Z2": {
+            "type": "number",
+            "value": 24
+          },
+          "Inputs!Z3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Z4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "Appendix A case C: grid_discount.vlookup."
+    },
+    {
+      "id": "0022-a-c-grid-discount-xlookup",
+      "title": "=IF(Inputs!Z1=3,XLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0022",
+        "H-27"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!Z1=3,XLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Z1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!Z2": {
+            "type": "number",
+            "value": 24
+          },
+          "Inputs!Z3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Z4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "Appendix A case C: grid_discount.xlookup."
+    },
+    {
+      "id": "0023-a-c-grid-discount-index-match",
+      "title": "=IF(Inputs!Z1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!U1:V5,,1),1),2))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0023"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!Z1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!Z2+Inputs!Z3+Inputs!Z4),INDEX(Inputs!U1:V5,,1),1),2))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!Z1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!Z2": {
+            "type": "number",
+            "value": 24
+          },
+          "Inputs!Z3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!Z4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "Appendix A case C: grid_discount.index_match."
+    },
+    {
+      "id": "0024-a-d-admin-price",
+      "title": "=IF(Inputs!AA9=\"entered\",Inputs!AA10,Inputs!AA5+Inputs!AA6*N(Inputs!AA12)+Inputs!AA7*N(Inputs!AA13))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0024"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AA9=\"entered\",Inputs!AA10,Inputs!AA5+Inputs!AA6*N(Inputs!AA12)+Inputs!AA7*N(Inputs!AA13))"
+        },
+        "inputs": {
+          "Inputs!AA5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AA6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AA7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AA9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AA10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AA12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AA13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1400
+        }
+      },
+      "notes": "Appendix A case D: admin_price.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0025-a-d-admin-price-sumproduct",
+      "title": "=IF(Inputs!AA9=\"entered\",Inputs!AA10,SUMPRODUCT({TRUE,Inputs!AA12,Inputs!AA13}*1,{Inputs!AA5,Inputs!AA6,Inputs!AA7}))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0025",
+        "H-21"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AA9=\"entered\",Inputs!AA10,SUMPRODUCT({TRUE,Inputs!AA12,Inputs!AA13}*1,{Inputs!AA5,Inputs!AA6,Inputs!AA7}))"
+        },
+        "inputs": {
+          "Inputs!AA5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AA6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AA7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AA9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AA10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AA12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AA13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1400
+        }
+      },
+      "notes": "Appendix A case D: admin_price.sumproduct.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0026-a-d-line-admin",
+      "title": "=ROUND(Inputs!AA11*IF(Inputs!AA9=\"entered\",Inputs!AA10,Inputs!AA5+Inputs!AA6*N(Inputs!AA12)+Inputs!AA7*N(Inputs!AA13))*(1-(IF(Inputs!AA1=3,VLOOKUP((Inputs!AA2+Inputs!AA3+Inputs!AA4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AA2+Inputs!AA3+Inputs!AA4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AA8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0026"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!AA11*IF(Inputs!AA9=\"entered\",Inputs!AA10,Inputs!AA5+Inputs!AA6*N(Inputs!AA12)+Inputs!AA7*N(Inputs!AA13))*(1-(IF(Inputs!AA1=3,VLOOKUP((Inputs!AA2+Inputs!AA3+Inputs!AA4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AA2+Inputs!AA3+Inputs!AA4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AA8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AA1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AA2": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!AA3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AA4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AA5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AA6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AA7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AA8": {
+            "type": "number",
+            "value": 1
+          },
+          "Inputs!AA9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AA10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AA11": {
+            "type": "number",
+            "value": 1
+          },
+          "Inputs!AA12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AA13": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1400
+        }
+      },
+      "notes": "Appendix A case D: line_admin.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0027-a-e-total-units",
+      "title": "=SUM(Inputs!AB2,Inputs!AB3,Inputs!AB4)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0027"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!AB2,Inputs!AB3,Inputs!AB4)"
+        },
+        "inputs": {
+          "Inputs!AB2": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AB3": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AB4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "notes": "Appendix A case E: total_units.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0028-a-e-needs-core",
+      "title": "=IF(AND(Inputs!AB3+Inputs!AB4>0,Inputs!AB2=0),\"Advanced modules need Core\",\"\")",
+      "since": "0.39.0",
+      "tags": [
+        "A-0028"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(AND(Inputs!AB3+Inputs!AB4>0,Inputs!AB2=0),\"Advanced modules need Core\",\"\")"
+        },
+        "inputs": {
+          "Inputs!AB2": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AB3": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AB4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "Advanced modules need Core"
+        }
+      },
+      "notes": "Appendix A case E: needs_core."
+    },
+    {
+      "id": "0029-a-f-accel-pct",
+      "title": "=INDEX(Inputs!W1:W5,Inputs!AC8)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0029",
+        "H-22"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX(Inputs!W1:W5,Inputs!AC8)"
+        },
+        "inputs": {
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AC8": {
+            "type": "number",
+            "value": 9
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      },
+      "notes": "Appendix A case F: accel_pct."
+    },
+    {
+      "id": "0030-a-f-total-discount",
+      "title": "=(IF(Inputs!AC1=3,VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AC8))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0030",
+        "H-22"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=(IF(Inputs!AC1=3,VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AC8))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AC1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AC2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!AC3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!AC4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AC8": {
+            "type": "number",
+            "value": 9
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      },
+      "notes": "Appendix A case F: total_discount."
+    },
+    {
+      "id": "0031-a-f-line-core",
+      "title": "=ROUND(Inputs!AC2*Inputs!AC5*(1-(IF(Inputs!AC1=3,VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AC8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0031",
+        "H-22"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!AC2*Inputs!AC5*(1-(IF(Inputs!AC1=3,VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AC2+Inputs!AC3+Inputs!AC4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AC8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AC1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AC2": {
+            "type": "number",
+            "value": 30
+          },
+          "Inputs!AC3": {
+            "type": "number",
+            "value": 10
+          },
+          "Inputs!AC4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AC5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AC8": {
+            "type": "number",
+            "value": 9
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      },
+      "notes": "Appendix A case F: line_core."
+    },
+    {
+      "id": "0032-a-g-grid-discount-vlookup",
+      "title": "=IF(Inputs!AD1=3,VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!U1:V5,2,TRUE))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0032"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AD1=3,VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!U1:V5,2,TRUE))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AD1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AD2": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AD3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AD4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.08
+        }
+      },
+      "notes": "Appendix A case G: grid_discount.vlookup.",
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0033-a-g-grid-discount-xlookup",
+      "title": "=IF(Inputs!AD1=3,XLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0033",
+        "H-27"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AD1=3,XLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AD1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AD2": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AD3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AD4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.08
+        }
+      },
+      "notes": "Appendix A case G: grid_discount.xlookup.",
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0034-a-g-grid-discount-index-match",
+      "title": "=IF(Inputs!AD1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!U1:V5,,1),1),2))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0034"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AD1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!AD2+Inputs!AD3+Inputs!AD4),INDEX(Inputs!U1:V5,,1),1),2))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AD1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AD2": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AD3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AD4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.08
+        }
+      },
+      "notes": "Appendix A case G: grid_discount.index_match.",
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0035-a-g-total-discount",
+      "title": "=(IF(Inputs!AD1=3,VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AD8))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0035"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=(IF(Inputs!AD1=3,VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AD2+Inputs!AD3+Inputs!AD4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AD8))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AD1": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AD2": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AD3": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AD4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AD8": {
+            "type": "number",
+            "value": 3
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.18
+        }
+      },
+      "notes": "Appendix A case G: total_discount.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0036-a-h-total-units",
+      "title": "=SUM(Inputs!AE2,Inputs!AE3,Inputs!AE4)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0036"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!AE2,Inputs!AE3,Inputs!AE4)"
+        },
+        "inputs": {
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 250
+        }
+      },
+      "notes": "Appendix A case H: total_units.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0037-a-h-grid-discount-vlookup",
+      "title": "=IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0037"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.2
+        }
+      },
+      "notes": "Appendix A case H: grid_discount.vlookup.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0038-a-h-grid-discount-xlookup",
+      "title": "=IF(Inputs!AE1=3,XLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0038",
+        "H-27"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AE1=3,XLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!S1:T5,,1),INDEX(Inputs!S1:T5,,2),,-1),XLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!U1:V5,,1),INDEX(Inputs!U1:V5,,2),,-1))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.2
+        }
+      },
+      "notes": "Appendix A case H: grid_discount.xlookup.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0039-a-h-grid-discount-index-match",
+      "title": "=IF(Inputs!AE1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!U1:V5,,1),1),2))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0039"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AE1=3,INDEX(Inputs!S1:T5,MATCH((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!S1:T5,,1),1),2),INDEX(Inputs!U1:V5,MATCH((Inputs!AE2+Inputs!AE3+Inputs!AE4),INDEX(Inputs!U1:V5,,1),1),2))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.2
+        }
+      },
+      "notes": "Appendix A case H: grid_discount.index_match.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0040-a-h-accel-pct",
+      "title": "=INDEX(Inputs!W1:W5,Inputs!AE8)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0040"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX(Inputs!W1:W5,Inputs!AE8)"
+        },
+        "inputs": {
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.2
+        }
+      },
+      "notes": "Appendix A case H: accel_pct.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0041-a-h-total-discount",
+      "title": "=(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0041"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.4
+        }
+      },
+      "notes": "Appendix A case H: total_discount.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0042-a-h-line-core",
+      "title": "=ROUND(Inputs!AE2*Inputs!AE5*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0042"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!AE2*Inputs!AE5*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 120000
+        }
+      },
+      "notes": "Appendix A case H: line_core.",
+      "tolerance": 5e-10
+    },
+    {
+      "id": "0043-a-h-line-adv-a",
+      "title": "=ROUND(Inputs!AE3*Inputs!AE6*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0043"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!AE3*Inputs!AE6*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 12000
+        }
+      },
+      "notes": "Appendix A case H: line_adv_a.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0044-a-h-line-adv-b",
+      "title": "=ROUND(Inputs!AE4*Inputs!AE7*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0044"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!AE4*Inputs!AE7*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "Appendix A case H: line_adv_b."
+    },
+    {
+      "id": "0045-a-h-admin-price",
+      "title": "=IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0045"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))"
+        },
+        "inputs": {
+          "Inputs!AE5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AE6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AE7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AE9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AE10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AE13": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2000
+        }
+      },
+      "notes": "Appendix A case H: admin_price.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0046-a-h-admin-price-sumproduct",
+      "title": "=IF(Inputs!AE9=\"entered\",Inputs!AE10,SUMPRODUCT({TRUE,Inputs!AE12,Inputs!AE13}*1,{Inputs!AE5,Inputs!AE6,Inputs!AE7}))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0046",
+        "H-21"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!AE9=\"entered\",Inputs!AE10,SUMPRODUCT({TRUE,Inputs!AE12,Inputs!AE13}*1,{Inputs!AE5,Inputs!AE6,Inputs!AE7}))"
+        },
+        "inputs": {
+          "Inputs!AE5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AE6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AE7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AE9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AE10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AE13": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2000
+        }
+      },
+      "notes": "Appendix A case H: admin_price.sumproduct.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0047-a-h-line-admin",
+      "title": "=ROUND(Inputs!AE11*IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)",
+      "since": "0.39.0",
+      "tags": [
+        "A-0047"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROUND(Inputs!AE11*IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2)"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AE6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AE7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AE10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE11": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AE12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AE13": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3600
+        }
+      },
+      "notes": "Appendix A case H: line_admin.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0048-a-h-annual-total",
+      "title": "=SUM(ROUND(Inputs!AE2*Inputs!AE5*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE3*Inputs!AE6*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE4*Inputs!AE7*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE11*IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2))",
+      "since": "0.39.0",
+      "tags": [
+        "A-0048"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(ROUND(Inputs!AE2*Inputs!AE5*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE3*Inputs!AE6*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE4*Inputs!AE7*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE11*IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2))"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AE6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AE7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AE10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE11": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AE12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AE13": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 135600
+        }
+      },
+      "notes": "Appendix A case H: annual_total.",
+      "tolerance": 5e-10
+    },
+    {
+      "id": "0049-a-h-contract-total",
+      "title": "=SUM(ROUND(Inputs!AE2*Inputs!AE5*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE3*Inputs!AE6*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE4*Inputs!AE7*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE11*IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2))*Inputs!AE1",
+      "since": "0.39.0",
+      "tags": [
+        "A-0049"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(ROUND(Inputs!AE2*Inputs!AE5*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE3*Inputs!AE6*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE4*Inputs!AE7*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2),ROUND(Inputs!AE11*IF(Inputs!AE9=\"entered\",Inputs!AE10,Inputs!AE5+Inputs!AE6*N(Inputs!AE12)+Inputs!AE7*N(Inputs!AE13))*(1-(IF(Inputs!AE1=3,VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!S1:T5,2,TRUE),VLOOKUP((Inputs!AE2+Inputs!AE3+Inputs!AE4),Inputs!U1:V5,2,TRUE))+INDEX(Inputs!W1:W5,Inputs!AE8))),2))*Inputs!AE1"
+        },
+        "inputs": {
+          "Inputs!S1:T5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0
+              ],
+              [
+                25,
+                0.05
+              ],
+              [
+                50,
+                0.08
+              ],
+              [
+                100,
+                0.12
+              ],
+              [
+                250,
+                0.15
+              ]
+            ]
+          },
+          "Inputs!U1:V5": {
+            "type": "range",
+            "rows": [
+              [
+                0,
+                0.03
+              ],
+              [
+                25,
+                0.08
+              ],
+              [
+                50,
+                0.12
+              ],
+              [
+                100,
+                0.16
+              ],
+              [
+                250,
+                0.2
+              ]
+            ]
+          },
+          "Inputs!W1:W5": {
+            "type": "range",
+            "rows": [
+              [
+                0
+              ],
+              [
+                0.05
+              ],
+              [
+                0.1
+              ],
+              [
+                0.15
+              ],
+              [
+                0.2
+              ]
+            ]
+          },
+          "Inputs!AE1": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE5": {
+            "type": "number",
+            "value": 1000
+          },
+          "Inputs!AE6": {
+            "type": "number",
+            "value": 400
+          },
+          "Inputs!AE7": {
+            "type": "number",
+            "value": 600
+          },
+          "Inputs!AE8": {
+            "type": "number",
+            "value": 5
+          },
+          "Inputs!AE9": {
+            "type": "text",
+            "value": "derived"
+          },
+          "Inputs!AE10": {
+            "type": "number",
+            "value": 0
+          },
+          "Inputs!AE11": {
+            "type": "number",
+            "value": 3
+          },
+          "Inputs!AE12": {
+            "type": "boolean",
+            "value": true
+          },
+          "Inputs!AE13": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 678000
+        }
+      },
+      "notes": "Appendix A case H: contract_total.",
+      "tolerance": 5e-10
+    },
+    {
+      "id": "0050-a-h-needs-core",
+      "title": "=IF(AND(Inputs!AE3+Inputs!AE4>0,Inputs!AE2=0),\"Advanced modules need Core\",\"\")",
+      "since": "0.39.0",
+      "tags": [
+        "A-0050"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(AND(Inputs!AE3+Inputs!AE4>0,Inputs!AE2=0),\"Advanced modules need Core\",\"\")"
+        },
+        "inputs": {
+          "Inputs!AE2": {
+            "type": "number",
+            "value": 200
+          },
+          "Inputs!AE3": {
+            "type": "number",
+            "value": 50
+          },
+          "Inputs!AE4": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": ""
+        }
+      },
+      "notes": "Appendix A case H: needs_core."
+    }
+  ]
+}

@@ -1,0 +1,1150 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/eval-logical",
+  "cases": [
+    {
+      "id": "0171-e-if",
+      "title": "=IF(TRUE,1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0171"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(TRUE,1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0172-e-if",
+      "title": "=IF(0,1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0172"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(0,1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0173-e-if",
+      "title": "=IF(\"x\",1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0173",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(\"x\",1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0174-e-if",
+      "title": "=IF(FALSE,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0174"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(FALSE,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0175-e-if",
+      "title": "=IF(1/0,1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0175"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(1/0,1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0176-e-if",
+      "title": "=IF(TRUE,1,1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0176"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(TRUE,1,1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "The untaken branch is not evaluated.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0177-e-ifs",
+      "title": "=IFS(FALSE,1,TRUE,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0177"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFS(FALSE,1,TRUE,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0178-e-ifs",
+      "title": "=IFS(FALSE,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0178"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFS(FALSE,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0179-e-ifs",
+      "title": "=IFS(1>2,\"a\",2>1,\"b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0179"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFS(1>2,\"a\",2>1,\"b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "b"
+        }
+      }
+    },
+    {
+      "id": "0180-e-switch",
+      "title": "=SWITCH(2,1,\"one\",2,\"two\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0180"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SWITCH(2,1,\"one\",2,\"two\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "two"
+        }
+      }
+    },
+    {
+      "id": "0181-e-switch",
+      "title": "=SWITCH(3,1,\"one\",\"default\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0181"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SWITCH(3,1,\"one\",\"default\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "default"
+        }
+      }
+    },
+    {
+      "id": "0182-e-switch",
+      "title": "=SWITCH(3,1,\"one\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0182"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SWITCH(3,1,\"one\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0183-e-switch",
+      "title": "=SWITCH(\"A\",\"a\",\"lower\",\"other\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0183",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SWITCH(\"A\",\"a\",\"lower\",\"other\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "lower"
+        }
+      }
+    },
+    {
+      "id": "0184-e-iferror",
+      "title": "=IFERROR(1/0,\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0184"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFERROR(1/0,\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "x"
+        }
+      }
+    },
+    {
+      "id": "0185-e-iferror",
+      "title": "=IFERROR(5,\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0185"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFERROR(5,\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0186-e-iferror",
+      "title": "=IFERROR(NA())",
+      "since": "0.39.0",
+      "tags": [
+        "E-0186",
+        "H-31"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFERROR(NA())"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "empty"
+        }
+      },
+      "notes": "value_if_error omitted."
+    },
+    {
+      "id": "0187-e-ifna",
+      "title": "=IFNA(NA(),\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0187"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFNA(NA(),\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "x"
+        }
+      }
+    },
+    {
+      "id": "0188-e-ifna",
+      "title": "=IFNA(1/0,\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0188"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFNA(1/0,\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0189-e-ifna",
+      "title": "=IFNA(3,\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0189"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IFNA(3,\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0190-e-and",
+      "title": "=AND(TRUE,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0190"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AND(TRUE,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0191-e-and",
+      "title": "=AND(TRUE,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0191"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AND(TRUE,0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0192-e-and",
+      "title": "=AND(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0192"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AND(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0193-e-and",
+      "title": "=AND(FALSE,1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0193",
+        "H-10"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AND(FALSE,1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0194-e-and",
+      "title": "=AND(\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0194",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AND(\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0195-e-or",
+      "title": "=OR(FALSE,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0195"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=OR(FALSE,0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0196-e-or",
+      "title": "=OR(TRUE,1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0196",
+        "H-10"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=OR(TRUE,1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0197-e-or",
+      "title": "=OR(0,\"TRUE\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0197",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=OR(0,\"TRUE\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0198-e-not",
+      "title": "=NOT(TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0198"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NOT(TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0199-e-not",
+      "title": "=NOT(0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0199"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NOT(0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0200-e-not",
+      "title": "=NOT(\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0200",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NOT(\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0201-e-xor",
+      "title": "=XOR(TRUE,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0201"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XOR(TRUE,TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0202-e-xor",
+      "title": "=XOR(TRUE,FALSE,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0202"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XOR(TRUE,FALSE,TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0203-e-xor",
+      "title": "=XOR(1,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0203"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=XOR(1,0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0204-e-true",
+      "title": "=TRUE()",
+      "since": "0.39.0",
+      "tags": [
+        "E-0204"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TRUE()"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0205-e-true",
+      "title": "=TRUE()+1",
+      "since": "0.39.0",
+      "tags": [
+        "E-0205"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TRUE()+1"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0206-e-true",
+      "title": "=IF(TRUE(),\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0206"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(TRUE(),\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "t"
+        }
+      }
+    },
+    {
+      "id": "0207-e-false",
+      "title": "=FALSE()",
+      "since": "0.39.0",
+      "tags": [
+        "E-0207"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FALSE()"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0208-e-false",
+      "title": "=FALSE()*1",
+      "since": "0.39.0",
+      "tags": [
+        "E-0208"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FALSE()*1"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0209-e-false",
+      "title": "=FALSE()=0",
+      "since": "0.39.0",
+      "tags": [
+        "E-0209"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FALSE()=0"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0210-e-let",
+      "title": "=LET(x,2,y,3,x*y)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0210"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LET(x,2,y,3,x*y)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 6
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0211-e-let",
+      "title": "=LET(x,2,x+LET(x,10,x))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0211"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LET(x,2,x+LET(x,10,x))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 12
+        }
+      },
+      "notes": "Inner x shadows outer x.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0212-e-let",
+      "title": "=LET(a,Inputs!B1:B5,SUM(a))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0212"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LET(a,Inputs!B1:B5,SUM(a))"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 15
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0213-e-let",
+      "title": "=LET(x,1/0,5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0213"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LET(x,1/0,5)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "notes": "An unused binding that errors.",
+      "tolerance": 5e-15
+    }
+  ]
+}

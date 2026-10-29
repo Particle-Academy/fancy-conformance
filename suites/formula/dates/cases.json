@@ -1,0 +1,759 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/dates",
+  "cases": [
+    {
+      "id": "0001-d",
+      "title": "=DATE(1900,2,29)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0001",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(1900,2,29)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 61
+        }
+      },
+      "notes": "Excel: serial 60 (a fictitious day). Sheets: 1900-03-01 = 61?",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0002-d",
+      "title": "=DATE(1900,3,1)-DATE(1900,2,28)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0002",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(1900,3,1)-DATE(1900,2,28)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "1 without the bug, 2 with it.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0003-d",
+      "title": "=TEXT(60,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0003",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(60,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1900-02-28"
+        }
+      }
+    },
+    {
+      "id": "0004-d",
+      "title": "=TEXT(59,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0004",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(59,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1900-02-27"
+        }
+      }
+    },
+    {
+      "id": "0005-d",
+      "title": "=TEXT(61,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0005",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(61,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1900-03-01"
+        }
+      },
+      "notes": "Sheets and Excel agree from here on."
+    },
+    {
+      "id": "0006-d",
+      "title": "=DATE(1900,1,1)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0006",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(1900,1,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "Sheets: 2. Excel: 1.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0007-d",
+      "title": "=TEXT(1,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0007",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(1,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1899-12-31"
+        }
+      }
+    },
+    {
+      "id": "0008-d",
+      "title": "=TEXT(0,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0008",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(0,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1899-12-30"
+        }
+      },
+      "notes": "Serial 0 is 1899-12-30."
+    },
+    {
+      "id": "0009-d",
+      "title": "=DAY(60)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0009",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DAY(60)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 28
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0010-d",
+      "title": "=MONTH(60)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0010",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MONTH(60)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0011-d",
+      "title": "=TEXT(-1,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0011",
+        "H-07"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(-1,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1899-12-29"
+        }
+      }
+    },
+    {
+      "id": "0012-d",
+      "title": "=YEAR(-1)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0012",
+        "H-07"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=YEAR(-1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0013-d",
+      "title": "=DATE(1899,12,29)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0013",
+        "H-07",
+        "H-08"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(1899,12,29)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 693960
+        }
+      },
+      "notes": "A date before the epoch: 1899 is below 1900, so it may read as 3799.",
+      "tolerance": 5e-10
+    },
+    {
+      "id": "0014-d",
+      "title": "=DATE(2026,10,27)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0014"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2026,10,27)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46322
+        }
+      },
+      "notes": "Worked check: 46322.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0015-d",
+      "title": "=DATE(0,1,1)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0015",
+        "H-08"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(0,1,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "Year 0 -> 1900.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0016-d",
+      "title": "=DATE(99,12,31)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0016",
+        "H-08"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(99,12,31)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 36525
+        }
+      },
+      "notes": "Sheets documents 1900+y; LibreOffice uses a 1930-2029 window.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0017-d",
+      "title": "=DATE(119,2,1)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0017",
+        "H-08"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(119,2,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 43497
+        }
+      },
+      "notes": "The documented example: 2019-02-01.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0018-d",
+      "title": "=DATE(-1,1,1)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0018",
+        "H-08"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(-1,1,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0019-d",
+      "title": "=DATE(10000,1,1)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0019",
+        "H-08"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(10000,1,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0020-d",
+      "title": "=DATE(9999,12,31)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0020",
+        "H-08"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(9999,12,31)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2958465
+        }
+      },
+      "tolerance": 5e-09
+    },
+    {
+      "id": "0021-d",
+      "title": "=DATEVALUE(\"1/1/29\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0021",
+        "H-26"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEVALUE(\"1/1/29\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 47119
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0022-d",
+      "title": "=DATEVALUE(\"1/1/30\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0022",
+        "H-26"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEVALUE(\"1/1/30\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 10959
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0023-d",
+      "title": "=TEXT(DATE(2026,10,27)+0.5,\"yyyy-mm-dd hh:mm\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0023"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(DATE(2026,10,27)+0.5,\"yyyy-mm-dd hh:mm\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "2026-10-27 12:00"
+        }
+      },
+      "notes": "A time fraction."
+    },
+    {
+      "id": "0024-d",
+      "title": "=DATE(2024,2,29)+365",
+      "since": "0.39.0",
+      "tags": [
+        "D-0024"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2024,2,29)+365"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 45716
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0025-d",
+      "title": "=DATE(2100,2,29)",
+      "since": "0.39.0",
+      "tags": [
+        "D-0025"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2100,2,29)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 73110
+        }
+      },
+      "notes": "2100 is not a leap year.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0026-d",
+      "title": "=TEXT(2958465,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0026"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(2958465,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "9999-12-31"
+        }
+      },
+      "notes": "9999-12-31."
+    },
+    {
+      "id": "0027-d",
+      "title": "=TEXT(2958466,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0027"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(2958466,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "10000-01-01"
+        }
+      },
+      "notes": "Past 9999."
+    },
+    {
+      "id": "0028-d",
+      "title": "=VALUE(\"1900-02-29\")",
+      "since": "0.39.0",
+      "tags": [
+        "D-0028",
+        "H-06"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(\"1900-02-29\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      },
+      "notes": "Text naming the fictitious day."
+    }
+  ]
+}

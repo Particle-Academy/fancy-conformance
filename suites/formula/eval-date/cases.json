@@ -1,0 +1,1205 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/eval-date",
+  "cases": [
+    {
+      "id": "0380-e-date",
+      "title": "=DATE(2026,13,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0380"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2026,13,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46388
+        }
+      },
+      "notes": "Month rollover.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0381-e-date",
+      "title": "=DATE(2026,1,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0381"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2026,1,0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46022
+        }
+      },
+      "notes": "Day 0 is the last day of the previous month.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0382-e-date",
+      "title": "=DATE(2026,2,30)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0382"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2026,2,30)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46083
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0383-e-date",
+      "title": "=DATE(2026.9,1,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0383"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2026.9,1,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46023
+        }
+      },
+      "notes": "Fractional year.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0384-e-year",
+      "title": "=YEAR(46322)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0384"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=YEAR(46322)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2026
+        }
+      },
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0385-e-year",
+      "title": "=YEAR(0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0385"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=YEAR(0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1899
+        }
+      },
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0386-e-year",
+      "title": "=YEAR(\"2026-10-27\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0386"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=YEAR(\"2026-10-27\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2026
+        }
+      },
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0387-e-month",
+      "title": "=MONTH(46322)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0387"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MONTH(46322)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 10
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0388-e-month",
+      "title": "=MONTH(DATE(2024,2,29))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0388"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MONTH(DATE(2024,2,29))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0389-e-month",
+      "title": "=MONTH(\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0389"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MONTH(\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0390-e-day",
+      "title": "=DAY(46322)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0390"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DAY(46322)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 27
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0391-e-day",
+      "title": "=DAY(DATE(2024,3,0))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0391"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DAY(DATE(2024,3,0))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 29
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0392-e-day",
+      "title": "=DAY(46322.99)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0392"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DAY(46322.99)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 27
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0393-e-edate",
+      "title": "=EDATE(DATE(2026,1,31),1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0393"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EDATE(DATE(2026,1,31),1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46081
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0394-e-edate",
+      "title": "=EDATE(DATE(2024,1,31),1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0394"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EDATE(DATE(2024,1,31),1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 45351
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0395-e-edate",
+      "title": "=EDATE(DATE(2026,3,31),-1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0395"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EDATE(DATE(2026,3,31),-1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46081
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0396-e-edate",
+      "title": "=EDATE(DATE(2026,1,15),1.9)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0396"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EDATE(DATE(2026,1,15),1.9)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46068
+        }
+      },
+      "notes": "Fractional months.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0397-e-eomonth",
+      "title": "=EOMONTH(DATE(2026,1,15),0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0397"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EOMONTH(DATE(2026,1,15),0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46053
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0398-e-eomonth",
+      "title": "=EOMONTH(DATE(2026,1,15),1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0398"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EOMONTH(DATE(2026,1,15),1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46081
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0399-e-eomonth",
+      "title": "=EOMONTH(DATE(2024,1,15),1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0399"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EOMONTH(DATE(2024,1,15),1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 45351
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0400-e-eomonth",
+      "title": "=EOMONTH(DATE(2026,1,15),-13)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0400"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EOMONTH(DATE(2026,1,15),-13)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 45657
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0401-e-days",
+      "title": "=DAYS(DATE(2026,12,25),DATE(2026,10,27))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0401"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DAYS(DATE(2026,12,25),DATE(2026,10,27))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 59
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0402-e-days",
+      "title": "=DAYS(\"2026-01-02\",\"2026-01-01\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0402"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DAYS(\"2026-01-02\",\"2026-01-01\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0403-e-days",
+      "title": "=DAYS(DATE(2026,1,1),DATE(2026,12,31))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0403"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DAYS(DATE(2026,1,1),DATE(2026,12,31))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -364
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0404-e-datedif",
+      "title": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"Y\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0404"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"Y\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 6
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0405-e-datedif",
+      "title": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"M\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0405"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"M\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 81
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0406-e-datedif",
+      "title": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"D\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0406"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"D\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2477
+        }
+      },
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0407-e-datedif",
+      "title": "=DATEDIF(DATE(2020,1,31),DATE(2026,3,1),\"MD\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0407"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEDIF(DATE(2020,1,31),DATE(2026,3,1),\"MD\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0408-e-datedif",
+      "title": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"YM\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0408"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"YM\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0409-e-datedif",
+      "title": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"YD\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0409"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEDIF(DATE(2020,1,15),DATE(2026,10,27),\"YD\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 286
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0410-e-datedif",
+      "title": "=DATEDIF(DATE(2026,1,1),DATE(2025,1,1),\"D\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0410"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEDIF(DATE(2026,1,1),DATE(2025,1,1),\"D\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      },
+      "notes": "Start after end."
+    },
+    {
+      "id": "0411-e-datevalue",
+      "title": "=DATEVALUE(\"2026-10-27\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0411"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEVALUE(\"2026-10-27\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46322
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0412-e-datevalue",
+      "title": "=DATEVALUE(\"10/27/2026\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0412"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEVALUE(\"10/27/2026\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46322
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0413-e-datevalue",
+      "title": "=DATEVALUE(\"27/10/2026\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0413"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEVALUE(\"27/10/2026\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      },
+      "notes": "Day-first in the en_US locale."
+    },
+    {
+      "id": "0414-e-datevalue",
+      "title": "=DATEVALUE(\"Oct 27, 2026\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0414"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATEVALUE(\"Oct 27, 2026\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46322
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0415-e-weekday",
+      "title": "=WEEKDAY(46322)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0415"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=WEEKDAY(46322)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0416-e-weekday",
+      "title": "=WEEKDAY(46322,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0416"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=WEEKDAY(46322,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0417-e-weekday",
+      "title": "=WEEKDAY(46322,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0417"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=WEEKDAY(46322,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0418-e-weekday",
+      "title": "=WEEKDAY(46322,11)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0418"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=WEEKDAY(46322,11)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0419-e-networkdays",
+      "title": "=NETWORKDAYS(DATE(2026,10,1),DATE(2026,10,31))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0419"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NETWORKDAYS(DATE(2026,10,1),DATE(2026,10,31))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 22
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0420-e-networkdays",
+      "title": "=NETWORKDAYS(DATE(2026,10,1),DATE(2026,10,31),Inputs!I1:I2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0420"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NETWORKDAYS(DATE(2026,10,1),DATE(2026,10,31),Inputs!I1:I2)"
+        },
+        "inputs": {
+          "Inputs!I1:I2": {
+            "type": "range",
+            "rows": [
+              [
+                46307
+              ],
+              [
+                46337
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 21
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0421-e-networkdays",
+      "title": "=NETWORKDAYS(DATE(2026,10,31),DATE(2026,10,1))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0421"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NETWORKDAYS(DATE(2026,10,31),DATE(2026,10,1))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -22
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0422-e-workday",
+      "title": "=WORKDAY(DATE(2026,10,30),1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0422"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=WORKDAY(DATE(2026,10,30),1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46328
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0423-e-workday",
+      "title": "=WORKDAY(DATE(2026,10,30),-5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0423"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=WORKDAY(DATE(2026,10,30),-5)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46318
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0424-e-workday",
+      "title": "=WORKDAY(DATE(2026,10,9),1,Inputs!I1:I2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0424"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=WORKDAY(DATE(2026,10,9),1,Inputs!I1:I2)"
+        },
+        "inputs": {
+          "Inputs!I1:I2": {
+            "type": "range",
+            "rows": [
+              [
+                46307
+              ],
+              [
+                46337
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46308
+        }
+      },
+      "tolerance": 5e-11
+    }
+  ]
+}

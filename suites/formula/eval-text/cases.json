@@ -1,0 +1,2100 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/eval-text",
+  "cases": [
+    {
+      "id": "0300-e-concatenate",
+      "title": "=CONCATENATE(\"a\",\"b\",1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0300"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CONCATENATE(\"a\",\"b\",1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "ab1"
+        }
+      }
+    },
+    {
+      "id": "0301-e-concatenate",
+      "title": "=CONCATENATE(Inputs!G1:G2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0301",
+        "H-11"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CONCATENATE(Inputs!G1:G2)"
+        },
+        "inputs": {
+          "Inputs!G1:G2": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "appleBanana"
+        }
+      },
+      "notes": "A range argument."
+    },
+    {
+      "id": "0302-e-concatenate",
+      "title": "=CONCATENATE(TRUE,1/3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0302",
+        "H-23"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CONCATENATE(TRUE,1/3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "TRUE0.333333333333333"
+        }
+      }
+    },
+    {
+      "id": "0303-e-textjoin",
+      "title": "=TEXTJOIN(\",\",TRUE,\"a\",\"\",\"b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0303"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXTJOIN(\",\",TRUE,\"a\",\"\",\"b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a,b"
+        }
+      }
+    },
+    {
+      "id": "0304-e-textjoin",
+      "title": "=TEXTJOIN(\",\",FALSE,\"a\",\"\",\"b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0304"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXTJOIN(\",\",FALSE,\"a\",\"\",\"b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a,,b"
+        }
+      }
+    },
+    {
+      "id": "0305-e-textjoin",
+      "title": "=TEXTJOIN(\"-\",TRUE,Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0305"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXTJOIN(\"-\",TRUE,Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "10-20-TRUE-abc-5"
+        }
+      }
+    },
+    {
+      "id": "0306-e-textjoin",
+      "title": "=TEXTJOIN(\", \",TRUE,Inputs!G1:G4)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0306"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXTJOIN(\", \",TRUE,Inputs!G1:G4)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "apple, Banana, cherry, apple"
+        }
+      }
+    },
+    {
+      "id": "0307-e-len",
+      "title": "=LEN(\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0307"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0308-e-len",
+      "title": "=LEN(\"\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0308"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(\"\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0309-e-len",
+      "title": "=LEN(\"é\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0309",
+        "H-15"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(\"é\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "One code point, one UTF-16 unit, two UTF-8 bytes.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0310-e-len",
+      "title": "=LEN(\"😀\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0310",
+        "H-15"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(\"😀\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "One code point, two UTF-16 units.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0311-e-len",
+      "title": "=LEN(12.5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0311"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(12.5)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0312-e-len",
+      "title": "=LEN(REPT(\"a\",50001))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0312",
+        "H-34"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(REPT(\"a\",50001))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      },
+      "notes": "Past the believed 50,000-character limit."
+    },
+    {
+      "id": "0313-e-left",
+      "title": "=LEFT(\"abcdef\",2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0313"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEFT(\"abcdef\",2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "ab"
+        }
+      }
+    },
+    {
+      "id": "0314-e-left",
+      "title": "=LEFT(\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0314"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEFT(\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a"
+        }
+      }
+    },
+    {
+      "id": "0315-e-left",
+      "title": "=LEFT(\"abc\",10)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0315"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEFT(\"abc\",10)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "abc"
+        }
+      }
+    },
+    {
+      "id": "0316-e-left",
+      "title": "=LEFT(\"abc\",-1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0316"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEFT(\"abc\",-1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0317-e-left",
+      "title": "=LEN(LEFT(\"😀x\",1))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0317",
+        "H-15"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(LEFT(\"😀x\",1))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Does LEFT split a surrogate pair?",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0318-e-right",
+      "title": "=RIGHT(\"abcdef\",2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0318"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=RIGHT(\"abcdef\",2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "ef"
+        }
+      }
+    },
+    {
+      "id": "0319-e-right",
+      "title": "=RIGHT(\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0319"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=RIGHT(\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "c"
+        }
+      }
+    },
+    {
+      "id": "0320-e-right",
+      "title": "=RIGHT(12345,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0320"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=RIGHT(12345,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "45"
+        }
+      }
+    },
+    {
+      "id": "0321-e-mid",
+      "title": "=MID(\"abcdef\",2,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0321"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MID(\"abcdef\",2,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "bcd"
+        }
+      }
+    },
+    {
+      "id": "0322-e-mid",
+      "title": "=MID(\"abc\",5,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0322"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MID(\"abc\",5,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": ""
+        }
+      }
+    },
+    {
+      "id": "0323-e-mid",
+      "title": "=MID(\"abc\",0,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0323"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MID(\"abc\",0,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0324-e-mid",
+      "title": "=MID(\"abc\",2,100)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0324"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MID(\"abc\",2,100)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "bc"
+        }
+      }
+    },
+    {
+      "id": "0325-e-mid",
+      "title": "=MID(\"a😀b\",3,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0325",
+        "H-15"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MID(\"a😀b\",3,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "?"
+        }
+      }
+    },
+    {
+      "id": "0326-e-upper",
+      "title": "=UPPER(\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0326"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UPPER(\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "ABC"
+        }
+      }
+    },
+    {
+      "id": "0327-e-upper",
+      "title": "=UPPER(\"straße\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0327"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UPPER(\"straße\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "STRASSE"
+        }
+      }
+    },
+    {
+      "id": "0328-e-upper",
+      "title": "=UPPER(1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0328"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UPPER(1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1"
+        }
+      }
+    },
+    {
+      "id": "0329-e-lower",
+      "title": "=LOWER(\"ABC\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0329"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LOWER(\"ABC\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "abc"
+        }
+      }
+    },
+    {
+      "id": "0330-e-lower",
+      "title": "=LOWER(\"ÀÉÎ\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0330"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LOWER(\"ÀÉÎ\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "àéî"
+        }
+      }
+    },
+    {
+      "id": "0331-e-lower",
+      "title": "=LOWER(TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0331"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LOWER(TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "true"
+        }
+      }
+    },
+    {
+      "id": "0332-e-proper",
+      "title": "=PROPER(\"hello world\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0332"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=PROPER(\"hello world\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "Hello World"
+        }
+      }
+    },
+    {
+      "id": "0333-e-proper",
+      "title": "=PROPER(\"o'neil mc-donald\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0333"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=PROPER(\"o'neil mc-donald\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "O'Neil Mc-Donald"
+        }
+      }
+    },
+    {
+      "id": "0334-e-proper",
+      "title": "=PROPER(\"ABC def2ghi\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0334"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=PROPER(\"ABC def2ghi\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "Abc Def2Ghi"
+        }
+      }
+    },
+    {
+      "id": "0335-e-trim",
+      "title": "=TRIM(\"  a   b  \")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0335"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TRIM(\"  a   b  \")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a b"
+        }
+      }
+    },
+    {
+      "id": "0336-e-trim",
+      "title": "=LEN(TRIM(CHAR(9)&\"a\"))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0336"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(TRIM(CHAR(9)&\"a\"))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Is TAB trimmed?",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0337-e-trim",
+      "title": "=LEN(TRIM(\"a\"&CHAR(160)&\" b\"))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0337"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LEN(TRIM(\"a\"&CHAR(160)&\" b\"))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "notes": "Is a no-break space trimmed?",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0338-e-substitute",
+      "title": "=SUBSTITUTE(\"aaa\",\"a\",\"b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0338"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUBSTITUTE(\"aaa\",\"a\",\"b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "bbb"
+        }
+      }
+    },
+    {
+      "id": "0339-e-substitute",
+      "title": "=SUBSTITUTE(\"aaa\",\"a\",\"b\",2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0339"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUBSTITUTE(\"aaa\",\"a\",\"b\",2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "aba"
+        }
+      }
+    },
+    {
+      "id": "0340-e-substitute",
+      "title": "=SUBSTITUTE(\"abc\",\"\",\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0340"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUBSTITUTE(\"abc\",\"\",\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "abc"
+        }
+      }
+    },
+    {
+      "id": "0341-e-substitute",
+      "title": "=SUBSTITUTE(\"aaa\",\"a\",\"b\",0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0341"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUBSTITUTE(\"aaa\",\"a\",\"b\",0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "bbb"
+        }
+      }
+    },
+    {
+      "id": "0342-e-rept",
+      "title": "=REPT(\"ab\",3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0342"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=REPT(\"ab\",3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "ababab"
+        }
+      }
+    },
+    {
+      "id": "0343-e-rept",
+      "title": "=REPT(\"a\",0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0343"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=REPT(\"a\",0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": ""
+        }
+      }
+    },
+    {
+      "id": "0344-e-rept",
+      "title": "=REPT(\"a\",-1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0344"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=REPT(\"a\",-1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0345-e-rept",
+      "title": "=REPT(\"a\",2.9)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0345"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=REPT(\"a\",2.9)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "aa"
+        }
+      }
+    },
+    {
+      "id": "0346-e-find",
+      "title": "=FIND(\"b\",\"abcb\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0346"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIND(\"b\",\"abcb\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0347-e-find",
+      "title": "=FIND(\"B\",\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0347"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIND(\"B\",\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0348-e-find",
+      "title": "=FIND(\"b\",\"abcb\",3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0348"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIND(\"b\",\"abcb\",3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0349-e-find",
+      "title": "=FIND(\"\",\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0349"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIND(\"\",\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0350-e-search",
+      "title": "=SEARCH(\"B\",\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0350"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SEARCH(\"B\",\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0351-e-search",
+      "title": "=SEARCH(\"b?\",\"abcb\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0351"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SEARCH(\"b?\",\"abcb\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0352-e-search",
+      "title": "=SEARCH(\"~?\",\"a?b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0352"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SEARCH(\"~?\",\"a?b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0353-e-search",
+      "title": "=SEARCH(\"z\",\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0353"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SEARCH(\"z\",\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0354-e-exact",
+      "title": "=EXACT(\"a\",\"A\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0354"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EXACT(\"a\",\"A\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0355-e-exact",
+      "title": "=EXACT(\"a\",\"a\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0355"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EXACT(\"a\",\"a\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0356-e-exact",
+      "title": "=EXACT(1,\"1\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0356"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EXACT(1,\"1\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0357-e-value",
+      "title": "=VALUE(\"12.5\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0357"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(\"12.5\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 12.5
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0358-e-value",
+      "title": "=VALUE(\"5%\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0358"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(\"5%\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.05
+        }
+      },
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0359-e-value",
+      "title": "=VALUE(\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0359"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0360-e-value",
+      "title": "=VALUE(\"2026-10-27\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0360"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(\"2026-10-27\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46322
+        }
+      },
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0361-e-value",
+      "title": "=VALUE(\" 12 \")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0361"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(\" 12 \")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 12
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0362-e-value",
+      "title": "=VALUE(\"1,234\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0362",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=VALUE(\"1,234\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1234
+        }
+      },
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0363-e-fixed",
+      "title": "=FIXED(1234.567,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0363"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIXED(1234.567,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1,234.6"
+        }
+      }
+    },
+    {
+      "id": "0364-e-fixed",
+      "title": "=FIXED(1234.567,1,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0364"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIXED(1234.567,1,TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1234.6"
+        }
+      }
+    },
+    {
+      "id": "0365-e-fixed",
+      "title": "=FIXED(-1234.5,-2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0365"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIXED(-1234.5,-2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "-1,200"
+        }
+      }
+    },
+    {
+      "id": "0366-e-fixed",
+      "title": "=FIXED(2.5,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0366",
+        "H-05"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=FIXED(2.5,0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "3"
+        }
+      }
+    },
+    {
+      "id": "0367-e-dollar",
+      "title": "=DOLLAR(1234.567)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0367"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DOLLAR(1234.567)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "$1,234.57"
+        }
+      }
+    },
+    {
+      "id": "0368-e-dollar",
+      "title": "=DOLLAR(-1234.567,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0368"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DOLLAR(-1234.567,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "-$1,234.6"
+        }
+      }
+    },
+    {
+      "id": "0369-e-dollar",
+      "title": "=DOLLAR(0.5,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0369"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DOLLAR(0.5,0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "$1"
+        }
+      }
+    },
+    {
+      "id": "0370-e-text",
+      "title": "=TEXT(1234.5,\"#,##0.00\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0370"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(1234.5,\"#,##0.00\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1,234.50"
+        }
+      }
+    },
+    {
+      "id": "0371-e-text",
+      "title": "=TEXT(0.05,\"0%\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0371"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(0.05,\"0%\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "5%"
+        }
+      }
+    },
+    {
+      "id": "0372-e-text",
+      "title": "=TEXT(0.125,\"0.0%\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0372"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(0.125,\"0.0%\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "12.5%"
+        }
+      }
+    },
+    {
+      "id": "0373-e-text",
+      "title": "=TEXT(46322,\"yyyy-mm-dd\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0373"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(46322,\"yyyy-mm-dd\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "2026-10-27"
+        }
+      }
+    },
+    {
+      "id": "0374-e-text",
+      "title": "=TEXT(1234.5,\"$#,##0.00\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0374"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(1234.5,\"$#,##0.00\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "$1,234.50"
+        }
+      }
+    },
+    {
+      "id": "0375-e-text",
+      "title": "=TEXT(2.5,\"0\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0375",
+        "H-05"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(2.5,\"0\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "3"
+        }
+      }
+    },
+    {
+      "id": "0376-e-text",
+      "title": "=TEXT(-1234.5,\"#,##0.00;(#,##0.00)\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0376"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(-1234.5,\"#,##0.00;(#,##0.00)\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "(1,234.50)"
+        }
+      }
+    },
+    {
+      "id": "0377-e-text",
+      "title": "=TEXT(46322,\"dddd, mmmm d, yyyy\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0377"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(46322,\"dddd, mmmm d, yyyy\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "Tuesday, October 27, 2026"
+        }
+      }
+    },
+    {
+      "id": "0378-e-text",
+      "title": "=TEXT(0.5,\"0.00\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0378"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(0.5,\"0.00\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "0.50"
+        }
+      }
+    },
+    {
+      "id": "0379-e-text",
+      "title": "=TEXT(1.005,\"0.00\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0379",
+        "H-05"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TEXT(1.005,\"0.00\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "1.01"
+        }
+      },
+      "notes": "Formatting rounds like ROUND?"
+    }
+  ]
+}

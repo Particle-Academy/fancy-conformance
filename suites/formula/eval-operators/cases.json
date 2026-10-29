@@ -1,0 +1,2474 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/eval-operators",
+  "cases": [
+    {
+      "id": "0001-e-add",
+      "title": "=ADD(1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0001"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ADD(1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0001-p",
+      "title": "=-2^2",
+      "since": "0.39.0",
+      "tags": [
+        "P-0001",
+        "H-01"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=-2^2"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "notes": "Unary minus vs ^.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0002-e-add",
+      "title": "=ADD(\"1\",2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0002"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ADD(\"1\",2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0002-p",
+      "title": "=0-2^2",
+      "since": "0.39.0",
+      "tags": [
+        "P-0002",
+        "H-01"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=0-2^2"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -4
+        }
+      },
+      "notes": "Binary minus is below ^: -4 either way; the control for the row above.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0003-e-add",
+      "title": "=ADD(1,\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0003"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ADD(1,\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0003-p",
+      "title": "=2^3^2",
+      "since": "0.39.0",
+      "tags": [
+        "P-0003",
+        "H-02"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=2^3^2"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 512
+        }
+      },
+      "notes": "Associativity of ^.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0004-e-minus",
+      "title": "=MINUS(5,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0004"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MINUS(5,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0004-p",
+      "title": "=-2^0.5",
+      "since": "0.39.0",
+      "tags": [
+        "P-0004",
+        "H-01"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=-2^0.5"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      },
+      "notes": "If unary minus binds first this is (-2)^0.5 = #NUM!."
+    },
+    {
+      "id": "0005-e-minus",
+      "title": "=MINUS(DATE(2026,10,27),DATE(2026,10,1))",
+      "since": "0.39.0",
+      "tags": [
+        "E-0005"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MINUS(DATE(2026,10,27),DATE(2026,10,1))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 26
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0005-p",
+      "title": "=50%",
+      "since": "0.39.0",
+      "tags": [
+        "P-0005"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=50%"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.5
+        }
+      },
+      "notes": "Postfix percent.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0006-e-minus",
+      "title": "=MINUS(TRUE,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0006"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MINUS(TRUE,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0006-p",
+      "title": "=2*50%",
+      "since": "0.39.0",
+      "tags": [
+        "P-0006"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=2*50%"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Percent binds tighter than *.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0007-e-multiply",
+      "title": "=MULTIPLY(2,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0007"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MULTIPLY(2,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 6
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0007-p",
+      "title": "=2^50%",
+      "since": "0.39.0",
+      "tags": [
+        "P-0007"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=2^50%"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1.414213562
+        }
+      },
+      "notes": "Percent binds tighter than ^: 2^0.5.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0008-e-multiply",
+      "title": "=MULTIPLY(TRUE,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0008"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MULTIPLY(TRUE,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0008-p",
+      "title": "=-50%",
+      "since": "0.39.0",
+      "tags": [
+        "P-0008"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=-50%"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -0.5
+        }
+      },
+      "notes": "Unary minus with percent.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0009-e-multiply",
+      "title": "=MULTIPLY(Inputs!O1,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0009"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MULTIPLY(Inputs!O1,3)"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0009-p",
+      "title": "=10%%",
+      "since": "0.39.0",
+      "tags": [
+        "P-0009"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=10%%"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#ERROR!"
+        }
+      },
+      "notes": "Postfix percent applied twice."
+    },
+    {
+      "id": "0010-e-divide",
+      "title": "=DIVIDE(6,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0010"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DIVIDE(6,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0010-p",
+      "title": "=1+2*3",
+      "since": "0.39.0",
+      "tags": [
+        "P-0010"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+2*3"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0011-e-divide",
+      "title": "=DIVIDE(1,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0011"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DIVIDE(1,0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0011-p",
+      "title": "=(1+2)*3",
+      "since": "0.39.0",
+      "tags": [
+        "P-0011"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=(1+2)*3"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 9
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0012-e-divide",
+      "title": "=DIVIDE(1,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0012"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DIVIDE(1,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.3333333333
+        }
+      },
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0012-p",
+      "title": "=\"a\"&1+2",
+      "since": "0.39.0",
+      "tags": [
+        "P-0012"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"a\"&1+2"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "a3"
+        }
+      },
+      "notes": "& is below +: \"a3\"."
+    },
+    {
+      "id": "0013-e-pow",
+      "title": "=POW(2,3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0013"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=POW(2,3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 8
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0013-p",
+      "title": "=1&2=12",
+      "since": "0.39.0",
+      "tags": [
+        "P-0013",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1&2=12"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      },
+      "notes": "Comparison is lowest: (\"12\")=12 compares text with a number."
+    },
+    {
+      "id": "0014-e-pow",
+      "title": "=POW(-8,1/3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0014"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=POW(-8,1/3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0014-p",
+      "title": "=1=1=TRUE",
+      "since": "0.39.0",
+      "tags": [
+        "P-0014"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1=1=TRUE"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      },
+      "notes": "Comparison is left-associative."
+    },
+    {
+      "id": "0015-e-pow",
+      "title": "=POW(4,0.5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0015"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=POW(4,0.5)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0015-p",
+      "title": "=--\"3\"",
+      "since": "0.39.0",
+      "tags": [
+        "P-0015",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=--\"3\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Double unary minus coerces text.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0016-e-uminus",
+      "title": "=UMINUS(3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0016"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UMINUS(3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0016-p",
+      "title": "=+\"3\"",
+      "since": "0.39.0",
+      "tags": [
+        "P-0016"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=+\"3\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "3"
+        }
+      },
+      "notes": "Does unary plus coerce, or pass text through?"
+    },
+    {
+      "id": "0017-e-uminus",
+      "title": "=UMINUS(\"3\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0017"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UMINUS(\"3\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0017-p",
+      "title": "=\"say \"\"hi\"\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "P-0017"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"say \"\"hi\"\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "say \"hi\""
+        }
+      },
+      "notes": "The \"\" escape inside a string literal."
+    },
+    {
+      "id": "0018-e-uminus",
+      "title": "=UMINUS(TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0018"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UMINUS(TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0018-p",
+      "title": "=.5+1E2",
+      "since": "0.39.0",
+      "tags": [
+        "P-0018"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=.5+1E2"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 100.5
+        }
+      },
+      "notes": "Leading-dot and exponent number literals.",
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0019-e-uplus",
+      "title": "=UPLUS(3)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0019"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UPLUS(3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0019-p",
+      "title": "=1E-3*1000",
+      "since": "0.39.0",
+      "tags": [
+        "P-0019"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1E-3*1000"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0020-e-uplus",
+      "title": "=UPLUS(\"abc\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0020"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UPLUS(\"abc\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "abc"
+        }
+      }
+    },
+    {
+      "id": "0020-p",
+      "title": "=SUM({1,2;3,4})",
+      "since": "0.39.0",
+      "tags": [
+        "P-0020"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM({1,2;3,4})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 10
+        }
+      },
+      "notes": "Array literal: , separates columns, ; rows.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0021-e-uplus",
+      "title": "=UPLUS(TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0021"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UPLUS(TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0021-p",
+      "title": "=ROWS({1,2;3,4})",
+      "since": "0.39.0",
+      "tags": [
+        "P-0021"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ROWS({1,2;3,4})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0022-e-unary-percent",
+      "title": "=UNARY_PERCENT(50)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0022"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UNARY_PERCENT(50)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.5
+        }
+      },
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0022-p",
+      "title": "=COLUMNS({1,2,3})",
+      "since": "0.39.0",
+      "tags": [
+        "P-0022"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COLUMNS({1,2,3})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0023-e-unary-percent",
+      "title": "=UNARY_PERCENT(\"50\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0023"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UNARY_PERCENT(\"50\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.5
+        }
+      },
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0023-p",
+      "title": "=SUM({1,2}*{3,4})",
+      "since": "0.39.0",
+      "tags": [
+        "P-0023",
+        "H-11"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM({1,2}*{3,4})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Array arithmetic inside SUM without ARRAYFORMULA.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0024-e-unary-percent",
+      "title": "=UNARY_PERCENT(-5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0024"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=UNARY_PERCENT(-5)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -0.05
+        }
+      },
+      "tolerance": 5e-17
+    },
+    {
+      "id": "0024-p",
+      "title": "=sum(1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0024"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=sum(1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Function names are case-insensitive.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0025-e-eq",
+      "title": "=EQ(1,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0025"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EQ(1,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0025-p",
+      "title": "=SUM(Inputs!B1:B5)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0025"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!B1:B5)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 15
+        }
+      },
+      "notes": "A sheet-qualified range.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0026-e-eq",
+      "title": "=EQ(\"a\",\"A\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0026",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EQ(\"a\",\"A\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0026-p",
+      "title": "=SUM(Inputs!$B$1:$B$5)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0026"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!$B$1:$B$5)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 15
+        }
+      },
+      "notes": "Absolute markers are accepted.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0027-e-eq",
+      "title": "=EQ(1,\"1\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0027",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=EQ(1,\"1\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0027-p",
+      "title": "=SUM(Inputs!B:B)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0027",
+        "H-25"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!B:B)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 15
+        }
+      },
+      "notes": "An open column range.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0028-e-ne",
+      "title": "=NE(1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0028"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NE(1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0028-p",
+      "title": "=INDEX({10,20;30,40},2,1)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0028"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=INDEX({10,20;30,40},2,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 30
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0029-e-ne",
+      "title": "=NE(\"a\",\"A\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0029",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NE(\"a\",\"A\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0029-p",
+      "title": "=SUM({Inputs!B1,Inputs!B2})",
+      "since": "0.39.0",
+      "tags": [
+        "P-0029",
+        "H-21"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM({Inputs!B1,Inputs!B2})"
+        },
+        "inputs": {
+          "Inputs!B1": {
+            "type": "number",
+            "value": 1
+          },
+          "Inputs!B2": {
+            "type": "number",
+            "value": 2
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "References inside an array literal.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0030-e-ne",
+      "title": "=NE(TRUE,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0030",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NE(TRUE,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0030-p",
+      "title": "=ERROR.TYPE(#NULL!)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0030",
+        "H-16"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(#NULL!)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Does #NULL! exist?",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0031-e-gt",
+      "title": "=GT(2,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0031"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=GT(2,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0031-p",
+      "title": "=ERROR.TYPE(#ERROR!)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0031",
+        "H-16"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(#ERROR!)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 8
+        }
+      },
+      "notes": "Does #ERROR! exist as a literal?",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0032-e-gt",
+      "title": "=GT(\"b\",\"a\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0032"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=GT(\"b\",\"a\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0032-p",
+      "title": "=ERROR.TYPE(#N/A)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0032"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ERROR.TYPE(#N/A)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7
+        }
+      },
+      "notes": "An error literal.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0033-e-gt",
+      "title": "=GT(\"a\",1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0033",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=GT(\"a\",1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0033-p",
+      "title": "=1/0",
+      "since": "0.39.0",
+      "tags": [
+        "P-0033"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1/0"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0034-e-gte",
+      "title": "=GTE(1,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0034"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=GTE(1,1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0034-p",
+      "title": "=TRUE+TRUE",
+      "since": "0.39.0",
+      "tags": [
+        "P-0034"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TRUE+TRUE"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "notes": "Booleans in arithmetic.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0035-e-gte",
+      "title": "=GTE(TRUE,\"z\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0035",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=GTE(TRUE,\"z\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0035-p",
+      "title": "=2^-1",
+      "since": "0.39.0",
+      "tags": [
+        "P-0035"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=2^-1"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0.5
+        }
+      },
+      "notes": "Unary minus in an exponent.",
+      "tolerance": 5e-16
+    },
+    {
+      "id": "0036-e-gte",
+      "title": "=GTE(Inputs!O1,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0036",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=GTE(Inputs!O1,0)"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0036-p",
+      "title": "=-(-3)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0036"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=-(-3)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0037-e-lt",
+      "title": "=LT(1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0037"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LT(1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0037-p",
+      "title": "=3-(-2)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0037"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=3-(-2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0038-e-lt",
+      "title": "=LT(\"a\",\"B\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0038",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LT(\"a\",\"B\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0038-p",
+      "title": "=1<>2",
+      "since": "0.39.0",
+      "tags": [
+        "P-0038"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1<>2"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0039-e-lt",
+      "title": "=LT(Inputs!O1,\"\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0039",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LT(Inputs!O1,\"\")"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0039-p",
+      "title": "=-\"abc\"",
+      "since": "0.39.0",
+      "tags": [
+        "P-0039"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=-\"abc\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      },
+      "notes": "Unary minus on non-numeric text."
+    },
+    {
+      "id": "0040-e-lte",
+      "title": "=LTE(2,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0040"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LTE(2,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0040-p",
+      "title": "=(((((((((1)))))))))",
+      "since": "0.39.0",
+      "tags": [
+        "P-0040"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=(((((((((1)))))))))"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Deep but legal nesting.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0041-e-lte",
+      "title": "=LTE(-1,Inputs!O1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0041",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LTE(-1,Inputs!O1)"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0041-p",
+      "title": "=IF(TRUE,\"yes\")&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "P-0041"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(TRUE,\"yes\")&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "yes"
+        }
+      },
+      "notes": "An omitted else branch."
+    },
+    {
+      "id": "0042-e-lte",
+      "title": "=LTE(\"10\",\"9\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0042"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LTE(\"10\",\"9\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0042-p",
+      "title": "=SUM(1,,2)",
+      "since": "0.39.0",
+      "tags": [
+        "P-0042"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(1,,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "An empty argument in a variadic call.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0043-e-isbetween",
+      "title": "=ISBETWEEN(5,1,10)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0043"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISBETWEEN(5,1,10)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0044-e-isbetween",
+      "title": "=ISBETWEEN(1,1,10,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0044"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISBETWEEN(1,1,10,FALSE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0045-e-isbetween",
+      "title": "=ISBETWEEN(10,1,10,TRUE,FALSE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0045"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=ISBETWEEN(10,1,10,TRUE,FALSE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0046-e-concat",
+      "title": "=CONCAT(\"a\",\"b\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0046"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CONCAT(\"a\",\"b\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "ab"
+        }
+      }
+    },
+    {
+      "id": "0047-e-concat",
+      "title": "=CONCAT(1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0047"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CONCAT(1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "12"
+        }
+      }
+    },
+    {
+      "id": "0048-e-concat",
+      "title": "=CONCAT(TRUE,\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0048"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CONCAT(TRUE,\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "TRUEx"
+        }
+      }
+    }
+  ]
+}

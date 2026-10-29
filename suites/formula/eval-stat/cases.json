@@ -1,0 +1,2198 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/eval-stat",
+  "cases": [
+    {
+      "id": "0123-e-min",
+      "title": "=MIN(3,1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0123"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MIN(3,1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0124-e-min",
+      "title": "=MIN(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0124"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MIN(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0125-e-min",
+      "title": "=MIN(Inputs!O1:O2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0125"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MIN(Inputs!O1:O2)"
+        },
+        "inputs": {
+          "Inputs!O1:O2": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0126-e-max",
+      "title": "=MAX(3,1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0126"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAX(3,1,2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0127-e-max",
+      "title": "=MAX(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0127"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAX(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 10
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0128-e-max",
+      "title": "=MAX(Inputs!O1:O2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0128"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAX(Inputs!O1:O2)"
+        },
+        "inputs": {
+          "Inputs!O1:O2": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0129-e-minifs",
+      "title": "=MINIFS(Inputs!H1:H4,Inputs!G1:G4,\"apple\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0129"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MINIFS(Inputs!H1:H4,Inputs!G1:G4,\"apple\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 100
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0130-e-minifs",
+      "title": "=MINIFS(Inputs!H1:H4,Inputs!G1:G4,\"zzz\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0130"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MINIFS(Inputs!H1:H4,Inputs!G1:G4,\"zzz\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0131-e-minifs",
+      "title": "=MINIFS(Inputs!H1:H4,Inputs!H1:H4,\">150\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0131"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MINIFS(Inputs!H1:H4,Inputs!H1:H4,\">150\")"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 200
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0132-e-maxifs",
+      "title": "=MAXIFS(Inputs!H1:H4,Inputs!G1:G4,\"apple\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0132"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAXIFS(Inputs!H1:H4,Inputs!G1:G4,\"apple\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 400
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0133-e-maxifs",
+      "title": "=MAXIFS(Inputs!H1:H4,Inputs!H1:H4,\"<300\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0133"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAXIFS(Inputs!H1:H4,Inputs!H1:H4,\"<300\")"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 200
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0134-e-maxifs",
+      "title": "=MAXIFS(Inputs!H1:H4,Inputs!G1:G4,\"zzz\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0134"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAXIFS(Inputs!H1:H4,Inputs!G1:G4,\"zzz\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0135-e-average",
+      "title": "=AVERAGE(1,2,3,4)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0135"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGE(1,2,3,4)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2.5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0136-e-average",
+      "title": "=AVERAGE(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0136"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGE(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7.5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0137-e-average",
+      "title": "=AVERAGE(Inputs!O1:O2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0137"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGE(Inputs!O1:O2)"
+        },
+        "inputs": {
+          "Inputs!O1:O2": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0138-e-average",
+      "title": "=AVERAGE(1,TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0138",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGE(1,TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0139-e-averageif",
+      "title": "=AVERAGEIF(Inputs!H1:H4,\">150\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0139"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGEIF(Inputs!H1:H4,\">150\")"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 300
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0140-e-averageif",
+      "title": "=AVERAGEIF(Inputs!G1:G4,\"apple\",Inputs!H1:H4)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0140"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGEIF(Inputs!G1:G4,\"apple\",Inputs!H1:H4)"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 250
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0141-e-averageif",
+      "title": "=AVERAGEIF(Inputs!H1:H4,\">1000\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0141"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGEIF(Inputs!H1:H4,\">1000\")"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0142-e-averageifs",
+      "title": "=AVERAGEIFS(Inputs!H1:H4,Inputs!G1:G4,\"<>apple\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0142"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGEIFS(Inputs!H1:H4,Inputs!G1:G4,\"<>apple\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 250
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0143-e-averageifs",
+      "title": "=AVERAGEIFS(Inputs!H1:H4,Inputs!H1:H4,\">=200\",Inputs!H1:H4,\"<=300\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0143"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGEIFS(Inputs!H1:H4,Inputs!H1:H4,\">=200\",Inputs!H1:H4,\"<=300\")"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 250
+        }
+      },
+      "tolerance": 5e-13
+    },
+    {
+      "id": "0144-e-averageifs",
+      "title": "=AVERAGEIFS(Inputs!H1:H4,Inputs!G1:G4,\"none\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0144"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGEIFS(Inputs!H1:H4,Inputs!G1:G4,\"none\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0145-e-count",
+      "title": "=COUNT(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0145"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNT(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0146-e-count",
+      "title": "=COUNT(Inputs!B1:B5,1,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0146"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNT(Inputs!B1:B5,1,2)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0147-e-count",
+      "title": "=COUNT(Inputs!O1:O2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0147"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNT(Inputs!O1:O2)"
+        },
+        "inputs": {
+          "Inputs!O1:O2": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0148-e-counta",
+      "title": "=COUNTA(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0148"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTA(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0149-e-counta",
+      "title": "=COUNTA(1,\"\",TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0149"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTA(1,\"\",TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0150-e-counta",
+      "title": "=COUNTA(Inputs!O1:O2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0150"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTA(Inputs!O1:O2)"
+        },
+        "inputs": {
+          "Inputs!O1:O2": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0151-e-countblank",
+      "title": "=COUNTBLANK(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0151"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTBLANK(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0152-e-countblank",
+      "title": "=COUNTBLANK(Inputs!O1:O2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0152"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTBLANK(Inputs!O1:O2)"
+        },
+        "inputs": {
+          "Inputs!O1:O2": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ],
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0153-e-countblank",
+      "title": "=COUNTBLANK(Inputs!B1:B5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0153"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTBLANK(Inputs!B1:B5)"
+        },
+        "inputs": {
+          "Inputs!B1:B5": {
+            "type": "range",
+            "rows": [
+              [
+                1
+              ],
+              [
+                2
+              ],
+              [
+                3
+              ],
+              [
+                4
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0154-e-countif",
+      "title": "=COUNTIF(Inputs!G1:G4,\"apple\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0154"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!G1:G4,\"apple\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0155-e-countif",
+      "title": "=COUNTIF(Inputs!H1:H4,\">200\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0155"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!H1:H4,\">200\")"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0156-e-countif",
+      "title": "=COUNTIF(Inputs!G1:G4,\"*an*\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0156"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!G1:G4,\"*an*\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0157-e-countif",
+      "title": "=COUNTIF(Inputs!A1:A6,\"20\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0157",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!A1:A6,\"20\")"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Criteria \"20\" against number 20 and text \"20\".",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0158-e-countif",
+      "title": "=COUNTIF(Inputs!G1:G4,\"<>apple\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0158"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIF(Inputs!G1:G4,\"<>apple\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0159-e-countifs",
+      "title": "=COUNTIFS(Inputs!G1:G4,\"apple\",Inputs!H1:H4,\">200\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0159"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIFS(Inputs!G1:G4,\"apple\",Inputs!H1:H4,\">200\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          },
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0160-e-countifs",
+      "title": "=COUNTIFS(Inputs!H1:H4,\">=100\",Inputs!H1:H4,\"<=300\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0160"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIFS(Inputs!H1:H4,\">=100\",Inputs!H1:H4,\"<=300\")"
+        },
+        "inputs": {
+          "Inputs!H1:H4": {
+            "type": "range",
+            "rows": [
+              [
+                100
+              ],
+              [
+                200
+              ],
+              [
+                300
+              ],
+              [
+                400
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0161-e-countifs",
+      "title": "=COUNTIFS(Inputs!G1:G4,\"~*\")",
+      "since": "0.39.0",
+      "tags": [
+        "E-0161"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNTIFS(Inputs!G1:G4,\"~*\")"
+        },
+        "inputs": {
+          "Inputs!G1:G4": {
+            "type": "range",
+            "rows": [
+              [
+                "apple"
+              ],
+              [
+                "Banana"
+              ],
+              [
+                "cherry"
+              ],
+              [
+                "apple"
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      }
+    },
+    {
+      "id": "0162-e-median",
+      "title": "=MEDIAN(1,2,3,4)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0162"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MEDIAN(1,2,3,4)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2.5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0163-e-median",
+      "title": "=MEDIAN(Inputs!E1:E5)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0163"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MEDIAN(Inputs!E1:E5)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 30
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0164-e-median",
+      "title": "=MEDIAN(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0164"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MEDIAN(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7.5
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0165-e-large",
+      "title": "=LARGE(Inputs!E1:E5,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0165"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LARGE(Inputs!E1:E5,2)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 40
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0166-e-large",
+      "title": "=LARGE(Inputs!E1:E5,6)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0166"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LARGE(Inputs!E1:E5,6)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0167-e-large",
+      "title": "=LARGE({1,2,3},1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0167"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=LARGE({1,2,3},1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0168-e-small",
+      "title": "=SMALL(Inputs!E1:E5,1)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0168"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SMALL(Inputs!E1:E5,1)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 10
+        }
+      },
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0169-e-small",
+      "title": "=SMALL(Inputs!E1:E5,0)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0169"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SMALL(Inputs!E1:E5,0)"
+        },
+        "inputs": {
+          "Inputs!E1:E5": {
+            "type": "range",
+            "rows": [
+              [
+                30
+              ],
+              [
+                10
+              ],
+              [
+                50
+              ],
+              [
+                20
+              ],
+              [
+                40
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#NUM!"
+        }
+      }
+    },
+    {
+      "id": "0170-e-small",
+      "title": "=SMALL(Inputs!A1:A6,2)",
+      "since": "0.39.0",
+      "tags": [
+        "E-0170"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SMALL(Inputs!A1:A6,2)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 10
+        }
+      },
+      "tolerance": 5e-14
+    }
+  ]
+}

@@ -50,7 +50,7 @@ ROWS: list[tuple[str, int, str | None, str, str, Any]] = [
     ("A-0001", 7, "formula/pricing", "=Inputs!X2>0", "b", True),
 ]
 
-TYPE_OF = {"n": 1, "str": 2, "b": 4, "e": 16, "estr": 16}
+TYPE_OF = {"n": 1, "str": 2, "b": 4, "e": 16, "estr": 16, "blank": 1}
 
 # ERROR.TYPE codes for the literals the synthetic rows use.
 ERROR_TYPE_OF = {"#N/A": 7, "#NUM!": 6, "#DIV/0!": 2}
@@ -110,6 +110,10 @@ def _cell(ref: str, kind: str | None, value: Any, formula: str | None, shared: l
         return f'<c r="{ref}" t="b">{f}<v>{1 if value else 0}</v></c>'
     if kind in ("str", "e"):
         return f'<c r="{ref}" t="{kind}">{f}<v>{_esc(str(value))}</v></c>'
+    if kind == "blank":
+        # How Google Sheets' xlsx download stores a formula's BLANK result:
+        # t="str" with an empty value (seen in capture v2, row E-0186).
+        return f'<c r="{ref}" t="str">{f}<v></v></c>'
     if kind == "estr":
         # How Google Sheets' xlsx download stores a formula's ERROR result:
         # t="str" with the literal, never t="e" (seen in capture v1, row P-0004).
@@ -130,6 +134,7 @@ def make_export(
     bad_type: str | None = None,
     error_type: dict[str, int] | None = None,
     input_x2: Any = 30,
+    length: dict[str, int] | None = None,
 ) -> Path:
     """Write a SYNTHETIC export shaped like a Google Sheets xlsx download."""
     shared: list[str] = []
@@ -150,6 +155,9 @@ def make_export(
         cells.append(
             _cell(f"D{row}", "n" if err else "str", err, f'=IFERROR(ERROR.TYPE(B{row}),"")', shared)
         )
+        if kind == "blank" or (length and case_id in length):
+            n = (length or {}).get(case_id, 0)
+            cells.append(_cell(f"E{row}", "n", n, f'=LEN(B{row}&"")', shared))
         xml_rows.append(f'<row r="{row}">{"".join(cells)}</row>')
     main = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
     rel = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -305,6 +313,28 @@ def test_refuses_a_text_error_with_no_error_type(tmp_path: Path) -> None:
         tmp_path / "x.xlsx", _with_e0002("estr", "#NUM!"), error_type={"E-0002": ""}
     )
     refused(tmp_path, export, provenance(export), "ERROR.TYPE")
+
+
+def test_a_blank_result_sheets_stored_as_empty_text_is_read_as_empty(tmp_path: Path) -> None:
+    # Capture v2, E-0186: =IFERROR(NA()) came back t="str" with an empty <v>,
+    # TYPE 1 (Sheets' TYPE of a blank) and LEN 0. That is a BLANK result.
+    export = make_export(tmp_path / "export.xlsx", _with_e0002("blank", ""))
+    suites = _build(export, request(), provenance(export))
+    assert suites["formula/eval-info"]["cases"][0]["expected"] == {"value": {"t": "empty"}}
+
+
+def test_an_empty_string_result_stays_an_empty_string(tmp_path: Path) -> None:
+    # ="" is a zero-length STRING: TYPE says 2, so it must not become blank.
+    export = make_export(tmp_path / "export.xlsx", _with_e0002("str", ""))
+    suites = _build(export, request(), provenance(export))
+    assert suites["formula/eval-info"]["cases"][0]["expected"] == {
+        "value": {"t": "string", "v": ""}
+    }
+
+
+def test_refuses_a_blank_whose_length_probe_disagrees(tmp_path: Path) -> None:
+    export = make_export(tmp_path / "x.xlsx", _with_e0002("blank", ""), length={"E-0002": 3})
+    refused(tmp_path, export, provenance(export), "LEN")
 
 
 def test_refuses_a_text_error_that_is_not_a_known_literal(tmp_path: Path) -> None:

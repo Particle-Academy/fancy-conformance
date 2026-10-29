@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-29",
+  "capturer": "the repository owner, by hand",
+  "accountType": "Google account (type not recorded)",
+  "locale": "en_US",
+  "timeZone": "UTC",
+  "exportRoute": "manual: Drive upload of capture-v1.xlsx (rebuilt with holy-sheet 2.11.3), Open with Google Sheets, Save as Google Sheets, File > Settings locale United States + time zone UTC, recalculated, File > Download > Microsoft Excel (.xlsx)",
+  "inputSha256": "ae8ce7e7ff564487d20f17a2155e6190ffbaa14cbbe6739baf9905632425b4e7",
+  "outputSha256": "beb97f2a56892cbdc4f3d15ee9165fd188cf21516501bc28085960016d025e8f"
+}

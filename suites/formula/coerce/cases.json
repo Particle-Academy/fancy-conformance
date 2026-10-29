@@ -1,0 +1,1743 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "formula/coerce",
+  "cases": [
+    {
+      "id": "0001-c",
+      "title": "=1+\"2\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0001",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"2\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Numeric text in arithmetic.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0002-c",
+      "title": "=1+\"5%\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0002",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"5%\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1.05
+        }
+      },
+      "notes": "Percent text.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0003-c",
+      "title": "=1+\"2026-10-27\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0003",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"2026-10-27\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 46323
+        }
+      },
+      "notes": "Date-like text becomes a serial.",
+      "tolerance": 5e-11
+    },
+    {
+      "id": "0004-c",
+      "title": "=1+\"abc\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0004",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"abc\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      },
+      "notes": "Non-numeric text."
+    },
+    {
+      "id": "0005-c",
+      "title": "=1+TRUE",
+      "since": "0.39.0",
+      "tags": [
+        "C-0005"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+TRUE"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0006-c",
+      "title": "=1+Inputs!O1",
+      "since": "0.39.0",
+      "tags": [
+        "C-0006",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+Inputs!O1"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "An empty cell is 0.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0007-c",
+      "title": "=1+NA()",
+      "since": "0.39.0",
+      "tags": [
+        "C-0007"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+NA()"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      },
+      "notes": "An error propagates."
+    },
+    {
+      "id": "0008-c",
+      "title": "=1+\" 2 \"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0008",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\" 2 \""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "Surrounding spaces.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0009-c",
+      "title": "=1+\"1e3\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0009",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"1e3\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1001
+        }
+      },
+      "notes": "Exponent text.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0010-c",
+      "title": "=1+\"$5\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0010",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"$5\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 6
+        }
+      },
+      "notes": "A currency symbol in text.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0011-c",
+      "title": "=1+\"1,000\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0011",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"1,000\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1001
+        }
+      },
+      "notes": "A thousands separator in text.",
+      "tolerance": 5e-12
+    },
+    {
+      "id": "0012-c",
+      "title": "=1+\"(5)\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0012",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"(5)\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": -4
+        }
+      },
+      "notes": "Accounting negative in text.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0013-c",
+      "title": "=1+\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0013",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "Empty TEXT is not an empty cell.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0014-c",
+      "title": "=1+Inputs!A2",
+      "since": "0.39.0",
+      "tags": [
+        "C-0014",
+        "H-24"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1+Inputs!A2"
+        },
+        "inputs": {
+          "Inputs!A2": {
+            "type": "text",
+            "value": "20"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 21
+        }
+      },
+      "notes": "A cell holding numeric TEXT, in arithmetic.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0015-c",
+      "title": "=1/3&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0015",
+        "H-23"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1/3&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "0.333333333333333"
+        }
+      },
+      "notes": "15 significant digits."
+    },
+    {
+      "id": "0016-c",
+      "title": "=TRUE&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0016"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=TRUE&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "TRUE"
+        }
+      }
+    },
+    {
+      "id": "0017-c",
+      "title": "=Inputs!O1&\"x\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0017",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!O1&\"x\""
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "x"
+        }
+      },
+      "notes": "Empty is \"\"."
+    },
+    {
+      "id": "0018-c",
+      "title": "=NA()&\"x\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0018"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NA()&\"x\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0019-c",
+      "title": "=123456789012345678&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0019",
+        "H-23"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=123456789012345678&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "123456789012345000"
+        }
+      },
+      "notes": "A number past 15 digits, as text."
+    },
+    {
+      "id": "0020-c",
+      "title": "=1E+20&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0020",
+        "H-23"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1E+20&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "100000000000000000000"
+        }
+      },
+      "notes": "Large numbers switch to scientific form?"
+    },
+    {
+      "id": "0021-c",
+      "title": "=1E-7&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0021",
+        "H-23"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1E-7&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "0.0000001"
+        }
+      },
+      "notes": "Small numbers switch to scientific form?"
+    },
+    {
+      "id": "0022-c",
+      "title": "=DATE(2026,10,27)&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0022"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=DATE(2026,10,27)&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "46322"
+        }
+      },
+      "notes": "A date is its serial as text."
+    },
+    {
+      "id": "0023-c",
+      "title": "=-0&\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0023"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=-0&\"\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "0"
+        }
+      },
+      "notes": "Negative zero."
+    },
+    {
+      "id": "0024-c",
+      "title": "=IF(2,\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0024"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(2,\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "t"
+        }
+      }
+    },
+    {
+      "id": "0025-c",
+      "title": "=IF(-0.5,\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0025"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(-0.5,\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "t"
+        }
+      }
+    },
+    {
+      "id": "0026-c",
+      "title": "=IF(\"TRUE\",\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0026",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(\"TRUE\",\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "t"
+        }
+      }
+    },
+    {
+      "id": "0027-c",
+      "title": "=IF(\"true\",\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0027",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(\"true\",\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "t"
+        }
+      }
+    },
+    {
+      "id": "0028-c",
+      "title": "=IF(\"FALSE\",\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0028",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(\"FALSE\",\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "f"
+        }
+      }
+    },
+    {
+      "id": "0029-c",
+      "title": "=IF(\"yes\",\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0029",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(\"yes\",\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0030-c",
+      "title": "=IF(Inputs!O1,\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0030"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(Inputs!O1,\"t\",\"f\")"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "string",
+          "v": "f"
+        }
+      },
+      "notes": "Empty is FALSE."
+    },
+    {
+      "id": "0031-c",
+      "title": "=IF(NA(),\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0031"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(NA(),\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0032-c",
+      "title": "=NOT(\"FALSE\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0032",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NOT(\"FALSE\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0033-c",
+      "title": "=IF(\"0\",\"t\",\"f\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0033",
+        "H-18"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=IF(\"0\",\"t\",\"f\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      },
+      "notes": "The text \"0\" (PHP treats it as false)."
+    },
+    {
+      "id": "0034-c",
+      "title": "=SUM(1,\"2\",TRUE)",
+      "since": "0.39.0",
+      "tags": [
+        "C-0034",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(1,\"2\",TRUE)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 4
+        }
+      },
+      "notes": "Literal text and bool in SUM.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0035-c",
+      "title": "=SUM(1,\"x\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0035",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(1,\"x\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#VALUE!"
+        }
+      }
+    },
+    {
+      "id": "0036-c",
+      "title": "=SUM(Inputs!A1:A6)",
+      "since": "0.39.0",
+      "tags": [
+        "C-0036",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!A1:A6)"
+        },
+        "inputs": {
+          "Inputs!A1:A6": {
+            "type": "range",
+            "rows": [
+              [
+                10
+              ],
+              [
+                "20"
+              ],
+              [
+                true
+              ],
+              [
+                null
+              ],
+              [
+                "abc"
+              ],
+              [
+                5
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 15
+        }
+      },
+      "notes": "The same kinds inside a range are skipped.",
+      "tolerance": 5e-14
+    },
+    {
+      "id": "0037-c",
+      "title": "=SUM(Inputs!A2)",
+      "since": "0.39.0",
+      "tags": [
+        "C-0037",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!A2)"
+        },
+        "inputs": {
+          "Inputs!A2": {
+            "type": "text",
+            "value": "20"
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "A single cell holding numeric text."
+    },
+    {
+      "id": "0038-c",
+      "title": "=SUM(Inputs!A3)",
+      "since": "0.39.0",
+      "tags": [
+        "C-0038",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(Inputs!A3)"
+        },
+        "inputs": {
+          "Inputs!A3": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 0
+        }
+      },
+      "notes": "A single cell holding TRUE."
+    },
+    {
+      "id": "0039-c",
+      "title": "=AVERAGE(1,\"3\")",
+      "since": "0.39.0",
+      "tags": [
+        "C-0039",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=AVERAGE(1,\"3\")"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 2
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0040-c",
+      "title": "=MAX(\"7\",2)",
+      "since": "0.39.0",
+      "tags": [
+        "C-0040",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAX(\"7\",2)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 7
+        }
+      },
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0041-c",
+      "title": "=COUNT(\"1\",TRUE,\"x\",1)",
+      "since": "0.39.0",
+      "tags": [
+        "C-0041",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=COUNT(\"1\",TRUE,\"x\",1)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 3
+        }
+      },
+      "notes": "COUNT over literal arguments.",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0042-c",
+      "title": "=SUM({1,\"2\",TRUE})",
+      "since": "0.39.0",
+      "tags": [
+        "C-0042",
+        "H-12"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM({1,\"2\",TRUE})"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "number",
+          "v": 1
+        }
+      },
+      "notes": "An array literal: like a range, or like literal arguments?",
+      "tolerance": 5e-15
+    },
+    {
+      "id": "0043-c",
+      "title": "=1<\"a\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0043",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1<\"a\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0044-c",
+      "title": "=\"a\"<TRUE",
+      "since": "0.39.0",
+      "tags": [
+        "C-0044",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"a\"<TRUE"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0045-c",
+      "title": "=1<TRUE",
+      "since": "0.39.0",
+      "tags": [
+        "C-0045",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1<TRUE"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0046-c",
+      "title": "=\"a\"=\"A\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0046",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"a\"=\"A\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0047-c",
+      "title": "=\"a\"<\"B\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0047",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"a\"<\"B\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0048-c",
+      "title": "=\"ä\"=\"Ä\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0048",
+        "H-14"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"ä\"=\"Ä\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      },
+      "notes": "Case folding beyond ASCII."
+    },
+    {
+      "id": "0049-c",
+      "title": "=Inputs!O1=0",
+      "since": "0.39.0",
+      "tags": [
+        "C-0049",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!O1=0"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0050-c",
+      "title": "=Inputs!O1=\"\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0050",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!O1=\"\""
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0051-c",
+      "title": "=Inputs!O1<1",
+      "since": "0.39.0",
+      "tags": [
+        "C-0051",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!O1<1"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      }
+    },
+    {
+      "id": "0052-c",
+      "title": "=Inputs!O1=FALSE",
+      "since": "0.39.0",
+      "tags": [
+        "C-0052",
+        "H-19"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=Inputs!O1=FALSE"
+        },
+        "inputs": {
+          "Inputs!O1": {
+            "type": "range",
+            "rows": [
+              [
+                null
+              ]
+            ]
+          }
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      },
+      "notes": "Empty against a boolean."
+    },
+    {
+      "id": "0053-c",
+      "title": "=\"10\"<\"9\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0053"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"10\"<\"9\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": true
+        }
+      },
+      "notes": "Text compares as text."
+    },
+    {
+      "id": "0054-c",
+      "title": "=\" a\"=\"a\"",
+      "since": "0.39.0",
+      "tags": [
+        "C-0054"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\" a\"=\"a\""
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      },
+      "notes": "Whitespace is significant."
+    },
+    {
+      "id": "0055-c",
+      "title": "=1=TRUE",
+      "since": "0.39.0",
+      "tags": [
+        "C-0055",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1=TRUE"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0056-c",
+      "title": "=\"1\"=1",
+      "since": "0.39.0",
+      "tags": [
+        "C-0056",
+        "H-13"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=\"1\"=1"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "bool",
+          "v": false
+        }
+      }
+    },
+    {
+      "id": "0057-c",
+      "title": "=NA()+1/0",
+      "since": "0.39.0",
+      "tags": [
+        "C-0057",
+        "H-20"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=NA()+1/0"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0058-c",
+      "title": "=1/0+NA()",
+      "since": "0.39.0",
+      "tags": [
+        "C-0058",
+        "H-20"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=1/0+NA()"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0059-c",
+      "title": "=SUM(1/0,NA())",
+      "since": "0.39.0",
+      "tags": [
+        "C-0059",
+        "H-20"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=SUM(1/0,NA())"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    },
+    {
+      "id": "0060-c",
+      "title": "=CONCATENATE(NA(),1/0)",
+      "since": "0.39.0",
+      "tags": [
+        "C-0060",
+        "H-20"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=CONCATENATE(NA(),1/0)"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#N/A"
+        }
+      }
+    },
+    {
+      "id": "0061-c",
+      "title": "=MAX(1/0,NA())",
+      "since": "0.39.0",
+      "tags": [
+        "C-0061",
+        "H-20"
+      ],
+      "fn": "evaluate",
+      "input": {
+        "version": 1,
+        "formulas": {
+          "result": "=MAX(1/0,NA())"
+        },
+        "outputs": {
+          "result": {}
+        },
+        "trace": "none"
+      },
+      "expected": {
+        "value": {
+          "t": "error",
+          "v": "#DIV/0!"
+        }
+      }
+    }
+  ]
+}
