@@ -1869,6 +1869,7 @@ function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<strin
   const lw = structuredClone(BASE_DEFS);
   const fp = structuredClone(BASE_DEFS);
   lw.blockTypes!.push("chart");
+  if (!m.lastWordNoFootnote) lw.run!.push("footnote");
   if (m.lastWordToday) {
     lw.page = lw.page!.filter((k) => k !== "background" && k !== "border");
     lw.pageBorder = [];

@@ -5780,6 +5780,1490 @@
         "control"
       ],
       "notes": "The control for 0043. Without it, an implementation of roundTripFixpoint that returns a hardcoded true passes the acceptance row and the suite reports success over nothing. 0042 is the same document, spelled out."
+    },
+    {
+      "id": "0045-footnote-reference-run",
+      "title": "A footnote is a run with text \"\" and a footnote; in the body it is ONE FootnoteReference-styled run",
+      "since": "0.40.0",
+      "fn": "runProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Revenue grew 18%"
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Audited figures, FY2026."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "text": " on the prior year."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "text": "Revenue grew 18%",
+          "rPr": []
+        },
+        {
+          "text": "",
+          "rPr": [
+            [
+              "rStyle",
+              {
+                "val": "FootnoteReference"
+              }
+            ]
+          ]
+        },
+        {
+          "text": " on the prior year.",
+          "rPr": []
+        }
+      ],
+      "tags": [
+        "footnote",
+        "run"
+      ],
+      "notes": "The reference run carries w:rStyle FootnoteReference and nothing else in its w:rPr, and no text: its child is <w:footnoteReference w:id=\"1\"/>, which footnotesPart pins. Word draws the number; the model never carries one. The runs either side are untouched."
+    },
+    {
+      "id": "0046-footnotes-part",
+      "title": "word/footnotes.xml: the separator (-1), the continuation separator (0), then the document's from 1, each opening with its mark",
+      "since": "0.40.0",
+      "fn": "footnotesPart",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "First"
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Plain."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Second"
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Sources: ",
+                            "bold": true
+                          },
+                          {
+                            "text": "the ledger"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "And the board pack."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml",
+        "relationship": "footnotes.xml",
+        "footnotePr": [
+          [
+            "footnote",
+            {
+              "id": "-1"
+            }
+          ],
+          [
+            "footnote",
+            {
+              "id": "0"
+            }
+          ]
+        ],
+        "references": [
+          "1",
+          "2"
+        ],
+        "footnotes": [
+          {
+            "id": "-1",
+            "type": "separator",
+            "text": "",
+            "content": [
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "spacing",
+                        {
+                          "after": "0",
+                          "line": "240",
+                          "lineRule": "auto"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "separator",
+                        true
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "id": "0",
+            "type": "continuationSeparator",
+            "text": "",
+            "content": [
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "spacing",
+                        {
+                          "after": "0",
+                          "line": "240",
+                          "lineRule": "auto"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "continuationSeparator",
+                        true
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "id": "1",
+            "type": null,
+            "text": " Plain.",
+            "content": [
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "pStyle",
+                        {
+                          "val": "FootnoteText"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "rPr",
+                        [
+                          [
+                            "rStyle",
+                            {
+                              "val": "FootnoteReference"
+                            }
+                          ]
+                        ]
+                      ],
+                      [
+                        "footnoteRef",
+                        true
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "t",
+                        {
+                          "space": "preserve"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "t",
+                        {
+                          "space": "preserve"
+                        }
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "id": "2",
+            "type": null,
+            "text": " Sources: the ledgerAnd the board pack.",
+            "content": [
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "pStyle",
+                        {
+                          "val": "FootnoteText"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "rPr",
+                        [
+                          [
+                            "rStyle",
+                            {
+                              "val": "FootnoteReference"
+                            }
+                          ]
+                        ]
+                      ],
+                      [
+                        "footnoteRef",
+                        true
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "t",
+                        {
+                          "space": "preserve"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "rPr",
+                        [
+                          [
+                            "b",
+                            true
+                          ]
+                        ]
+                      ],
+                      [
+                        "t",
+                        {
+                          "space": "preserve"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "t",
+                        {
+                          "space": "preserve"
+                        }
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "pStyle",
+                        {
+                          "val": "FootnoteText"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "t",
+                        {
+                          "space": "preserve"
+                        }
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "footnote",
+        "part"
+      ],
+      "notes": "Word reports a file whose footnotes part lacks the two separator footnotes as damaged, and names them in settings <w:footnotePr>. Ids -1 and 0 are what current Word writes (Word 2003 used 0 and 1; the reader accepts any). A footnote's first paragraph opens, after its w:pPr, with <w:r><w:rPr><w:rStyle w:val=\"FootnoteReference\"/></w:rPr><w:footnoteRef/></w:r> and then a run holding ONE space -- the gap Word puts after the number, which the reader strips again. Every paragraph is FootnoteText-styled. `text` is the concatenated w:t of each footnote, so the leading space is visible there."
+    },
+    {
+      "id": "0047-footnote-opening-with-a-table",
+      "title": "A footnote that opens with a table gets a mark paragraph before it and a closing paragraph after it",
+      "since": "0.40.0",
+      "fn": "footnotesPart",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "table",
+                        "rows": [
+                          {
+                            "cells": [
+                              {
+                                "blocks": [
+                                  {
+                                    "type": "paragraph",
+                                    "runs": [
+                                      {
+                                        "text": "cell"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml",
+        "relationship": "footnotes.xml",
+        "footnotePr": [
+          [
+            "footnote",
+            {
+              "id": "-1"
+            }
+          ],
+          [
+            "footnote",
+            {
+              "id": "0"
+            }
+          ]
+        ],
+        "references": [
+          "1"
+        ],
+        "footnotes": [
+          {
+            "id": "-1",
+            "type": "separator",
+            "text": "",
+            "content": [
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "spacing",
+                        {
+                          "after": "0",
+                          "line": "240",
+                          "lineRule": "auto"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "separator",
+                        true
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "id": "0",
+            "type": "continuationSeparator",
+            "text": "",
+            "content": [
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "spacing",
+                        {
+                          "after": "0",
+                          "line": "240",
+                          "lineRule": "auto"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "continuationSeparator",
+                        true
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          },
+          {
+            "id": "1",
+            "type": null,
+            "text": "cell",
+            "content": [
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "pStyle",
+                        {
+                          "val": "FootnoteText"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "r",
+                    [
+                      [
+                        "rPr",
+                        [
+                          [
+                            "rStyle",
+                            {
+                              "val": "FootnoteReference"
+                            }
+                          ]
+                        ]
+                      ],
+                      [
+                        "footnoteRef",
+                        true
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "tbl",
+                [
+                  [
+                    "tblPr",
+                    [
+                      [
+                        "tblW",
+                        {
+                          "w": "0",
+                          "type": "auto"
+                        }
+                      ],
+                      [
+                        "tblBorders",
+                        [
+                          [
+                            "top",
+                            {
+                              "val": "single",
+                              "sz": "4",
+                              "space": "0",
+                              "color": "auto"
+                            }
+                          ],
+                          [
+                            "left",
+                            {
+                              "val": "single",
+                              "sz": "4",
+                              "space": "0",
+                              "color": "auto"
+                            }
+                          ],
+                          [
+                            "bottom",
+                            {
+                              "val": "single",
+                              "sz": "4",
+                              "space": "0",
+                              "color": "auto"
+                            }
+                          ],
+                          [
+                            "right",
+                            {
+                              "val": "single",
+                              "sz": "4",
+                              "space": "0",
+                              "color": "auto"
+                            }
+                          ],
+                          [
+                            "insideH",
+                            {
+                              "val": "single",
+                              "sz": "4",
+                              "space": "0",
+                              "color": "auto"
+                            }
+                          ],
+                          [
+                            "insideV",
+                            {
+                              "val": "single",
+                              "sz": "4",
+                              "space": "0",
+                              "color": "auto"
+                            }
+                          ]
+                        ]
+                      ],
+                      [
+                        "tblCellMar",
+                        [
+                          [
+                            "top",
+                            {
+                              "w": "60",
+                              "type": "dxa"
+                            }
+                          ],
+                          [
+                            "left",
+                            {
+                              "w": "108",
+                              "type": "dxa"
+                            }
+                          ],
+                          [
+                            "bottom",
+                            {
+                              "w": "60",
+                              "type": "dxa"
+                            }
+                          ],
+                          [
+                            "right",
+                            {
+                              "w": "108",
+                              "type": "dxa"
+                            }
+                          ]
+                        ]
+                      ]
+                    ]
+                  ],
+                  [
+                    "tblGrid",
+                    [
+                      [
+                        "gridCol",
+                        {
+                          "w": "9360"
+                        }
+                      ]
+                    ]
+                  ],
+                  [
+                    "tr",
+                    [
+                      [
+                        "tc",
+                        [
+                          [
+                            "tcPr",
+                            [
+                              [
+                                "tcW",
+                                {
+                                  "w": "9360",
+                                  "type": "dxa"
+                                }
+                              ]
+                            ]
+                          ],
+                          [
+                            "p",
+                            [
+                              [
+                                "r",
+                                [
+                                  [
+                                    "t",
+                                    {
+                                      "space": "preserve"
+                                    }
+                                  ]
+                                ]
+                              ]
+                            ]
+                          ]
+                        ]
+                      ]
+                    ]
+                  ]
+                ]
+              ],
+              [
+                "p",
+                [
+                  [
+                    "pPr",
+                    [
+                      [
+                        "pStyle",
+                        {
+                          "val": "FootnoteText"
+                        }
+                      ]
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "footnote",
+        "part"
+      ],
+      "notes": "The mark must be in a paragraph, so a footnote whose first block is not a paragraph (table, quote, code) is preceded by a FootnoteText paragraph holding ONLY the mark (no space run). A footnote is a block container and ends in a paragraph, as a table cell does, so one that ends with a table gets an empty FootnoteText paragraph. The reader drops both: neither carries text."
+    },
+    {
+      "id": "0048-footnotes-absent",
+      "title": "Without a footnote there is no footnotes part, no relationship, no settings and no reference",
+      "since": "0.40.0",
+      "fn": "footnotesPart",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "No footnotes here."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "contentType": null,
+        "relationship": null,
+        "footnotePr": null,
+        "references": [],
+        "footnotes": []
+      },
+      "tags": [
+        "footnote",
+        "baseline"
+      ],
+      "notes": "The no-op guarantee: a document without footnotes is byte-identical to one written before footnotes existed, settings.xml included (it is still written only for a page colour or even/odd headers). The FootnoteText / FootnoteReference styles are likewise added only when a footnote exists."
+    },
+    {
+      "id": "0049-read-back-footnotes",
+      "title": "read() gives every footnote back as the run that wrote it, wherever it sat",
+      "since": "0.40.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 1,
+              "runs": [
+                {
+                  "text": "Results"
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Unaudited."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Revenue grew "
+                },
+                {
+                  "text": "18%",
+                  "bold": true
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Against FY2025."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "text": " on the prior year."
+                }
+              ]
+            },
+            {
+              "type": "list",
+              "items": [
+                {
+                  "runs": [
+                    {
+                      "text": "EMEA"
+                    },
+                    {
+                      "text": "",
+                      "footnote": {
+                        "blocks": [
+                          {
+                            "type": "paragraph",
+                            "runs": [
+                              {
+                                "text": "Includes Turkey."
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "rows": [
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Q3"
+                            },
+                            {
+                              "text": "",
+                              "footnote": {
+                                "blocks": [
+                                  {
+                                    "type": "paragraph",
+                                    "runs": [
+                                      {
+                                        "text": "Thirteen weeks."
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "1,250"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Two in a row"
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Ibid."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Ibid."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "A paragraph that is only a mark."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "heading",
+            "level": 1,
+            "runs": [
+              {
+                "text": "Results"
+              },
+              {
+                "text": "",
+                "footnote": {
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "runs": [
+                        {
+                          "text": "Unaudited."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Revenue grew "
+              },
+              {
+                "text": "18%",
+                "bold": true
+              },
+              {
+                "text": "",
+                "footnote": {
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "runs": [
+                        {
+                          "text": "Against FY2025."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "text": " on the prior year."
+              }
+            ]
+          },
+          {
+            "type": "list",
+            "items": [
+              {
+                "runs": [
+                  {
+                    "text": "EMEA"
+                  },
+                  {
+                    "text": "",
+                    "footnote": {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Includes Turkey."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "rows": [
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Q3"
+                          },
+                          {
+                            "text": "",
+                            "footnote": {
+                              "blocks": [
+                                {
+                                  "type": "paragraph",
+                                  "runs": [
+                                    {
+                                      "text": "Thirteen weeks."
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "1,250"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Two in a row"
+              },
+              {
+                "text": "",
+                "footnote": {
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "runs": [
+                        {
+                          "text": "Ibid."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "text": "",
+                "footnote": {
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "runs": [
+                        {
+                          "text": "Ibid."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "",
+                "footnote": {
+                  "blocks": [
+                    {
+                      "type": "paragraph",
+                      "runs": [
+                        {
+                          "text": "A paragraph that is only a mark."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "footnote",
+        "read-back"
+      ],
+      "notes": "Heading, paragraph, list item, table cell; two IDENTICAL footnotes in a row (\"Ibid.\" twice) stay TWO runs (a reader must never merge footnote runs, nor drop one for its empty text); a paragraph holding only a mark is still a paragraph. The space after each footnote's own mark is stripped, so the footnote text reads as written."
+    },
+    {
+      "id": "0050-fixpoint-footnotes",
+      "title": "A footnote holding a link, a list and a table is a round-trip fixpoint",
+      "since": "0.40.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "quote",
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "Quoted"
+                    },
+                    {
+                      "text": "",
+                      "footnote": {
+                        "blocks": [
+                          {
+                            "type": "paragraph",
+                            "runs": [
+                              {
+                                "text": "Interview, 3 October."
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Rich"
+                },
+                {
+                  "text": "",
+                  "footnote": {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Sources: ",
+                            "bold": true
+                          },
+                          {
+                            "text": "the ledger",
+                            "link": "https://example.com/ledger"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "list",
+                        "ordered": true,
+                        "items": [
+                          {
+                            "runs": [
+                              {
+                                "text": "Ledger"
+                              }
+                            ]
+                          },
+                          {
+                            "runs": [
+                              {
+                                "text": "Board pack"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "table",
+                        "rows": [
+                          {
+                            "cells": [
+                              {
+                                "blocks": [
+                                  {
+                                    "type": "paragraph",
+                                    "runs": [
+                                      {
+                                        "text": "FY26"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "blocks": [
+                                  {
+                                    "type": "paragraph",
+                                    "runs": [
+                                      {
+                                        "text": "1,250",
+                                        "italic": true
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": " leading space kept"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "fixpoint": true
+      },
+      "tags": [
+        "footnote",
+        "fixpoint"
+      ],
+      "notes": "The link resolves through word/_rels/footnotes.xml.rels -- the footnotes part's OWN relationships, rIds counted from rId1 in that part -- never the document's. Only the FIRST paragraph's first space after the mark is stripped, so a later paragraph that starts with a space keeps it."
+    },
+    {
+      "id": "0051-section-header-footer-distance",
+      "title": "margins.header / margins.footer are w:pgMar header / footer, in twips",
+      "since": "0.40.0",
+      "fn": "sectionProps",
+      "input": {
+        "doc": {
+          "page": {
+            "margins": {
+              "bottom": 54,
+              "header": 18,
+              "footer": 27
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Body"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        [
+          "pgSz",
+          {
+            "w": "12240",
+            "h": "15840"
+          }
+        ],
+        [
+          "pgMar",
+          {
+            "top": "1440",
+            "right": "1440",
+            "bottom": "1080",
+            "left": "1440",
+            "header": "360",
+            "footer": "540",
+            "gutter": "0"
+          }
+        ]
+      ],
+      "tags": [
+        "page",
+        "section"
+      ],
+      "notes": "The header distance is from the TOP edge of the page to the top of the header, the footer distance from the BOTTOM edge to the bottom of the footer, both in points in the model and twips (pt*20) on w:pgMar. 18pt -> 360, 27pt -> 540, a 54pt bottom margin -> 1080. Unset sides stay 1440 and unset distances 720, as before."
+    },
+    {
+      "id": "0052-read-back-page-distances",
+      "title": "read() returns a non-default bottom margin and both distances",
+      "since": "0.40.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "page": {
+            "margins": {
+              "bottom": 54,
+              "header": 18,
+              "footer": 27
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Body"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "page": {
+          "margins": {
+            "bottom": 54,
+            "header": 18,
+            "footer": 27
+          }
+        },
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Body"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "page",
+        "read-back"
+      ],
+      "notes": "What MOIC's viewer saw as \"no bottom margin\" was a bottom margin of exactly one inch: the reader omits every value equal to the writer's default. Here all three differ, so all three come back."
+    },
+    {
+      "id": "0053-read-back-default-distances-omitted",
+      "title": "A value equal to its default is omitted on read: sides at 72pt, distances at 36pt",
+      "since": "0.40.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "page": {
+            "margins": {
+              "top": 72,
+              "bottom": 72,
+              "header": 36,
+              "footer": 36
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Body"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Body"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "page",
+        "read-back",
+        "baseline"
+      ],
+      "notes": "The margin rule, pinned. A page whose every margin and distance is the default reads back with NO page key at all, exactly as every document did before the distances were read, so no existing output changed. A viewer resolves the omitted values with the defaults: top/right/bottom/left 72, header/footer 36 (PHP Schema::pageMargins)."
     }
   ]
 }

@@ -10,6 +10,40 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-11-01
+
+**What a consumer must do:** a last-word engine (PHP, Node, Python) that bumps to
+0.40.0 gets nine new `last-word/docx-constructs` rows and one changed
+`doc-model/shared` row, and must implement footnotes and the header/footer
+distances to pass them, plus one new extractor, `footnotesPart` (declared in the
+manifest). fine-print needs nothing: its half of `doc-model/shared` is
+unchanged. Every other suite is untouched.
+
+### Added
+
+- **`last-word/docx-constructs` rows 0045-0053: footnotes and page geometry**
+  (MOIC, 2026-11-01). Goldens from running particle-academy/last-word 0.15.0.
+  - 0045-0050, footnotes: a footnote is a RUN, `{"text": "", "footnote":
+    {"blocks": [...]}}`. Pinned: the FootnoteReference-styled reference run;
+    `word/footnotes.xml` with the separator (`w:id` -1) and continuation
+    separator (0) Word requires, settings `w:footnotePr`, the content type and
+    the relationship; the mark that opens each footnote (and the paragraph a
+    footnote opening with a table gets for it); nothing at all without a
+    footnote; read-back in a heading, paragraph, list item, table cell and two
+    in a row; a rich footnote (link, list, table) as a round-trip fixpoint.
+  - 0051-0053, page geometry: `page.margins.header` / `.footer` are `w:pgMar`'s
+    `header` / `footer`; a non-default bottom margin and both distances read
+    back; and the margin rule, that a value equal to the writer's default
+    (72pt a side, 36pt a distance) is omitted on read.
+  - New function `footnotesPart`, defined in the manifest.
+
+### Changed
+
+- **`doc-model/shared` 0006-run: `footnote` is a last-word-only run property**,
+  a deliberate delta (fine-print draws no footnotes). Generated, as before, by
+  `scripts/build-exchange-cases.py`; the probe gains the matching mutant
+  (`lastWordNoFootnote`, fails exactly 0006).
+
 ## [0.39.0] - 2026-10-29
 
 **What a consumer must do: nothing.** No existing suite changed. The manifest

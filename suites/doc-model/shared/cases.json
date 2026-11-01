@@ -154,9 +154,12 @@
           "text",
           "underline"
         ],
-        "lastWordOnly": [],
+        "lastWordOnly": [
+          "footnote"
+        ],
         "finePrintOnly": []
-      }
+      },
+      "notes": "Deliberate delta since 0.40.0: a last-word run may carry a footnote ({text: \"\", footnote: {blocks}}); fine-print draws no footnotes yet."
     },
     {
       "id": "0007-paragraph",

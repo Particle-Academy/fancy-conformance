@@ -4672,9 +4672,10 @@ def doc_model_suite() -> Suite:
                     "size",
                     "font",
                     "letterSpacing",
-                ]
+                ],
+                lw=["footnote"],
             ),
-            None,
+            "Deliberate delta since 0.40.0: a last-word run may carry a footnote ({text: \"\", footnote: {blocks}}); fine-print draws no footnotes yet.",
         ),
         (
             "0007-paragraph",
