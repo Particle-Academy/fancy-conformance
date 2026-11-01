@@ -10,6 +10,41 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-11-01
+
+**What a consumer must do:** a fancy-flow runtime (Node, PHP, Python, Rust) that
+bumps to 0.42.0 gets five new `flow/graph-runs` rows and a new suite,
+`flow/config-admission`, and must implement `transform`'s fields mode and admit
+the editor's default config to pass them. The releases that do are
+`@particle-academy/fancy-flow` 0.82.0, `particle-academy/fancy-flow-php` 0.65.0
+and `fancy-flow` (Python) 0.30.0; `fancy-flow-rs` carries it unreleased. A
+harness that counts `flow/graph-runs` rows moves from 36 to 41. Every other
+suite is untouched.
+
+### Added
+
+- **`flow/config-admission`: which config keys a runtime's validator reports**
+  (Maipa, 2026-11-01). Nine `transform` rows: the editor's own defaults
+  (`{mode: "fields", fields: [{key: "", value: ""}]}`) admitted, a stale blank
+  row in expression mode admitted, real rows admitted, an empty row object
+  admitted; an unknown mode, a value with no key, `fields` that is not a list, a
+  non-object row and a non-string `expression` refused. Keys are asserted, never
+  messages. The four type rows skip Rust with the reason stated:
+  fancy-flow-rs's `validate_config` is deliberately shallow. Goldens from
+  running `@particle-academy/fancy-flow` 0.82.0's `validateConfig`; a
+  discrimination probe with seven mutants
+  (`tests/discrimination-config-admission.test.ts`) proves every row catches
+  something.
+- **`flow/graph-runs` rows 0037-0041: `transform`'s two authoring modes.** The
+  editor's untouched default passes its input through; fields mode builds the
+  object (typed whole expressions, interpolation, literals, trimmed keys,
+  skipped blank rows, a repeated key keeping the later value at the first
+  position); expression mode; expression mode ignoring stale `fields`; and an
+  unknown `mode` taking the fields path at run time. Generated from the Node
+  runtime, the reference for this kind, by
+  `scripts/build-flow-transform-cases.mjs`; the published 0.81.0 produces
+  byte-identical goldens.
+
 ## [0.41.0] - 2026-11-01
 
 **What a consumer must do:** a last-word engine (PHP, Node, Python) that bumps to

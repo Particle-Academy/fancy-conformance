@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/config-admission",
+  "title": "Declared-config admission: which config keys a runtime's validator reports",
+  "since": "0.42.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "admit(kind: string, config: object) -> { issueKeys: string[] }",
+    "summary": "Look the builtin kind up in this runtime's registry and validate `config` against its declared configSchema (TypeScript `validateConfig`, PHP `NodeKindRegistry::validateConfig`, Python `NodeKindRegistry.validate_config`, Rust `NodeKindRegistry::validate_config`). Return the config KEYS that have an issue, in the order the validator reports them; an empty list means the config is admitted. The message text is deliberately NOT part of the contract.",
+    "reference": "node",
+    "referenceNote": "Goldens come from running @particle-academy/fancy-flow's validateConfig (0.82.0), via scripts/build-flow-transform-cases.mjs. The editor that writes these configs is the reference's own, so its validator is the one whose verdict the others must reproduce.",
+    "implementations": [
+      { "language": "node", "package": "@particle-academy/fancy-flow", "symbol": "validateConfig" },
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\NodeKindRegistry::validateConfig" },
+      { "language": "python", "package": "fancy-flow", "symbol": "fancy_flow.NodeKindRegistry.validate_config" },
+      { "language": "rust", "package": "fancy-flow", "symbol": "fancy_flow::NodeKindRegistry::validate_config" }
+    ]
+  },
+  "notes": [
+    "THIS SUITE EXISTS BECAUSE THE EDITOR'S DEFAULTS WERE REFUSED. Maipa, a consumer, built a transform node with the TypeScript editor and its Python host refused the config: the Python port (and the PHP one) declared only a required `expression`, while the editor writes `{mode: \"fields\", fields: [{key: \"\", value: \"\"}]}`. The reference's own validator refused that blank row too. flow/graph-runs could not see any of it: its contract imports leniently, where a config issue is a warning and the run proceeds.",
+    "KEYS, NOT MESSAGES. PHP, Python and TypeScript word the issues identically today and Rust does not (`Key is required.` with a full stop, and its own select message). Pinning prose would hold four runtimes to a translation and go red on a wording change that alters nothing.",
+    "THE BLANK-ROW RULE IS 'EVERY FIELD BLANK', NOT 'KEY BLANK'. 0006 is the row that makes the difference: a value with no key is a configured value the executor would drop. Admitting it would be field loss with no signal, which is the outcome the consumer asked us to rule out.",
+    "VALIDATION IS MODE-INDEPENDENT. Every declared key is checked whichever mode is selected, which is the reference's behaviour: a stale BLANK row in expression mode is admitted (0002) because it is blank, not because its mode is unused, and a non-string `expression` in fields mode is still refused (0009).",
+    "RUST IS SKIPPED ON THE TYPE ROWS, with the reason on each. fancy-flow-rs `validate_config` is documented as deliberately shallow -- required fields and select options -- and checks no value types for any kind. Making it deep is a change to every kind's admission, not to transform's, and is not decided here.",
+    "THERE IS A DISCRIMINATION PROBE (tests/discrimination-config-admission.test.ts): a reading of the reference validator restricted to the field types transform declares, plus one mutant per hazard. It proves the rows discriminate; it is not an implementation anyone runs."
+  ]
+}

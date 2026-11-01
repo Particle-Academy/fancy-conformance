@@ -3027,6 +3027,490 @@
           }
         }
       }
+    },
+    {
+      "id": "0037-transform-editor-defaults-pass-through",
+      "title": "A transform with the editor's untouched defaults (fields mode, one blank row) passes its input through.",
+      "since": "0.42.0",
+      "tags": [
+        "logic",
+        "transform",
+        "editor-defaults"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "fields",
+                  "fields": [
+                    {
+                      "key": "",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          },
+          "tf": {
+            "user": {
+              "name": "Ada"
+            }
+          },
+          "o": {
+            "user": {
+              "name": "Ada"
+            }
+          }
+        }
+      },
+      "notes": "The config is the reference's own `defaultConfigFor(transform)`, which is what the editor writes for a new node. The blank row has no key, so it writes nothing, and a transform that writes nothing passes its input through rather than emptying it. Reported by Maipa: this exact config was refused by the Python port's admission and, had it run there, fields mode did not exist."
+    },
+    {
+      "id": "0038-transform-fields-mode-builds-the-object",
+      "title": "Fields mode builds the output object row by row: whole expressions keep their type, mixed text interpolates, a literal stays literal, keys are trimmed and blank rows are skipped.",
+      "since": "0.42.0",
+      "tags": [
+        "logic",
+        "transform",
+        "fields"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "fields",
+                  "fields": [
+                    {
+                      "key": "",
+                      "value": ""
+                    },
+                    {
+                      "key": " name ",
+                      "value": "{{ $json.user.name }}"
+                    },
+                    {
+                      "key": "greeting",
+                      "value": "Hi {{ $json.user.name }}"
+                    },
+                    {
+                      "key": "age",
+                      "value": "{{ $json.user.age }}"
+                    },
+                    {
+                      "key": "source",
+                      "value": "manual"
+                    },
+                    {
+                      "key": "count",
+                      "value": 3
+                    },
+                    {
+                      "key": "source",
+                      "value": "editor"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "user": {
+              "name": "Ada",
+              "age": 36
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "user": {
+              "name": "Ada",
+              "age": 36
+            }
+          },
+          "tf": {
+            "name": "Ada",
+            "greeting": "Hi Ada",
+            "age": 36,
+            "source": "editor",
+            "count": 3
+          },
+          "o": {
+            "name": "Ada",
+            "greeting": "Hi Ada",
+            "age": 36,
+            "source": "editor",
+            "count": 3
+          }
+        }
+      },
+      "notes": "Each pinned behaviour is a way a port goes wrong silently: `age` must stay a NUMBER (a whole `{{ }}` keeps its type); ` name ` must arrive as `name`; the blank first row must not produce an empty-string key; a non-string value (`count: 3`) is already a value; and a repeated key (`source`) keeps the LATER value at the FIRST position, which is what a JavaScript object does. Compare outputs as maps, not as ordered text."
+    },
+    {
+      "id": "0039-transform-expression-mode",
+      "title": "Expression mode returns the expression's value.",
+      "since": "0.42.0",
+      "tags": [
+        "logic",
+        "transform",
+        "expression"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "expression",
+                  "expression": "{{ $json.user }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          },
+          "tf": {
+            "name": "Ada"
+          },
+          "o": {
+            "name": "Ada"
+          }
+        }
+      }
+    },
+    {
+      "id": "0040-transform-expression-mode-ignores-stale-fields",
+      "title": "Expression mode ignores the `fields` the editor left behind, including a filled-in row.",
+      "since": "0.42.0",
+      "tags": [
+        "logic",
+        "transform",
+        "expression",
+        "editor-defaults"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "expression",
+                  "fields": [
+                    {
+                      "key": "",
+                      "value": ""
+                    },
+                    {
+                      "key": "who",
+                      "value": "{{ $json.user.name }}"
+                    }
+                  ],
+                  "expression": "{{ $json.user }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          },
+          "tf": {
+            "name": "Ada"
+          },
+          "o": {
+            "name": "Ada"
+          }
+        }
+      },
+      "notes": "NodeConfigPanel MERGES an edited key into the existing config, so switching a node to 'One expression' leaves `fields` in place. The unused mode's keys are ignored, not refused and not applied."
+    },
+    {
+      "id": "0041-transform-unknown-mode-takes-the-fields-path",
+      "title": "A `mode` the schema does not list takes the fields path at run time; refusing it is the validator's job (flow/config-admission 0005).",
+      "since": "0.42.0",
+      "tags": [
+        "logic",
+        "transform",
+        "fields"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "rows",
+                  "fields": [
+                    {
+                      "key": "who",
+                      "value": "{{ $json.user.name }}"
+                    }
+                  ],
+                  "expression": "{{ $json.user }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "user": {
+              "name": "Ada"
+            }
+          },
+          "tf": {
+            "who": "Ada"
+          },
+          "o": {
+            "who": "Ada"
+          }
+        }
+      },
+      "notes": "Pinned because the runtimes DISAGREED here before this row: the reference's executor treats any mode other than `expression` (or none) as fields, while ports that read `expression` unconditionally returned the expression's value. Same JSON in, different outputs. Whether an unknown mode should fail the RUN is a separate question; today import reports it as a warning and the run proceeds, in every runtime."
     }
   ]
 }

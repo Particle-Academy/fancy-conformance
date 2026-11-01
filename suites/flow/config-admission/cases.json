@@ -1,0 +1,232 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/config-admission",
+  "cases": [
+    {
+      "id": "0001-transform-editor-defaults-are-admitted",
+      "title": "The editor's own defaults for a transform are admitted.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "admitted"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            {
+              "key": "",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": []
+      },
+      "notes": "The defect this suite exists for. The reference's validator refused its own defaults (the blank row's `key` is required) until 0.82.0, and the Python and PHP ports declared only a REQUIRED `expression`, so every node dropped from the editor was refused. `fields` now declares `skipBlankRows`: a row whose every field is blank is an unfilled placeholder."
+    },
+    {
+      "id": "0002-transform-expression-mode-with-a-stale-blank-row-is-admitted",
+      "title": "Expression mode with the blank default row still present is admitted.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "admitted"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "expression",
+          "fields": [
+            {
+              "key": "",
+              "value": ""
+            }
+          ],
+          "expression": "{{ $json.user }}"
+        }
+      },
+      "expected": {
+        "issueKeys": []
+      }
+    },
+    {
+      "id": "0003-transform-fields-mode-with-real-rows-is-admitted",
+      "title": "Fields mode with filled-in rows and a trailing blank row is admitted.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "admitted"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            {
+              "key": "name",
+              "value": "{{ $json.first }}"
+            },
+            {
+              "key": "",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": []
+      }
+    },
+    {
+      "id": "0004-transform-a-row-object-with-no-keys-is-blank",
+      "title": "A row that is an empty object is blank, and admitted.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "admitted"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            {}
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": []
+      },
+      "notes": "PHP decodes `{}` to `[]`, the same value as an empty list, so the PHP port treats an empty array row as the blank object it came from."
+    },
+    {
+      "id": "0005-transform-unknown-mode-is-refused",
+      "title": "A mode the schema does not list is refused.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "refused"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "rows",
+          "fields": []
+        }
+      },
+      "expected": {
+        "issueKeys": [
+          "mode"
+        ]
+      }
+    },
+    {
+      "id": "0006-transform-a-value-without-a-key-is-refused",
+      "title": "A row with a value and no key is refused: the executor would drop that value silently.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "refused"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            {
+              "key": "",
+              "value": "{{ $json.a }}"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": [
+          "fields"
+        ]
+      },
+      "skip": {
+        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
+      },
+      "notes": "This is why the blank-row rule is 'every field blank' rather than 'key blank'. Skipping on a blank key alone would admit a configured value that never reaches the output -- field loss with no signal."
+    },
+    {
+      "id": "0007-transform-fields-not-a-list-is-refused",
+      "title": "`fields` that is not a list is refused.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "refused"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": "name"
+        }
+      },
+      "expected": {
+        "issueKeys": [
+          "fields"
+        ]
+      },
+      "skip": {
+        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
+      }
+    },
+    {
+      "id": "0008-transform-a-row-that-is-not-an-object-is-refused",
+      "title": "A `fields` row that is not an object is refused.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "refused"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            "name"
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": [
+          "fields"
+        ]
+      },
+      "skip": {
+        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
+      }
+    },
+    {
+      "id": "0009-transform-an-expression-that-is-not-a-string-is-refused",
+      "title": "An `expression` that is not a string is refused, whichever mode is selected.",
+      "since": "0.42.0",
+      "tags": [
+        "transform",
+        "refused"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [],
+          "expression": 5
+        }
+      },
+      "expected": {
+        "issueKeys": [
+          "expression"
+        ]
+      },
+      "skip": {
+        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
+      }
+    }
+  ]
+}
