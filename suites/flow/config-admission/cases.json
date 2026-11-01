@@ -148,10 +148,7 @@
           "fields"
         ]
       },
-      "skip": {
-        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
-      },
-      "notes": "This is why the blank-row rule is 'every field blank' rather than 'key blank'. Skipping on a blank key alone would admit a configured value that never reaches the output -- field loss with no signal."
+      "notes": "This is why the blank-row rule is 'every field blank' rather than 'key blank'. Skipping on a blank key alone would admit a configured value that never reaches the output -- field loss with no signal. Rust ran this row from 0.43.0: fancy-flow-rs validate_config did not walk repeater rows before, so it admitted this config too."
     },
     {
       "id": "0007-transform-fields-not-a-list-is-refused",
@@ -174,7 +171,7 @@
         ]
       },
       "skip": {
-        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
+        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields, select options, and a repeater row's required cells) and does not type-check values or rows"
       }
     },
     {
@@ -200,7 +197,7 @@
         ]
       },
       "skip": {
-        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
+        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields, select options, and a repeater row's required cells) and does not type-check values or rows"
       }
     },
     {
@@ -225,8 +222,85 @@
         ]
       },
       "skip": {
-        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows"
+        "rust": "fancy-flow-rs validate_config is deliberately shallow (required fields, select options, and a repeater row's required cells) and does not type-check values or rows"
       }
+    },
+    {
+      "id": "0010-transform-a-whitespace-only-key-with-a-value-is-refused",
+      "title": "A row whose key is only whitespace but which has a value is refused, like an empty key: the executor trims the key and would drop that value.",
+      "since": "0.43.0",
+      "tags": [
+        "transform",
+        "refused"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            {
+              "key": "   ",
+              "value": "Configured synthetic value"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": [
+          "fields"
+        ]
+      },
+      "notes": "Maipa's config, verbatim, reported against the published TS 0.82.0 and PHP 0.65.0. Validators compared the key with an exact empty string while every executor TRIMS it, so this was admitted, imported cleanly and then ran as a passthrough with the value silently gone. Admission must judge blankness exactly as the executor does. ASCII spaces only: the runtimes' trims agree on ASCII and differ at the edges of Unicode, which this row is not about."
+    },
+    {
+      "id": "0011-transform-a-whitespace-only-key-with-an-empty-value-is-blank",
+      "title": "A row whose key is only whitespace and whose value is empty is a blank row, and admitted.",
+      "since": "0.43.0",
+      "tags": [
+        "transform",
+        "admitted"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            {
+              "key": "   ",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": []
+      },
+      "notes": "The trimmed judgement cuts both ways: a whitespace-only key is blank for skipping the row too, so a row with nothing configured stays a placeholder -- as the editor's untouched default (0001) does. Before 0.43.0's fix the reference refused this row ('Value is required') while running it as nothing."
+    },
+    {
+      "id": "0012-transform-a-padded-non-blank-key-is-admitted",
+      "title": "A key padded with whitespace around real text is admitted.",
+      "since": "0.43.0",
+      "tags": [
+        "transform",
+        "admitted"
+      ],
+      "input": {
+        "kind": "transform",
+        "config": {
+          "mode": "fields",
+          "fields": [
+            {
+              "key": "  name ",
+              "value": "{{ $json.first }}"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "issueKeys": []
+      },
+      "notes": "Guards the fix for 0010 from overreaching: trimming decides whether a key is BLANK, and a padded key is not. At run time its value lands under the trimmed key (flow/graph-runs 0042)."
     }
   ]
 }

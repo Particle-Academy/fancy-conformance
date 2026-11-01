@@ -10,6 +10,46 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-11-01
+
+**What a consumer must do:** a fancy-flow runtime that bumps to 0.43.0 gets
+three new `flow/config-admission` rows and one new `flow/graph-runs` row, and
+must judge a `transform` key's blankness TRIMMED in its validator, as its
+executor already does, to pass them. The releases that do are
+`@particle-academy/fancy-flow` 0.82.1, `particle-academy/fancy-flow-php` 0.65.1
+and `fancy-flow` (Python) 0.30.1; `fancy-flow-rs` carries it unreleased. Rust
+now RUNS `flow/config-admission` 0006 (its skip is gone) and the new rows. A
+harness that counts rows moves from 41 to 42 (`flow/graph-runs`) and 9 to 12
+(`flow/config-admission`). Every earlier row's golden is unchanged.
+
+### Added
+
+- **`flow/config-admission` 0010-0012: a whitespace-only key** (Maipa,
+  2026-11-01, against the published TS 0.82.0 and PHP 0.65.0). `{key: "   ",
+  value: "Configured synthetic value"}` was admitted by every validator (an
+  exact `""` comparison) and its value silently dropped at run time (every
+  executor trims the key and skips a blank one). 0010 refuses it, 0011 keeps a
+  whitespace key with an empty value a blank row, 0012 admits a padded
+  non-blank key. ASCII spaces only; the manifest records where the runtimes'
+  trims differ at the edges of Unicode.
+- **`flow/graph-runs` 0042: a padded key keeps its value under the trimmed
+  key**, spaces and a tab around `name`, and `age` keeping its number type.
+- **Two discrimination mutants** in `tests/discrimination-config-admission.test.ts`:
+  judging the key untrimmed fails exactly 0010 and 0011, and an overreaching fix
+  that treats a padded key as blank fails exactly 0012. The existing
+  `refuseBlankRows` and `blankMeansKeyBlank` mutants now also fail 0011 and 0010
+  respectively.
+
+### Changed
+
+- **`flow/config-admission` 0006 no longer skips Rust.** fancy-flow-rs's
+  `validate_config` now walks a repeater row's required cells; the type rows
+  0007-0009 still skip Rust, with the reason reworded to say so.
+
+Goldens from running `@particle-academy/fancy-flow` 0.82.1 through
+`scripts/build-flow-transform-cases.mjs`; rows 0037-0041 and config-admission
+0001-0009 re-ran byte-identical.
+
 ## [0.42.0] - 2026-11-01
 
 **What a consumer must do:** a fancy-flow runtime (Node, PHP, Python, Rust) that

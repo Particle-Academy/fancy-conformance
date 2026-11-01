@@ -17,6 +17,8 @@ type Config = Record<string, unknown>;
 type Mutation = {
   refuseBlankRows?: boolean;
   blankMeansKeyBlank?: boolean;
+  untrimmedKey?: boolean;
+  paddedKeyIsBlank?: boolean;
   ignoreSelectOptions?: boolean;
   noListCheck?: boolean;
   noRowObjectCheck?: boolean;
@@ -25,6 +27,11 @@ type Mutation = {
 };
 
 const blank = (v: unknown) => v === undefined || v === null || v === "";
+// A KEY is judged trimmed, as every executor reads it (0.43.0); a value never is.
+const blankKey = (v: unknown, m: Mutation) =>
+  blank(v) ||
+  (!m.untrimmedKey && typeof v === "string" && v.trim() === "") ||
+  (!!m.paddedKeyIsBlank && typeof v === "string" && v.trim() !== v);
 const isObject = (v: unknown): v is Config => typeof v === "object" && v !== null && !Array.isArray(v);
 
 function admit(config: Config, m: Mutation = {}): { issueKeys: string[] } {
@@ -46,9 +53,10 @@ function admit(config: Config, m: Mutation = {}): { issueKeys: string[] } {
           if (m.noRowObjectCheck) continue;
           return true;
         }
-        const isBlank = m.blankMeansKeyBlank ? blank(row.key) : blank(row.key) && blank(row.value);
+        const keyBlank = blankKey(row.key, m);
+        const isBlank = m.blankMeansKeyBlank ? keyBlank : keyBlank && blank(row.value);
         if (!m.refuseBlankRows && isBlank) continue;
-        if (blank(row.key) || blank(row.value)) return true;
+        if (keyBlank || blank(row.value)) return true;
         if (!str(row.key) || !str(row.value)) return true;
       }
       return false;
@@ -82,11 +90,29 @@ test("flow/config-admission: refusing a blank row refuses the editor's own defau
     "0002-transform-expression-mode-with-a-stale-blank-row-is-admitted",
     "0003-transform-fields-mode-with-real-rows-is-admitted",
     "0004-transform-a-row-object-with-no-keys-is-blank",
+    "0011-transform-a-whitespace-only-key-with-an-empty-value-is-blank",
   ]);
 });
 
 test("flow/config-admission: 'blank' meaning only a blank key admits a value that would be lost", () => {
-  assert.deepEqual(idsFailedBy({ blankMeansKeyBlank: true }), ["0006-transform-a-value-without-a-key-is-refused"]);
+  assert.deepEqual(idsFailedBy({ blankMeansKeyBlank: true }), [
+    "0006-transform-a-value-without-a-key-is-refused",
+    "0010-transform-a-whitespace-only-key-with-a-value-is-refused",
+  ]);
+});
+
+test("flow/config-admission: judging the key untrimmed admits a whitespace key whose value the run drops", () => {
+  // The defect Maipa reported against TS 0.82.0 / PHP 0.65.0: the validator
+  // compared the key with "" while every executor trims it. It also refused a
+  // whitespace-key row with nothing configured, which the run treats as blank.
+  assert.deepEqual(idsFailedBy({ untrimmedKey: true }), [
+    "0010-transform-a-whitespace-only-key-with-a-value-is-refused",
+    "0011-transform-a-whitespace-only-key-with-an-empty-value-is-blank",
+  ]);
+});
+
+test("flow/config-admission: a fix that overreaches refuses a merely padded key", () => {
+  assert.deepEqual(idsFailedBy({ paddedKeyIsBlank: true }), ["0012-transform-a-padded-non-blank-key-is-admitted"]);
 });
 
 test("flow/config-admission: ignoring the select's options admits an unknown mode", () => {

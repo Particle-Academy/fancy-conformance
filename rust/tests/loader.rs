@@ -340,8 +340,8 @@ fn the_graph_runs_suite_carries_what_a_flow_runtime_needs() {
     // Exact on purpose -- a row QUIETLY LOST is the failure this catches. Move it
     // with the suite: 0.33.0 added the five raw-branch-condition rows (0032-0036)
     // and left this at 31, so this loader sat red while the suite shipped.
-    // 0.42.0 added the five transform rows (0037-0041).
-    assert_eq!(rows.len(), 41);
+    // 0.42.0 added the five transform rows (0037-0041), 0.43.0 the padded key (0042).
+    assert_eq!(rows.len(), 42);
 
     for row in &rows {
         let input = row.input();

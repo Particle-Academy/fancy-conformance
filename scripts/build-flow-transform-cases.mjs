@@ -128,13 +128,29 @@ const RUN_ROWS = [
     notes:
       "Pinned because the runtimes DISAGREED here before this row: the reference's executor treats any mode other than `expression` (or none) as fields, while ports that read `expression` unconditionally returned the expression's value. Same JSON in, different outputs. Whether an unknown mode should fail the RUN is a separate question; today import reports it as a warning and the run proceeds, in every runtime.",
   },
+  {
+    id: "0042-transform-a-padded-key-keeps-its-value-under-the-trimmed-key",
+    since: "0.43.0",
+    title: "A padded non-blank key keeps its value, written under the trimmed key.",
+    tags: ["logic", "transform", "fields"],
+    config: {
+      mode: "fields",
+      fields: [
+        { key: "  name\t", value: "{{ $json.user.name }}" },
+        { key: " age ", value: "{{ $json.user.age }}" },
+      ],
+    },
+    payload: { user: { name: "Ada", age: 36 } },
+    notes:
+      "The other half of flow/config-admission 0010-0012 (0.43.0). Admission now judges a key's blankness trimmed, exactly as the executor does, and refuses a whitespace-only key that carries a value. That must not reach a key that is merely PADDED: it is admitted (config-admission 0012), and at run time its value lands under the trimmed key -- here with a tab as well as spaces, and `age` keeping its NUMBER type. ASCII whitespace only, deliberately: the runtimes' trims agree on ASCII and differ at the edges of Unicode, which this row is not about.",
+  },
 ];
 
 const runRows = [];
 for (const row of RUN_ROWS) {
   const input = { schema: graph(row.config), initialInputs: { t: row.payload } };
   const expected = await runGraph(input.schema, input.initialInputs);
-  const out = { id: row.id, title: row.title, since: SINCE, tags: row.tags, input, expected };
+  const out = { id: row.id, title: row.title, since: row.since ?? SINCE, tags: row.tags, input, expected };
   if (row.notes) out.notes = row.notes;
   runRows.push(out);
 }
@@ -150,7 +166,7 @@ writeFileSync(graphRunsPath, JSON.stringify(graphRuns, null, 2) + "\n");
 // ---------------------------------------------------------------------------
 
 const SHALLOW_RUST =
-  "fancy-flow-rs validate_config is deliberately shallow (required fields and select options only) and does not type-check values or walk repeater rows";
+  "fancy-flow-rs validate_config is deliberately shallow (required fields, select options, and a repeater row's required cells) and does not type-check values or rows";
 
 const ADMISSION_ROWS = [
   {
@@ -186,9 +202,8 @@ const ADMISSION_ROWS = [
     id: "0006-transform-a-value-without-a-key-is-refused",
     title: "A row with a value and no key is refused: the executor would drop that value silently.",
     config: { mode: "fields", fields: [{ key: "", value: "{{ $json.a }}" }] },
-    skip: { rust: SHALLOW_RUST },
     notes:
-      "This is why the blank-row rule is 'every field blank' rather than 'key blank'. Skipping on a blank key alone would admit a configured value that never reaches the output -- field loss with no signal.",
+      "This is why the blank-row rule is 'every field blank' rather than 'key blank'. Skipping on a blank key alone would admit a configured value that never reaches the output -- field loss with no signal. Rust ran this row from 0.43.0: fancy-flow-rs validate_config did not walk repeater rows before, so it admitted this config too.",
   },
   {
     id: "0007-transform-fields-not-a-list-is-refused",
@@ -208,6 +223,30 @@ const ADMISSION_ROWS = [
     config: { mode: "fields", fields: [], expression: 5 },
     skip: { rust: SHALLOW_RUST },
   },
+  {
+    id: "0010-transform-a-whitespace-only-key-with-a-value-is-refused",
+    since: "0.43.0",
+    title: "A row whose key is only whitespace but which has a value is refused, like an empty key: the executor trims the key and would drop that value.",
+    config: { mode: "fields", fields: [{ key: "   ", value: "Configured synthetic value" }] },
+    notes:
+      "Maipa's config, verbatim, reported against the published TS 0.82.0 and PHP 0.65.0. Validators compared the key with an exact empty string while every executor TRIMS it, so this was admitted, imported cleanly and then ran as a passthrough with the value silently gone. Admission must judge blankness exactly as the executor does. ASCII spaces only: the runtimes' trims agree on ASCII and differ at the edges of Unicode, which this row is not about.",
+  },
+  {
+    id: "0011-transform-a-whitespace-only-key-with-an-empty-value-is-blank",
+    since: "0.43.0",
+    title: "A row whose key is only whitespace and whose value is empty is a blank row, and admitted.",
+    config: { mode: "fields", fields: [{ key: "   ", value: "" }] },
+    notes:
+      "The trimmed judgement cuts both ways: a whitespace-only key is blank for skipping the row too, so a row with nothing configured stays a placeholder -- as the editor's untouched default (0001) does. Before 0.43.0's fix the reference refused this row ('Value is required') while running it as nothing.",
+  },
+  {
+    id: "0012-transform-a-padded-non-blank-key-is-admitted",
+    since: "0.43.0",
+    title: "A key padded with whitespace around real text is admitted.",
+    config: { mode: "fields", fields: [{ key: "  name ", value: "{{ $json.first }}" }] },
+    notes:
+      "Guards the fix for 0010 from overreaching: trimming decides whether a key is BLANK, and a padded key is not. At run time its value lands under the trimmed key (flow/graph-runs 0042).",
+  },
 ];
 
 const admissionRows = ADMISSION_ROWS.map((row) => {
@@ -215,7 +254,7 @@ const admissionRows = ADMISSION_ROWS.map((row) => {
   const out = {
     id: row.id,
     title: row.title,
-    since: SINCE,
+    since: row.since ?? SINCE,
     tags: ["transform", issues.length === 0 ? "admitted" : "refused"],
     input: { kind: "transform", config: row.config },
     expected: { issueKeys: issues.map((i) => i.key) },

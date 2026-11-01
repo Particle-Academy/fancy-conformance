@@ -3511,6 +3511,103 @@
         }
       },
       "notes": "Pinned because the runtimes DISAGREED here before this row: the reference's executor treats any mode other than `expression` (or none) as fields, while ports that read `expression` unconditionally returned the expression's value. Same JSON in, different outputs. Whether an unknown mode should fail the RUN is a separate question; today import reports it as a warning and the run proceeds, in every runtime."
+    },
+    {
+      "id": "0042-transform-a-padded-key-keeps-its-value-under-the-trimmed-key",
+      "title": "A padded non-blank key keeps its value, written under the trimmed key.",
+      "since": "0.43.0",
+      "tags": [
+        "logic",
+        "transform",
+        "fields"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 1,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "fields",
+                  "fields": [
+                    {
+                      "key": "  name\t",
+                      "value": "{{ $json.user.name }}"
+                    },
+                    {
+                      "key": " age ",
+                      "value": "{{ $json.user.age }}"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "o",
+                "kind": "output",
+                "position": {
+                  "x": 2,
+                  "y": 0
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "user": {
+              "name": "Ada",
+              "age": 36
+            }
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "outputs": {
+          "t": {
+            "user": {
+              "name": "Ada",
+              "age": 36
+            }
+          },
+          "tf": {
+            "name": "Ada",
+            "age": 36
+          },
+          "o": {
+            "name": "Ada",
+            "age": 36
+          }
+        }
+      },
+      "notes": "The other half of flow/config-admission 0010-0012 (0.43.0). Admission now judges a key's blankness trimmed, exactly as the executor does, and refuses a whitespace-only key that carries a value. That must not reach a key that is merely PADDED: it is admitted (config-admission 0012), and at run time its value lands under the trimmed key -- here with a tab as well as spaces, and `age` keeping its NUMBER type. ASCII whitespace only, deliberately: the runtimes' trims agree on ASCII and differ at the edges of Unicode, which this row is not about."
     }
   ]
 }
