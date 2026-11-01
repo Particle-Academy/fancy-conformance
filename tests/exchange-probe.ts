@@ -1870,6 +1870,8 @@ function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<strin
   const fp = structuredClone(BASE_DEFS);
   lw.blockTypes!.push("chart");
   if (!m.lastWordNoFootnote) lw.run!.push("footnote");
+  if (!m.lastWordNoMeta) lw.document!.push("meta");
+  if (!m.lastWordNoPageVariants) lw.page!.push("firstHeader", "firstFooter", "evenHeader", "evenFooter");
   if (m.lastWordToday) {
     lw.page = lw.page!.filter((k) => k !== "background" && k !== "border");
     lw.pageBorder = [];

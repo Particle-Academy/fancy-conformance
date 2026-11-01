@@ -159,6 +159,8 @@ const MUTANTS: Array<[string, string, string, string[]]> = [
   ["doc-model/shared", "last-word as it is today, without page.background/border", "lastWordToday", ["0002", "0003"]],
   ["doc-model/shared", "fine-print accepting chart", "finePrintChart", ["0005"]],
   ["doc-model/shared", "last-word before 0.40.0, with no footnote on the run", "lastWordNoFootnote", ["0006"]],
+  ["doc-model/shared", "last-word before 0.41.0, with no meta", "lastWordNoMeta", ["0001"]],
+  ["doc-model/shared", "last-word before 0.41.0, with no first or even band", "lastWordNoPageVariants", ["0002"]],
   ["doc-model/shared", "the link rule converged (a deliberate delta erased)", "linkConverged", ["0101"]],
   ["doc-model/shared", "the size rule converged (a deliberate delta erased)", "sizeConverged", ["0102"]],
 ];

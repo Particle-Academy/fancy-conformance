@@ -7264,6 +7264,2011 @@
         "baseline"
       ],
       "notes": "The margin rule, pinned. A page whose every margin and distance is the default reads back with NO page key at all, exactly as every document did before the distances were read, so no existing output changed. A viewer resolves the omitted values with the defaults: top/right/bottom/left 72, header/footer 36 (PHP Schema::pageMargins)."
+    },
+    {
+      "id": "0054-template-letterhead-every-page",
+      "title": "templateParts headers/footers without templateFirstPageOnly: the letterhead on every page (the default reference)",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        },
+        "template": {
+          "page": {
+            "header": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "1 Example Street, Exampleton"
+                    }
+                  ]
+                }
+              ]
+            },
+            "footer": {
+              "center": "Acme Ltd | registered in Exampleshire"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Template body, never taken."
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "templateParts": [
+            "headers",
+            "footers"
+          ]
+        }
+      },
+      "expected": {
+        "titlePg": false,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "default",
+            "target": "header1.xml",
+            "text": "ACME LETTERHEAD1 Example Street, Exampleton"
+          },
+          {
+            "kind": "footer",
+            "type": "default",
+            "target": "footer1.xml",
+            "text": "Acme Ltd | registered in Exampleshire"
+          }
+        ],
+        "parts": [
+          "word/footer1.xml",
+          "word/header1.xml"
+        ]
+      },
+      "tags": [
+        "template",
+        "first-page",
+        "baseline"
+      ],
+      "notes": "The behaviour before 0.41.0, pinned so the option is seen to change it. input.template is a DOCUMENT MODEL: every engine writes it with toBytes() and passes those bytes as the template option. The template's parts keep the template-section names (header1.xml, footer1.xml) and no w:titlePg is written."
+    },
+    {
+      "id": "0055-template-first-page-only-false",
+      "title": "templateFirstPageOnly: false is exactly the default",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        },
+        "template": {
+          "page": {
+            "header": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "1 Example Street, Exampleton"
+                    }
+                  ]
+                }
+              ]
+            },
+            "footer": {
+              "center": "Acme Ltd | registered in Exampleshire"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Template body, never taken."
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "templateParts": [
+            "headers",
+            "footers"
+          ],
+          "templateFirstPageOnly": false
+        }
+      },
+      "expected": {
+        "titlePg": false,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "default",
+            "target": "header1.xml",
+            "text": "ACME LETTERHEAD1 Example Street, Exampleton"
+          },
+          {
+            "kind": "footer",
+            "type": "default",
+            "target": "footer1.xml",
+            "text": "Acme Ltd | registered in Exampleshire"
+          }
+        ],
+        "parts": [
+          "word/footer1.xml",
+          "word/header1.xml"
+        ]
+      },
+      "tags": [
+        "template",
+        "first-page",
+        "baseline"
+      ],
+      "notes": "Same expected value as 0054. OFF is today's behaviour, byte for byte: the reference also pins that with part digests taken from 0.15.0."
+    },
+    {
+      "id": "0056-template-first-page-only",
+      "title": "templateFirstPageOnly: true makes the letterhead the FIRST-page header and footer, with w:titlePg",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        },
+        "template": {
+          "page": {
+            "header": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "1 Example Street, Exampleton"
+                    }
+                  ]
+                }
+              ]
+            },
+            "footer": {
+              "center": "Acme Ltd | registered in Exampleshire"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Template body, never taken."
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "templateParts": [
+            "headers",
+            "footers"
+          ],
+          "templateFirstPageOnly": true
+        }
+      },
+      "expected": {
+        "titlePg": true,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "first",
+            "target": "header4.xml",
+            "text": "ACME LETTERHEAD1 Example Street, Exampleton"
+          },
+          {
+            "kind": "footer",
+            "type": "first",
+            "target": "footer4.xml",
+            "text": "Acme Ltd | registered in Exampleshire"
+          }
+        ],
+        "parts": [
+          "word/footer4.xml",
+          "word/header4.xml"
+        ]
+      },
+      "tags": [
+        "template",
+        "first-page"
+      ],
+      "notes": "Each kind's carried part is referenced as type \"first\" only, and numbered 4 (word/header4.xml, rIdTplHeader4): numbers 1-3 belong to the document's own bands by slot (1 default, 2 first, 3 even), which can sit beside it. The document sets no band, so later pages have none."
+    },
+    {
+      "id": "0057-template-first-page-only-later-pages",
+      "title": "With templateFirstPageOnly, later pages get the document's own page.header / page.footer",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "left": "Acme | continued"
+            },
+            "footer": {
+              "right": "Page {page} of {pages}"
+            }
+          }
+        },
+        "template": {
+          "page": {
+            "header": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "1 Example Street, Exampleton"
+                    }
+                  ]
+                }
+              ]
+            },
+            "footer": {
+              "center": "Acme Ltd | registered in Exampleshire"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Template body, never taken."
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "templateParts": [
+            "headers",
+            "footers"
+          ],
+          "templateFirstPageOnly": true
+        }
+      },
+      "expected": {
+        "titlePg": true,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "default",
+            "target": "header1.xml",
+            "text": "Acme | continued"
+          },
+          {
+            "kind": "header",
+            "type": "first",
+            "target": "header4.xml",
+            "text": "ACME LETTERHEAD1 Example Street, Exampleton"
+          },
+          {
+            "kind": "footer",
+            "type": "default",
+            "target": "footer1.xml",
+            "text": "Page 1 of 1"
+          },
+          {
+            "kind": "footer",
+            "type": "first",
+            "target": "footer4.xml",
+            "text": "Acme Ltd | registered in Exampleshire"
+          }
+        ],
+        "parts": [
+          "word/footer1.xml",
+          "word/footer4.xml",
+          "word/header1.xml",
+          "word/header4.xml"
+        ]
+      },
+      "tags": [
+        "template",
+        "first-page"
+      ],
+      "notes": "References in default, first, even order within each kind, header before footer. The document's bands are default references (header1.xml, footer1.xml); the template's are the first-page references."
+    },
+    {
+      "id": "0058-template-first-page-only-uses-its-first-part",
+      "title": "A template with its own first-page header gives THAT part to page one; its even part is never carried",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        },
+        "template": {
+          "page": {
+            "header": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "1 Example Street, Exampleton"
+                    }
+                  ]
+                }
+              ]
+            },
+            "footer": {
+              "center": "Acme Ltd | registered in Exampleshire"
+            },
+            "firstHeader": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME FIRST PAGE LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                }
+              ]
+            },
+            "evenHeader": {
+              "left": "ACME EVEN PAGE"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Template body, never taken."
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "templateParts": [
+            "headers",
+            "footers"
+          ],
+          "templateFirstPageOnly": true
+        }
+      },
+      "expected": {
+        "titlePg": true,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "first",
+            "target": "header4.xml",
+            "text": "ACME FIRST PAGE LETTERHEAD"
+          },
+          {
+            "kind": "footer",
+            "type": "first",
+            "target": "footer4.xml",
+            "text": "Acme Ltd | registered in Exampleshire"
+          }
+        ],
+        "parts": [
+          "word/footer4.xml",
+          "word/header4.xml"
+        ]
+      },
+      "tags": [
+        "template",
+        "first-page"
+      ],
+      "notes": "The template's first-page part is what it shows on page one, so it is the letterhead; its default part is its continuation header and is not carried. No even part and no w:evenAndOddHeaders: the option carries one part per kind. A template whose w:titlePg is off has no first page in force, and its default part is taken."
+    },
+    {
+      "id": "0059-template-first-page-only-document-first-wins",
+      "title": "A document firstHeader wins over the template's for that kind, and only that kind",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "firstHeader": {
+              "left": "Our own cover"
+            }
+          }
+        },
+        "template": {
+          "page": {
+            "header": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "1 Example Street, Exampleton"
+                    }
+                  ]
+                }
+              ]
+            },
+            "footer": {
+              "center": "Acme Ltd | registered in Exampleshire"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Template body, never taken."
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "templateParts": [
+            "headers",
+            "footers"
+          ],
+          "templateFirstPageOnly": true
+        }
+      },
+      "expected": {
+        "titlePg": true,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "first",
+            "target": "header2.xml",
+            "text": "Our own cover"
+          },
+          {
+            "kind": "footer",
+            "type": "first",
+            "target": "footer4.xml",
+            "text": "Acme Ltd | registered in Exampleshire"
+          }
+        ],
+        "parts": [
+          "word/footer4.xml",
+          "word/header2.xml"
+        ]
+      },
+      "tags": [
+        "template",
+        "first-page"
+      ],
+      "notes": "The template header is not written at all (no word/header4.xml); the template footer still is."
+    },
+    {
+      "id": "0060-read-back-template-first-page-only",
+      "title": "read() returns a first-page-only letterhead as firstHeader / firstFooter beside the document's own header / footer",
+      "since": "0.41.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "left": "Acme | continued"
+            },
+            "footer": {
+              "right": "Page {page} of {pages}"
+            }
+          }
+        },
+        "template": {
+          "page": {
+            "header": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "ACME LETTERHEAD",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "1 Example Street, Exampleton"
+                    }
+                  ]
+                }
+              ]
+            },
+            "footer": {
+              "center": "Acme Ltd | registered in Exampleshire"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Template body, never taken."
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "templateParts": [
+            "headers",
+            "footers"
+          ],
+          "templateFirstPageOnly": true
+        }
+      },
+      "expected": {
+        "page": {
+          "header": {
+            "left": "Acme | continued"
+          },
+          "footer": {
+            "right": "Page {page} of {pages}"
+          },
+          "firstHeader": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "ACME LETTERHEAD",
+                    "bold": true
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "1 Example Street, Exampleton"
+                  }
+                ]
+              }
+            ]
+          },
+          "firstFooter": {
+            "center": "Acme Ltd | registered in Exampleshire"
+          }
+        },
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Dear customer,"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "A letter written by an agent onto the house letterhead."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "template",
+        "first-page",
+        "read-back"
+      ],
+      "notes": "This is how a reader tells a first-page-only letterhead from an every-page one: it is firstHeader, never header. Keys in page come in schema order: header, footer, firstHeader, firstFooter, evenHeader, evenFooter."
+    },
+    {
+      "id": "0061-first-header-parts",
+      "title": "page.firstHeader is Word's first header (header2.xml); page.header is every later page; a footer with no firstFooter is on page one too",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "left": "Board memo | continued"
+            },
+            "footer": {
+              "center": "{page}"
+            },
+            "firstHeader": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "BOARD MEMO",
+                      "bold": true
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "Confidential"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "expected": {
+        "titlePg": true,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "default",
+            "target": "header1.xml",
+            "text": "Board memo | continued"
+          },
+          {
+            "kind": "header",
+            "type": "first",
+            "target": "header2.xml",
+            "text": "BOARD MEMOConfidential"
+          },
+          {
+            "kind": "footer",
+            "type": "default",
+            "target": "footer1.xml",
+            "text": "1"
+          },
+          {
+            "kind": "footer",
+            "type": "first",
+            "target": "footer1.xml",
+            "text": "1"
+          }
+        ],
+        "parts": [
+          "word/footer1.xml",
+          "word/header1.xml",
+          "word/header2.xml"
+        ]
+      },
+      "tags": [
+        "first-page"
+      ],
+      "notes": "w:titlePg is on whenever a first-page part is referenced. A kind with a default band and no first band references its default for the first page as well, so a footer is never lost from page one by adding a first-page header."
+    },
+    {
+      "id": "0062-even-header-parts",
+      "title": "page.evenHeader is Word's even header (header3.xml) with w:evenAndOddHeaders in settings; page.header is then the odd pages'",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "right": "Odd pages"
+            },
+            "footer": {
+              "center": "{page}"
+            },
+            "evenHeader": {
+              "left": "Even pages"
+            }
+          }
+        }
+      },
+      "expected": {
+        "titlePg": false,
+        "evenAndOddHeaders": true,
+        "references": [
+          {
+            "kind": "header",
+            "type": "default",
+            "target": "header1.xml",
+            "text": "Odd pages"
+          },
+          {
+            "kind": "header",
+            "type": "even",
+            "target": "header3.xml",
+            "text": "Even pages"
+          },
+          {
+            "kind": "footer",
+            "type": "default",
+            "target": "footer1.xml",
+            "text": "1"
+          },
+          {
+            "kind": "footer",
+            "type": "even",
+            "target": "footer1.xml",
+            "text": "1"
+          }
+        ],
+        "parts": [
+          "word/footer1.xml",
+          "word/header1.xml",
+          "word/header3.xml"
+        ]
+      },
+      "tags": [
+        "even-page"
+      ],
+      "notes": "The even switch is document-wide (settings.xml); a kind with no even band references its default for even pages too."
+    },
+    {
+      "id": "0063-blank-first-header",
+      "title": "An empty firstHeader beside a header leaves page one with no header: an empty header2.xml",
+      "since": "0.41.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "left": "Not on the cover"
+            },
+            "firstHeader": {
+              "blocks": []
+            }
+          }
+        }
+      },
+      "expected": {
+        "titlePg": true,
+        "evenAndOddHeaders": false,
+        "references": [
+          {
+            "kind": "header",
+            "type": "default",
+            "target": "header1.xml",
+            "text": "Not on the cover"
+          },
+          {
+            "kind": "header",
+            "type": "first",
+            "target": "header2.xml",
+            "text": ""
+          }
+        ],
+        "parts": [
+          "word/header1.xml",
+          "word/header2.xml"
+        ]
+      },
+      "tags": [
+        "first-page"
+      ],
+      "notes": "An empty first or even band ({\"blocks\": []} or a band with no text) blanks that page only when the document's own default band of that kind would otherwise show there; with no default band it asks for nothing (the document is written as if it were absent). The blank part is one empty paragraph."
+    },
+    {
+      "id": "0064-read-back-first-and-even",
+      "title": "read() returns every first and even band, in schema order",
+      "since": "0.41.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "left": "Odd"
+            },
+            "footer": {
+              "center": "{page}"
+            },
+            "firstHeader": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "First"
+                    }
+                  ]
+                }
+              ]
+            },
+            "firstFooter": {
+              "center": "Cover"
+            },
+            "evenHeader": {
+              "left": "Even"
+            },
+            "evenFooter": {
+              "center": "Even {page}"
+            }
+          }
+        }
+      },
+      "expected": {
+        "page": {
+          "header": {
+            "left": "Odd"
+          },
+          "footer": {
+            "center": "{page}"
+          },
+          "firstHeader": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "First"
+                  }
+                ]
+              }
+            ]
+          },
+          "firstFooter": {
+            "center": "Cover"
+          },
+          "evenHeader": {
+            "left": "Even"
+          },
+          "evenFooter": {
+            "center": "Even {page}"
+          }
+        },
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Dear customer,"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "A letter written by an agent onto the house letterhead."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "first-page",
+        "even-page",
+        "read-back"
+      ],
+      "notes": "A variant naming the same part as the default (as the writer does for a kind with no variant) is not repeated in the model."
+    },
+    {
+      "id": "0065-fixpoint-first-and-even-bands",
+      "title": "Every first and even band round-trips",
+      "since": "0.41.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "left": "Odd"
+            },
+            "footer": {
+              "center": "{page}"
+            },
+            "firstHeader": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "First"
+                    }
+                  ]
+                }
+              ]
+            },
+            "firstFooter": {
+              "center": "Cover"
+            },
+            "evenHeader": {
+              "left": "Even"
+            },
+            "evenFooter": {
+              "center": "Even {page}"
+            }
+          }
+        }
+      },
+      "expected": {
+        "fixpoint": true
+      },
+      "tags": [
+        "first-page",
+        "even-page",
+        "fixpoint"
+      ],
+      "notes": "Slot and blocks forms together."
+    },
+    {
+      "id": "0066-fixpoint-blank-first-header",
+      "title": "A blank first-page header round-trips as {\"blocks\": []}",
+      "since": "0.41.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ],
+          "page": {
+            "header": {
+              "left": "Not on the cover"
+            },
+            "firstHeader": {
+              "blocks": []
+            }
+          }
+        }
+      },
+      "expected": {
+        "fixpoint": true
+      },
+      "tags": [
+        "first-page",
+        "fixpoint"
+      ],
+      "notes": "The reader returns {\"blocks\": []} for a first (even) page whose part is missing or empty while the default has content, which is what that page shows in Word."
+    },
+    {
+      "id": "0067-field-tokens",
+      "title": "Every field token is a complex field: the instruction between single spaces, and the cached result",
+      "since": "0.41.0",
+      "fn": "bandFields",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "page": {
+            "header": {
+              "left": "Printed {date} at {time}",
+              "right": "{filename}"
+            },
+            "footer": {
+              "left": "{author} | {title}",
+              "center": "Section {section} of {sectionpages}",
+              "right": "Page {page} of {pages}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "target": "header1.xml",
+          "fields": [
+            {
+              "instruction": " DATE ",
+              "result": ""
+            },
+            {
+              "instruction": " TIME ",
+              "result": ""
+            },
+            {
+              "instruction": " FILENAME ",
+              "result": ""
+            }
+          ]
+        },
+        {
+          "target": "footer1.xml",
+          "fields": [
+            {
+              "instruction": " AUTHOR ",
+              "result": "Ada Lovelace"
+            },
+            {
+              "instruction": " TITLE ",
+              "result": "Board memo"
+            },
+            {
+              "instruction": " SECTION ",
+              "result": "1"
+            },
+            {
+              "instruction": " SECTIONPAGES ",
+              "result": "1"
+            },
+            {
+              "instruction": " PAGE ",
+              "result": "1"
+            },
+            {
+              "instruction": " NUMPAGES ",
+              "result": "1"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "fields"
+      ],
+      "notes": "Cached result: \"1\" for PAGE, NUMPAGES, SECTION, SECTIONPAGES; meta.author for AUTHOR and the document title for TITLE (empty without one); nothing at all for DATE, TIME and FILENAME, which the writer cannot know without making the same document write different bytes. Word recomputes on update; LibreOffice computes them on load."
+    },
+    {
+      "id": "0068-field-token-formats",
+      "title": "{date:FORMAT} / {time:FORMAT} carry their picture as DATE / TIME \\@ \"FORMAT\"",
+      "since": "0.41.0",
+      "fn": "bandFields",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "page": {
+            "footer": {
+              "left": "{date:yyyy-MM-dd}",
+              "center": "{date:d MMMM yyyy}",
+              "right": "{time:HH:mm}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "target": "footer1.xml",
+          "fields": [
+            {
+              "instruction": " DATE \\@ \"yyyy-MM-dd\" ",
+              "result": ""
+            },
+            {
+              "instruction": " DATE \\@ \"d MMMM yyyy\" ",
+              "result": ""
+            },
+            {
+              "instruction": " TIME \\@ \"HH:mm\" ",
+              "result": ""
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "fields"
+      ],
+      "notes": "The picture is written exactly as given, double-quoted. Without one, DATE and TIME carry no switch and show in the reader's locale."
+    },
+    {
+      "id": "0069-field-tokens-in-a-blocks-band",
+      "title": "In a {blocks} band the tokens in run text are fields too",
+      "since": "0.41.0",
+      "fn": "bandFields",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "page": {
+            "footer": {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "align": "right",
+                  "runs": [
+                    {
+                      "text": "{title}, {date:d MMMM yyyy}",
+                      "bold": true
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "target": "footer1.xml",
+          "fields": [
+            {
+              "instruction": " TITLE ",
+              "result": "Board memo"
+            },
+            {
+              "instruction": " DATE \\@ \"d MMMM yyyy\" ",
+              "result": ""
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "fields"
+      ],
+      "notes": "Every piece of the field carries the run's formatting (pinned by the reference's own tests)."
+    },
+    {
+      "id": "0070-not-field-tokens",
+      "title": "Anything else in braces is literal text: wrong case, unknown names, an empty or quoted picture, a picture on a field that takes none",
+      "since": "0.41.0",
+      "fn": "bandFields",
+      "input": {
+        "doc": {
+          "page": {
+            "footer": {
+              "left": "{Date} {foo} {date:} {page:x} {author:x} {date:a\"b}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "target": "footer1.xml",
+          "fields": []
+        }
+      ],
+      "tags": [
+        "fields",
+        "baseline"
+      ],
+      "notes": "Grammar: {page} {pages} {section} {sectionpages} {author} {title} {filename}, and {date} / {time} with an optional :FORMAT of one or more characters, none of {, }, \" or a backslash. Names are lower-case and exact."
+    },
+    {
+      "id": "0071-read-back-field-tokens",
+      "title": "read() returns every field as its token",
+      "since": "0.41.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "page": {
+            "header": {
+              "left": "Printed {date} at {time}",
+              "right": "{filename}"
+            },
+            "footer": {
+              "left": "{author} | {title}",
+              "center": "Section {section} of {sectionpages}",
+              "right": "Page {page} of {pages}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "title": "Board memo",
+        "meta": {
+          "author": "Ada Lovelace"
+        },
+        "page": {
+          "header": {
+            "left": "Printed {date} at {time}",
+            "right": "{filename}"
+          },
+          "footer": {
+            "left": "{author} | {title}",
+            "center": "Section {section} of {sectionpages}",
+            "right": "Page {page} of {pages}"
+          }
+        },
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Dear customer,"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "A letter written by an agent onto the house letterhead."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "fields",
+        "read-back"
+      ],
+      "notes": "Any producer's field is read by its first word, case-insensitively; DATE / TIME keep a \\@ picture the grammar can hold; every other switch and argument is dropped (\\* MERGEFORMAT, FILENAME \\p, AUTHOR \"new name\")."
+    },
+    {
+      "id": "0072-fixpoint-field-token-formats",
+      "title": "Pictured date and time tokens round-trip",
+      "since": "0.41.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "page": {
+            "footer": {
+              "left": "{date:yyyy-MM-dd}",
+              "center": "{date:d MMMM yyyy}",
+              "right": "{time:HH:mm}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "fixpoint": true
+      },
+      "tags": [
+        "fields",
+        "fixpoint"
+      ]
+    },
+    {
+      "id": "0073-read-back-literal-braces",
+      "title": "Literal braces read back as the same text",
+      "since": "0.41.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "page": {
+            "footer": {
+              "left": "{Date} {foo} {date:} {page:x} {author:x} {date:a\"b}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "page": {
+          "footer": {
+            "left": "{Date} {foo} {date:} {page:x} {author:x} {date:a\"b}"
+          }
+        },
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Dear customer,"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "A letter written by an agent onto the house letterhead."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "fields",
+        "read-back"
+      ]
+    },
+    {
+      "id": "0074-fields-without-meta",
+      "title": "AUTHOR and TITLE without an author or title: empty cached results, and no core part",
+      "since": "0.41.0",
+      "fn": "bandFields",
+      "input": {
+        "doc": {
+          "page": {
+            "footer": {
+              "left": "{author} | {title}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "target": "footer1.xml",
+          "fields": [
+            {
+              "instruction": " AUTHOR ",
+              "result": ""
+            },
+            {
+              "instruction": " TITLE ",
+              "result": ""
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "fields",
+        "meta"
+      ]
+    },
+    {
+      "id": "0075-core-props-title-and-author",
+      "title": "meta.author is dc:creator, after dc:title",
+      "since": "0.41.0",
+      "fn": "coreProps",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "contentType": "application/vnd.openxmlformats-package.core-properties+xml",
+        "relationship": "docProps/core.xml",
+        "elements": [
+          [
+            "dc:title",
+            "Board memo"
+          ],
+          [
+            "dc:creator",
+            "Ada Lovelace"
+          ]
+        ]
+      },
+      "tags": [
+        "meta"
+      ],
+      "notes": "The title stays the top-level \"title\" (there is no meta.title: one slot for dc:title). No timestamps: the part stays deterministic."
+    },
+    {
+      "id": "0076-core-props-author-only",
+      "title": "An author with no title writes a core part with dc:creator alone",
+      "since": "0.41.0",
+      "fn": "coreProps",
+      "input": {
+        "doc": {
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "contentType": "application/vnd.openxmlformats-package.core-properties+xml",
+        "relationship": "docProps/core.xml",
+        "elements": [
+          [
+            "dc:creator",
+            "Ada Lovelace"
+          ]
+        ]
+      },
+      "tags": [
+        "meta"
+      ]
+    },
+    {
+      "id": "0077-core-props-title-only",
+      "title": "A title alone writes the core part it always did",
+      "since": "0.41.0",
+      "fn": "coreProps",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "contentType": "application/vnd.openxmlformats-package.core-properties+xml",
+        "relationship": "docProps/core.xml",
+        "elements": [
+          [
+            "dc:title",
+            "Board memo"
+          ]
+        ]
+      },
+      "tags": [
+        "meta",
+        "baseline"
+      ]
+    },
+    {
+      "id": "0078-core-props-absent",
+      "title": "Neither title nor author: no core part",
+      "since": "0.41.0",
+      "fn": "coreProps",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": null,
+      "tags": [
+        "meta",
+        "baseline"
+      ]
+    },
+    {
+      "id": "0079-read-back-meta",
+      "title": "read() returns meta.author from dc:creator, after title",
+      "since": "0.41.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "title": "Board memo",
+          "meta": {
+            "author": "Ada Lovelace"
+          },
+          "page": {
+            "header": {
+              "left": "Printed {date} at {time}",
+              "right": "{filename}"
+            },
+            "footer": {
+              "left": "{author} | {title}",
+              "center": "Section {section} of {sectionpages}",
+              "right": "Page {page} of {pages}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Dear customer,"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "A letter written by an agent onto the house letterhead."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "title": "Board memo",
+        "meta": {
+          "author": "Ada Lovelace"
+        },
+        "page": {
+          "header": {
+            "left": "Printed {date} at {time}",
+            "right": "{filename}"
+          },
+          "footer": {
+            "left": "{author} | {title}",
+            "center": "Section {section} of {sectionpages}",
+            "right": "Page {page} of {pages}"
+          }
+        },
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Dear customer,"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "A letter written by an agent onto the house letterhead."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "meta",
+        "read-back"
+      ],
+      "notes": "An empty dc:creator reads as no meta, as an empty dc:title reads as no title."
     }
   ]
 }

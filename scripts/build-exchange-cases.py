@@ -4609,15 +4609,18 @@ def doc_model_suite() -> Suite:
             "0001-document",
             "Document properties",
             "document",
-            fields(["title", "blocks", "page", "defaultFont", "defaultSize"]),
-            None,
+            fields(["title", "blocks", "page", "defaultFont", "defaultSize"], lw=["meta"]),
+            "Deliberate delta since 0.41.0: last-word has meta ({author}, docProps/core.xml dc:creator); fine-print has no document properties yet.",
         ),
         (
             "0002-page",
             "page: background and border are SHARED",
             "page",
-            fields(["size", "orientation", "margins", "header", "footer", "background", "border"]),
-            "Owner decision 11: last-word gains page.background and page.border. This row FAILS for last-word until it does; that is the point.",
+            fields(
+                ["size", "orientation", "margins", "header", "footer", "background", "border"],
+                lw=["firstHeader", "firstFooter", "evenHeader", "evenFooter"],
+            ),
+            "Owner decision 11: last-word gains page.background and page.border. This row FAILS for last-word until it does; that is the point. Deliberate delta since 0.41.0: last-word has first-page and even-page bands (Word's titlePg and evenAndOddHeaders); fine-print draws one band per kind.",
         ),
         (
             "0003-page-border",
