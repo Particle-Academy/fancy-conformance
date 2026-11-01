@@ -258,9 +258,7 @@ def test_canaries_are_guards_not_rows(tmp_path: Path) -> None:
 
 def test_the_manifest_names_google_sheets_and_the_capture(tmp_path: Path) -> None:
     export = make_export(tmp_path / "export.xlsx")
-    manifest = _build(export, request(), provenance(export))["formula/eval-math"][
-        "manifest"
-    ]
+    manifest = _build(export, request(), provenance(export))["formula/eval-math"]["manifest"]
     contract = manifest["contract"]
     assert contract["reference"] == "google-sheets"
     assert "synthetic test input" in contract["referenceNote"]
@@ -349,7 +347,16 @@ def test_main_writes_suites_and_the_raw_artifacts(tmp_path: Path) -> None:
     prov = tmp_path / "provenance.json"
     prov.write_text(json.dumps(provenance(export)), encoding="utf-8")
     out = tmp_path / "out"
-    argv = ["--capture", str(export), "--request", str(req), "--provenance", str(prov), "--workbook", str(UPLOADED)]
+    argv = [
+        "--capture",
+        str(export),
+        "--request",
+        str(req),
+        "--provenance",
+        str(prov),
+        "--workbook",
+        str(UPLOADED),
+    ]
     code = bfc.main([*argv, "--since", "0.39.0", "--out", str(out)])
     assert code == 0
     table = json.loads((out / "eval-math" / "cases.json").read_text(encoding="utf-8"))
@@ -394,7 +401,7 @@ def test_refuses_a_missing_case_id(tmp_path: Path) -> None:
     # build() stops at the literal-survival guard first: the id is a literal cell.
     refused(tmp_path, export, provenance(export), r"did not survive.*Cases!A5")
     # The id guard itself, which build() reaches only after that one.
-    with pytest.raises(bfc.CaptureRefusedError, match="do not match request.json"):
+    with pytest.raises(bfc.CaptureRefusedError, match=r"do not match request\.json"):
         bfc.collect(bfc.read_xlsx(export), request())
 
 
@@ -489,6 +496,15 @@ def test_a_refusal_writes_nothing(tmp_path: Path) -> None:
     prov = tmp_path / "provenance.json"
     prov.write_text(json.dumps(provenance(export)), encoding="utf-8")
     out = tmp_path / "out"
-    argv = ["--capture", str(export), "--request", str(req), "--provenance", str(prov), "--workbook", str(UPLOADED)]
+    argv = [
+        "--capture",
+        str(export),
+        "--request",
+        str(req),
+        "--provenance",
+        str(prov),
+        "--workbook",
+        str(UPLOADED),
+    ]
     assert bfc.main([*argv, "--since", "0.39.0", "--out", str(out)]) == 1
     assert not out.exists()

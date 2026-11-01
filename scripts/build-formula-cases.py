@@ -225,7 +225,9 @@ ERROR_TYPE_CODE = {
 }
 
 
-def _sheets_text_error(case_id: str, cell: Cell, type_cell: Cell | None, err_cell: Cell | None) -> Cell:
+def _sheets_text_error(
+    case_id: str, cell: Cell, type_cell: Cell | None, err_cell: Cell | None
+) -> Cell:
     """Google Sheets' xlsx download stores a formula's ERROR result as t="str"
     holding the literal, never t="e" (observed in capture v1, row P-0004:
     `-2^0.5` came back as t="str" "#NUM!" beside TYPE 16 and ERROR.TYPE 6).
@@ -410,7 +412,9 @@ def tolerance_at_15_digits(v: float) -> float:
     return 0.5 * 10 ** (math.floor(math.log10(abs(v))) - 14)
 
 
-def check_literals_survived(workbook: Path, request: dict[str, Any], export: dict[str, dict[str, Cell]]) -> None:
+def check_literals_survived(
+    workbook: Path, request: dict[str, Any], export: dict[str, dict[str, Cell]]
+) -> None:
     """Every literal (non-formula, non-empty) cell of the uploaded workbook must
     come back from Sheets with the same kind and value.
 
@@ -434,11 +438,15 @@ def check_literals_survived(workbook: Path, request: dict[str, Any], export: dic
             got = got_sheet.get(ref)
             same = got is not None and got.formula is None and got.kind == cell.kind
             if same and cell.kind == "number":
-                same = abs(float(got.value) - float(cell.value)) <= tolerance_at_15_digits(float(cell.value))
+                same = abs(float(got.value) - float(cell.value)) <= tolerance_at_15_digits(
+                    float(cell.value)
+                )
             elif same:
                 same = got.value == cell.value
             if not same:
-                shown = "nothing" if got is None or got.kind == "empty" else f"{got.kind} {got.value!r}"
+                shown = (
+                    "nothing" if got is None or got.kind == "empty" else f"{got.kind} {got.value!r}"
+                )
                 lost.append(f"{name}!{ref} ({cell.kind} {cell.value!r} came back as {shown})")
     if lost:
         more = f" (and {len(lost) - 5} more)" if len(lost) > 5 else ""
