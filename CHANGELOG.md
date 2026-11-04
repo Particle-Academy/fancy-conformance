@@ -10,6 +10,8 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-11-03
+
 **What a consumer must do:** a harness that counts rows moves: `fine-print/writer-model`
 57 to 109, `doc-model/shared` 20 to 21, `template/profiles` by nine, and there is a new
 suite, `doc-model/page-refusal` (18 rows). A harness compares with `match`/`switch` over
