@@ -162,10 +162,15 @@ const MUTANTS: Array<[string, string, string, string[]]> = [
   ["doc-model/shared", "last-word before 0.41.0, with no meta", "lastWordNoMeta", ["0001"]],
   ["doc-model/shared", "last-word before 0.41.0, with no first or even band", "lastWordNoPageVariants", ["0002"]],
   ["doc-model/shared", "fine-print with no page on a break", "finePrintNoBreakPage", ["0015"]],
+  ["doc-model/shared", "last-word with no page on a break, as before DOCX stage 2", "lastWordNoBreakPage", ["0015"]],
+  ["doc-model/shared", "last-word with no header or footer distance", "lastWordNoBandDistances", ["0016"]],
   ["doc-model/shared", "the link rule converged (a deliberate delta erased)", "linkConverged", ["0101"]],
   ["doc-model/shared", "the size rule converged (a deliberate delta erased)", "sizeConverged", ["0102"]],
   // doc-model/page-refusal
-  ["doc-model/page-refusal", "a repairer rewriting a break to bare {type} and reporting ok", "repairStripsPage", ["0001", "0002", "0003", "0004"]],
+  ["doc-model/page-refusal", "a repairer rewriting a break to bare {type} and reporting ok", "repairStripsPage", ["0003"]],
+  ["doc-model/page-refusal", "last-word still refusing page, as before DOCX stage 2", "lastWordStage1", ["0001", "0002", "0003", "0004", "0010", "0011", "0012", "0013", "0014", "0015", "0016", "0017", "0018", "0019", "0020", "0033", "0034", "0035"]],
+  ["doc-model/page-refusal", "page allowed on a nested break", "nestedAllowed", ["0033"]],
+  ["doc-model/page-refusal", "a background allowed on a break", "backgroundAllowed", ["0034"]],
   ["doc-model/page-refusal", "a near-miss message reworded", "nearMissReworded", ["0010", "0011", "0012", "0013", "0014", "0015", "0016", "0017", "0018", "0019", "0020"]],
 ];
 

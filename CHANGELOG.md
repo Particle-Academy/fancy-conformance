@@ -10,6 +10,27 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- **`last-word/docx-constructs` 0080-0092: mixed pages.** New functions `sections` and
+  `readFile`. Goldens from running `last-word` (its `tests/Support/export-constructs.php`,
+  which appends and refuses to change an existing row). `0091` and `0092` are file
+  references to files this package did not write, one of them the deferred two-section
+  reader row.
+- `doc-model/shared` `0016-page-margins`: `pageMargins` had no row.
+- `doc-model/page-refusal` `0033`-`0035`: a nested `page`, a background on a break, and a
+  `page` that is not an object.
+
+### Changed
+
+- **BREAKING: `doc-model/shared` `0015-page-break` has no delta any more**: `page` is in
+  `both`. **Consumer action:** `last-word` must honour `pageBreak.page`; move the pin with
+  `last-word` 0.20.0 (PHP), 0.16.0 (JS), 0.12.0 (Python) and no earlier.
+- **BREAKING: `doc-model/page-refusal`: the `lastWord` half of every row now says what the
+  `finePrint` half does.** **Consumer action:** as above. A package's runner should also
+  read `pageKept` from `lastWord`, on `0003`.
+- `writer-bytes` and `writer-model` are untouched.
+
 ## [0.44.0] - 2026-11-03
 
 **What a consumer must do:** a harness that counts rows moves: `fine-print/writer-model`

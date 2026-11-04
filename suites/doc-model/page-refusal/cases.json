@@ -4,7 +4,7 @@
   "cases": [
     {
       "id": "0001-page",
-      "title": "A break carrying page: fine-print honours it, last-word refuses",
+      "title": "A break carrying page is honoured",
       "since": "0.44.0",
       "tags": [
         "page-refusal"
@@ -44,16 +44,14 @@
           "repairOk": true
         },
         "lastWord": {
-          "messages": [
-            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
-          ],
-          "repairOk": false
+          "messages": [],
+          "repairOk": true
         }
       }
     },
     {
       "id": "0002-page-empty",
-      "title": "An empty page is a request too",
+      "title": "An empty page is valid: a new stretch with nothing changed",
       "since": "0.44.0",
       "tags": [
         "page-refusal"
@@ -91,10 +89,8 @@
           "repairOk": true
         },
         "lastWord": {
-          "messages": [
-            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
-          ],
-          "repairOk": false
+          "messages": [],
+          "repairOk": true
         }
       }
     },
@@ -132,7 +128,8 @@
           "pageKept": true
         },
         "lastWord": {
-          "repairOk": false
+          "repairOk": true,
+          "pageKept": true
         }
       },
       "notes": "Before stage 1 the repairers rewrote a break to {type: pageBreak}, so repairing anything else silently undid the orientation and reported ok: true. Messages are not compared: the heading's own error differs by package."
@@ -175,11 +172,8 @@
           "repairOk": true
         },
         "lastWord": {
-          "messages": [
-            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print",
-            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
-          ],
-          "repairOk": false
+          "messages": [],
+          "repairOk": true
         }
       }
     },
@@ -212,10 +206,10 @@
           "messages": [
             "a pageBreak has no size key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0011-near-miss-orientation",
@@ -246,10 +240,10 @@
           "messages": [
             "a pageBreak has no orientation key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0012-near-miss-margins",
@@ -282,10 +276,10 @@
           "messages": [
             "a pageBreak has no margins key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0013-near-miss-header",
@@ -318,10 +312,10 @@
           "messages": [
             "a pageBreak has no header key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0014-near-miss-footer",
@@ -354,10 +348,10 @@
           "messages": [
             "a pageBreak has no footer key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0015-near-miss-firstHeader",
@@ -390,10 +384,10 @@
           "messages": [
             "a pageBreak has no firstHeader key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0016-near-miss-firstFooter",
@@ -426,10 +420,10 @@
           "messages": [
             "a pageBreak has no firstFooter key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0017-near-miss-evenHeader",
@@ -462,10 +456,10 @@
           "messages": [
             "a pageBreak has no evenHeader key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0018-near-miss-evenFooter",
@@ -498,10 +492,10 @@
           "messages": [
             "a pageBreak has no evenFooter key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0019-near-miss-background",
@@ -532,10 +526,10 @@
           "messages": [
             "a pageBreak has no background key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0020-near-miss-border",
@@ -568,10 +562,10 @@
           "messages": [
             "a pageBreak has no border key; use pageBreak.page"
           ],
-          "repairOk": false
+          "repairOk": true
         }
       },
-      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+      "notes": "Repair moves the key into page with a note (a background is then dropped, also with a note)."
     },
     {
       "id": "0030-sections",
@@ -685,6 +679,122 @@
         },
         "lastWord": {
           "messages": [],
+          "repairOk": true
+        }
+      }
+    },
+    {
+      "id": "0033-nested-page",
+      "title": "page on a break in a quote or a cell is refused, and repair removes it with a note",
+      "since": "0.45.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "quote",
+              "blocks": [
+                {
+                  "type": "pageBreak",
+                  "page": {
+                    "orientation": "landscape"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"
+          ],
+          "repairOk": true
+        }
+      }
+    },
+    {
+      "id": "0034-background-on-a-break",
+      "title": "page.background on a break is refused: one page colour per document",
+      "since": "0.45.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "page": {
+                "background": "#FFFFFF"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a document has one page colour: set background on the top-level page, not on a break"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a document has one page colour: set background on the top-level page, not on a break"
+          ],
+          "repairOk": true
+        }
+      }
+    },
+    {
+      "id": "0035-page-not-an-object",
+      "title": "page must be an object, {} for a new stretch with nothing changed",
+      "since": "0.45.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "page": "landscape"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "page on a break must be an object of page settings, {} for a new stretch with nothing changed"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "page on a break must be an object of page settings, {} for a new stretch with nothing changed"
+          ],
           "repairOk": true
         }
       }

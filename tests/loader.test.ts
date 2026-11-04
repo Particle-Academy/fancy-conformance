@@ -302,8 +302,8 @@ test("the exchange suites and doc-model/shared load, every row with a function",
   // Exact counts on purpose: a row QUIETLY LOST between the generator and a
   // loader is the failure this catches. Move the numbers with the suites.
   const expected: Record<string, number> = {
-    "doc-model/page-refusal": 18,
-    "doc-model/shared": 21,
+    "doc-model/page-refusal": 21,
+    "doc-model/shared": 22,
     "exchange/content": 56,
     "exchange/csv": 12,
     "exchange/from-dark-slide": 18,

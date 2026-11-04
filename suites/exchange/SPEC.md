@@ -710,7 +710,6 @@ drift and fails a row:
 | `run.link` | any string | `^(https?://|mailto:)` | a PDF link is an action |
 | `run.size`, `defaultSize`, `band.size` | `exclusiveMinimum: 0` | `minimum: 1` (run, defaultSize also `maximum: 400`) | text under 1pt reads as hidden text |
 | `page.size` | | | identical enum |
-| `pageBreak` | | `page` | fine-print honours it; last-word refuses it until DOCX stage 2, in all three runtimes. Stage 2 removes this delta |
 | `table`, `image` | | `keepNext` | fine-print keeps them with the next block; last-word has yet to write it. Until DOCX stage 2 |
 
 `page.background` and `page.border` are SHARED: last-word gains them
@@ -720,9 +719,13 @@ is the point.
 `page.firstHeader`, `firstFooter`, `evenHeader`, `evenFooter`, `run.footnote` and
 `meta` are SHARED since fine-print's mixed-pages release, which draws all of them.
 
-`doc-model/page-refusal` holds the documents last-word must refuse and fine-print
-must not lose, as messages (the same bytes in both, paths left out because Node's
-are JSON Pointers) and `validateAndRepair`'s `ok`. Each package runs its own half.
+`pageBreak.page` and `page.margins` are SHARED: last-word writes and reads a break's
+`page` since DOCX stage 2 (0.45.0).
+
+`doc-model/page-refusal` holds what both writers refuse and must not lose, as messages
+(the same bytes in both, paths left out because Node's are JSON Pointers) and
+`validateAndRepair`'s `ok`. Each package runs its own half; since 0.45.0 the two halves
+of every row are the same.
 
 ## 16. Versioning
 

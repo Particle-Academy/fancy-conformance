@@ -30,6 +30,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent / "suites"
 SINCE = "0.37.0"
 SINCE_MIXED_PAGES = "0.44.0"
+SINCE_MIXED_DOCX = "0.45.0"
 SUITE_SINCE = {"doc-model/page-refusal": SINCE_MIXED_PAGES}
 SPEC = "suites/exchange/SPEC.md"
 
@@ -4746,12 +4747,21 @@ def doc_model_suite() -> Suite:
         s.add(cid, title, f, {"def": d}, exp, note)
     s.add(
         "0015-page-break",
-        "pageBreak: page is fine-print's alone until DOCX stage 2",
+        "pageBreak: page is shared",
         f,
         {"def": "pageBreak"},
-        fields(["type"], fp=["page"]),
-        "Deliberate delta until stage 2: fine-print honours pageBreak.page. last-word refuses it, in all three runtimes (doc-model/page-refusal), so its schema does not declare it. Stage 2 moves it to both and removes this delta.",
+        fields(["type", "page"]),
+        "fine-print shipped pageBreak.page first; last-word writes and reads it since DOCX stage 2 (fancy-conformance 0.45.0), and this row no longer holds a delta.",
         since=SINCE_MIXED_PAGES,
+    )
+    s.add(
+        "0016-page-margins",
+        "page.margins: the four sides and both band distances",
+        f,
+        {"def": "pageMargins"},
+        fields(["top", "right", "bottom", "left", "header", "footer"]),
+        "Had no row until stage 2, though both writers read margins.header and margins.footer since their first-page band releases.",
+        since=SINCE_MIXED_DOCX,
     )
     cons: list[tuple[str, str, str, Any, str | None]] = [
         (
@@ -4824,7 +4834,6 @@ def doc_model_suite() -> Suite:
 # doc-model/page-refusal
 # ---------------------------------------------------------------------------
 
-NOT_IN_LAST_WORD = "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
 NO_SECTIONS = "there is no sections key; use pageBreak.page"
 PAGE_KEYS = [
     "size",
@@ -4853,44 +4862,42 @@ def page_refusal_suite() -> Suite:
 
     Only messages are compared: Node's error paths are JSON Pointers
     (`/blocks/1/page`) where PHP and Python write `blocks[1].page`. `repairOk` is
-    validateAndRepair's `ok`, the half that catches a repairer silently rewriting a
-    break to bare {type} and reporting success.
+    validateAndRepair's `ok`, and `pageKept` catches a repairer silently rewriting a
+    break to bare {type} and reporting success. Since DOCX stage 2 (0.45.0) both halves
+    of every row say the same thing: the suite pins that they stay together.
     """
     s = Suite("doc-model/page-refusal")
     para = {"type": "paragraph", "runs": [{"text": "x"}]}
     landscape = {"type": "pageBreak", "page": {"orientation": "landscape"}}
 
-    def row(cid, title, doc, fine_print, last_word, note=None):
+    def row(cid, title, doc, want, note=None, since=SINCE_MIXED_PAGES):
         s.add(
             cid,
             title,
             "refusal",
             {"doc": doc},
-            {"finePrint": fine_print, "lastWord": last_word},
+            {"finePrint": want, "lastWord": want},
             note,
-            since=SINCE_MIXED_PAGES,
+            since=since,
         )
 
     row(
         "0001-page",
-        "A break carrying page: fine-print honours it, last-word refuses",
+        "A break carrying page is honoured",
         {"blocks": [para, landscape, para]},
         {"messages": [], "repairOk": True},
-        {"messages": [NOT_IN_LAST_WORD], "repairOk": False},
     )
     row(
         "0002-page-empty",
-        "An empty page is a request too",
+        "An empty page is valid: a new stretch with nothing changed",
         {"blocks": [para, {"type": "pageBreak", "page": {}}, para]},
         {"messages": [], "repairOk": True},
-        {"messages": [NOT_IN_LAST_WORD], "repairOk": False},
     )
     row(
         "0003-trap-unrelated-repair",
         "THE TRAP: an unrelated repair must not delete page and report ok",
         {"blocks": [{"type": "heading", "runs": [{"text": "no level"}]}, landscape]},
         {"repairOk": True, "pageKept": True},
-        {"repairOk": False},
         "Before stage 1 the repairers rewrote a break to {type: pageBreak}, so repairing anything else silently undid the orientation and reported ok: true. Messages are not compared: the heading's own error differs by package.",
     )
     row(
@@ -4898,7 +4905,6 @@ def page_refusal_suite() -> Suite:
         "Every break is judged, not the first",
         {"blocks": [{"type": "pageBreak"}, landscape, {"type": "pageBreak"}, landscape]},
         {"messages": [], "repairOk": True},
-        {"messages": [NOT_IN_LAST_WORD, NOT_IN_LAST_WORD], "repairOk": False},
     )
     for i, key in enumerate(PAGE_KEYS):
         message = f"a pageBreak has no {key} key; use pageBreak.page"
@@ -4907,14 +4913,12 @@ def page_refusal_suite() -> Suite:
             f"{key} on the break itself: the same message in both",
             {"blocks": [{"type": "pageBreak", key: NEAR_MISS_VALUES.get(key, {"left": "x"})}]},
             {"messages": [message], "repairOk": True},
-            {"messages": [message], "repairOk": False},
-            "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it.",
+            "Repair moves the key into page with a note (a background is then dropped, also with a note).",
         )
     row(
         "0030-sections",
         "There is no sections key: refused by both, and repair cannot save it",
         {"sections": [{"blocks": [para]}], "blocks": []},
-        {"messages": [NO_SECTIONS], "repairOk": False},
         {"messages": [NO_SECTIONS], "repairOk": False},
         "Dropping it would lose the content inside it and report ok, so neither repairer does.",
     )
@@ -4923,14 +4927,33 @@ def page_refusal_suite() -> Suite:
         "A plain page break is untouched",
         {"blocks": [para, {"type": "pageBreak"}, para]},
         {"messages": [], "repairOk": True},
-        {"messages": [], "repairOk": True},
     )
     row(
         "0032-unknown-key",
         "An unknown key on a break stays tolerated: near-misses are narrow",
         {"blocks": [{"type": "pageBreak", "note": "mine"}]},
         {"messages": [], "repairOk": True},
-        {"messages": [], "repairOk": True},
+    )
+    row(
+        "0033-nested-page",
+        "page on a break in a quote or a cell is refused, and repair removes it with a note",
+        {"blocks": [{"type": "quote", "blocks": [landscape]}, para]},
+        {"messages": ["page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"], "repairOk": True},
+        since=SINCE_MIXED_DOCX,
+    )
+    row(
+        "0034-background-on-a-break",
+        "page.background on a break is refused: one page colour per document",
+        {"blocks": [{"type": "pageBreak", "page": {"background": "#FFFFFF"}}]},
+        {"messages": ["a document has one page colour: set background on the top-level page, not on a break"], "repairOk": True},
+        since=SINCE_MIXED_DOCX,
+    )
+    row(
+        "0035-page-not-an-object",
+        "page must be an object, {} for a new stretch with nothing changed",
+        {"blocks": [{"type": "pageBreak", "page": "landscape"}]},
+        {"messages": ["page on a break must be an object of page settings, {} for a new stretch with nothing changed"], "repairOk": True},
+        since=SINCE_MIXED_DOCX,
     )
     return s
 
@@ -5097,7 +5120,7 @@ META: dict[str, tuple[str, dict[str, str], list[dict[str, str]], list[str]]] = {
         },
         LW + FP,
         [
-            "SPEC section 15. Stage 2 of mixed page orientation moves last-word's half to what fine-print's says."
+            "SPEC section 15. Since stage 2 of mixed page orientation (0.45.0) last-word's half is what fine-print's says, on every row."
         ],
     ),
     "exchange/csv": (

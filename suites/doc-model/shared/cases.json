@@ -376,7 +376,7 @@
     },
     {
       "id": "0015-page-break",
-      "title": "pageBreak: page is fine-print's alone until DOCX stage 2",
+      "title": "pageBreak: page is shared",
       "since": "0.44.0",
       "tags": [
         "shared"
@@ -387,14 +387,38 @@
       },
       "expected": {
         "both": [
+          "page",
           "type"
         ],
         "lastWordOnly": [],
-        "finePrintOnly": [
-          "page"
-        ]
+        "finePrintOnly": []
       },
-      "notes": "Deliberate delta until stage 2: fine-print honours pageBreak.page. last-word refuses it, in all three runtimes (doc-model/page-refusal), so its schema does not declare it. Stage 2 moves it to both and removes this delta."
+      "notes": "fine-print shipped pageBreak.page first; last-word writes and reads it since DOCX stage 2 (fancy-conformance 0.45.0), and this row no longer holds a delta."
+    },
+    {
+      "id": "0016-page-margins",
+      "title": "page.margins: the four sides and both band distances",
+      "since": "0.45.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "pageMargins"
+      },
+      "expected": {
+        "both": [
+          "bottom",
+          "footer",
+          "header",
+          "left",
+          "right",
+          "top"
+        ],
+        "lastWordOnly": [],
+        "finePrintOnly": []
+      },
+      "notes": "Had no row until stage 2, though both writers read margins.header and margins.footer since their first-page band releases."
     },
     {
       "id": "0101-run-link",

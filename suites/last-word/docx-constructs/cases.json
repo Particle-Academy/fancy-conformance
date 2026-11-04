@@ -9269,6 +9269,1617 @@
         "read-back"
       ],
       "notes": "An empty dc:creator reads as no meta, as an empty dc:title reads as no title."
+    },
+    {
+      "id": "0080-sections-in-order",
+      "title": "Each section has its own w:sectPr, in document order, and each text width its own band parts",
+      "since": "0.45.0",
+      "fn": "sections",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "Report",
+              "right": "Page {page} of {pages}"
+            },
+            "footer": {
+              "center": "Page {page}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Portrait"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape",
+                "margins": {
+                  "left": 28.8,
+                  "right": 28.8
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Landscape"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "portrait"
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Portrait again"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            },
+            {
+              "kind": "footer",
+              "type": "default",
+              "target": "footer1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "15840",
+                "h": "12240",
+                "orient": "landscape"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "576",
+                "bottom": "1440",
+                "left": "576",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header5.xml",
+              "tabs": [
+                "7344",
+                "14688"
+              ]
+            },
+            {
+              "kind": "footer",
+              "type": "default",
+              "target": "footer5.xml",
+              "tabs": [
+                "7344",
+                "14688"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "576",
+                "bottom": "1440",
+                "left": "576",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header6.xml",
+              "tabs": [
+                "5544",
+                "11088"
+              ]
+            },
+            {
+              "kind": "footer",
+              "type": "default",
+              "target": "footer6.xml",
+              "tabs": [
+                "5544",
+                "11088"
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "mixed-pages"
+      ],
+      "notes": "Tab stops are the point of the separate parts: 9360, then 14688, then 11088, because margins merge and portrait keeps the narrow ones."
+    },
+    {
+      "id": "0081-sections-first-stretch-by-slot",
+      "title": "The first stretch keeps header1-3 by slot; later ones number from 5",
+      "since": "0.45.0",
+      "fn": "sections",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "default"
+            },
+            "firstHeader": {
+              "left": "first"
+            },
+            "evenHeader": {
+              "left": "even"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "One"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape"
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Two"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ],
+            [
+              "titlePg",
+              true
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            },
+            {
+              "kind": "header",
+              "type": "first",
+              "target": "header2.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            },
+            {
+              "kind": "header",
+              "type": "even",
+              "target": "header3.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "15840",
+                "h": "12240",
+                "orient": "landscape"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header5.xml",
+              "tabs": [
+                "6480",
+                "12960"
+              ]
+            },
+            {
+              "kind": "header",
+              "type": "even",
+              "target": "header6.xml",
+              "tabs": [
+                "6480",
+                "12960"
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "mixed-pages"
+      ],
+      "notes": "firstHeader is not inherited, so the second section has no first reference and no w:titlePg."
+    },
+    {
+      "id": "0082-sections-same-width-shares-a-part",
+      "title": "A stretch at a width already seen shares the part",
+      "since": "0.45.0",
+      "fn": "sections",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "x"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {}
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape"
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "c"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "portrait"
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "d"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "15840",
+                "h": "12240",
+                "orient": "landscape"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header5.xml",
+              "tabs": [
+                "6480",
+                "12960"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "mixed-pages"
+      ]
+    },
+    {
+      "id": "0083-sections-first-band-on-a-break",
+      "title": "firstHeader on a break means the first page after it, and w:titlePg is that section's",
+      "since": "0.45.0",
+      "fn": "sections",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "run"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "firstHeader": {
+                  "left": "second cover"
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {}
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "c"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ],
+            [
+              "titlePg",
+              true
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            },
+            {
+              "kind": "header",
+              "type": "first",
+              "target": "header5.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "mixed-pages"
+      ],
+      "notes": "The third section has neither: never inherited."
+    },
+    {
+      "id": "0084-sections-even-is-the-documents",
+      "title": "An even band on a later break turns even-and-odd on everywhere, and the first stretch references its own default as even",
+      "since": "0.45.0",
+      "fn": "sections",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "run"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "evenHeader": {
+                  "left": "even"
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            },
+            {
+              "kind": "header",
+              "type": "even",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            },
+            {
+              "kind": "header",
+              "type": "even",
+              "target": "header5.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "mixed-pages"
+      ]
+    },
+    {
+      "id": "0085-sections-blank-band",
+      "title": "A band a break empties is a blank part: Word would inherit the last one",
+      "since": "0.45.0",
+      "fn": "sections",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "run"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "header": {
+                  "blocks": []
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header1.xml",
+              "tabs": [
+                "4680",
+                "9360"
+              ]
+            }
+          ]
+        },
+        {
+          "props": [
+            [
+              "pgSz",
+              {
+                "w": "12240",
+                "h": "15840"
+              }
+            ],
+            [
+              "pgMar",
+              {
+                "top": "1440",
+                "right": "1440",
+                "bottom": "1440",
+                "left": "1440",
+                "header": "720",
+                "footer": "720",
+                "gutter": "0"
+              }
+            ]
+          ],
+          "references": [
+            {
+              "kind": "header",
+              "type": "default",
+              "target": "header5.xml",
+              "tabs": []
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "mixed-pages"
+      ]
+    },
+    {
+      "id": "0086-band-parts-settings-for-a-later-even-band",
+      "title": "evenAndOddHeaders is in settings for a band only a later stretch has",
+      "since": "0.45.0",
+      "fn": "bandParts",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "run"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "evenHeader": {
+                  "left": "even"
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "titlePg": false,
+        "evenAndOddHeaders": true,
+        "references": [
+          {
+            "kind": "header",
+            "type": "default",
+            "target": "header1.xml",
+            "text": "run"
+          },
+          {
+            "kind": "header",
+            "type": "even",
+            "target": "header5.xml",
+            "text": "even"
+          }
+        ],
+        "parts": [
+          "word/header1.xml",
+          "word/header5.xml"
+        ]
+      },
+      "tags": [
+        "mixed-pages"
+      ],
+      "notes": "bandParts describes the body sectPr, the last section."
+    },
+    {
+      "id": "0087-section-number-cached-per-part",
+      "title": "A {section} band has a part per stretch, its cached result that stretch's number",
+      "since": "0.45.0",
+      "fn": "bandFields",
+      "input": {
+        "doc": {
+          "page": {
+            "footer": {
+              "left": "{section} of {sectionpages}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {}
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "target": "footer5.xml",
+          "fields": [
+            {
+              "instruction": " SECTION ",
+              "result": "2"
+            },
+            {
+              "instruction": " SECTIONPAGES ",
+              "result": "1"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "mixed-pages",
+        "fields"
+      ],
+      "notes": "LibreOffice shows the cached SECTION rather than computing it. SECTIONPAGES stays 1: the writer cannot know it."
+    },
+    {
+      "id": "0088-read-back-mixed",
+      "title": "read() gives top-level page from the first section and each later one as a break",
+      "since": "0.45.0",
+      "fn": "readBack",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "Report",
+              "right": "Page {page} of {pages}"
+            },
+            "footer": {
+              "center": "Page {page}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Portrait"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape",
+                "margins": {
+                  "left": 28.8,
+                  "right": 28.8
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Landscape"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "portrait"
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Portrait again"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "page": {
+          "header": {
+            "left": "Report",
+            "right": "Page {page} of {pages}"
+          },
+          "footer": {
+            "center": "Page {page}"
+          }
+        },
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Portrait"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "landscape",
+              "margins": {
+                "left": 28.8,
+                "right": 28.8
+              }
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Landscape"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "portrait"
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "Portrait again"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "mixed-pages"
+      ]
+    },
+    {
+      "id": "0089-fixpoint-mixed",
+      "title": "A mixed document comes back as written",
+      "since": "0.45.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "page": {
+            "header": {
+              "left": "Report",
+              "right": "Page {page} of {pages}"
+            },
+            "footer": {
+              "center": "Page {page}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Portrait"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape",
+                "margins": {
+                  "left": 28.8,
+                  "right": 28.8
+                }
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Landscape"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "portrait"
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Portrait again"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "fixpoint": true
+      },
+      "tags": [
+        "mixed-pages"
+      ]
+    },
+    {
+      "id": "0090-fixpoint-empty-page",
+      "title": "A break with an empty page comes back with an empty page",
+      "since": "0.45.0",
+      "fn": "roundTripFixpoint",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "a"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {}
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "b"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "fixpoint": true
+      },
+      "tags": [
+        "mixed-pages"
+      ],
+      "notes": "A fixpoint, not a golden: see the empty-object note in the exporter."
+    },
+    {
+      "id": "0091-read-file-two-sections",
+      "title": "A file with sectPr on the last paragraph of the section, and no w:type",
+      "since": "0.45.0",
+      "fn": "readFile",
+      "input": {
+        "file": {
+          "file": "fixtures/two-sections.docx",
+          "sha256": "dff1ab903d8b1205b51cb9f785cfee09374dce489beb3446e56355c011168ac7"
+        }
+      },
+      "expected": {
+        "title": "Two sections",
+        "blocks": [
+          {
+            "type": "heading",
+            "level": 1,
+            "runs": [
+              {
+                "text": "Portrait"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "The last paragraph of the portrait section carries its section properties."
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "landscape"
+            }
+          },
+          {
+            "type": "heading",
+            "level": 1,
+            "runs": [
+              {
+                "text": "Landscape"
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "rows": [
+              {
+                "header": true,
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Site",
+                            "bold": true
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "Reading",
+                            "bold": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "cells": [
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "North"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "12"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "mixed-pages",
+        "reader"
+      ],
+      "notes": "The deferred reader row. This package laid the section properties out by hand, as Word does; its writer uses a dedicated paragraph."
+    },
+    {
+      "id": "0092-read-file-section-starts",
+      "title": "Every section start the model cannot hold: no break or a break, and a report at the block",
+      "since": "0.45.0",
+      "fn": "readFile",
+      "input": {
+        "file": {
+          "file": "fixtures/section-starts.docx",
+          "sha256": "54653b5e06e7a358190884e18a0f0e12445243aaed977aaca535ef33141aa11c"
+        }
+      },
+      "expected": {
+        "blocks": [
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "first section"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "continuous, same page: no break, reported"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "continuous, other margins: no break, reported"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "landscape"
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "continuous, other orientation: a break"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "portrait",
+              "size": "a4"
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "oddPage: a break, reported"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "landscape",
+              "size": "letter",
+              "margins": {
+                "top": 36
+              }
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "evenPage: a break, reported"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "portrait",
+              "margins": {
+                "top": 72
+              }
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "columns: a break, reported"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "landscape"
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "a restart: a break, reported"
+              }
+            ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "orientation": "portrait"
+            }
+          },
+          {
+            "type": "paragraph",
+            "runs": [
+              {
+                "text": "unknown paper: a break, reported"
+              }
+            ]
+          }
+        ],
+        "unrepresented": [
+          {
+            "where": "/blocks/1",
+            "kind": "layout-not-preserved",
+            "count": 1
+          },
+          {
+            "where": "/blocks/2",
+            "kind": "layout-not-preserved",
+            "count": 1
+          },
+          {
+            "where": "/blocks/5",
+            "kind": "layout-not-preserved",
+            "count": 1
+          },
+          {
+            "where": "/blocks/7",
+            "kind": "layout-not-preserved",
+            "count": 1
+          },
+          {
+            "where": "/blocks/9",
+            "kind": "layout-not-preserved",
+            "count": 1
+          },
+          {
+            "where": "/blocks/11",
+            "kind": "layout-not-preserved",
+            "count": 1
+          },
+          {
+            "where": "/blocks/13",
+            "kind": "layout-not-preserved",
+            "count": 1
+          }
+        ]
+      },
+      "tags": [
+        "mixed-pages",
+        "reader"
+      ],
+      "notes": "w:type is how THAT section starts. Checked against LibreOffice, not against Word, which was not available."
     }
   ]
 }

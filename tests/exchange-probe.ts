@@ -1844,7 +1844,8 @@ const BASE_DEFS: Record<string, string[]> = {
   tableCell: ["blocks", "shading", "borders", "padding", "valign", "colSpan", "rowSpan"],
   image: ["type", "src", "widthPx", "heightPx", "alt"],
   border: ["style", "width", "color"],
-  pageBreak: ["type"],
+  pageBreak: ["type", "page"],
+  pageMargins: ["top", "right", "bottom", "left", "header", "footer"],
 };
 const SIZE_LW = { type: "number", exclusiveMinimum: 0 };
 const BASE_CONSTRAINTS = {
@@ -1874,7 +1875,9 @@ function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<strin
   fp.run!.push("footnote");
   fp.table!.push("keepNext");
   fp.image!.push("keepNext");
-  if (!m.finePrintNoBreakPage) fp.pageBreak!.push("page");
+  if (m.finePrintNoBreakPage) fp.pageBreak = ["type"];
+  if (m.lastWordNoBreakPage) lw.pageBreak = ["type"];
+  if (m.lastWordNoBandDistances) lw.pageMargins = ["top", "right", "bottom", "left"];
   lw.blockTypes!.push("chart");
   if (!m.lastWordNoFootnote) lw.run!.push("footnote");
   if (!m.lastWordNoMeta) lw.document!.push("meta");
@@ -1911,46 +1914,40 @@ export function docModelConstraint(def: string, m: Mutations = {}): J {
 
 const PAGE_KEYS = ["size", "orientation", "margins", "header", "footer", "firstHeader", "firstFooter", "evenHeader", "evenFooter", "background", "border"];
 const NOT_IN_LAST_WORD = "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print";
+const NESTED_PAGE = "page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page";
+const ONE_COLOUR = "a document has one page colour: set background on the top-level page, not on a break";
+const NOT_AN_OBJECT = "page on a break must be an object of page settings, {} for a new stretch with nothing changed";
 
 export function pageRefusal(doc: J, m: Mutations = {}): J {
   const messages: string[] = [];
-  const lastWord: string[] = [];
-  let broken = false;
-  if (doc.sections !== undefined) {
-    messages.push("there is no sections key; use pageBreak.page");
-    lastWord.push("there is no sections key; use pageBreak.page");
-  }
+  const stage1Refusals: string[] = [];
+  if (doc.sections !== undefined) messages.push("there is no sections key; use pageBreak.page");
   let unrelatedRepair = false;
+  const pageOf = (block: J, nested: boolean): void => {
+    if (!("page" in block)) return;
+    stage1Refusals.push(NOT_IN_LAST_WORD);
+    if (typeof block.page !== "object" || block.page === null) messages.push(NOT_AN_OBJECT);
+    else if (nested && !m.nestedAllowed) messages.push(NESTED_PAGE);
+    else if ("background" in block.page && !m.backgroundAllowed) messages.push(ONE_COLOUR);
+  };
   for (const block of doc.blocks ?? []) {
-    if (block.type === "heading" && block.level === undefined) {
-      broken = true;
-      unrelatedRepair = true;
-    }
+    if (block.type === "heading" && block.level === undefined) unrelatedRepair = true;
+    if (block.type === "quote") for (const inner of block.blocks ?? []) if (inner.type === "pageBreak") pageOf(inner, true);
     if (block.type !== "pageBreak") continue;
     for (const key of PAGE_KEYS) {
-      if (key in block) {
-        const text = m.nearMissReworded ? `pageBreak has no ${key}` : `a pageBreak has no ${key} key; use pageBreak.page`;
-        messages.push(text);
-        lastWord.push(text);
-      }
+      if (key in block) messages.push(m.nearMissReworded ? `pageBreak has no ${key}` : `a pageBreak has no ${key} key; use pageBreak.page`);
     }
-    if ("page" in block) lastWord.push(NOT_IN_LAST_WORD);
+    pageOf(block, false);
   }
-  const lwRefuses = lastWord.length > 0 || broken;
-  const hasPage = (doc.blocks ?? []).some((b: J) => b.type === "pageBreak" && "page" in b);
-  // A repairer that rewrites a break to bare {type} deletes the very thing refused.
-  const lwRepairOk = m.repairStripsPage && hasPage ? !doc.sections : !lwRefuses;
-  const fpRepairOk = !doc.sections;
-  if (unrelatedRepair) {
-    return {
-      finePrint: { repairOk: fpRepairOk, pageKept: !m.repairStripsPage },
-      lastWord: { repairOk: lwRepairOk },
-    };
-  }
-  return {
-    finePrint: { messages, repairOk: fpRepairOk },
-    lastWord: { messages: lastWord, repairOk: lwRepairOk },
+  const repairOk = !doc.sections;
+  // last-word as it was before DOCX stage 2: it refused page, and repair could not save it.
+  const half = (refuses: boolean): J => {
+    if (unrelatedRepair) return { repairOk: refuses ? false : repairOk, pageKept: !m.repairStripsPage };
+    return refuses
+      ? { messages: [...stage1Refusals, ...messages.filter((t) => !t.startsWith("page") && !t.startsWith("a document"))], repairOk: messages.length === 0 && stage1Refusals.length === 0 }
+      : { messages, repairOk };
   };
+  return { finePrint: half(false), lastWord: half(m.lastWordStage1 === true) };
 }
 
 // ---------------------------------------------------------------------------
