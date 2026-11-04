@@ -401,8 +401,9 @@ fn the_graph_runs_error_goldens_are_exact_strings_not_substrings() {
 fn the_exchange_suites_load_with_exact_counts() {
     // Exact on purpose: a row QUIETLY LOST between the generator and this
     // loader is the failure this catches. Move the numbers with the suites.
-    let expected: [(&str, usize); 16] = [
-        ("doc-model/shared", 20),
+    let expected: [(&str, usize); 17] = [
+        ("doc-model/page-refusal", 18),
+        ("doc-model/shared", 21),
         ("exchange/content", 56),
         ("exchange/csv", 12),
         ("exchange/from-dark-slide", 18),
