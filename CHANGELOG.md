@@ -10,6 +10,8 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.45.0] - 2026-11-04
+
 ### Added
 
 - **`last-word/docx-constructs` 0080-0092: mixed pages.** New functions `sections` and
