@@ -4938,21 +4938,36 @@ def page_refusal_suite() -> Suite:
         "0033-nested-page",
         "page on a break in a quote or a cell is refused, and repair removes it with a note",
         {"blocks": [{"type": "quote", "blocks": [landscape]}, para]},
-        {"messages": ["page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"], "repairOk": True},
+        {
+            "messages": [
+                "page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"
+            ],
+            "repairOk": True,
+        },
         since=SINCE_MIXED_DOCX,
     )
     row(
         "0034-background-on-a-break",
         "page.background on a break is refused: one page colour per document",
         {"blocks": [{"type": "pageBreak", "page": {"background": "#FFFFFF"}}]},
-        {"messages": ["a document has one page colour: set background on the top-level page, not on a break"], "repairOk": True},
+        {
+            "messages": [
+                "a document has one page colour: set background on the top-level page, not on a break"
+            ],
+            "repairOk": True,
+        },
         since=SINCE_MIXED_DOCX,
     )
     row(
         "0035-page-not-an-object",
         "page must be an object, {} for a new stretch with nothing changed",
         {"blocks": [{"type": "pageBreak", "page": "landscape"}]},
-        {"messages": ["page on a break must be an object of page settings, {} for a new stretch with nothing changed"], "repairOk": True},
+        {
+            "messages": [
+                "page on a break must be an object of page settings, {} for a new stretch with nothing changed"
+            ],
+            "repairOk": True,
+        },
         since=SINCE_MIXED_DOCX,
     )
     return s
