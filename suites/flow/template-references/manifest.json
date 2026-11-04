@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "flow/template-references",
+  "title": "A template naming a field its upstream step does not declare is found without running it",
+  "since": "0.46.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "function": "templateReferences(schema: WorkflowSchema) -> Array<{ nodeId: string, configKey: string, path: string, fields: string[] }>",
+    "summary": "Import the document leniently against a local built-in kind registry with the structural kinds, then compare each `{{ dot.path }}` in a node's config to the fields arriving on the wire that path reads. A finding means the path is provably absent. `fields` is what the node could have named, sorted by code point; findings are sorted by nodeId, then configKey, then path. Nothing is run. Silence is not a claim that a reference is right: it can also mean unknown. Message text is NOT part of the contract.",
+    "reference": "php",
+    "referenceNote": "Goldens come from running fancy-flow-php's `FancyFlow\\Analysis\\TemplateReferences`, via scripts/build-flow-template-references-cases.py. PHP is the only runtime that has this check when the table is written. TypeScript and Python are expected to follow; until they do, this table is a specification for them and a regression check for PHP.",
+    "implementations": [
+      { "language": "php", "package": "particle-academy/fancy-flow-php", "symbol": "FancyFlow\\Analysis\\TemplateReferences::findings" }
+    ]
+  },
+  "notes": [
+    "NULL IS UNKNOWN AND REFUSES NOTHING. `outputShape` has three states: null is not declared, [] declares no fields, a list declares those fields. 0003 fails an implementation that collapses null into []. A false rejection is one the author cannot comply with, so anything that cannot be proved is silent, and so is everything downstream of it.",
+    "HALF THE ROWS ARE SILENT, ON PURPOSE, for the same reason as `flow/run-diagnostics`: a warning that fires on correct graphs is how a real warning stops being read.",
+    "THE PORT A SHAPE DESCRIBES. 0007: `for_each` declares what it publishes on `done`. The `item` port carries one element of the list. A shape cannot express that per port today, so implementations name this port rather than letting the shape over-apply. Measured: without that, every `{{ in.name }}` inside an iteration lane is reported as missing.",
+    "RELATIONS ARE DIFFERENT OPERATIONS. `input` passes the `in` payload through (0004). `inputs-merged` is the union of the payload fields of every port (0014). `expression:<key>` carries a shape only when the whole string is one reference (0016, 0017). 0024: `wait` NESTS its input under `input`, so an inbound field is not top level, which is the case a relation would have over-permitted.",
+    "HEADS FOLLOW `collectInputs`. A payload lands under its target handle, default `in`; a handle-less edge is also addressable by its source's id; `$json` and `$input` alias `in`. A head that is not one of those may be something the host seeded, so it is silent (0012).",
+    "A SCANNER, NOT A REGEX. This reads text it did not write. The PHP reference pairs an opener with the next closer using string search, which is the same segmentation as the engine's resolver without the backtracking of a lazy capture on an unterminated opener.",
+    "There is NO discrimination probe for this suite, for the same reason as `flow/graph-runs`: the implementation under test needs a kind registry, which this package does not carry."
+  ]
+}

@@ -10,6 +10,16 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- **`flow/template-references`, 25 rows: a `{{ in.field }}` naming a field its upstream
+  step does not declare is found without running it.** Null shapes are unknown and refuse
+  nothing. Goldens from running fancy-flow-php's `TemplateReferences`, via
+  `scripts/build-flow-template-references-cases.py`. **Consumer action:** none to keep
+  working. PHP asserts the table from fancy-flow-php's next release. The TypeScript and
+  Python engines have no such check yet, and their implementations are not listed in the
+  manifest until they do.
+
 ## [0.45.0] - 2026-11-04
 
 ### Added

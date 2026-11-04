@@ -1,0 +1,1949 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "flow/template-references",
+  "cases": [
+    {
+      "id": "0001-wrong-field-is-found",
+      "title": "A template naming a field the upstream kind does not declare is found, with what it could have named.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "static-shape"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.txt }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.txt",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0002-declared-field-is-silent",
+      "title": "A template naming a declared field is silent.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "static-shape"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.text }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0003-null-shape-refuses-nothing",
+      "title": "A kind with no declared shape is UNKNOWN, so any field is silent. This is the row that catches null read as empty.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "unknown"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "u",
+                "kind": "tool_use",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "tool": "x"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.anything }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "u"
+              },
+              {
+                "id": "e1",
+                "source": "u",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0004-passthrough-carries-the-shape",
+      "title": "A kind whose relation is `input` passes the upstream shape through, on every port it publishes.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "relation-input"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ in.text }}"
+                }
+              },
+              {
+                "id": "y",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.txt }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "b",
+                "target": "y",
+                "sourceHandle": "true"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "y",
+          "configKey": "message",
+          "path": "in.txt",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0005-passthrough-of-unknown-is-unknown",
+      "title": "A passthrough whose source is unknown stays unknown.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "unknown",
+        "relation-input"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ in.flag }}"
+                }
+              },
+              {
+                "id": "y",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.whatever }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e1",
+                "source": "b",
+                "target": "y",
+                "sourceHandle": "true"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0006-entry-point-is-not-judged",
+      "title": "A node with no inbound edge reads what the host seeded, so nothing on it is judged.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "entry-point"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.x }} {{ y }}"
+                }
+              }
+            ],
+            "edges": []
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0007-for-each-item-is-unknown-and-done-is-not",
+      "title": "The for_each shape describes `done`. The `item` port carries one element of the list and is never judged against it.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "silent",
+        "for-each"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "e",
+                "kind": "for_each",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "source": "{{ in.users }}"
+                }
+              },
+              {
+                "id": "per",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.name }}"
+                }
+              },
+              {
+                "id": "after",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.nope }} {{ in.count }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "e"
+              },
+              {
+                "id": "e1",
+                "source": "e",
+                "target": "per",
+                "sourceHandle": "item"
+              },
+              {
+                "id": "e2",
+                "source": "e",
+                "target": "after",
+                "sourceHandle": "done"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "after",
+          "configKey": "message",
+          "path": "in.nope",
+          "fields": [
+            "count",
+            "failures",
+            "items",
+            "results"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0008-rejoined-sources-union",
+      "title": "Edges rejoining on one port deliver one payload per run, so a field any source declares is present.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "rejoin"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "api_request",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "url": "https://example.test/"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.text }} {{ in.status }} {{ in.zzz }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "a",
+                "target": "o"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.zzz",
+          "fields": [
+            "body",
+            "headers",
+            "raw",
+            "status",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0009-one-unknown-source-makes-the-port-unknown",
+      "title": "One unknown source on a port makes the whole port unknown.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "rejoin",
+        "unknown"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "tool_use",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "tool": "x"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.zzz }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "a",
+                "target": "o"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0010-deeper-than-a-declared-field",
+      "title": "A path deeper than a declared field is silent: the field may be an object nobody described.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "paths"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "h",
+                "kind": "api_request",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "url": "https://example.test/"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.body.items.0.name }} {{ in.headers }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "h"
+              },
+              {
+                "id": "e1",
+                "source": "h",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0011-every-spelling-of-the-input",
+      "title": "`in`, `$json`, `$input` and a handle-less edge's source id all read the same wire.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "heads"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.a1 }} {{ $json.a2 }} {{ $input.a3 }} {{ a.a4 }} {{ in.text }} {{ $json }} {{ in }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "$input.a3",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        },
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "$json.a2",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        },
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "a.a4",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        },
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.a1",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0012-a-named-port-and-an-unknown-head",
+      "title": "A wired port name is judged. A head that is not a wired port cannot be proved and is silent.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "silent",
+        "heads"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ p.text }} {{ p.nope }} {{ unrelated.thing }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "m",
+                "targetHandle": "p"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "m",
+          "configKey": "message",
+          "path": "p.nope",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0013-not-a-dot-path-is-not-judged",
+      "title": "A template that is not a plain dot-path, an empty one and an unterminated one are all silent here.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "grammar"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ { id: $json.id } }} {{ a && b }} {{ }} {{ unclosed"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0014-merge-is-the-union-of-its-ports",
+      "title": "`merge` emits the union of every port's payload fields.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "relation-inputs-merged"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "api_request",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "url": "https://example.test/"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "merge",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.text }} {{ in.status }} {{ in.gone }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "b"
+              },
+              {
+                "id": "e2",
+                "source": "a",
+                "target": "m",
+                "targetHandle": "a"
+              },
+              {
+                "id": "e3",
+                "source": "b",
+                "target": "m",
+                "targetHandle": "b"
+              },
+              {
+                "id": "e4",
+                "source": "m",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.gone",
+          "fields": [
+            "body",
+            "headers",
+            "raw",
+            "status",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0015-merge-concat-is-unknown",
+      "title": "`merge` in concat mode builds a list and declares nothing, which is not the same as no fields.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "unknown"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "m",
+                "kind": "merge",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "concat"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.gone }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "m",
+                "targetHandle": "a"
+              },
+              {
+                "id": "e2",
+                "source": "m",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0016-single-reference-expression-carries-the-shape",
+      "title": "A `variable` holding exactly one reference emits that reference's shape.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "relation-expression"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "v",
+                "kind": "variable",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "name": "v",
+                  "value": "{{ in }}"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.text }} {{ in.nope }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "v"
+              },
+              {
+                "id": "e2",
+                "source": "v",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.nope",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0017-interpolated-expression-is-unknown",
+      "title": "Interpolating produces a string with no addressable fields. It must not be expanded into the source's shape.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "relation-expression"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "v",
+                "kind": "variable",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "name": "v",
+                  "value": "x {{ in.text }} y"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.anything }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "v"
+              },
+              {
+                "id": "e2",
+                "source": "v",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0018-transform-fields-rows-are-read",
+      "title": "A transform's `fields` rows are templates. The object it builds declares nothing, so what follows is unknown.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "silent",
+        "transform"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "tf",
+                "kind": "transform",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "fields",
+                  "fields": [
+                    {
+                      "key": "k",
+                      "value": "{{ in.txt }}"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.whatever }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "tf"
+              },
+              {
+                "id": "e2",
+                "source": "tf",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "tf",
+          "configKey": "fields.0.value",
+          "path": "in.txt",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0019-dynamic-shape-with-its-config",
+      "title": "`llm_call` gains `data` when a response schema is set: the shape is resolved from the node's own config.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "dynamic-shape"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x",
+                  "response_schema": {
+                    "type": "object"
+                  }
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.data.score }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0020-dynamic-shape-without-its-config",
+      "title": "The same reference with no response schema is found.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "dynamic-shape"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.data.score }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.data.score",
+          "fields": [
+            "raw",
+            "text",
+            "usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0021-a-cycle-is-not-a-hang",
+      "title": "A back edge terminates and says nothing.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "cycle"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "a",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ in.x }}"
+                }
+              },
+              {
+                "id": "b",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ in.y }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "a",
+                "target": "b",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e1",
+                "source": "b",
+                "target": "a",
+                "sourceHandle": "true"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0022-malformed-config-for-a-shape-function",
+      "title": "A shape computed from config that the config cannot satisfy is unknown, not a crash.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "dynamic-shape",
+        "hostile"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "u",
+                "kind": "user_input",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "fields": [
+                    "not-an-object"
+                  ]
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.x }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "u"
+              },
+              {
+                "id": "e1",
+                "source": "u",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    },
+    {
+      "id": "0023-user-input-declares-its-own-keys",
+      "title": "`user_input` emits the keys its author defined.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "dynamic-shape"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "u",
+                "kind": "user_input",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "fields": [
+                    {
+                      "key": "email",
+                      "label": "Email"
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.email }} {{ in.phone }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "u"
+              },
+              {
+                "id": "e1",
+                "source": "u",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.phone",
+          "fields": [
+            "email"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0024-wait-nests-rather-than-passes",
+      "title": "`wait` carries its input under `input`, so an inbound field is not top level.",
+      "since": "0.46.0",
+      "tags": [
+        "finds",
+        "nesting"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "w",
+                "kind": "wait",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "mode": "duration",
+                  "duration": "1s"
+                }
+              },
+              {
+                "id": "o",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "{{ in.text }} {{ in.input.text }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "w"
+              },
+              {
+                "id": "e2",
+                "source": "w",
+                "target": "o"
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "o",
+          "configKey": "message",
+          "path": "in.text",
+          "fields": [
+            "duration",
+            "input",
+            "waited"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0025-credential-fields-are-not-templates",
+      "title": "A credential field is a reference to a host secret, never a template.",
+      "since": "0.46.0",
+      "tags": [
+        "silent",
+        "config-keys"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {}
+              },
+              {
+                "id": "a",
+                "kind": "llm_call",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "model": "m",
+                  "prompt": "x"
+                }
+              },
+              {
+                "id": "n",
+                "kind": "human_approval",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "channel": "{{ in.nope }}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e0",
+                "source": "t",
+                "target": "a"
+              },
+              {
+                "id": "e1",
+                "source": "a",
+                "target": "n"
+              }
+            ]
+          }
+        }
+      },
+      "expected": []
+    }
+  ]
+}
