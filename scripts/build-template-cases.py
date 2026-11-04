@@ -226,6 +226,7 @@ class Suite:
 
 # Rows added for the `$value` splice and the plain-notes ruling (owner, 2026-10-27).
 SPLICE = "0.36.0"
+BAND_FIELDS = "0.44.0"
 
 # ---------------------------------------------------------------------------
 # template/tokenize
@@ -2351,6 +2352,88 @@ def profiles_suite() -> Suite:
         ok_doc(sheet("Tags", {"value": "=1+1"}, {"value": "b"}, "end")),
         "A splice at cell level: the spliced string sits at the cell's path, so the guard applies to it and to nothing the author wrote.",
         since=SPLICE,
+    )
+    named_run = {"type": "paragraph", "runs": [{"text": "{{ name }}"}]}
+    s.render(
+        "0207-fine-print-band-value-with-section",
+        "A band VALUE holding any band field is VALUE_PAGE_FIELD, not only {page}",
+        env(band(left="{{ name }}"), v),
+        {"name": "see {section}"},
+        err("VALUE_PAGE_FIELD", "/document/page/footer/left"),
+        "Once a writer resolves {section}, user data holding it would become a live value. One list for both writers.",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0208-last-word-band-value-with-a-date-picture",
+        "last-word: a date with a picture is a field too",
+        lw({"blocks": [], "page": {"footer": {"left": "{{ name }}"}}}),
+        {"name": "{date:d MMMM yyyy}"},
+        err("VALUE_PAGE_FIELD", "/document/page/footer/left"),
+        "last-word has written this as a live DATE field since 0.16.0; the old check saw only {page} and {pages}.",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0209-band-value-only-brace-shaped",
+        "A value that is only brace-shaped is text",
+        env(band(left="{{ name }}"), v),
+        {"name": "{Page} {pagex} {date:}"},
+        ok_doc(band(left="{Page} {pagex} {date:}")),
+        "Lower-case exact names, and :FORMAT needs a character: the writers' own grammar.",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0210-fine-print-first-band-takes-a-token",
+        "fine-print: firstFooter is a band slot",
+        env({"blocks": [], "page": {"firstFooter": {"left": "{{ name }}"}}}, v),
+        {"name": "Ada"},
+        ok_doc({"blocks": [], "page": {"firstFooter": {"left": "Ada"}}}),
+        "",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0211-fine-print-band-on-a-break",
+        "fine-print: a band on a pageBreak is refused the same value",
+        env({"blocks": [{"type": "pageBreak", "page": {"footer": {"left": "{{ name }}"}}}]}, v),
+        {"name": "{pages}"},
+        err("VALUE_PAGE_FIELD", "/document/blocks/0/page/footer/left"),
+        "",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0212-fine-print-blocks-band-run",
+        "fine-print: a blocks band's run text is a band field too",
+        env({"blocks": [], "page": {"footer": {"blocks": [named_run]}}}, v),
+        {"name": "{page}"},
+        err("VALUE_PAGE_FIELD", "/document/page/footer/blocks/0/runs/0/text"),
+        "First match wins in a profile, so `**.runs.*.text` used to take this as plain text: a live field with no error at all.",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0213-last-word-blocks-band-run",
+        "last-word: the same hole, the same refusal",
+        lw({"blocks": [], "page": {"footer": {"blocks": [named_run]}}}),
+        {"name": "{page}"},
+        err("VALUE_PAGE_FIELD", "/document/page/footer/blocks/0/runs/0/text"),
+        "",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0214-fine-print-body-run-stays-literal",
+        "A body run keeps a field-shaped value: only a band is live",
+        env({"blocks": [named_run]}, v),
+        {"name": "{page}"},
+        ok_doc({"blocks": [{"type": "paragraph", "runs": [{"text": "{page}"}]}]}),
+        "",
+        since=BAND_FIELDS,
+    )
+    s.render(
+        "0215-fine-print-geometry-on-a-break-is-forbidden",
+        "fine-print: page geometry on a break stays closed to tokens",
+        env({"blocks": [{"type": "pageBreak", "page": {"orientation": "{{ name }}"}}]}, v),
+        {"name": "landscape"},
+        err("TOKEN_FORBIDDEN_FIELD", "/document/blocks/0/page/orientation"),
+        "",
+        since=BAND_FIELDS,
     )
     return s
 

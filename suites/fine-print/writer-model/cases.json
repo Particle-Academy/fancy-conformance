@@ -3449,7 +3449,18 @@
                 "properties": {
                     "title": {
                         "type": "string",
-                        "description": "The document title, stored as PDF metadata (not drawn)."
+                        "description": "The document title, stored as PDF metadata and shown by a {title} token in a band. Not drawn in the body; write a heading for that."
+                    },
+                    "meta": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "Document properties beyond the title (which is the top-level `title`).",
+                        "properties": {
+                            "author": {
+                                "type": "string",
+                                "description": "The PDF's Author, and what an {author} token in a band shows."
+                            }
+                        }
                     },
                     "blocks": {
                         "type": "array",
@@ -3460,7 +3471,7 @@
                     "page": {
                         "type": "object",
                         "additionalProperties": false,
-                        "description": "Page geometry. One-inch margins by default.",
+                        "description": "Page geometry. One-inch margins by default. Mixed page shapes: a pageBreak with its own `page`.",
                         "properties": {
                             "size": {
                                 "enum": [
@@ -3476,20 +3487,78 @@
                                 ]
                             },
                             "margins": {
-                                "$ref": "#/$defs/boxSides"
+                                "$ref": "#/$defs/pageMargins"
                             },
                             "header": {
-                                "$ref": "#/$defs/band",
-                                "description": "A running header on every page."
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/$defs/band"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/blocksBand"
+                                    }
+                                ],
+                                "description": "A running header on every page: a one-line band, or blocks (a letterhead with a logo). With a firstHeader, every page but the first; with an evenHeader, the odd pages."
                             },
                             "footer": {
-                                "$ref": "#/$defs/band",
-                                "description": "A running footer on every page: where a multi-page document carries its page numbers."
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/$defs/band"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/blocksBand"
+                                    }
+                                ],
+                                "description": "A running footer on every page: where a multi-page document carries its page numbers. With a firstFooter, every page but the first; with an evenFooter, the odd pages."
+                            },
+                            "firstHeader": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/$defs/band"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/blocksBand"
+                                    }
+                                ],
+                                "description": "The header of the FIRST page only, in place of header there. {\"blocks\": []} leaves that page with no header. On a pageBreak it means the first page after that break. Never inherited by a later break."
+                            },
+                            "firstFooter": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/$defs/band"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/blocksBand"
+                                    }
+                                ],
+                                "description": "The footer of the first page only, in place of footer there. {\"blocks\": []} leaves that page with no footer. On a pageBreak it means the first page after that break. Never inherited by a later break."
+                            },
+                            "evenHeader": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/$defs/band"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/blocksBand"
+                                    }
+                                ],
+                                "description": "The header of even pages; header is then the odd pages'. Follows the page number, which runs through the whole document and does not restart at a break."
+                            },
+                            "evenFooter": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/$defs/band"
+                                    },
+                                    {
+                                        "$ref": "#/$defs/blocksBand"
+                                    }
+                                ],
+                                "description": "The footer of even pages; footer is then the odd pages'. Follows the page number, which runs through the whole document and does not restart at a break."
                             },
                             "background": {
                                 "type": "string",
                                 "pattern": "^#[0-9A-Fa-f]{6}$",
-                                "description": "Page colour, painted full-bleed on every page under everything else, e.g. \"#FDFAF3\". White (none) by default."
+                                "description": "Page colour, painted full-bleed on every page under everything else, e.g. \"#FDFAF3\". White (none) by default. One per document: refused on a pageBreak."
                             },
                             "border": {
                                 "type": "object",
@@ -3594,6 +3663,9 @@
                             "letterSpacing": {
                                 "type": "number",
                                 "description": "Tracking in points; may be negative."
+                            },
+                            "footnote": {
+                                "$ref": "#/$defs/footnote"
                             }
                         }
                     },
@@ -3750,6 +3822,73 @@
                             }
                         }
                     },
+                    "pageMargins": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "description": "Page margins in points, 72 (one inch) each side by default, and the header and footer DISTANCES: how far the header sits from the top edge of the page and the footer from the bottom edge, 36 by default. A blocks band taller than the margin leaves room for moves the body down (or up), on the pages that draw it; a one-line band never does.",
+                        "properties": {
+                            "top": {
+                                "type": "number",
+                                "description": "Points."
+                            },
+                            "right": {
+                                "type": "number",
+                                "description": "Points."
+                            },
+                            "bottom": {
+                                "type": "number",
+                                "description": "Points."
+                            },
+                            "left": {
+                                "type": "number",
+                                "description": "Points."
+                            },
+                            "header": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Points from the top edge of the page to the top of the header. 36 by default."
+                            },
+                            "footer": {
+                                "type": "number",
+                                "minimum": 0,
+                                "description": "Points from the bottom edge of the page to the bottom of the footer. 36 by default."
+                            }
+                        }
+                    },
+                    "footnote": {
+                        "type": "object",
+                        "required": [
+                            "blocks"
+                        ],
+                        "additionalProperties": false,
+                        "description": "A footnote, carried by a run whose text is \"\" and which sits where the reference mark goes: {\"text\": \"\", \"footnote\": {\"blocks\": [{\"type\": \"paragraph\", \"runs\": [{\"text\": \"Audited figures, FY2026.\"}]}]}}. Marks number 1, 2, 3 in reading order, and each note is set at the foot of the page that holds its mark, at 10pt. The blocks are the body vocabulary less pageBreak, with no footnote inside a footnote. Not in a header or footer.",
+                        "properties": {
+                            "blocks": {
+                                "type": "array",
+                                "items": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/$defs/block"
+                                        },
+                                        {
+                                            "not": {
+                                                "properties": {
+                                                    "type": {
+                                                        "enum": [
+                                                            "pageBreak"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "type"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
                     "band": {
                         "type": "object",
                         "additionalProperties": false,
@@ -3757,15 +3896,15 @@
                         "properties": {
                             "left": {
                                 "type": "string",
-                                "description": "Text. `{page}` is the current page number and `{pages}` the page count: \"Page {page} of {pages}\"."
+                                "description": "Text with live tokens: {page} and {pages} (\"Page {page} of {pages}\", the document's own numbering and total), {section} (which stretch of pages this is, counting one per pageBreak with a page) and {sectionpages} (that stretch's page count), {title} and {author} (meta.author). A PDF has no live date: {date}, {time} and {filename} are written as literal text and reported in warnings. Anything else in braces is literal text."
                             },
                             "center": {
                                 "type": "string",
-                                "description": "Text. `{page}` is the current page number and `{pages}` the page count: \"Page {page} of {pages}\"."
+                                "description": "Text with live tokens: {page} and {pages} (\"Page {page} of {pages}\", the document's own numbering and total), {section} (which stretch of pages this is, counting one per pageBreak with a page) and {sectionpages} (that stretch's page count), {title} and {author} (meta.author). A PDF has no live date: {date}, {time} and {filename} are written as literal text and reported in warnings. Anything else in braces is literal text."
                             },
                             "right": {
                                 "type": "string",
-                                "description": "Text. `{page}` is the current page number and `{pages}` the page count: \"Page {page} of {pages}\"."
+                                "description": "Text with live tokens: {page} and {pages} (\"Page {page} of {pages}\", the document's own numbering and total), {section} (which stretch of pages this is, counting one per pageBreak with a page) and {sectionpages} (that stretch's page count), {title} and {author} (meta.author). A PDF has no live date: {date}, {time} and {filename} are written as literal text and reported in warnings. Anything else in braces is literal text."
                             },
                             "size": {
                                 "type": "number",
@@ -3776,6 +3915,40 @@
                                 "type": "string",
                                 "pattern": "^#[0-9A-Fa-f]{6}$",
                                 "description": "Text colour; #6B7280 by default."
+                            }
+                        }
+                    },
+                    "blocksBand": {
+                        "type": "object",
+                        "required": [
+                            "blocks"
+                        ],
+                        "additionalProperties": false,
+                        "description": "A running header or footer that holds blocks, the body's own vocabulary less pageBreak at any depth, for what one line cannot: a logo, a table, a line with a rule under it. e.g. {\"blocks\": [{\"type\": \"image\", \"src\": \"data:image/png;base64,...\", \"widthPx\": 96}, {\"type\": \"paragraph\", \"align\": \"right\", \"runs\": [{\"text\": \"Page {page}\", \"size\": 8}]}]}. Tokens in run text are live, in a table cell too. Set at the page's own width, between its left and right margins. Never mixed with left/center/right/size/color.",
+                        "properties": {
+                            "blocks": {
+                                "type": "array",
+                                "items": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/$defs/block"
+                                        },
+                                        {
+                                            "not": {
+                                                "properties": {
+                                                    "type": {
+                                                        "enum": [
+                                                            "pageBreak"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "type"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
                             }
                         }
                     },
@@ -3962,6 +4135,10 @@
                                     "cellPadding": {
                                         "$ref": "#/$defs/boxSides"
                                     },
+                                    "keepNext": {
+                                        "type": "boolean",
+                                        "description": "Keep on the same page as the block after it: a chart with its caption, a table with the note under it."
+                                    },
                                     "rows": {
                                         "type": "array",
                                         "items": {
@@ -4033,10 +4210,15 @@
                                         "const": "code"
                                     },
                                     "language": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Not drawn in a PDF yet (warnings say so)."
                                     },
                                     "text": {
                                         "type": "string"
+                                    },
+                                    "keepNext": {
+                                        "type": "boolean",
+                                        "description": "Keep on the same page as the block after it: a chart with its caption, a table with the note under it."
                                     }
                                 }
                             },
@@ -4084,7 +4266,12 @@
                                         "description": "Height in px at 96 dpi. With only one of the two, the other keeps the aspect ratio."
                                     },
                                     "alt": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "description": "Not carried by a PDF from this writer yet (warnings say so)."
+                                    },
+                                    "keepNext": {
+                                        "type": "boolean",
+                                        "description": "Keep on the same page as the block after it: a chart with its caption, a table with the note under it."
                                     }
                                 }
                             },
@@ -4096,6 +4283,127 @@
                                 "properties": {
                                     "type": {
                                         "const": "pageBreak"
+                                    },
+                                    "page": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "description": "Change the page from here on: {\"type\": \"pageBreak\", \"page\": {\"orientation\": \"landscape\", \"margins\": {\"left\": 28.8, \"right\": 28.8}}}. Pages after the break keep every setting until another break names a change; portrait does not come back by itself. margins merge side by side, every other key is replaced whole. {} starts a new stretch with nothing changed. Only on a top-level break, not one in a quote or a table cell.",
+                                        "properties": {
+                                            "size": {
+                                                "enum": [
+                                                    "letter",
+                                                    "legal",
+                                                    "a4"
+                                                ]
+                                            },
+                                            "orientation": {
+                                                "enum": [
+                                                    "portrait",
+                                                    "landscape"
+                                                ]
+                                            },
+                                            "margins": {
+                                                "$ref": "#/$defs/pageMargins"
+                                            },
+                                            "header": {
+                                                "oneOf": [
+                                                    {
+                                                        "$ref": "#/$defs/band"
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/blocksBand"
+                                                    }
+                                                ],
+                                                "description": "A running header on every page: a one-line band, or blocks (a letterhead with a logo). With a firstHeader, every page but the first; with an evenHeader, the odd pages."
+                                            },
+                                            "footer": {
+                                                "oneOf": [
+                                                    {
+                                                        "$ref": "#/$defs/band"
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/blocksBand"
+                                                    }
+                                                ],
+                                                "description": "A running footer on every page: where a multi-page document carries its page numbers. With a firstFooter, every page but the first; with an evenFooter, the odd pages."
+                                            },
+                                            "firstHeader": {
+                                                "oneOf": [
+                                                    {
+                                                        "$ref": "#/$defs/band"
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/blocksBand"
+                                                    }
+                                                ],
+                                                "description": "The header of the FIRST page only, in place of header there. {\"blocks\": []} leaves that page with no header. On a pageBreak it means the first page after that break. Never inherited by a later break."
+                                            },
+                                            "firstFooter": {
+                                                "oneOf": [
+                                                    {
+                                                        "$ref": "#/$defs/band"
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/blocksBand"
+                                                    }
+                                                ],
+                                                "description": "The footer of the first page only, in place of footer there. {\"blocks\": []} leaves that page with no footer. On a pageBreak it means the first page after that break. Never inherited by a later break."
+                                            },
+                                            "evenHeader": {
+                                                "oneOf": [
+                                                    {
+                                                        "$ref": "#/$defs/band"
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/blocksBand"
+                                                    }
+                                                ],
+                                                "description": "The header of even pages; header is then the odd pages'. Follows the page number, which runs through the whole document and does not restart at a break."
+                                            },
+                                            "evenFooter": {
+                                                "oneOf": [
+                                                    {
+                                                        "$ref": "#/$defs/band"
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/blocksBand"
+                                                    }
+                                                ],
+                                                "description": "The footer of even pages; footer is then the odd pages'. Follows the page number, which runs through the whole document and does not restart at a break."
+                                            },
+                                            "border": {
+                                                "type": "object",
+                                                "additionalProperties": false,
+                                                "description": "A frame around every page, measured from the page edge, so it is the same whatever the page holds (a certificate border). e.g. {\"style\": \"double\", \"width\": 6, \"color\": \"#B08D57\", \"inset\": 18}. Margins are separate: keep them wider than inset + width so text clears the frame.",
+                                                "properties": {
+                                                    "style": {
+                                                        "enum": [
+                                                            "single",
+                                                            "double",
+                                                            "dashed",
+                                                            "dotted",
+                                                            "none"
+                                                        ],
+                                                        "description": "single by default; double draws two rules with a gap, each a third of the width; none draws nothing."
+                                                    },
+                                                    "width": {
+                                                        "type": "number",
+                                                        "exclusiveMinimum": 0,
+                                                        "description": "Points, the whole frame (both rules and the gap, for double). 0.5 by default."
+                                                    },
+                                                    "color": {
+                                                        "type": "string",
+                                                        "pattern": "^#[0-9A-Fa-f]{6}$",
+                                                        "description": "Black by default."
+                                                    },
+                                                    "inset": {
+                                                        "type": "number",
+                                                        "minimum": 0,
+                                                        "description": "Points from the page edge to the outside of the frame. 24 by default."
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             },
@@ -4107,6 +4415,10 @@
                                 "properties": {
                                     "type": {
                                         "const": "hr"
+                                    },
+                                    "keepNext": {
+                                        "type": "boolean",
+                                        "description": "Keep on the same page as the block after it: a chart with its caption, a table with the note under it."
                                     }
                                 }
                             }
@@ -4478,9 +4790,2240 @@
             "fn": "guide",
             "input": {},
             "expected": {
-                "sha256": "53ffa434ed5485e8578be6e762d953aa0a6547495f867e6f42538fb7a311435f"
+                "sha256": "b5f2667b5deb08965200d10b27fed802fcf9105cbf6d32061a1566403f918d0b"
             },
             "notes": "The guide is shipped as a file, identical in every port."
+        },
+        {
+            "id": "0058-validate-break-page",
+            "title": "A break carrying page settings",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "A"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape",
+                                "margins": {
+                                    "left": 28.8,
+                                    "right": 28.8
+                                }
+                            }
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "B"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": []
+        },
+        {
+            "id": "0059-validate-break-page-empty",
+            "title": "An empty page: a new stretch with nothing changed",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "A"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": {}
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "B"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": []
+        },
+        {
+            "id": "0060-validate-break-page-bands",
+            "title": "Every band and both distances, on the page and on a break",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "page": {
+                        "margins": {
+                            "header": 14,
+                            "footer": 14
+                        },
+                        "header": {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "H {page}"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "firstHeader": {
+                            "blocks": []
+                        },
+                        "evenFooter": {
+                            "left": "E"
+                        }
+                    },
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "A"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "footer": {
+                                    "blocks": [
+                                        {
+                                            "type": "hr"
+                                        },
+                                        {
+                                            "type": "paragraph",
+                                            "runs": [
+                                                {
+                                                    "text": "F"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "firstFooter": {
+                                    "left": "first"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": []
+        },
+        {
+            "id": "0061-validate-break-page-background",
+            "title": "page.background on a break is refused",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "background": "#FDFAF3"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].page.background",
+                    "message": "a document has one page colour: set background on the top-level page, not on a break"
+                }
+            ]
+        },
+        {
+            "id": "0062-validate-break-page-nested-quote",
+            "title": "page on a break in a quote is refused",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "quote",
+                            "blocks": [
+                                {
+                                    "type": "pageBreak",
+                                    "page": {
+                                        "orientation": "landscape",
+                                        "margins": {
+                                            "left": 28.8,
+                                            "right": 28.8
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].blocks[0].page",
+                    "message": "page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"
+                }
+            ]
+        },
+        {
+            "id": "0063-validate-break-page-nested-cell",
+            "title": "page on a break in a table cell is refused",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "table",
+                            "rows": [
+                                {
+                                    "cells": [
+                                        {
+                                            "blocks": [
+                                                {
+                                                    "type": "pageBreak",
+                                                    "page": []
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].rows[0].cells[0].blocks[0].page",
+                    "message": "page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"
+                }
+            ]
+        },
+        {
+            "id": "0064-validate-break-page-not-object",
+            "title": "page on a break must be an object",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": "landscape"
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].page",
+                    "message": "page on a break must be an object of page settings, {} for a new stretch with nothing changed"
+                }
+            ]
+        },
+        {
+            "id": "0065-validate-break-page-own-rules",
+            "title": "A break's page faces the page object's rules, at its own path",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "sideways",
+                                "margins": {
+                                    "header": -1
+                                },
+                                "footer": "text"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].page.orientation",
+                    "message": "page orientation must be one of: portrait, landscape"
+                },
+                {
+                    "path": "blocks[0].page.margins.header",
+                    "message": "page margins header (the distance from the page edge to the header) must not be negative"
+                },
+                {
+                    "path": "blocks[0].page.footer",
+                    "message": "page footer must be an object ({left?, center?, right?, size?, color?})"
+                }
+            ]
+        },
+        {
+            "id": "0066-validate-break-page-inherited-margins",
+            "title": "Margins are judged against the paper they inherit",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "page": {
+                        "orientation": "landscape",
+                        "margins": {
+                            "left": 300,
+                            "right": 300
+                        }
+                    },
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "portrait"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].page.margins",
+                    "message": "margins must leave at least one inch (72pt) of text area across and down the page"
+                }
+            ]
+        },
+        {
+            "id": "0067-validate-sections",
+            "title": "There is no sections key",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "sections": [
+                        {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "x"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "blocks": []
+                }
+            },
+            "expected": [
+                {
+                    "path": "sections",
+                    "message": "there is no sections key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0068-validate-band-mixed",
+            "title": "A band is one line or blocks, never both",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "page": {
+                        "footer": {
+                            "left": "x",
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "y"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "blocks": []
+                }
+            },
+            "expected": [
+                {
+                    "path": "page.footer",
+                    "message": "page footer is either {left, center, right, size, color} or {blocks}, never both (found blocks with left)"
+                }
+            ]
+        },
+        {
+            "id": "0069-validate-band-refused",
+            "title": "A band refuses a page break at any depth",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "page": {
+                        "header": {
+                            "blocks": [
+                                {
+                                    "type": "quote",
+                                    "blocks": [
+                                        {
+                                            "type": "pageBreak"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "blocks": []
+                }
+            },
+            "expected": [
+                {
+                    "path": "page.header.blocks[0].blocks[0].type",
+                    "message": "a header or footer cannot hold a pageBreak block"
+                }
+            ]
+        },
+        {
+            "id": "0070-validate-band-footnote",
+            "title": "A band refuses a footnote",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "page": {
+                        "footer": {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "",
+                                            "footnote": {
+                                                "blocks": [
+                                                    {
+                                                        "type": "paragraph",
+                                                        "runs": [
+                                                            {
+                                                                "text": "n"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "blocks": []
+                }
+            },
+            "expected": [
+                {
+                    "path": "page.footer.blocks[0].runs[0].footnote",
+                    "message": "a header or footer cannot hold a footnote"
+                }
+            ]
+        },
+        {
+            "id": "0071-validate-footnote",
+            "title": "A footnote run",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "n"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": []
+        },
+        {
+            "id": "0072-validate-footnote-text",
+            "title": "A footnote run's text must be \"\"",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "n"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].runs[0].text",
+                    "message": "a footnote run's text must be \"\": marks are numbered for you. Put the text it follows in the run before it"
+                }
+            ]
+        },
+        {
+            "id": "0073-validate-footnote-empty",
+            "title": "A footnote needs blocks",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": []
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].runs[0].footnote.blocks",
+                    "message": "footnote requires \"blocks\": a non-empty list of blocks, e.g. [{\"type\": \"paragraph\", \"runs\": [{\"text\": \"Source: ...\"}]}]"
+                }
+            ]
+        },
+        {
+            "id": "0074-validate-footnote-nested",
+            "title": "A footnote cannot hold a footnote",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "",
+                                                        "footnote": {
+                                                            "blocks": [
+                                                                {
+                                                                    "type": "paragraph",
+                                                                    "runs": [
+                                                                        {
+                                                                            "text": "in"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].runs[0].footnote.blocks[0].runs[0].footnote",
+                    "message": "a footnote cannot hold a footnote"
+                }
+            ]
+        },
+        {
+            "id": "0075-validate-keepnext-blocks",
+            "title": "keepNext on a table, image-less code and a rule",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "table",
+                            "keepNext": true,
+                            "rows": []
+                        },
+                        {
+                            "type": "code",
+                            "text": "x",
+                            "keepNext": false
+                        },
+                        {
+                            "type": "hr",
+                            "keepNext": true
+                        }
+                    ]
+                }
+            },
+            "expected": []
+        },
+        {
+            "id": "0076-validate-keepnext-not-boolean",
+            "title": "keepNext must be a boolean on those too",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "table",
+                            "keepNext": "yes",
+                            "rows": []
+                        },
+                        {
+                            "type": "code",
+                            "text": "x",
+                            "keepNext": 1
+                        },
+                        {
+                            "type": "hr",
+                            "keepNext": "no"
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].keepNext",
+                    "message": "keepNext must be a boolean"
+                },
+                {
+                    "path": "blocks[1].keepNext",
+                    "message": "keepNext must be a boolean"
+                },
+                {
+                    "path": "blocks[2].keepNext",
+                    "message": "keepNext must be a boolean"
+                }
+            ]
+        },
+        {
+            "id": "0077-validate-meta",
+            "title": "meta: author is text, and the title is not here",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "meta": {
+                        "author": 7,
+                        "title": "T"
+                    },
+                    "blocks": []
+                }
+            },
+            "expected": [
+                {
+                    "path": "meta.author",
+                    "message": "meta author must be text"
+                },
+                {
+                    "path": "meta.title",
+                    "message": "the document title is the top-level \"title\", not meta.title"
+                }
+            ]
+        },
+        {
+            "id": "0078-validate-near-miss-size",
+            "title": "size on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "size": "a4"
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].size",
+                    "message": "a pageBreak has no size key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0079-validate-near-miss-orientation",
+            "title": "orientation on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "orientation": "landscape"
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].orientation",
+                    "message": "a pageBreak has no orientation key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0080-validate-near-miss-margins",
+            "title": "margins on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "margins": {
+                                "left": 10
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].margins",
+                    "message": "a pageBreak has no margins key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0081-validate-near-miss-header",
+            "title": "header on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "header": {
+                                "left": "x"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].header",
+                    "message": "a pageBreak has no header key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0082-validate-near-miss-footer",
+            "title": "footer on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "footer": {
+                                "left": "x"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].footer",
+                    "message": "a pageBreak has no footer key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0083-validate-near-miss-firstheader",
+            "title": "firstHeader on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "firstHeader": {
+                                "left": "x"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].firstHeader",
+                    "message": "a pageBreak has no firstHeader key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0084-validate-near-miss-firstfooter",
+            "title": "firstFooter on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "firstFooter": {
+                                "left": "x"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].firstFooter",
+                    "message": "a pageBreak has no firstFooter key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0085-validate-near-miss-evenheader",
+            "title": "evenHeader on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "evenHeader": {
+                                "left": "x"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].evenHeader",
+                    "message": "a pageBreak has no evenHeader key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0086-validate-near-miss-evenfooter",
+            "title": "evenFooter on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "evenFooter": {
+                                "left": "x"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].evenFooter",
+                    "message": "a pageBreak has no evenFooter key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0087-validate-near-miss-background",
+            "title": "background on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "background": "#FFFFFF"
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].background",
+                    "message": "a pageBreak has no background key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0088-validate-near-miss-border",
+            "title": "border on the break itself is a near-miss naming page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validate",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "border": {
+                                "width": 1
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "path": "blocks[0].border",
+                    "message": "a pageBreak has no border key; use pageBreak.page"
+                }
+            ]
+        },
+        {
+            "id": "0089-repair-page-kept",
+            "title": "An unrelated repair keeps page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        "coerced",
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape",
+                                "margins": {
+                                    "left": 28.8,
+                                    "right": 28.8
+                                }
+                            }
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "B"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "coerced"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape",
+                                "margins": {
+                                    "left": 28.8,
+                                    "right": 28.8
+                                }
+                            }
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "B"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0]",
+                        "message": "coerced bare string block to a paragraph"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0090-repair-page-empty-kept",
+            "title": "An unrelated repair keeps an empty page",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        "coerced",
+                        {
+                            "type": "pageBreak",
+                            "page": {}
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "coerced"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": []
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0]",
+                        "message": "coerced bare string block to a paragraph"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0091-repair-near-miss-moved",
+            "title": "Near-miss keys move into page, each with a note",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "orientation": "landscape",
+                            "margins": {
+                                "left": 30
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape",
+                                "margins": {
+                                    "left": 30
+                                }
+                            }
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0].orientation",
+                        "message": "moved orientation into the break's \"page\": a break's page settings go there"
+                    },
+                    {
+                        "path": "blocks[0].margins",
+                        "message": "moved margins into the break's \"page\": a break's page settings go there"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0092-repair-near-miss-page-wins",
+            "title": "page wins over a near-miss of the same key",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "orientation": "portrait",
+                            "page": {
+                                "orientation": "landscape"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape"
+                            }
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0].orientation",
+                        "message": "dropped orientation from the break: its page already says what it is"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0093-repair-background-dropped",
+            "title": "A background on a break is removed, and said so",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "background": "#FDFAF3",
+                                "orientation": "landscape"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape"
+                            }
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0].page.background",
+                        "message": "removed: a document has one page colour: set background on the top-level page, not on a break"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0094-repair-nested-page-dropped",
+            "title": "A page on a nested break is removed, and said so",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "quote",
+                            "blocks": [
+                                {
+                                    "type": "pageBreak",
+                                    "page": {
+                                        "orientation": "landscape",
+                                        "margins": {
+                                            "left": 28.8,
+                                            "right": 28.8
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "quote",
+                            "blocks": [
+                                {
+                                    "type": "pageBreak"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0].blocks[0].page",
+                        "message": "removed: page settings go on a top-level page break; a break nested in a quote or a table cell cannot change the page"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0095-repair-sections-refused",
+            "title": "sections stays refused: ok false, nothing is lost quietly",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "sections": [
+                        {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "x"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "blocks": []
+                }
+            },
+            "expected": {
+                "ok": false,
+                "schema": {
+                    "sections": [
+                        {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "x"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "blocks": []
+                },
+                "errors": [
+                    {
+                        "path": "sections",
+                        "message": "there is no sections key; use pageBreak.page"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0096-repair-band-blocks",
+            "title": "A band's blocks are repaired under a band's rules",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "page": {
+                        "footer": {
+                            "left": "gone",
+                            "blocks": [
+                                "line",
+                                {
+                                    "type": "pageBreak"
+                                },
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "",
+                                            "footnote": {
+                                                "blocks": [
+                                                    {
+                                                        "type": "paragraph",
+                                                        "runs": [
+                                                            {
+                                                                "text": "n"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "blocks": []
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "page": {
+                        "footer": {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "line"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "paragraph",
+                                    "runs": []
+                                }
+                            ]
+                        }
+                    },
+                    "blocks": []
+                },
+                "errors": [
+                    {
+                        "path": "page.footer",
+                        "message": "removed left: a band is either one line or blocks, and this one has blocks"
+                    },
+                    {
+                        "path": "page.footer.blocks[0]",
+                        "message": "coerced bare string block to a paragraph"
+                    },
+                    {
+                        "path": "page.footer.blocks[1].type",
+                        "message": "dropped a pageBreak block: a header or footer cannot hold one"
+                    },
+                    {
+                        "path": "page.footer.blocks[2].runs[0].footnote",
+                        "message": "dropped a footnote: a header or footer cannot hold one"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0097-repair-break-band-blocks",
+            "title": "So are a break's",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "header": {
+                                    "blocks": [
+                                        "line"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "header": {
+                                    "blocks": [
+                                        {
+                                            "type": "paragraph",
+                                            "runs": [
+                                                {
+                                                    "text": "line"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0].page.header.blocks[0]",
+                        "message": "coerced bare string block to a paragraph"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0098-repair-footnote-run",
+            "title": "A footnote run is repaired as last-word repairs one",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "typed",
+                                    "footnote": "A string note"
+                                },
+                                {
+                                    "footnote": [
+                                        {
+                                            "type": "paragraph",
+                                            "runs": [
+                                                {
+                                                    "text": "A bare list"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "kept"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "pageBreak"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": 7
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "typed"
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "A string note"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "A bare list"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "kept"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0].runs[0].text",
+                        "message": "moved text typed on a footnote mark into a run of its own before it"
+                    },
+                    {
+                        "path": "blocks[0].runs[0].footnote",
+                        "message": "coerced a string footnote to {blocks: [paragraph]}"
+                    },
+                    {
+                        "path": "blocks[0].runs[1].footnote",
+                        "message": "coerced a list of blocks to {blocks}"
+                    },
+                    {
+                        "path": "blocks[0].runs[1].text",
+                        "message": "defaulted a footnote run's text to \"\""
+                    },
+                    {
+                        "path": "blocks[0].runs[2].footnote.blocks[1].type",
+                        "message": "dropped a pageBreak block: a footnote cannot hold one"
+                    },
+                    {
+                        "path": "blocks[0].runs[3].footnote",
+                        "message": "dropped a footnote without blocks"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0099-repair-meta-title",
+            "title": "meta.title moves to the title",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "meta": {
+                        "title": "T",
+                        "author": "A"
+                    },
+                    "blocks": []
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "meta": {
+                        "author": "A"
+                    },
+                    "blocks": [],
+                    "title": "T"
+                },
+                "errors": [
+                    {
+                        "path": "meta.title",
+                        "message": "moved meta.title to the top-level \"title\""
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0100-repair-keepnext-removed",
+            "title": "An invalid keepNext is removed; a valid one on a rule survives",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "validateAndRepair",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        "coerced",
+                        {
+                            "type": "table",
+                            "keepNext": "yes",
+                            "rows": []
+                        },
+                        {
+                            "type": "hr",
+                            "keepNext": true
+                        }
+                    ]
+                }
+            },
+            "expected": {
+                "ok": true,
+                "schema": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "coerced"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "table",
+                            "rows": []
+                        },
+                        {
+                            "type": "hr",
+                            "keepNext": true
+                        }
+                    ]
+                },
+                "errors": [
+                    {
+                        "path": "blocks[0]",
+                        "message": "coerced bare string block to a paragraph"
+                    },
+                    {
+                        "path": "blocks[1].keepNext",
+                        "message": "removed: keepNext must be a boolean"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0101-describe-stretches",
+            "title": "Stretches, bands and footnotes are described",
+            "since": "0.44.0",
+            "tags": [
+                "mixed-pages"
+            ],
+            "fn": "describe",
+            "input": {
+                "doc": {
+                    "page": {
+                        "firstFooter": {
+                            "blocks": []
+                        }
+                    },
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "A"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape"
+                            }
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "B"
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "n"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "portrait"
+                            }
+                        }
+                    ]
+                }
+            },
+            "expected": "Document: Untitled\nPage: letter portrait, firstFooter\nStretches: 3 (portrait, landscape, portrait)\nBlocks: 4 (2 paragraph, 2 pageBreak)\nFootnotes: 1\nWords: 2"
+        },
+        {
+            "id": "0102-lint-field-literal",
+            "title": "Lint: field-literal",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "page": {
+                        "footer": {
+                            "left": "{date}",
+                            "center": "{time:HH:mm}",
+                            "right": "{filename}"
+                        }
+                    },
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "band-field-literal",
+                    "severity": "warning",
+                    "path": "page.footer.left",
+                    "message": "a PDF has no live date or time and this writer does not know the file name: {date}, {time} and {filename} are written as literal text, so put the value in the text itself"
+                },
+                {
+                    "rule": "band-field-literal",
+                    "severity": "warning",
+                    "path": "page.footer.center",
+                    "message": "a PDF has no live date or time and this writer does not know the file name: {date}, {time} and {filename} are written as literal text, so put the value in the text itself"
+                },
+                {
+                    "rule": "band-field-literal",
+                    "severity": "warning",
+                    "path": "page.footer.right",
+                    "message": "a PDF has no live date or time and this writer does not know the file name: {date}, {time} and {filename} are written as literal text, so put the value in the text itself"
+                }
+            ]
+        },
+        {
+            "id": "0103-lint-field-literal-blocks",
+            "title": "Lint: field-literal-blocks",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "page": {
+                        "footer": {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "{date:d MMMM yyyy}"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "band-field-literal",
+                    "severity": "warning",
+                    "path": "page.footer.blocks[0].runs[0]",
+                    "message": "a PDF has no live date or time and this writer does not know the file name: {date}, {time} and {filename} are written as literal text, so put the value in the text itself"
+                }
+            ]
+        },
+        {
+            "id": "0104-lint-field-literal-on-break",
+            "title": "Lint: field-literal-on-break",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "footer": {
+                                    "left": "{date}"
+                                }
+                            }
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "y"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "band-field-literal",
+                    "severity": "warning",
+                    "path": "blocks[1].page.footer.left",
+                    "message": "a PDF has no live date or time and this writer does not know the file name: {date}, {time} and {filename} are written as literal text, so put the value in the text itself"
+                },
+                {
+                    "rule": "sparse-page",
+                    "severity": "warning",
+                    "path": "page 1",
+                    "page": 1,
+                    "message": "page 1 is 2% full; move material so every page carries content, and never pad"
+                },
+                {
+                    "rule": "sparse-page",
+                    "severity": "warning",
+                    "path": "page 2",
+                    "page": 2,
+                    "message": "page 2 is 2% full; move material so every page carries content, and never pad"
+                },
+                {
+                    "rule": "no-page-numbers",
+                    "severity": "info",
+                    "path": "page",
+                    "message": "a multi-page document should carry \"Page {page} of {pages}\" in page.footer"
+                }
+            ]
+        },
+        {
+            "id": "0105-lint-band-overlap-distance",
+            "title": "Lint: band-overlap-distance",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "page": {
+                        "margins": {
+                            "header": 30,
+                            "top": 36
+                        },
+                        "header": {
+                            "left": "H"
+                        }
+                    },
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "band-overlap",
+                    "severity": "warning",
+                    "path": "page.header",
+                    "message": "the header sits 30pt from the page edge and needs a top margin of at least 45pt, or it runs into the text"
+                }
+            ]
+        },
+        {
+            "id": "0106-lint-code-language",
+            "title": "Lint: code-language",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "code",
+                            "language": "php",
+                            "text": "x"
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "code-language",
+                    "severity": "info",
+                    "path": "blocks[0]",
+                    "message": "a code language draws nothing in a PDF yet: the code is set plain, in Courier"
+                }
+            ]
+        },
+        {
+            "id": "0107-lint-footnote-placeholder",
+            "title": "Lint: footnote-placeholder",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                },
+                                {
+                                    "text": "",
+                                    "footnote": {
+                                        "blocks": [
+                                            {
+                                                "type": "paragraph",
+                                                "runs": [
+                                                    {
+                                                        "text": "TODO"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "placeholder",
+                    "severity": "warning",
+                    "path": "blocks[0].runs[1].footnote.blocks[0].runs[0]",
+                    "message": "this text looks like a placeholder (\"[Insert ...]\", \"TBD\", \"TODO\", lorem ipsum); a finished document has none"
+                }
+            ]
+        },
+        {
+            "id": "0108-lint-band-placeholder",
+            "title": "Lint: band-placeholder",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "page": {
+                        "header": {
+                            "blocks": [
+                                {
+                                    "type": "paragraph",
+                                    "runs": [
+                                        {
+                                            "text": "[Insert date]"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "placeholder",
+                    "severity": "warning",
+                    "path": "page.header.blocks[0].runs[0]",
+                    "message": "this text looks like a placeholder (\"[Insert ...]\", \"TBD\", \"TODO\", lorem ipsum); a finished document has none"
+                }
+            ]
+        },
+        {
+            "id": "0109-lint-mixed-sparse",
+            "title": "Lint: mixed-sparse",
+            "since": "0.44.0",
+            "tags": [
+                "lint",
+                "mixed-pages"
+            ],
+            "fn": "lint",
+            "input": {
+                "doc": {
+                    "blocks": [
+                        {
+                            "type": "pageBreak",
+                            "page": {
+                                "orientation": "landscape"
+                            }
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "x"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "expected": [
+                {
+                    "rule": "sparse-page",
+                    "severity": "warning",
+                    "path": "page 1",
+                    "page": 1,
+                    "message": "page 1 is 0% full; move material so every page carries content, and never pad"
+                },
+                {
+                    "rule": "sparse-page",
+                    "severity": "warning",
+                    "path": "page 2",
+                    "page": 2,
+                    "message": "page 2 is 3% full; move material so every page carries content, and never pad"
+                },
+                {
+                    "rule": "no-page-numbers",
+                    "severity": "info",
+                    "path": "page",
+                    "message": "a multi-page document should carry \"Page {page} of {pages}\" in page.footer"
+                }
+            ]
         }
     ]
 }

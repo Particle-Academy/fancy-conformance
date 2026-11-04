@@ -1844,6 +1844,7 @@ const BASE_DEFS: Record<string, string[]> = {
   tableCell: ["blocks", "shading", "borders", "padding", "valign", "colSpan", "rowSpan"],
   image: ["type", "src", "widthPx", "heightPx", "alt"],
   border: ["style", "width", "color"],
+  pageBreak: ["type"],
 };
 const SIZE_LW = { type: "number", exclusiveMinimum: 0 };
 const BASE_CONSTRAINTS = {
@@ -1868,6 +1869,12 @@ const BASE_CONSTRAINTS = {
 function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<string, string[]> } {
   const lw = structuredClone(BASE_DEFS);
   const fp = structuredClone(BASE_DEFS);
+  fp.document!.push("meta");
+  fp.page!.push("firstHeader", "firstFooter", "evenHeader", "evenFooter");
+  fp.run!.push("footnote");
+  fp.table!.push("keepNext");
+  fp.image!.push("keepNext");
+  if (!m.finePrintNoBreakPage) fp.pageBreak!.push("page");
   lw.blockTypes!.push("chart");
   if (!m.lastWordNoFootnote) lw.run!.push("footnote");
   if (!m.lastWordNoMeta) lw.document!.push("meta");
@@ -1896,6 +1903,54 @@ export function docModelConstraint(def: string, m: Mutations = {}): J {
   if (m.linkConverged) c.lastWord["run.link"] = c.finePrint["run.link"];
   if (m.sizeConverged) c.finePrint["run.size"] = c.lastWord["run.size"];
   return { lastWord: c.lastWord[def], finePrint: c.finePrint[def] };
+}
+
+// ---------------------------------------------------------------------------
+// doc-model/page-refusal (SPEC 15) -- both refusal rules as data
+// ---------------------------------------------------------------------------
+
+const PAGE_KEYS = ["size", "orientation", "margins", "header", "footer", "firstHeader", "firstFooter", "evenHeader", "evenFooter", "background", "border"];
+const NOT_IN_LAST_WORD = "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print";
+
+export function pageRefusal(doc: J, m: Mutations = {}): J {
+  const messages: string[] = [];
+  const lastWord: string[] = [];
+  let broken = false;
+  if (doc.sections !== undefined) {
+    messages.push("there is no sections key; use pageBreak.page");
+    lastWord.push("there is no sections key; use pageBreak.page");
+  }
+  let unrelatedRepair = false;
+  for (const block of doc.blocks ?? []) {
+    if (block.type === "heading" && block.level === undefined) {
+      broken = true;
+      unrelatedRepair = true;
+    }
+    if (block.type !== "pageBreak") continue;
+    for (const key of PAGE_KEYS) {
+      if (key in block) {
+        const text = m.nearMissReworded ? `pageBreak has no ${key}` : `a pageBreak has no ${key} key; use pageBreak.page`;
+        messages.push(text);
+        lastWord.push(text);
+      }
+    }
+    if ("page" in block) lastWord.push(NOT_IN_LAST_WORD);
+  }
+  const lwRefuses = lastWord.length > 0 || broken;
+  const hasPage = (doc.blocks ?? []).some((b: J) => b.type === "pageBreak" && "page" in b);
+  // A repairer that rewrites a break to bare {type} deletes the very thing refused.
+  const lwRepairOk = m.repairStripsPage && hasPage ? !doc.sections : !lwRefuses;
+  const fpRepairOk = !doc.sections;
+  if (unrelatedRepair) {
+    return {
+      finePrint: { repairOk: fpRepairOk, pageKept: !m.repairStripsPage },
+      lastWord: { repairOk: lwRepairOk },
+    };
+  }
+  return {
+    finePrint: { messages, repairOk: fpRepairOk },
+    lastWord: { messages: lastWord, repairOk: lwRepairOk },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -1934,4 +1989,5 @@ export const RUNNERS: Record<string, (c: { fn?: string; input: J }, m: Mutations
   "exchange/policy": (c, m) => throwsAsValue(() => (c.fn === "checkExport" ? checkExport(c.input, m) : enabledTargets(c.input, m))),
   "exchange/csv": (c, m) => toCsv(c.input.table, c.input.options, m),
   "doc-model/shared": (c, m) => (c.fn === "compare" ? docModelCompare(c.input.def, m) : docModelConstraint(c.input.def, m)),
+  "doc-model/page-refusal": (c, m) => pageRefusal(c.input.doc, m),
 };

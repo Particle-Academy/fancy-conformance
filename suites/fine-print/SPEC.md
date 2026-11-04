@@ -119,6 +119,12 @@ every EMPTY object in its result with an empty list before comparing. Nothing
 else is normalised. This is `shared/value-equality/0210`'s blind spot, declared
 here once rather than worked around per row.
 
+Rows from `0058` hold mixed pages, bands, `keepNext` and footnotes (`since`
+0.44.0, tag `mixed-pages`). A port takes them with the vocabulary. `writer-bytes`
+has no row for them yet, on purpose: its 51 rows not moving is the proof that
+existing documents stayed byte-identical. Byte rows follow once a port can lay out
+mixed pages.
+
 `lint` rows whose golden contains a `guard:*` finding need the READER (lint
 writes the PDF and reads it back). They carry a `node`/`python` skip until
 phase R, and the skip is the only one the writer phase allows.

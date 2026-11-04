@@ -1,0 +1,693 @@
+{
+  "$schema": "../../../schema/case-table.schema.json",
+  "suite": "doc-model/page-refusal",
+  "cases": [
+    {
+      "id": "0001-page",
+      "title": "A break carrying page: fine-print honours it, last-word refuses",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape"
+              }
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
+          ],
+          "repairOk": false
+        }
+      }
+    },
+    {
+      "id": "0002-page-empty",
+      "title": "An empty page is a request too",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {}
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
+          ],
+          "repairOk": false
+        }
+      }
+    },
+    {
+      "id": "0003-trap-unrelated-repair",
+      "title": "THE TRAP: an unrelated repair must not delete page and report ok",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "heading",
+              "runs": [
+                {
+                  "text": "no level"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "repairOk": true,
+          "pageKept": true
+        },
+        "lastWord": {
+          "repairOk": false
+        }
+      },
+      "notes": "Before stage 1 the repairers rewrote a break to {type: pageBreak}, so repairing anything else silently undid the orientation and reported ok: true. Messages are not compared: the heading's own error differs by package."
+    },
+    {
+      "id": "0004-trap-page-in-a-list-of-breaks",
+      "title": "Every break is judged, not the first",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak"
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape"
+              }
+            },
+            {
+              "type": "pageBreak"
+            },
+            {
+              "type": "pageBreak",
+              "page": {
+                "orientation": "landscape"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print",
+            "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
+          ],
+          "repairOk": false
+        }
+      }
+    },
+    {
+      "id": "0010-near-miss-size",
+      "title": "size on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "size": "a4"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no size key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no size key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0011-near-miss-orientation",
+      "title": "orientation on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "orientation": "landscape"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no orientation key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no orientation key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0012-near-miss-margins",
+      "title": "margins on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "margins": {
+                "left": 10
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no margins key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no margins key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0013-near-miss-header",
+      "title": "header on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "header": {
+                "left": "x"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no header key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no header key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0014-near-miss-footer",
+      "title": "footer on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "footer": {
+                "left": "x"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no footer key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no footer key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0015-near-miss-firstHeader",
+      "title": "firstHeader on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "firstHeader": {
+                "left": "x"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no firstHeader key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no firstHeader key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0016-near-miss-firstFooter",
+      "title": "firstFooter on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "firstFooter": {
+                "left": "x"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no firstFooter key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no firstFooter key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0017-near-miss-evenHeader",
+      "title": "evenHeader on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "evenHeader": {
+                "left": "x"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no evenHeader key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no evenHeader key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0018-near-miss-evenFooter",
+      "title": "evenFooter on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "evenFooter": {
+                "left": "x"
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no evenFooter key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no evenFooter key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0019-near-miss-background",
+      "title": "background on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "background": "#FFFFFF"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no background key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no background key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0020-near-miss-border",
+      "title": "border on the break itself: the same message in both",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "border": {
+                "width": 1
+              }
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "a pageBreak has no border key; use pageBreak.page"
+          ],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [
+            "a pageBreak has no border key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it."
+    },
+    {
+      "id": "0030-sections",
+      "title": "There is no sections key: refused by both, and repair cannot save it",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "sections": [
+            {
+              "blocks": [
+                {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "x"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "blocks": []
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [
+            "there is no sections key; use pageBreak.page"
+          ],
+          "repairOk": false
+        },
+        "lastWord": {
+          "messages": [
+            "there is no sections key; use pageBreak.page"
+          ],
+          "repairOk": false
+        }
+      },
+      "notes": "Dropping it would lose the content inside it and report ok, so neither repairer does."
+    },
+    {
+      "id": "0031-plain-break",
+      "title": "A plain page break is untouched",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "x"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [],
+          "repairOk": true
+        }
+      }
+    },
+    {
+      "id": "0032-unknown-key",
+      "title": "An unknown key on a break stays tolerated: near-misses are narrow",
+      "since": "0.44.0",
+      "tags": [
+        "page-refusal"
+      ],
+      "fn": "refusal",
+      "input": {
+        "doc": {
+          "blocks": [
+            {
+              "type": "pageBreak",
+              "note": "mine"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "finePrint": {
+          "messages": [],
+          "repairOk": true
+        },
+        "lastWord": {
+          "messages": [],
+          "repairOk": true
+        }
+      }
+    }
+  ]
+}

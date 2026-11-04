@@ -1603,6 +1603,452 @@
         }
       },
       "notes": "A splice at cell level: the spliced string sits at the cell's path, so the guard applies to it and to nothing the author wrote."
+    },
+    {
+      "id": "0207-fine-print-band-value-with-section",
+      "title": "A band VALUE holding any band field is VALUE_PAGE_FIELD, not only {page}",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "left": "{{ name }}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "see {section}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/page/footer/left"
+      },
+      "notes": "Once a writer resolves {section}, user data holding it would become a live value. One list for both writers."
+    },
+    {
+      "id": "0208-last-word-band-value-with-a-date-picture",
+      "title": "last-word: a date with a picture is a field too",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "last-word",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "left": "{{ name }}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "{date:d MMMM yyyy}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/page/footer/left"
+      },
+      "notes": "last-word has written this as a live DATE field since 0.16.0; the old check saw only {page} and {pages}."
+    },
+    {
+      "id": "0209-band-value-only-brace-shaped",
+      "title": "A value that is only brace-shaped is text",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "left": "{{ name }}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "{Page} {pagex} {date:}"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [],
+          "page": {
+            "footer": {
+              "left": "{Page} {pagex} {date:}"
+            }
+          }
+        }
+      },
+      "notes": "Lower-case exact names, and :FORMAT needs a character: the writers' own grammar."
+    },
+    {
+      "id": "0210-fine-print-first-band-takes-a-token",
+      "title": "fine-print: firstFooter is a band slot",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "firstFooter": {
+                "left": "{{ name }}"
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "Ada"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [],
+          "page": {
+            "firstFooter": {
+              "left": "Ada"
+            }
+          }
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0211-fine-print-band-on-a-break",
+      "title": "fine-print: a band on a pageBreak is refused the same value",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "pageBreak",
+                "page": {
+                  "footer": {
+                    "left": "{{ name }}"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "{pages}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/blocks/0/page/footer/left"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0212-fine-print-blocks-band-run",
+      "title": "fine-print: a blocks band's run text is a band field too",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ name }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "{page}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/page/footer/blocks/0/runs/0/text"
+      },
+      "notes": "First match wins in a profile, so `**.runs.*.text` used to take this as plain text: a live field with no error at all."
+    },
+    {
+      "id": "0213-last-word-blocks-band-run",
+      "title": "last-word: the same hole, the same refusal",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "last-word",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [],
+            "page": {
+              "footer": {
+                "blocks": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ name }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "data": {
+          "name": "{page}"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "VALUE_PAGE_FIELD",
+        "path": "/document/page/footer/blocks/0/runs/0/text"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0214-fine-print-body-run-stays-literal",
+      "title": "A body run keeps a field-shaped value: only a band is live",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ name }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "{page}"
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "{page}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": ""
+    },
+    {
+      "id": "0215-fine-print-geometry-on-a-break-is-forbidden",
+      "title": "fine-print: page geometry on a break stays closed to tokens",
+      "since": "0.44.0",
+      "tags": [
+        "template",
+        "profiles"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            },
+            "logo": {
+              "type": "image"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "pageBreak",
+                "page": {
+                  "orientation": "{{ name }}"
+                }
+              }
+            ]
+          }
+        },
+        "data": {
+          "name": "landscape"
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TOKEN_FORBIDDEN_FIELD",
+        "path": "/document/blocks/0/page/orientation"
+      },
+      "notes": ""
     }
   ]
 }

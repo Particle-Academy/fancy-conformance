@@ -39,7 +39,7 @@ function failed(suite: string, m: Mutations): string[] {
 test("every exchange suite and doc-model/shared has a probe", () => {
   const shipped = listSuites().filter((s) => s.startsWith("exchange/") || s.startsWith("doc-model/"));
   assert.deepEqual([...shipped].sort(), [...SUITES].sort());
-  assert.equal(SUITES.length, 16);
+  assert.equal(SUITES.length, 17);
 });
 
 for (const suite of SUITES) {
@@ -161,8 +161,12 @@ const MUTANTS: Array<[string, string, string, string[]]> = [
   ["doc-model/shared", "last-word before 0.40.0, with no footnote on the run", "lastWordNoFootnote", ["0006"]],
   ["doc-model/shared", "last-word before 0.41.0, with no meta", "lastWordNoMeta", ["0001"]],
   ["doc-model/shared", "last-word before 0.41.0, with no first or even band", "lastWordNoPageVariants", ["0002"]],
+  ["doc-model/shared", "fine-print with no page on a break", "finePrintNoBreakPage", ["0015"]],
   ["doc-model/shared", "the link rule converged (a deliberate delta erased)", "linkConverged", ["0101"]],
   ["doc-model/shared", "the size rule converged (a deliberate delta erased)", "sizeConverged", ["0102"]],
+  // doc-model/page-refusal
+  ["doc-model/page-refusal", "a repairer rewriting a break to bare {type} and reporting ok", "repairStripsPage", ["0001", "0002", "0003", "0004"]],
+  ["doc-model/page-refusal", "a near-miss message reworded", "nearMissReworded", ["0010", "0011", "0012", "0013", "0014", "0015", "0016", "0017", "0018", "0019", "0020"]],
 ];
 
 for (const [suite, name, flag, expected] of MUTANTS) {

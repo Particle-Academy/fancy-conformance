@@ -175,7 +175,8 @@ it('loads the exchange suites and doc-model/shared, every row with a declared fu
     // Exact counts on purpose: a row quietly lost between the generator and
     // this loader is the failure this catches. Move them with the suites.
     $expected = [
-        'doc-model/shared' => 20,
+        'doc-model/page-refusal' => 18,
+        'doc-model/shared' => 21,
         'exchange/content' => 56,
         'exchange/csv' => 12,
         'exchange/from-dark-slide' => 18,

@@ -29,6 +29,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent / "suites"
 SINCE = "0.37.0"
+SINCE_MIXED_PAGES = "0.44.0"
+SUITE_SINCE = {"doc-model/page-refusal": SINCE_MIXED_PAGES}
 SPEC = "suites/exchange/SPEC.md"
 
 LF = chr(10)
@@ -275,11 +277,12 @@ class Suite:
         expected: Any,
         notes: str | None = None,
         tags: list[str] | None = None,
+        since: str | None = None,
     ) -> None:
         case: dict[str, Any] = {
             "id": cid,
             "title": title,
-            "since": SINCE,
+            "since": since or SINCE,
             "tags": tags or [self.name.split("/")[-1]],
             "fn": fn,
             "input": inp,
@@ -4609,18 +4612,29 @@ def doc_model_suite() -> Suite:
             "0001-document",
             "Document properties",
             "document",
-            fields(["title", "blocks", "page", "defaultFont", "defaultSize"], lw=["meta"]),
-            "Deliberate delta since 0.41.0: last-word has meta ({author}, docProps/core.xml dc:creator); fine-print has no document properties yet.",
+            fields(["title", "blocks", "page", "defaultFont", "defaultSize", "meta"]),
+            "meta ({author}) is SHARED since fine-print's mixed-pages release: it writes the PDF's Author and an {author} band token from it.",
         ),
         (
             "0002-page",
             "page: background and border are SHARED",
             "page",
             fields(
-                ["size", "orientation", "margins", "header", "footer", "background", "border"],
-                lw=["firstHeader", "firstFooter", "evenHeader", "evenFooter"],
+                [
+                    "size",
+                    "orientation",
+                    "margins",
+                    "header",
+                    "footer",
+                    "firstHeader",
+                    "firstFooter",
+                    "evenHeader",
+                    "evenFooter",
+                    "background",
+                    "border",
+                ],
             ),
-            "Owner decision 11: last-word gains page.background and page.border. This row FAILS for last-word until it does; that is the point. Deliberate delta since 0.41.0: last-word has first-page and even-page bands (Word's titlePg and evenAndOddHeaders); fine-print draws one band per kind.",
+            "Owner decision 11: last-word gains page.background and page.border. This row FAILS for last-word until it does; that is the point. First-page and even-page bands are SHARED since fine-print's mixed-pages release.",
         ),
         (
             "0003-page-border",
@@ -4675,10 +4689,10 @@ def doc_model_suite() -> Suite:
                     "size",
                     "font",
                     "letterSpacing",
+                    "footnote",
                 ],
-                lw=["footnote"],
             ),
-            'Deliberate delta since 0.40.0: a last-word run may carry a footnote ({text: "", footnote: {blocks}}); fine-print draws no footnotes yet.',
+            'A run may carry a footnote ({text: "", footnote: {blocks}}). SHARED since fine-print\'s mixed-pages release, which draws it (owner: "it should not be losing the footnote").',
         ),
         (
             "0007-paragraph",
@@ -4705,8 +4719,11 @@ def doc_model_suite() -> Suite:
             "0010-table",
             "Table properties",
             "table",
-            fields(["type", "widths", "width", "align", "borders", "cellPadding", "rows"]),
-            None,
+            fields(
+                ["type", "widths", "width", "align", "borders", "cellPadding", "rows"],
+                fp=["keepNext"],
+            ),
+            "Deliberate delta until DOCX stage 2: fine-print keeps a table with the next block. Word has no table-level keepNext; last-word would have to set it on every paragraph of the last row.",
         ),
         ("0011-table-row", "Table row", "tableRow", fields(["header", "cells"]), None),
         (
@@ -4720,13 +4737,22 @@ def doc_model_suite() -> Suite:
             "0013-image",
             "Image block",
             "image",
-            fields(["type", "src", "widthPx", "heightPx", "alt"]),
-            None,
+            fields(["type", "src", "widthPx", "heightPx", "alt"], fp=["keepNext"]),
+            "Deliberate delta until DOCX stage 2: fine-print keeps an image with its caption.",
         ),
         ("0014-border", "One border edge", "border", fields(["style", "width", "color"]), None),
     ]
     for cid, title, d, exp, note in rows:
         s.add(cid, title, f, {"def": d}, exp, note)
+    s.add(
+        "0015-page-break",
+        "pageBreak: page is fine-print's alone until DOCX stage 2",
+        f,
+        {"def": "pageBreak"},
+        fields(["type"], fp=["page"]),
+        "Deliberate delta until stage 2: fine-print honours pageBreak.page. last-word refuses it, in all three runtimes (doc-model/page-refusal), so its schema does not declare it. Stage 2 moves it to both and removes this delta.",
+        since=SINCE_MIXED_PAGES,
+    )
     cons: list[tuple[str, str, str, Any, str | None]] = [
         (
             "0101-run-link",
@@ -4791,6 +4817,121 @@ def doc_model_suite() -> Suite:
     ]
     for cid, title, d, exp, note in cons:
         s.add(cid, title, "constraint", {"def": d}, exp, note)
+    return s
+
+
+# ---------------------------------------------------------------------------
+# doc-model/page-refusal
+# ---------------------------------------------------------------------------
+
+NOT_IN_LAST_WORD = "pageBreak.page is not implemented in last-word yet; remove page to keep one page setup, or write this document as a PDF with fine-print"
+NO_SECTIONS = "there is no sections key; use pageBreak.page"
+PAGE_KEYS = [
+    "size",
+    "orientation",
+    "margins",
+    "header",
+    "footer",
+    "firstHeader",
+    "firstFooter",
+    "evenHeader",
+    "evenFooter",
+    "background",
+    "border",
+]
+NEAR_MISS_VALUES: dict[str, Any] = {
+    "size": "a4",
+    "orientation": "landscape",
+    "margins": {"left": 10},
+    "background": "#FFFFFF",
+    "border": {"width": 1},
+}
+
+
+def page_refusal_suite() -> Suite:
+    """The trap documents, as messages and ok, the same bytes across packages.
+
+    Only messages are compared: Node's error paths are JSON Pointers
+    (`/blocks/1/page`) where PHP and Python write `blocks[1].page`. `repairOk` is
+    validateAndRepair's `ok`, the half that catches a repairer silently rewriting a
+    break to bare {type} and reporting success.
+    """
+    s = Suite("doc-model/page-refusal")
+    para = {"type": "paragraph", "runs": [{"text": "x"}]}
+    landscape = {"type": "pageBreak", "page": {"orientation": "landscape"}}
+
+    def row(cid, title, doc, fine_print, last_word, note=None):
+        s.add(
+            cid,
+            title,
+            "refusal",
+            {"doc": doc},
+            {"finePrint": fine_print, "lastWord": last_word},
+            note,
+            since=SINCE_MIXED_PAGES,
+        )
+
+    row(
+        "0001-page",
+        "A break carrying page: fine-print honours it, last-word refuses",
+        {"blocks": [para, landscape, para]},
+        {"messages": [], "repairOk": True},
+        {"messages": [NOT_IN_LAST_WORD], "repairOk": False},
+    )
+    row(
+        "0002-page-empty",
+        "An empty page is a request too",
+        {"blocks": [para, {"type": "pageBreak", "page": {}}, para]},
+        {"messages": [], "repairOk": True},
+        {"messages": [NOT_IN_LAST_WORD], "repairOk": False},
+    )
+    row(
+        "0003-trap-unrelated-repair",
+        "THE TRAP: an unrelated repair must not delete page and report ok",
+        {"blocks": [{"type": "heading", "runs": [{"text": "no level"}]}, landscape]},
+        {"repairOk": True, "pageKept": True},
+        {"repairOk": False},
+        "Before stage 1 the repairers rewrote a break to {type: pageBreak}, so repairing anything else silently undid the orientation and reported ok: true. Messages are not compared: the heading's own error differs by package.",
+    )
+    row(
+        "0004-trap-page-in-a-list-of-breaks",
+        "Every break is judged, not the first",
+        {"blocks": [{"type": "pageBreak"}, landscape, {"type": "pageBreak"}, landscape]},
+        {"messages": [], "repairOk": True},
+        {"messages": [NOT_IN_LAST_WORD, NOT_IN_LAST_WORD], "repairOk": False},
+    )
+    for i, key in enumerate(PAGE_KEYS):
+        message = f"a pageBreak has no {key} key; use pageBreak.page"
+        row(
+            f"{10 + i:04d}-near-miss-{key}",
+            f"{key} on the break itself: the same message in both",
+            {"blocks": [{"type": "pageBreak", key: NEAR_MISS_VALUES.get(key, {"left": "x"})}]},
+            {"messages": [message], "repairOk": True},
+            {"messages": [message], "repairOk": False},
+            "fine-print's repair moves the key into page with a note (a background is then dropped, also with a note); last-word has nowhere to move it.",
+        )
+    row(
+        "0030-sections",
+        "There is no sections key: refused by both, and repair cannot save it",
+        {"sections": [{"blocks": [para]}], "blocks": []},
+        {"messages": [NO_SECTIONS], "repairOk": False},
+        {"messages": [NO_SECTIONS], "repairOk": False},
+        "Dropping it would lose the content inside it and report ok, so neither repairer does.",
+    )
+    row(
+        "0031-plain-break",
+        "A plain page break is untouched",
+        {"blocks": [para, {"type": "pageBreak"}, para]},
+        {"messages": [], "repairOk": True},
+        {"messages": [], "repairOk": True},
+    )
+    row(
+        "0032-unknown-key",
+        "An unknown key on a break stays tolerated: near-misses are narrow",
+        {"blocks": [{"type": "pageBreak", "note": "mine"}]},
+        {"messages": [], "repairOk": True},
+        {"messages": [], "repairOk": True},
+    )
     return s
 
 
@@ -4949,6 +5090,16 @@ META: dict[str, tuple[str, dict[str, str], list[dict[str, str]], list[str]]] = {
             "SPEC section 13. `environment` is what the language's own detection found; policy.modules overrides it, which is how 0006 injects an absent fine-print."
         ],
     ),
+    "doc-model/page-refusal": (
+        "pageBreak.page, near-miss keys and sections: the same messages, and repair that cannot lie",
+        {
+            "refusal": "refusal(doc) -> {finePrint, lastWord}, each half {messages?: [string], repairOk: boolean, pageKept?: boolean}. messages: validate(doc)'s messages in order, paths dropped, since Node's differ. repairOk: validateAndRepair(doc).ok. pageKept: every break that had page still has it in the repaired schema. A package runs its own half."
+        },
+        LW + FP,
+        [
+            "SPEC section 15. Stage 2 of mixed page orientation moves last-word's half to what fine-print's says."
+        ],
+    ),
     "exchange/csv": (
         "CSV export: RFC 4180 and formula-injection escaping on by default",
         {"toCsv": "toCsv(table, options?) -> {text, report}"},
@@ -4994,7 +5145,7 @@ def manifest(name: str) -> dict[str, Any]:
         "$schema": "../../../schema/suite-manifest.schema.json",
         "suite": name,
         "title": title,
-        "since": SINCE,
+        "since": SUITE_SINCE.get(name, SINCE),
         "caseFormat": "table",
         "cases": "cases.json",
         "contract": {
@@ -5026,6 +5177,7 @@ def main() -> None:
         policy_suite(),
         csv_suite(),
         doc_model_suite(),
+        page_refusal_suite(),
     ]
     total = 0
     for suite in suites:

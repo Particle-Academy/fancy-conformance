@@ -10,6 +10,34 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+**What a consumer must do:** a harness that counts rows moves: `fine-print/writer-model`
+57 to 109, `doc-model/shared` 20 to 21, `template/profiles` by nine, and there is a new
+suite, `doc-model/page-refusal` (18 rows). A harness compares with `match`/`switch` over
+`doc-model/shared`'s `def` needs an arm for `pageBreak`. `fine-print/writer-bytes` did not
+move, not a byte, and `0001`-`0055` of `writer-model` did not move. A fine-print port must
+take the new guide and schema (`0056`, `0057`) when it takes this version.
+
+### Added
+
+- **`doc-model/page-refusal`** (mixed page orientation, stage 1): `pageBreak.page`, the
+  near-miss keys and `sections` as messages, the same bytes in both packages, plus
+  `validateAndRepair`'s `ok`. Row `0003` is the trap: an unrelated repair must not delete
+  `page` and report success. Paths are left out because Node's are JSON Pointers. Each
+  package runs its own half; stage 2 moves last-word's half to what fine-print's says.
+- **`doc-model/shared` `0015-page-break`**: `page` is fine-print's alone until DOCX stage 2.
+- **`fine-print/writer-model` `0058`-`0109`**, exported, never hand-written: validate, repair,
+  describe and lint for mixed pages, blocks bands, footnotes and `keepNext`.
+- **`template/profiles` `0207`-`0215`**: a band value holding any band field is refused, for
+  both writers, in a one-line slot, on a break and in a blocks band's run text.
+
+### Changed
+
+- **`doc-model/shared`**: `meta` (`0001`), the first and even bands (`0002`) and `run.footnote`
+  (`0006`) move from last-word-only to both: fine-print draws them. `keepNext` joins `table`
+  (`0010`) and `image` (`0013`) as fine-print-only until stage 2.
+- **`fine-print/writer-model` `0056` and `0057`**: the JSON Schema and the guide hash, by the
+  exporter.
+
 ## [0.43.0] - 2026-11-01
 
 **What a consumer must do:** a fancy-flow runtime that bumps to 0.43.0 gets

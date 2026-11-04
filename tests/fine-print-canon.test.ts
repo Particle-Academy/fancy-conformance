@@ -159,7 +159,7 @@ test("the fine-print suites load with their exact row counts", () => {
   // Move these numbers with a re-export, never to make a failure go away.
   const expected: Record<string, number> = {
     "fine-print/php-semantics": 90,
-    "fine-print/writer-model": 57,
+    "fine-print/writer-model": 109,
     "fine-print/writer-bytes": 51,
   };
   for (const [suite, n] of Object.entries(expected)) {
