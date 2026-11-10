@@ -10,6 +10,18 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-11-10
+
+### Changed
+
+- **`fine-print/writer-model` row `0057-guide` carries the new guide hash**
+  (`a066d164…`), re-exported from fine-print 0.7.1, whose agent guide gained a
+  reading section (`Agent::read`, the 0.7.0 word boxes) and the exchange
+  methods. It is the only row that moved; the export of all three fine-print
+  suites was otherwise byte-for-byte unchanged. **Consumer action:** fine-print
+  and its ports take 0.47.0 together with fine-print 0.7.1. A fine-print older
+  than 0.7.1 fails this row against 0.47.0, so move both at once.
+
 ## [0.46.0] - 2026-11-04
 
 ### Added

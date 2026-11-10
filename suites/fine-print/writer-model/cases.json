@@ -4790,7 +4790,7 @@
             "fn": "guide",
             "input": {},
             "expected": {
-                "sha256": "b5f2667b5deb08965200d10b27fed802fcf9105cbf6d32061a1566403f918d0b"
+                "sha256": "a066d164027ef65f1cb2642e5d1063d01f24f10862225073ad0d5d000ca17814"
             },
             "notes": "The guide is shipped as a file, identical in every port."
         },
