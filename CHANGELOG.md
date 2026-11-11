@@ -10,6 +10,13 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Changed
+
+- **Releases need a lab-run certificate.** `publish.yml` gains a read-only
+  `lab-certificate` job that every publishing job needs: a tag is published only
+  when the fancy-labs lab has certified that exact version and commit. Consumers
+  do nothing; this changes how releases are cut, not what the package does.
+
 ## [0.47.0] - 2026-11-10
 
 ### Changed
@@ -595,7 +602,6 @@ dark-slide's backslash-escape fix with this pin (first entry under Added).
 
   Routing was verified against the TypeScript engine before release, and the
   goldens follow the suite's existing PHP-reference output shape.
-
 
 ### Fixed
 
@@ -1756,7 +1762,6 @@ No case or golden changed.
   over-correction, which discards a deliberately injected registry), a
   precedence inversion, and the correct implementation as a control.
 
-
 ## [0.7.0] - 2026-08-23
 
 *For consumers: **nothing to do.*** A new suite adds cases, it does not change
@@ -1915,7 +1920,6 @@ which is precisely what rule 4 of `runners/README.md` exists to make visible.
 
   Consumers pin the suite version deliberately, so this release moves the pin in
   every port that carries one. Each was re-run before its pin moved.
-
 
 ## [0.4.0] - 2026-08-19
 
@@ -2116,7 +2120,6 @@ which is precisely what rule 4 of `runners/README.md` exists to make visible.
   JavaScript and falsy in PHP, and a branch node reading a form value or a JSON
   body hits every one. An implementation forwarding to native truthiness fails
   cases 0013-0015 and nothing else.
-
 
 ## [0.1.0] - 2026-08-10
 
