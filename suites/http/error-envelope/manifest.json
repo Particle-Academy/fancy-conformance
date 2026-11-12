@@ -1,0 +1,40 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "http/error-envelope",
+  "title": "One error envelope: the shared sentences, and the normaliser that turns any error response into one",
+  "since": "0.48.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "functions": {
+      "normalise": "normalise({status, headers, body, now?}) -> null | {status, code, sentence, fields, retryAfter, requestId}",
+      "formatBytes": "formatBytes(n) -> string",
+      "formatDuration": "formatDuration(s) -> string (the retry clause, no leading space)",
+      "sanitise": "sanitise(text, max = 300) -> string"
+    },
+    "summary": "Normative text: suites/http/SPEC.md sections 2 and 6. Written BEFORE any implementation (CC-fancy-0031). The envelope's JSON Schema is envelope.schema.json beside this file; each package ships a byte copy pinned by sha256.",
+    "reference": "authored",
+    "referenceNote": "Authored from suites/http/SPEC.md in scripts/build-http-cases.py on 2026-11-12, before any implementation existed. tests/http-probe.ts is a reading of the spec that passes every row, and tests/discrimination-http.test.ts pins the mistakes it catches.",
+    "implementations": [
+      {
+        "language": "node",
+        "package": "@particle-academy/fancy-http-errors",
+        "symbol": "normalise"
+      },
+      {
+        "language": "php",
+        "package": "particle-academy/fancy-http-guard",
+        "symbol": "ParticleAcademy\\HttpGuard\\HttpError::normalise"
+      },
+      {
+        "language": "python",
+        "package": "fancy-http-guard",
+        "symbol": "fancy_http_guard.sentences"
+      }
+    ]
+  },
+  "notes": [
+    "Python runs formatBytes, formatDuration and sanitise, which its guard uses to write sentences; every normalise row carries skip.python with the reason.",
+    "Two halves on purpose: the servers EMIT one strict shape, and the normaliser ACCEPTS every shape a real server sends, because the UI talks to servers nobody here wrote."
+  ]
+}

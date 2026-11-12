@@ -10,6 +10,45 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-11-12
+
+Prepared on `main` and NOT tagged yet. The packages that run these tables pin
+`v0.48.0`, so their CI checkout fails until the tag exists.
+
+### Added
+
+- **`http/error-envelope`, 80 rows, and `http/request-guards`, 88 rows: request
+  guards and one error envelope (CC-fancy-0031).** Normative text:
+  `suites/http/SPEC.md`. The goldens are authored from it, because no
+  implementation existed yet. The exception is the workbook rows: holy-sheet's
+  counts there were measured by running fancy-holy-sheet.
+  - `error-envelope` pins the sentences every server and the UI share
+    (`formatBytes`, `formatDuration`, `sanitise`), plus the normaliser that
+    turns ANY error response into one sentence. It covers our envelope, FastAPI's
+    `detail` sentence and 422 list, Laravel's validation map and `message`, an
+    HTML proxy page and no response at all. A 5xx never shows server text.
+  - `request-guards` pins:
+    - the guard: Content-Length refused UNREAD, a lying length caught by
+      counting, NaN/Infinity/1e400 refused with the field path, and depth and
+      list bombs that stop the scan early;
+    - the renderer: exception text is never echoed, and Inertia's 409s pass
+      through;
+    - the request id;
+    - the holy-sheet workbook pairing.
+- **`envelope.schema.json`** beside `error-envelope`: the JSON Schema of the
+  envelope. Each package ships a byte copy pinned by sha256.
+- **The probe and the schema check:**
+  - `tests/http-probe.ts`, a reading of the spec;
+  - `tests/discrimination-http.test.ts`: the control passes every row it can
+    run, and 16 mutants each fail an exact set;
+  - `tests/schema-subset.ts`, a first-party validator for the subset the
+    envelope schema uses, so no third-party JSON Schema validator is needed.
+
+  Rows come from `scripts/build-http-cases.py`.
+- **Consumer action:** none. Nothing existing changed. The implementations are
+  `@particle-academy/fancy-http-errors`, `particle-academy/fancy-http-guard` and
+  `fancy-http-guard` (PyPI).
+
 ### Changed
 
 - **Releases need a lab-run certificate.** `publish.yml` gains a read-only

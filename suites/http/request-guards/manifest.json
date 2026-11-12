@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../schema/suite-manifest.schema.json",
+  "suite": "http/request-guards",
+  "title": "Request guards checked before the body is parsed, the renderer that turns what an app raised into the envelope, and the workbook pairing with holy-sheet",
+  "since": "0.48.0",
+  "caseFormat": "table",
+  "cases": "cases.json",
+  "contract": {
+    "functions": {
+      "guard": "guard({headers, body, limits?, config?}) -> {pass, requestId?} | {status, headers, body, bodyRead?}",
+      "render": "render({throw, config?, headers?}) -> {status, headers, body} | {passthrough, status}",
+      "workbookLimits": "workbookLimits(limits) -> holy-sheet limits",
+      "workbook": "workbook({limits, file, field}) -> {pass} | {status, headers, body}"
+    },
+    "summary": "Normative text: suites/http/SPEC.md sections 3 to 5. body is a string (sent as UTF-8), {hex}, or a file reference. \"$generated\" anywhere in an expected string stands for the generated request id: a lowercase UUID v4, the same in the header and the body. bodyRead: none = not one body byte requested; bounded = at most maxBodyBytes + 1 bytes plus one transport chunk. Expected headers are a subset, names lowercase.",
+    "reference": "authored",
+    "referenceNote": "Authored from suites/http/SPEC.md in scripts/build-http-cases.py on 2026-11-12, before any implementation existed. The workbook rows' counts were measured by running fancy-holy-sheet 0.13.2 from the envelope's sibling checkout; everything else is typed from the spec. tests/http-probe.ts passes every row but the workbook ones, which need holy-sheet.",
+    "implementations": [
+      {
+        "language": "php",
+        "package": "particle-academy/fancy-http-guard",
+        "symbol": "ParticleAcademy\\HttpGuard\\Guard"
+      },
+      {
+        "language": "python",
+        "package": "fancy-http-guard",
+        "symbol": "fancy_http_guard.GuardMiddleware"
+      }
+    ]
+  },
+  "notes": [
+    "The 413/400 rows marked bodyRead none are the reason this suite exists: refusing a body after reading it is what the guard is for avoiding.",
+    "PHP-FPM parses multipart and urlencoded bodies before any PHP runs, so those rows use other media types; the Laravel README states the post_max_size arrangement instead.",
+    "The workbook rows need holy-sheet in the runner's test environment (first-party). The probe does not run them."
+  ]
+}

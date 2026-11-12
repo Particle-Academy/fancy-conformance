@@ -1,0 +1,84 @@
+{
+  "halfEven": [
+    "env:0005"
+  ],
+  "retryRoundsDown": [
+    "env:0018",
+    "env:0019",
+    "env:0021",
+    "env:0044"
+  ],
+  "utf16Cap": [
+    "env:0027"
+  ],
+  "echo5xx": [
+    "env:0056",
+    "env:0057",
+    "env:0062"
+  ],
+  "trustInboundId": [
+    "req:0053",
+    "req:0055",
+    "req:0056"
+  ],
+  "depthOffByOne": [
+    "req:0034",
+    "req:0035",
+    "req:0036",
+    "req:0037"
+  ],
+  "arraysOnly": [
+    "req:0040",
+    "req:0041"
+  ],
+  "missesNaNToken": [
+    "req:0004",
+    "req:0005",
+    "req:0006",
+    "req:0017",
+    "req:0018",
+    "req:0019",
+    "req:0026",
+    "req:0027",
+    "req:0028",
+    "req:0031",
+    "req:0032",
+    "req:0033",
+    "req:0057"
+  ],
+  "missesOverflow": [
+    "req:0020",
+    "req:0021",
+    "req:0022",
+    "req:0026"
+  ],
+  "trustContentLength": [
+    "req:0012"
+  ],
+  "readsBeforeRefusing": [
+    "req:0007",
+    "req:0008",
+    "req:0009",
+    "req:0010",
+    "req:0011",
+    "req:0015"
+  ],
+  "scansOnlyDeclaredJson": [
+    "req:0004"
+  ],
+  "rewrites409": [
+    "req:0072",
+    "req:0073"
+  ],
+  "echoCrash": [
+    "req:0061",
+    "req:0062"
+  ],
+  "echoHttp5xx": [
+    "req:0060",
+    "req:0078"
+  ],
+  "noPartFloor": [
+    "req:0081"
+  ]
+}
