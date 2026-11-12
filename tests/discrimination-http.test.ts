@@ -65,6 +65,7 @@ for (const [name, ids] of Object.entries(MUTANTS)) {
 
 test("every mutation the probe knows is pinned", () => {
   const known = [
+    "assignsFields",
     "halfEven",
     "retryRoundsDown",
     "utf16Cap",

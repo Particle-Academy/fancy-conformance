@@ -237,7 +237,9 @@ export function normalise(input: J, m: Mutations = {}): J {
   let items = 0;
   const fields: Record<string, string> = {};
   const put = (f: string, msg: string) => {
-    if (!(f in fields)) fields[f] = sanitise(msg, 300, m);
+    if (Object.prototype.hasOwnProperty.call(fields, f)) return;
+    if (m.assignsFields) fields[f] = sanitise(msg, 300, m);
+    else Object.defineProperty(fields, f, { value: sanitise(msg, 300, m), enumerable: true, writable: true, configurable: true });
   };
   let limit: J;
 
@@ -259,7 +261,7 @@ export function normalise(input: J, m: Mutations = {}): J {
     b.detail.length > 0 &&
     b.detail.every((d: J) => isObj(d) && Array.isArray(d.loc) && typeof d.msg === "string")
   ) {
-    code = "validation_failed";
+    if (status >= 400 && status < 500) code = "validation_failed";
     for (const d of b.detail) {
       items++;
       const loc = [...d.loc];
@@ -270,7 +272,7 @@ export function normalise(input: J, m: Mutations = {}): J {
   } else if (b && typeof b.detail === "string") {
     serverMessage = b.detail;
   } else if (b && isObj(b.errors) && Object.values(b.errors).every((v) => typeof v === "string" || Array.isArray(v))) {
-    code = "validation_failed";
+    if (status >= 400 && status < 500) code = "validation_failed";
     for (const [f, v] of Object.entries(b.errors)) {
       const first = typeof v === "string" ? v : (v as J[]).find((x) => typeof x === "string");
       if (typeof first === "string") {
@@ -303,7 +305,8 @@ export function normalise(input: J, m: Mutations = {}): J {
     sentence = s || statusEntry(status)[1];
   }
 
-  return { status, code, sentence, fields, retryAfter, requestId };
+  const serverSide = status === 0 || status >= 500;
+  return { status, code, sentence, fields: serverSide && !m.echo5xx ? {} : fields, retryAfter, requestId };
 }
 
 function firstItemMessage(b: J): string | null {

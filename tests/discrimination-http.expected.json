@@ -1,4 +1,7 @@
 {
+  "assignsFields": [
+    "env:0082"
+  ],
   "halfEven": [
     "env:0005"
   ],
@@ -14,7 +17,8 @@
   "echo5xx": [
     "env:0056",
     "env:0057",
-    "env:0062"
+    "env:0062",
+    "env:0081"
   ],
   "trustInboundId": [
     "req:0053",

@@ -1478,6 +1478,55 @@
       "skip": {
         "python": "fancy-http-guard (Python) has no HTTP-client normaliser; the UI normaliser is TypeScript and the server one is Laravel's. Listed so the language reads as decided, not forgotten."
       }
+    },
+    {
+      "id": "0081-500-field-map",
+      "title": "A 5xx with a validation map shows no field text either",
+      "since": "0.48.0",
+      "fn": "normalise",
+      "input": {
+        "status": 500,
+        "headers": {},
+        "body": "{\"message\": \"x\", \"errors\": {\"db\": [\"SQLSTATE[HY000] [2002] Connection refused at 10.0.0.4:5432\"]}}"
+      },
+      "expected": {
+        "status": 500,
+        "code": "server_error",
+        "sentence": "Something went wrong on our side.",
+        "fields": {},
+        "retryAfter": null,
+        "requestId": null
+      },
+      "skip": {
+        "python": "fancy-http-guard (Python) has no HTTP-client normaliser; the UI normaliser is TypeScript and the server one is Laravel's. Listed so the language reads as decided, not forgotten."
+      },
+      "notes": "Field messages are server text too. A port that only guards the sentence still prints a connection string under a form field."
+    },
+    {
+      "id": "0082-proto-key",
+      "title": "A __proto__ field is an ordinary key",
+      "since": "0.48.0",
+      "fn": "normalise",
+      "input": {
+        "status": 422,
+        "headers": {},
+        "body": "{\"message\":\"x\",\"errors\":{\"__proto__\":[\"Polluted?\"],\"name\":[\"Required.\"]}}"
+      },
+      "expected": {
+        "status": 422,
+        "code": "validation_failed",
+        "sentence": "2 fields need attention.",
+        "fields": {
+          "__proto__": "Polluted?",
+          "name": "Required."
+        },
+        "retryAfter": null,
+        "requestId": null
+      },
+      "skip": {
+        "python": "fancy-http-guard (Python) has no HTTP-client normaliser; the UI normaliser is TypeScript and the server one is Laravel's. Listed so the language reads as decided, not forgotten."
+      },
+      "notes": "JSON.parse makes __proto__ an own key; assigning it into a plain object instead sets the prototype and the field silently disappears."
     }
   ]
 }

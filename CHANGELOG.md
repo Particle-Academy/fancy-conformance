@@ -17,7 +17,7 @@ Prepared on `main` and NOT tagged yet. The packages that run these tables pin
 
 ### Added
 
-- **`http/error-envelope`, 80 rows, and `http/request-guards`, 88 rows: request
+- **`http/error-envelope`, 82 rows, and `http/request-guards`, 88 rows: request
   guards and one error envelope (CC-fancy-0031).** Normative text:
   `suites/http/SPEC.md`. The goldens are authored from it, because no
   implementation existed yet. The exception is the workbook rows: holy-sheet's
@@ -40,7 +40,7 @@ Prepared on `main` and NOT tagged yet. The packages that run these tables pin
 - **The probe and the schema check:**
   - `tests/http-probe.ts`, a reading of the spec;
   - `tests/discrimination-http.test.ts`: the control passes every row it can
-    run, and 16 mutants each fail an exact set;
+    run, and 17 mutants each fail an exact set;
   - `tests/schema-subset.ts`, a first-party validator for the subset the
     envelope schema uses, so no third-party JSON Schema validator is needed.
 

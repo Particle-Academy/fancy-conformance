@@ -278,8 +278,9 @@ Output: `null` for a status from 100 to 399. Otherwise
    - **(e) Laravel message:** `message` is a string.
 
    Otherwise the body is UNRECOGNISED, and the code comes from the status.
-5. **`code`.** The envelope's `error`; else `validation_failed` for (b) and (d); else the
-   status code from 2.1.
+5. **`code`.** The envelope's `error`; else, on a 4xx, `validation_failed` for (b) and
+   (d); else the status code from 2.1. A field map on a 5xx is server text and does
+   not make the response a validation failure.
 6. **`sentence`**, first that applies:
    - **status 0 or 5xx:** the 5xx rule in 2.1 (status 0 has no reference clause).
      Nothing in the body is ever used.
@@ -291,4 +292,7 @@ Output: `null` for a status from 100 to 399. Otherwise
    - **the server's message** (envelope `message`, `detail`, or Laravel `message`), when
      non-empty after `sanitise`.
    - **the status's default sentence.**
-7. **Field messages** go through `sanitise` too. `fields` is `{}` when there are none.
+7. **Field messages** go through `sanitise` too. `fields` is `{}` when there are none,
+   and ALWAYS `{}` on status 0 and every 5xx: a field message is server text too.
+   Keys are the body's own strings, so an implementation must not let `__proto__`
+   (or any key) reach a prototype.

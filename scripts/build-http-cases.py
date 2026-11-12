@@ -284,6 +284,14 @@ def error_envelope() -> None:
     norm("413-bad-limit", "A malformed limit falls back to the message", 413, {},
          json.dumps({"error": "body_too_large", "message": "Too big.", "limit": {"name": "maxBodyBytes", "max": "lots"}, "requestId": "r-17"}),
          out(413, "body_too_large", "Too big.", rid="r-17"))
+    norm("500-field-map", "A 5xx with a validation map shows no field text either", 500, {},
+         json.dumps({"message": "x", "errors": {"db": ["SQLSTATE[HY000] [2002] Connection refused at 10.0.0.4:5432"]}}),
+         out(500, "server_error", "Something went wrong on our side."),
+         notes="Field messages are server text too. A port that only guards the sentence still prints a connection string under a form field.")
+    norm("proto-key", "A __proto__ field is an ordinary key", 422, {},
+         '{"message":"x","errors":{"__proto__":["Polluted?"],"name":["Required."]}}',
+         out(422, "validation_failed", "2 fields need attention.", {"__proto__": "Polluted?", "name": "Required."}),
+         notes="JSON.parse makes __proto__ an own key; assigning it into a plain object instead sets the prototype and the field silently disappears.")
 
     d = HTTP / "error-envelope"
     write_json(d / "cases.json", {"$schema": "../../../schema/case-table.schema.json", "suite": "http/error-envelope", "cases": t.rows})
@@ -588,8 +596,14 @@ def request_guards(holy_sheet_src: str) -> None:
            "maxArchiveBytes": 2097152, "maxPartBytes": 320000, "maxExpandedBytes": 1280000})
 
     # --- workbook (holy-sheet does the counting; its counts are measured here)
-    sheet = agent.from_array([[i, i * 2, "row %d" % i] for i in range(1, 6)], ["n", "double", "label"], "Data")
-    data = agent.to_bytes(sheet)
+    # Written ONCE and then kept: holy-sheet stamps the time into docProps, so
+    # re-writing it would move the digest on every run for no change in content.
+    existing = d / "fixtures" / "five-rows.xlsx"
+    if existing.exists():
+        data = existing.read_bytes()
+    else:
+        sheet = agent.from_array([[i, i * 2, "row %d" % i] for i in range(1, 6)], ["n", "double", "label"], "Data")
+        data = agent.to_bytes(sheet)
     xlsx = fixture(d, "five-rows.xlsx", data)
     corrupt = fixture(d, "not-a-workbook.xlsx", b"PK\x03\x04 this is not a zip archive")
 
