@@ -29,7 +29,7 @@ function failed(m: Mutations): string[] {
   for (const suite of SUITES) {
     for (const c of loadSuite(suite).cases) {
       if (c.fn === "workbook") continue;
-      const resolve = (ref: never) => fixtureBytes(suite, ref);
+      const resolve = (ref: unknown) => fixtureBytes(suite, ref as Parameters<typeof fixtureBytes>[1]);
       let actual: unknown;
       try {
         actual = run(c.fn!, c.input, resolve, m);

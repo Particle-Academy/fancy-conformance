@@ -172,12 +172,31 @@ function header(headers: Record<string, string>, name: string): string | undefin
   return undefined;
 }
 
+/**
+ * No lone surrogate. A local check rather than String.prototype.isWellFormed,
+ * which is ES2024 and outside this repo's `lib` (ES2023, which the loaders
+ * target on purpose).
+ */
+function wellFormed(s: string): boolean {
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c >= 0xd800 && c <= 0xdbff) {
+      const next = s.charCodeAt(i + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) return false;
+      i++;
+    } else if (c >= 0xdc00 && c <= 0xdfff) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function wellFormedStrings(v: J, maxDepth: number): boolean {
   const stack: Array<[J, number]> = [[v, 1]];
   while (stack.length) {
     const [x, d] = stack.pop()!;
     if (typeof x === "string") {
-      if (!x.isWellFormed()) return false;
+      if (!wellFormed(x)) return false;
       continue;
     }
     if (typeof x !== "object" || x === null) continue;
@@ -185,7 +204,7 @@ function wellFormedStrings(v: J, maxDepth: number): boolean {
     if (Array.isArray(x)) for (const e of x) stack.push([e, d + 1]);
     else
       for (const [k, e] of Object.entries(x)) {
-        if (!k.isWellFormed()) return false;
+        if (!wellFormed(k)) return false;
         stack.push([e, d + 1]);
       }
   }
