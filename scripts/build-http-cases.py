@@ -314,7 +314,7 @@ def error_envelope() -> None:
             "referenceNote": "Authored from suites/http/SPEC.md in scripts/build-http-cases.py on 2026-11-12, before any implementation existed. tests/http-probe.ts is a reading of the spec that passes every row, and tests/discrimination-http.test.ts pins the mistakes it catches.",
             "implementations": [
                 {"language": "node", "package": "@particle-academy/fancy-http-errors", "symbol": "normalise"},
-                {"language": "php", "package": "particle-academy/fancy-http-guard", "symbol": "ParticleAcademy\\HttpGuard\\HttpError::normalise"},
+                {"language": "php", "package": "particle-academy/fancy-http-guard", "symbol": "ParticleAcademy\\HttpGuard\\Client\\ErrorNormaliser::normalise"},
                 {"language": "python", "package": "fancy-http-guard", "symbol": "fancy_http_guard.sentences"},
             ],
         },
@@ -659,11 +659,11 @@ def request_guards(holy_sheet_src: str) -> None:
                 "workbookLimits": "workbookLimits(limits) -> holy-sheet limits",
                 "workbook": "workbook({limits, file, field}) -> {pass} | {status, headers, body}",
             },
-            "summary": "Normative text: suites/http/SPEC.md sections 3 to 5. body is a string (sent as UTF-8), {hex}, or a file reference. \"$generated\" anywhere in an expected string stands for the generated request id: a lowercase UUID v4, the same in the header and the body. bodyRead: none = not one body byte requested; bounded = at most maxBodyBytes + 1 bytes plus one transport chunk. Expected headers are a subset, names lowercase.",
+            "summary": "Normative text: suites/http/SPEC.md sections 3 to 5. body is a string (sent as UTF-8), {hex}, or a file reference. \"$generated\" anywhere in an expected string stands for the generated request id: a lowercase UUID v4, the same in the header and the body. bodyRead is reported on body_too_large and bad_request refusals only: none = not one body byte requested; bounded = at most maxBodyBytes + 1 bytes plus one transport chunk. Expected headers are a subset, names lowercase.",
             "reference": "authored",
             "referenceNote": "Authored from suites/http/SPEC.md in scripts/build-http-cases.py on 2026-11-12, before any implementation existed. The workbook rows' counts were measured by running fancy-holy-sheet 0.13.2 from the envelope's sibling checkout; everything else is typed from the spec. tests/http-probe.ts passes every row but the workbook ones, which need holy-sheet.",
             "implementations": [
-                {"language": "php", "package": "particle-academy/fancy-http-guard", "symbol": "ParticleAcademy\\HttpGuard\\Guard"},
+                {"language": "php", "package": "particle-academy/fancy-http-guard", "symbol": "ParticleAcademy\\HttpGuard\\Http\\Middleware\\GuardRequests"},
                 {"language": "python", "package": "fancy-http-guard", "symbol": "fancy_http_guard.GuardMiddleware"},
             ],
         },

@@ -24,7 +24,7 @@
       {
         "language": "php",
         "package": "particle-academy/fancy-http-guard",
-        "symbol": "ParticleAcademy\\HttpGuard\\HttpError::normalise"
+        "symbol": "ParticleAcademy\\HttpGuard\\Client\\ErrorNormaliser::normalise"
       },
       {
         "language": "python",
