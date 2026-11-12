@@ -128,7 +128,9 @@ A row's `input.limits` overrides the defaults key by key; `input.config` sets th
 ### 3.2 Order
 
 1. **`Content-Length`.** When present it must be 1 to 15 ASCII digits. Anything else
-   (empty, a sign, a comma list, letters) is a 400 `bad_request`. More than 15 digits is
+   (a sign, a comma list, letters, two different values) is a 400 `bad_request`.
+   An EMPTY value is treated as absent: PHP-FPM sends `CONTENT_LENGTH=""` on every
+   bodiless request, and refusing it would refuse every GET. More than 15 digits is
    a 413 with `limit.actual` omitted. A value over `maxBodyBytes` is a 413 with
    `limit.actual` = the value, and **NOT ONE BODY BYTE IS READ.**
 2. **Bounded read.** Read at most `maxBodyBytes + 1` bytes. Reaching `maxBodyBytes + 1`
