@@ -28,8 +28,13 @@ The one byte form that is hashed and sealed. change-council's scheme.
 - Integers, `true`, `false` and `null` print as literals. **Floats are refused**:
   PHP and JavaScript do not print them alike. Anything hashed holds integers or
   strings.
-- An empty object is `{}` and an empty list is `[]`. JSON decoders that lose the
-  difference need the row's `objects` paths.
+- An empty object is `{}` and an empty list is `[]`.
+- **An object is an object whatever its keys.** `{"0": "a", "1": "b"}` is
+  written `{"0":"a","1":"b"}` and never `["a","b"]` (rows `0027` to `0031`,
+  0.52.0). A runtime whose JSON decoder cannot keep the two apart (PHP with
+  `assoc: true`) must decode with objects kept as objects wherever the value is
+  hashed or sealed; the rows' `objects` paths name every object a PHP runner
+  would otherwise lose.
 
 ## 2. The chain (`sign/chain` `hash`, `append`, `verify`)
 
@@ -92,6 +97,16 @@ hash = sha256_hex(prev_hash + "\n" + canonical({seq, envelope_id, at, type, acto
   423. The `otp.failed` event's `reason` is `otp_unknown`, `otp_expired` or
   `otp_wrong`. Codes never appear in an event.
 - Every limit is a setting; the defaults are above.
+
+## 4a. Refusals on the wire (`sign/otp` `envelope`, 0.52.0)
+
+Every refusal is the kit-wide error envelope, `suites/http/SPEC.md` section 1
+(CC-fancy-0031): `{error, message, errors?, requestId}` plus the request-id
+header. A fancy-sign code whose status is 422 (`invalid_request`, `otp_invalid`,
+`fields_incomplete`, `mark_invalid`) is `error: "validation_failed"` with ONE
+item `{error: <code>, message}` and the top-level `message` equal to the item's;
+every other code is the top-level `error`. A client reads the fancy-sign code
+from the item on a 422 and from `error` otherwise.
 
 ## 5. Fields (`sign/fields`)
 

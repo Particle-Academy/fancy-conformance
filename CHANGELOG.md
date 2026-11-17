@@ -10,6 +10,14 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.52.0] - 2026-11-18
+
+### Added
+
+- **`sign/chain`, 5 rows (0027-0031): an object is an object whatever its keys.** Canonical JSON writes `{"0":"a","1":"b"}`, never `["a","b"]`, nested or at the top, and event data with index-like keys hashes as an object, including when a store hands it over as raw JSON text. PHP's `json_decode(assoc: true)` loses that difference and fancy-sign hashed the list until its pre-release fix; a Node port keeps it for free. The rows' `objects` paths name each object for a PHP runner. A new probe mutant (index-keyed objects written as lists) fails exactly these four of them.
+- **`sign/otp`, 3 rows (0017-0019) and a function, `envelope`: fancy-sign refusals are the kit-wide error envelope** (`suites/http/SPEC.md` section 1, CC-fancy-0031). A 422 code is `validation_failed` with the fancy-sign code as its one item; every other code is the top-level `error`; `requestId` always. `suites/sign/SPEC.md` section 4a.
+- **Consumer action:** none. No existing row changed; a runner that does not implement `envelope` should run it or name it as not run.
+
 ## [0.51.0] - 2026-11-18
 
 ### Added

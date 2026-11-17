@@ -86,10 +86,10 @@ verbatim.
 | `fun-lab/leaderboard` | 11 | Boards by XP, achievements or prizes, per metric, paged, with ties on profile id, and period boards on the XP earned in the period |
 | `fun-lab/analytics` | 8 | The event log's rows and the aggregates, series and breakdowns read over it |
 | `fun-lab/events` | 9 | The broadcast payloads of `xp.awarded`, `metric.level-reached`, `achievement.unlocked` and `prize.awarded`, key for key, as Echo delivers them |
-| `sign/chain` | 26 | fancy-sign's canonical JSON (UTF-8 byte-order keys, floats refused) and the per-envelope hash chain: hash, append (closed event set, client only for `page.viewed`), verify |
+| `sign/chain` | 31 | fancy-sign's canonical JSON (UTF-8 byte-order keys, floats refused) and the per-envelope hash chain: hash, append (closed event set, client only for `page.viewed`), verify |
 | `sign/completion` | 20 | The `fsig_v1_` completion record: closed key set, token, deterministic Ed25519 seal, key id, and `verify()`'s seven named failures |
 | `sign/fields` | 11 | The fields an envelope carries (document nodes, final page, per-page marks, the organisation's setting) and the page each lands on, never the final page for a per-page mark |
-| `sign/otp` | 16 | One-time codes: the stored digest, purpose binding, expiry, consumption, replacement, locking, rate limits, the ceremony order, and the closed error-code set |
+| `sign/otp` | 19 | One-time codes: the stored digest, purpose binding, expiry, consumption, replacement, locking, rate limits, the ceremony order, the closed error-code set, and refusals as the kit-wide error envelope |
 
 Every case carries an `id`, a `title`, the suite version it arrived in, and —
 where it exists to catch something specific — a `notes` field saying what.

@@ -9,6 +9,7 @@
         "functions": {
             "errorCodes": "errorCodes() -> {code: HTTP status}, the closed SignErrorCode set",
             "codeDigest": "codeDigest({app_key, envelope_id, signer_id, purpose, code}) -> lowercase hex",
+            "envelope": "envelope({code, message, request_id}) -> the kit-wide error envelope body for one refusal: a 422 code as validation_failed with one item, every other code at the top level",
             "scenario": "scenario({config?, steps}) -> {steps: [{op, result, events: [{type, source, data?}]}]}; data only for otp.* and link.* events. Steps: send | request {purpose, withSession?} | verify {code} | consent | open | advance {seconds} | sign {code}. A code is right (latest mailed), stale (the one before), wrong, view (the view code sent to sign) or six literal digits. One signer, alice, and a frozen clock."
         },
         "reference": "php",

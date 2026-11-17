@@ -39,6 +39,10 @@ type M = {
   anyEnvelope?: boolean;
   /** The code digest leaves the purpose out. */
   digestNoPurpose?: boolean;
+  /** An object whose keys are exactly "0".."n-1" is written as a list (what PHP's assoc decode does). */
+  indexKeysAsList?: boolean;
+  /** A 422 keeps its own code at the top level instead of validation_failed + one item. */
+  flat422?: boolean;
 };
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
@@ -73,6 +77,11 @@ function canonical(value: unknown, m: M, objects: string[] = [], at = ""): strin
   const path = (k: string | number) => (at === "" ? String(k) : `${at}.${k}`);
   if (Array.isArray(value)) return `[${value.map((v, i) => canonical(v, m, objects, path(i))).join(",")}]`;
   const keys = Object.keys(value as object);
+  if (m.indexKeysAsList && keys.length > 0 && keys.every((k) => /^(0|[1-9][0-9]*)$/.test(k)) && keys.length === new Set(keys).size
+    && keys.map(Number).sort((a, b) => a - b).every((n, i) => n === i)) {
+    const list = keys.map(Number).sort((a, b) => a - b).map((n) => (value as Record<string, unknown>)[String(n)]);
+    return canonical(list, m, [], at);
+  }
   keys.sort(m.utf16Keys ? undefined : byteOrder);
   return `{${keys.map((k) => `${JSON.stringify(k)}:${canonical((value as Record<string, unknown>)[k], m, objects, path(k))}`).join(",")}}`;
 }
@@ -205,6 +214,23 @@ function codeDigest(i: Record<string, Json>, m: M): string {
   return createHmac("sha256", String(i.app_key)).update(message).digest("hex");
 }
 
+const STATUS: Record<string, number> = {
+  invalid_request: 422, not_found: 404, forbidden: 403, link_invalid: 404, otp_invalid: 422, otp_locked: 423,
+  otp_rate_limited: 429, session_required: 401, consent_required: 409, not_viewed: 409, fields_incomplete: 422,
+  mark_invalid: 422, envelope_not_open: 409, envelope_not_draft: 409, already_signed: 409, already_declined: 409,
+  step_up_required: 401, limit_exceeded: 429,
+};
+
+/** The kit-wide error envelope (suites/http/SPEC.md section 1) for one fancy-sign refusal. */
+function envelope(i: Record<string, Json>, m: M): Json {
+  const code = String(i.code);
+  const message = String(i.message);
+  if (STATUS[code] === 422 && !m.flat422) {
+    return { error: "validation_failed", message, errors: [{ error: code, message }], requestId: String(i.request_id) };
+  }
+  return { error: code, message, requestId: String(i.request_id) };
+}
+
 // ------------------------------------------------------------ the runner
 
 function run(suite: string, fn: string, input: Record<string, Json>, m: M): unknown {
@@ -238,12 +264,14 @@ function run(suite: string, fn: string, input: Record<string, Json>, m: M): unkn
       return verifyCompletion(input, m);
     case "sign/otp codeDigest":
       return codeDigest(input, m);
+    case "sign/otp envelope":
+      return envelope(input, m);
     default:
       return undefined;
   }
 }
 
-const PROBED: Record<string, number> = { "sign/chain": 26, "sign/completion": 20, "sign/otp": 16 };
+const PROBED: Record<string, number> = { "sign/chain": 31, "sign/completion": 20, "sign/otp": 19 };
 
 /** The ids (suite/NNNN) this implementation FAILS, over the probed functions. */
 function failing(m: M = {}): string[] {
@@ -268,14 +296,14 @@ test("THE CONTROL: a faithful Node reading passes every probed row", () => {
   assert.deepEqual(failing(), [], "the control fails a row, so every mutant below proves nothing");
 });
 
-test("the control probes every row of sign/chain and sign/completion, and sign/otp's codeDigest rows", () => {
+test("the control probes every row of sign/chain and sign/completion, and sign/otp's codeDigest and envelope rows", () => {
   let probed = 0;
   for (const suite of Object.keys(PROBED)) {
     for (const c of loadSuite(suite).cases) {
       if (run(suite, String(c.fn), c.input as Record<string, Json>, {}) !== undefined) probed++;
     }
   }
-  assert.equal(probed, 26 + 20 + 2);
+  assert.equal(probed, 31 + 20 + 2 + 3);
 });
 
 test("sorting keys by UTF-16 code units fails exactly the byte-order row", () => {
@@ -320,6 +348,15 @@ test("accepting another envelope's intact chain fails exactly the other-envelope
 
 test("a code digest without the purpose fails exactly the two digest rows", () => {
   assert.deepEqual(failing({ digestNoPurpose: true }), ["otp/0002", "otp/0003"]);
+});
+
+test("writing index-keyed objects as lists fails exactly the index-key rows", () => {
+  // The defect a PHP port reading JSON with assoc=true has; the 0.52.0 rows exist for it.
+  assert.deepEqual(failing({ indexKeysAsList: true }), ["chain/0027", "chain/0029", "chain/0030", "chain/0031"]);
+});
+
+test("a flat 422 fails exactly the 422 envelope row", () => {
+  assert.deepEqual(failing({ flat422: true }), ["otp/0017"]);
 });
 
 // Sets derived by running each mutant once and reading every id against its

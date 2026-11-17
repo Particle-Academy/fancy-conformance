@@ -1260,6 +1260,138 @@
                 "seq": 4,
                 "problem": "broken_link"
             }
+        },
+        {
+            "id": "0027-canonical-index-keys-object",
+            "title": "an object whose keys are \"0\", \"1\" stays an object",
+            "since": "0.52.0",
+            "tags": [
+                "canonical",
+                "index-keys"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "1": "b",
+                    "0": "a"
+                },
+                "objects": [
+                    ""
+                ]
+            },
+            "expected": "{\"0\":\"a\",\"1\":\"b\"}",
+            "notes": "PHP's json_decode(assoc: true) turns this into the list [\"a\",\"b\"]. Canonical JSON is over JSON values, so it must not."
+        },
+        {
+            "id": "0028-canonical-index-keys-list",
+            "title": "the list with the same values stays a list",
+            "since": "0.52.0",
+            "tags": [
+                "canonical",
+                "index-keys"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": [
+                    "a",
+                    "b"
+                ]
+            },
+            "expected": "[\"a\",\"b\"]"
+        },
+        {
+            "id": "0029-canonical-index-keys-nested",
+            "title": "index-keyed objects nested in objects and lists stay objects",
+            "since": "0.52.0",
+            "tags": [
+                "canonical",
+                "index-keys"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "data": {
+                        "0": {
+                            "0": 1
+                        }
+                    },
+                    "list": [
+                        {
+                            "0": true
+                        }
+                    ]
+                },
+                "objects": [
+                    "data",
+                    "data.0",
+                    "list.0"
+                ]
+            },
+            "expected": "{\"data\":{\"0\":{\"0\":1}},\"list\":[{\"0\":true}]}"
+        },
+        {
+            "id": "0030-hash-index-key-data",
+            "title": "event data with index-like keys hashes as an object",
+            "since": "0.52.0",
+            "tags": [
+                "hash",
+                "index-keys"
+            ],
+            "fn": "hash",
+            "input": {
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "event": {
+                    "data": {
+                        "0": "x",
+                        "1": "y"
+                    },
+                    "seq": 1,
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "type": "envelope.created",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null
+                },
+                "objects": [
+                    "data"
+                ]
+            },
+            "expected": "dfd138c8c030cce708e752149a8c06997b5c6ac13521e0cb22ea68e950d3345d"
+        },
+        {
+            "id": "0031-verify-index-key-data",
+            "title": "a chain whose data is an index-keyed object, read raw as a JSON string, verifies",
+            "since": "0.52.0",
+            "tags": [
+                "verify",
+                "index-keys"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "data": "{\"0\":\"x\",\"1\":\"y\"}",
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "dfd138c8c030cce708e752149a8c06997b5c6ac13521e0cb22ea68e950d3345d"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": true,
+                "checked": 1,
+                "head": "dfd138c8c030cce708e752149a8c06997b5c6ac13521e0cb22ea68e950d3345d"
+            },
+            "notes": "The raw-store form: data as the JSON text a database column holds. A reader that decodes it into a list computes another hash."
         }
     ]
 }

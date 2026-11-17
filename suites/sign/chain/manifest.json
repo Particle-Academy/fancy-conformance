@@ -5,10 +5,10 @@
     "since": "0.51.0",
     "caseFormat": "table",
     "contract": {
-        "summary": "One append-only chain per envelope, change-council's scheme with envelope_id in place of change_id. hash = sha256(prev_hash + \"\\n\" + canonical({seq, envelope_id, at, type, actor, source, ip, user_agent, data})), genesis 64 zeros. Canonical JSON: keys sorted by UTF-8 byte order, recursively; list order kept; no whitespace; slashes, non-ASCII and U+2028/U+2029 unescaped; floats refused; empty data is the empty object. The event set is closed and only page.viewed may have source client. verify() reads raw rows and names the first problem: sequence_gap, broken_link or hash_mismatch. See SPEC.md.",
+        "summary": "One append-only chain per envelope, change-council's scheme with envelope_id in place of change_id. hash = sha256(prev_hash + \"\\n\" + canonical({seq, envelope_id, at, type, actor, source, ip, user_agent, data})), genesis 64 zeros. Canonical JSON: an object is an object whatever its keys (\"0\", \"1\" included); keys sorted by UTF-8 byte order, recursively; list order kept; no whitespace; slashes, non-ASCII and U+2028/U+2029 unescaped; floats refused; empty data is the empty object. The event set is closed and only page.viewed may have source client. verify() reads raw rows and names the first problem: sequence_gap, broken_link or hash_mismatch. See SPEC.md.",
         "functions": {
-            "canonical": "canonical(value, objects?) -> string | {error: \"refused\"}. `objects` lists the dot paths whose empty value is an OBJECT (a JSON decoder may not keep {} and [] apart).",
-            "hash": "hash(prev_hash, event) -> lowercase hex sha256. Missing ip, user_agent are null; missing data is {}.",
+            "canonical": "canonical(value, objects?) -> string | {error: \"refused\"}. `objects` lists the dot paths whose value is an OBJECT, for a runtime whose JSON decoder may not keep {} and [] (or {\"0\": x} and [x]) apart.",
+            "hash": "hash(prev_hash, event, objects?) -> lowercase hex sha256. Missing ip, user_agent are null; missing data is {}. `objects` paths are relative to the event.",
             "append": "append(last | null, event) -> the stored event {envelope_id, seq, at, type, actor, source, ip, user_agent, data, prev_hash, hash} | {error: \"refused\"} for a type outside the closed set or a source the type may not have.",
             "verify": "verify(rows) -> {ok, checked, head, seq?, problem?}. `data` may be an object or a JSON string."
         },
