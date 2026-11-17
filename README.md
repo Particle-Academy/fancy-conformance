@@ -85,6 +85,7 @@ verbatim.
 | `fun-lab/grants` | 10 | Achievements held once, prizes until their inventory runs out, refusals as results, and prize redemption |
 | `fun-lab/leaderboard` | 11 | Boards by XP, achievements or prizes, per metric, paged, with ties on profile id, and period boards on the XP earned in the period |
 | `fun-lab/analytics` | 8 | The event log's rows and the aggregates, series and breakdowns read over it |
+| `fun-lab/events` | 9 | The broadcast payloads of `xp.awarded`, `metric.level-reached`, `achievement.unlocked` and `prize.awarded`, key for key, as Echo delivers them |
 
 Every case carries an `id`, a `title`, the suite version it arrived in, and —
 where it exists to catch something specific — a `notes` field saying what.

@@ -1,0 +1,1154 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "fun-lab/events",
+    "cases": [
+        {
+            "id": "0001-xp-awarded-payload",
+            "title": "xp.awarded carries the flat payload: ids, the metric's slug and name, the amount, the metric's new total and level, reason, source and occurred_at",
+            "since": "0.50.0",
+            "tags": [
+                "xp.awarded",
+                "control"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat-xp",
+                            "name": "Combat XP"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat-xp",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat-xp",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat-xp",
+                        "to": "ada",
+                        "amount": 5,
+                        "reason": "first blood",
+                        "source": "arena"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 5,
+                            "current_level": 1
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat-xp",
+                                    "gamed_metric_name": "Combat XP",
+                                    "amount": 5,
+                                    "total_xp": 5,
+                                    "current_level": 1,
+                                    "reason": "first blood",
+                                    "source": "arena",
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "The UI's feed reads gamed_metric_name. A raw event with the name nested under metric renders the label with its {metric} placeholder unfilled."
+        },
+        {
+            "id": "0002-xp-awarded-without-reason-or-source",
+            "title": "reason and source are present and null when the award gave none, and the metric's name defaults from its slug",
+            "since": "0.50.0",
+            "tags": [
+                "xp.awarded",
+                "nulls"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "crafting"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "crafting",
+                        "to": "ada",
+                        "amount": 3
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 3,
+                            "current_level": 1
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "crafting",
+                                    "gamed_metric_name": "Crafting",
+                                    "amount": 3,
+                                    "total_xp": 3,
+                                    "current_level": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "A key that is absent and a key that is null are different JSON; a twin that drops a null key fails here."
+        },
+        {
+            "id": "0003-one-award-crossing-two-levels",
+            "title": "an award crossing two levels broadcasts each level, ascending, with what it granted, then the achievements, then xp.awarded at the final level",
+            "since": "0.50.0",
+            "tags": [
+                "metric.level-reached",
+                "achievement.unlocked",
+                "order",
+                "hazard"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat-xp",
+                            "name": "Combat XP"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat-xp",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat-xp",
+                            "level": 2,
+                            "xp": 100,
+                            "name": "Apprentice"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat-xp",
+                            "level": 3,
+                            "xp": 200,
+                            "name": "Adept"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "apprentice",
+                            "name": "Apprentice",
+                            "icon": "sword"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "adept"
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "apprentice",
+                        "metricLevel": {
+                            "metric": "combat-xp",
+                            "level": 2
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "adept",
+                        "metricLevel": {
+                            "metric": "combat-xp",
+                            "level": 3
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat-xp",
+                        "to": "ada",
+                        "amount": 250,
+                        "reason": "boss",
+                        "source": "raid"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 3
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": true,
+                        "broadcasts": []
+                    },
+                    {
+                        "result": true,
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 250,
+                            "current_level": 3
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "achievement.unlocked",
+                                "payload": {
+                                    "grant_type": "achievement",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "apprentice",
+                                    "achievement_name": "Apprentice",
+                                    "achievement_icon": "sword",
+                                    "reason": "Reached level 2: Apprentice",
+                                    "source": "metric-level-progression",
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "payload": {
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat-xp",
+                                    "gamed_metric_name": "Combat XP",
+                                    "level": 2,
+                                    "level_name": "Apprentice",
+                                    "xp_threshold": 100,
+                                    "total_xp": 250,
+                                    "achievements": [
+                                        {
+                                            "id": 1,
+                                            "slug": "apprentice",
+                                            "name": "Apprentice",
+                                            "icon": "sword"
+                                        }
+                                    ],
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "event": "achievement.unlocked",
+                                "payload": {
+                                    "grant_type": "achievement",
+                                    "id": 2,
+                                    "profile_id": 1,
+                                    "achievement_id": 2,
+                                    "achievement_slug": "adept",
+                                    "achievement_name": "Adept",
+                                    "achievement_icon": null,
+                                    "reason": "Reached level 3: Adept",
+                                    "source": "metric-level-progression",
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "payload": {
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat-xp",
+                                    "gamed_metric_name": "Combat XP",
+                                    "level": 3,
+                                    "level_name": "Adept",
+                                    "xp_threshold": 200,
+                                    "total_xp": 250,
+                                    "achievements": [
+                                        {
+                                            "id": 2,
+                                            "slug": "adept",
+                                            "name": "Adept",
+                                            "icon": null
+                                        }
+                                    ],
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat-xp",
+                                    "gamed_metric_name": "Combat XP",
+                                    "amount": 250,
+                                    "total_xp": 250,
+                                    "current_level": 3,
+                                    "reason": "boss",
+                                    "source": "raid",
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "achievements is a list of {id, slug, name, icon}, icon null when unset, and lists only what that level granted. total_xp on each level is the metric's XP when the level was reached."
+        },
+        {
+            "id": "0004-a-level-whose-achievement-is-already-held",
+            "title": "a level whose achievement the profile already holds broadcasts achievements as an empty list, and an unnamed level is called Level 2",
+            "since": "0.50.0",
+            "tags": [
+                "metric.level-reached",
+                "empty"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 10
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "veteran"
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "veteran",
+                        "metricLevel": {
+                            "metric": "combat",
+                            "level": 2
+                        }
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "veteran",
+                        "to": "ada",
+                        "reason": "imported",
+                        "source": "migration"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": true,
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "achievement.unlocked",
+                                "payload": {
+                                    "grant_type": "achievement",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "veteran",
+                                    "achievement_name": "Veteran",
+                                    "achievement_icon": null,
+                                    "reason": "imported",
+                                    "source": "migration",
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 2
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "metric.level-reached",
+                                "payload": {
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "level": 2,
+                                    "level_name": "Level 2",
+                                    "xp_threshold": 10,
+                                    "total_xp": 10,
+                                    "achievements": [],
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "amount": 10,
+                                    "total_xp": 10,
+                                    "current_level": 2,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "An empty list, never an empty object and never absent. level_name is the level's stored name, which setup defaults to 'Level N'."
+        },
+        {
+            "id": "0005-id-is-the-profile-metric-row",
+            "title": "xp.awarded's id is the profile's row for that metric: the same on every award to it, different per profile and per metric",
+            "since": "0.50.0",
+            "tags": [
+                "xp.awarded",
+                "id",
+                "hazard"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "bob": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "crafting"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 5
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "bob",
+                        "amount": 7
+                    },
+                    {
+                        "op": "award",
+                        "metric": "crafting",
+                        "to": "ada",
+                        "amount": 2
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 1
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 5,
+                            "current_level": 1
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "amount": 5,
+                                    "total_xp": 5,
+                                    "current_level": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 7,
+                            "current_level": 1
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 2,
+                                    "profile_id": 2,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "amount": 7,
+                                    "total_xp": 7,
+                                    "current_level": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 2,
+                            "current_level": 1
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 3,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 2,
+                                    "gamed_metric_slug": "crafting",
+                                    "gamed_metric_name": "Crafting",
+                                    "amount": 2,
+                                    "total_xp": 2,
+                                    "current_level": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 6,
+                            "current_level": 1
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "amount": 1,
+                                    "total_xp": 6,
+                                    "current_level": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "Catches an id taken from the event log row or a per-event counter: those would differ on the fourth award, where the profile-metric id repeats the first."
+        },
+        {
+            "id": "0006-event-log-off",
+            "title": "with the event log off the payloads are unchanged, id included",
+            "since": "0.50.0",
+            "tags": [
+                "xp.awarded",
+                "config",
+                "hazard"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "config": {
+                    "log_to_database": false
+                },
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 10,
+                            "name": "Two"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 12
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 12,
+                            "current_level": 2
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "metric.level-reached",
+                                "payload": {
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "level": 2,
+                                    "level_name": "Two",
+                                    "xp_threshold": 10,
+                                    "total_xp": 12,
+                                    "achievements": [],
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "amount": 12,
+                                    "total_xp": 12,
+                                    "current_level": 2,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "The payload does not read the event log, so turning it off changes nothing on the wire."
+        },
+        {
+            "id": "0007-dispatch-off",
+            "title": "with dispatch off nothing broadcasts",
+            "since": "0.50.0",
+            "tags": [
+                "config",
+                "control"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "config": {
+                    "dispatch": false
+                },
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 10
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 12
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 12,
+                            "current_level": 2
+                        },
+                        "broadcasts": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0008-grants-broadcast",
+            "title": "achievement.unlocked and prize.awarded carry the grant payloads: grant id, profile, the item's slug and name, status for a prize, and granted_at",
+            "since": "0.50.0",
+            "tags": [
+                "achievement.unlocked",
+                "prize.awarded"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "first-login",
+                            "name": "First Login",
+                            "icon": "star"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "prize",
+                        "with": {
+                            "slug": "premium",
+                            "name": "1 Month Premium"
+                        }
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "first-login",
+                        "to": "ada",
+                        "reason": "onboarding",
+                        "source": "registration"
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-18T12:05:30+00:00"
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "premium",
+                        "to": "ada",
+                        "reason": "won"
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "first-login",
+                        "to": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "achievement.unlocked",
+                                "payload": {
+                                    "grant_type": "achievement",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "first-login",
+                                    "achievement_name": "First Login",
+                                    "achievement_icon": "star",
+                                    "reason": "onboarding",
+                                    "source": "registration",
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "prize.awarded",
+                                "payload": {
+                                    "grant_type": "prize",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "prize_id": 1,
+                                    "prize_slug": "premium",
+                                    "prize_name": "1 Month Premium",
+                                    "status": "granted",
+                                    "reason": "won",
+                                    "source": null,
+                                    "granted_at": "2026-11-18T12:05:30+00:00"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "success": false,
+                            "message": "Achievement 'first-login' already granted"
+                        },
+                        "broadcasts": []
+                    }
+                ]
+            },
+            "notes": "The second first-login grant is refused and broadcasts nothing. granted_at follows the clock."
+        },
+        {
+            "id": "0009-occurred-at-follows-the-clock",
+            "title": "occurred_at is the time of the award, in Carbon's toIso8601String form",
+            "since": "0.50.0",
+            "tags": [
+                "xp.awarded",
+                "time"
+            ],
+            "fn": "broadcasts",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-12-31T23:59:59+00:00"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 1
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "broadcasts": []
+                    },
+                    {
+                        "result": null,
+                        "broadcasts": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 1,
+                            "current_level": 1
+                        },
+                        "broadcasts": [
+                            {
+                                "event": "xp.awarded",
+                                "payload": {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "amount": 1,
+                                    "total_xp": 1,
+                                    "current_level": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "occurred_at": "2026-12-31T23:59:59+00:00"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "+00:00, not Z, and no fractional seconds."
+        }
+    ]
+}

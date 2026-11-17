@@ -10,6 +10,16 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-11-17
+
+### Added
+
+- **`fun-lab/events`, 9 rows: the broadcast payloads.** What laravel-fun-lab's `broadcastWith()` returns for `xp.awarded`, `metric.level-reached`, `achievement.unlocked` and `prize.awarded`, the JSON an Echo listener receives and `@particle-academy/fancy-fun-lab-ui` reads. New function `broadcasts`: the same scenario input as `fun-lab/progression`, and each step reports `{event, payload}` for every broadcastable event, in emission order.
+  - **Why:** the Node and Python twins' 0.1.0 events carried raw rows (`{profile, profileMetric, metric, ...}`), so the UI rendered `+5 XP in {metric}` against a twin. `fun-lab/progression` pinned which events fire and in what order, never what they carry, so every table stayed green.
+  - The rows pin: `xp.awarded`'s `id` is the profile's row for that metric (repeats on a second award, so an event-log id or a counter fails); `reason` / `source` present and null; `achievements` as `{id, slug, name, icon}` and an empty list when nothing was granted; the payloads unchanged with the event log off; nothing with dispatch off; `occurred_at` / `granted_at` in Carbon's `+00:00` form at the clock.
+  - Goldens exported from the PHP event classes through `laravel-fun-lab/tests/Conformance/ExportFixturesTest.php`, which now records `broadcastWith()` for this suite. The other five suites re-exported byte-identical.
+  - **Consumer action:** none. Existing suites are unchanged; a runner that does not implement `broadcasts` should run the new suite or name it as not run.
+
 ## [0.49.0] - 2026-11-17
 
 ### Added

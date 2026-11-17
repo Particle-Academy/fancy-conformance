@@ -1,0 +1,34 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "fun-lab/events",
+    "title": "fun-lab: the broadcast payloads of xp.awarded, metric.level-reached, achievement.unlocked and prize.awarded",
+    "since": "0.50.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "A scenario, as in fun-lab/progression, but what is pinned is the WIRE payload of each broadcastable event: exactly what laravel-fun-lab's broadcastWith() returns, the JSON a Laravel Echo listener receives and @particle-academy/fancy-fun-lab-ui reads (feedItemFromEcho, FunLabXpFeed, FunLabLevelUp). A twin emits its own in-process event object; its payload serializer must turn that object into this document, key for key and type for type. The channel name is not pinned: PHP derives it from the awardable's class name, which a twin has none of.",
+        "functions": {
+            "broadcasts": "broadcasts(input: {clock, config?, subjects, steps}) -> {steps: [{result, broadcasts: [{event, payload}]}]}. Steps and results are those of fun-lab/progression's scenario(). broadcasts lists, in emission order, every xp.awarded, metric.level-reached, achievement.unlocked and prize.awarded event the step emitted, each with its broadcastWith() payload. award.granted and catalog.mutated do not broadcast and are not listed."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are laravel-fun-lab's own event classes: tests/Conformance/ScenarioRunner.php listens for each event and records $event->broadcastWith(), at the frozen clock, and tests/Conformance/ExportFixturesTest.php writes the table. Inputs are authored in fancy-conformance/scripts/fun-lab/events.input.json.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/laravel-fun-lab",
+                "symbol": "LaravelFunLab\\Events\\XpAwarded::broadcastWith"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-fun-lab",
+                "symbol": "xpAwardedPayload"
+            },
+            {
+                "language": "python",
+                "package": "fancy-fun-lab",
+                "symbol": "fancy_fun_lab.payloads.xp_awarded_payload"
+            }
+        ]
+    },
+    "notes": "Added because the twins' 0.1.0 events carried raw rows ({profile, profileMetric, metric, ...}) while laravel-fun-lab broadcasts flat payloads, and the UI rendered \"+5 XP in {metric}\" against a twin. fun-lab/progression pinned which events fire and in what order, never their payloads, so nothing failed. No discrimination probes, as for the other fun-lab suites.",
+    "cases": "cases.json"
+}

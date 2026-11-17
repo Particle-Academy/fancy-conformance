@@ -1,0 +1,187 @@
+{
+  "suite": "fun-lab/events",
+  "manifest": {
+    "title": "fun-lab: the broadcast payloads of xp.awarded, metric.level-reached, achievement.unlocked and prize.awarded",
+    "since": "0.50.0",
+    "caseFormat": "table",
+    "contract": {
+      "summary": "A scenario, as in fun-lab/progression, but what is pinned is the WIRE payload of each broadcastable event: exactly what laravel-fun-lab's broadcastWith() returns, the JSON a Laravel Echo listener receives and @particle-academy/fancy-fun-lab-ui reads (feedItemFromEcho, FunLabXpFeed, FunLabLevelUp). A twin emits its own in-process event object; its payload serializer must turn that object into this document, key for key and type for type. The channel name is not pinned: PHP derives it from the awardable's class name, which a twin has none of.",
+      "functions": {
+        "broadcasts": "broadcasts(input: {clock, config?, subjects, steps}) -> {steps: [{result, broadcasts: [{event, payload}]}]}. Steps and results are those of fun-lab/progression's scenario(). broadcasts lists, in emission order, every xp.awarded, metric.level-reached, achievement.unlocked and prize.awarded event the step emitted, each with its broadcastWith() payload. award.granted and catalog.mutated do not broadcast and are not listed."
+      },
+      "reference": "php",
+      "referenceNote": "Goldens are laravel-fun-lab's own event classes: tests/Conformance/ScenarioRunner.php listens for each event and records $event->broadcastWith(), at the frozen clock, and tests/Conformance/ExportFixturesTest.php writes the table. Inputs are authored in fancy-conformance/scripts/fun-lab/events.input.json.",
+      "implementations": [
+        { "language": "php", "package": "particle-academy/laravel-fun-lab", "symbol": "LaravelFunLab\\Events\\XpAwarded::broadcastWith" },
+        { "language": "node", "package": "@particle-academy/fancy-fun-lab", "symbol": "xpAwardedPayload" },
+        { "language": "python", "package": "fancy-fun-lab", "symbol": "fancy_fun_lab.payloads.xp_awarded_payload" }
+      ]
+    },
+    "notes": "Added because the twins' 0.1.0 events carried raw rows ({profile, profileMetric, metric, ...}) while laravel-fun-lab broadcasts flat payloads, and the UI rendered \"+5 XP in {metric}\" against a twin. fun-lab/progression pinned which events fire and in what order, never their payloads, so nothing failed. No discrimination probes, as for the other fun-lab suites."
+  },
+  "cases": [
+    {
+      "id": "0001-xp-awarded-payload",
+      "title": "xp.awarded carries the flat payload: ids, the metric's slug and name, the amount, the metric's new total and level, reason, source and occurred_at",
+      "tags": ["xp.awarded", "control"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat-xp", "name": "Combat XP" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat-xp", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat-xp", "level": 2, "xp": 100 } },
+          { "op": "award", "metric": "combat-xp", "to": "ada", "amount": 5, "reason": "first blood", "source": "arena" }
+        ]
+      },
+      "notes": "The UI's feed reads gamed_metric_name. A raw event with the name nested under metric renders the label with its {metric} placeholder unfilled."
+    },
+    {
+      "id": "0002-xp-awarded-without-reason-or-source",
+      "title": "reason and source are present and null when the award gave none, and the metric's name defaults from its slug",
+      "tags": ["xp.awarded", "nulls"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "crafting" } },
+          { "op": "award", "metric": "crafting", "to": "ada", "amount": 3 }
+        ]
+      },
+      "notes": "A key that is absent and a key that is null are different JSON; a twin that drops a null key fails here."
+    },
+    {
+      "id": "0003-one-award-crossing-two-levels",
+      "title": "an award crossing two levels broadcasts each level, ascending, with what it granted, then the achievements, then xp.awarded at the final level",
+      "tags": ["metric.level-reached", "achievement.unlocked", "order", "hazard"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat-xp", "name": "Combat XP" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat-xp", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat-xp", "level": 2, "xp": 100, "name": "Apprentice" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat-xp", "level": 3, "xp": 200, "name": "Adept" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "apprentice", "name": "Apprentice", "icon": "sword" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "adept" } },
+          { "op": "attach", "achievement": "apprentice", "metricLevel": { "metric": "combat-xp", "level": 2 } },
+          { "op": "attach", "achievement": "adept", "metricLevel": { "metric": "combat-xp", "level": 3 } },
+          { "op": "award", "metric": "combat-xp", "to": "ada", "amount": 250, "reason": "boss", "source": "raid" }
+        ]
+      },
+      "notes": "achievements is a list of {id, slug, name, icon}, icon null when unset, and lists only what that level granted. total_xp on each level is the metric's XP when the level was reached."
+    },
+    {
+      "id": "0004-a-level-whose-achievement-is-already-held",
+      "title": "a level whose achievement the profile already holds broadcasts achievements as an empty list, and an unnamed level is called Level 2",
+      "tags": ["metric.level-reached", "empty"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 10 } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "veteran" } },
+          { "op": "attach", "achievement": "veteran", "metricLevel": { "metric": "combat", "level": 2 } },
+          { "op": "grant", "slug": "veteran", "to": "ada", "reason": "imported", "source": "migration" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 }
+        ]
+      },
+      "notes": "An empty list, never an empty object and never absent. level_name is the level's stored name, which setup defaults to 'Level N'."
+    },
+    {
+      "id": "0005-id-is-the-profile-metric-row",
+      "title": "xp.awarded's id is the profile's row for that metric: the same on every award to it, different per profile and per metric",
+      "tags": ["xp.awarded", "id", "hazard"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bob": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "crafting" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 5 },
+          { "op": "award", "metric": "combat", "to": "bob", "amount": 7 },
+          { "op": "award", "metric": "crafting", "to": "ada", "amount": 2 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 1 }
+        ]
+      },
+      "notes": "Catches an id taken from the event log row or a per-event counter: those would differ on the fourth award, where the profile-metric id repeats the first."
+    },
+    {
+      "id": "0006-event-log-off",
+      "title": "with the event log off the payloads are unchanged, id included",
+      "tags": ["xp.awarded", "config", "hazard"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "config": { "log_to_database": false },
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 10, "name": "Two" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 12 }
+        ]
+      },
+      "notes": "The payload does not read the event log, so turning it off changes nothing on the wire."
+    },
+    {
+      "id": "0007-dispatch-off",
+      "title": "with dispatch off nothing broadcasts",
+      "tags": ["config", "control"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "config": { "dispatch": false },
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 10 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 12 }
+        ]
+      }
+    },
+    {
+      "id": "0008-grants-broadcast",
+      "title": "achievement.unlocked and prize.awarded carry the grant payloads: grant id, profile, the item's slug and name, status for a prize, and granted_at",
+      "tags": ["achievement.unlocked", "prize.awarded"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "achievement", "with": { "slug": "first-login", "name": "First Login", "icon": "star" } },
+          { "op": "setup", "a": "prize", "with": { "slug": "premium", "name": "1 Month Premium" } },
+          { "op": "grant", "slug": "first-login", "to": "ada", "reason": "onboarding", "source": "registration" },
+          { "op": "clock", "at": "2026-11-18T12:05:30+00:00" },
+          { "op": "grant", "slug": "premium", "to": "ada", "reason": "won" },
+          { "op": "grant", "slug": "first-login", "to": "ada" }
+        ]
+      },
+      "notes": "The second first-login grant is refused and broadcasts nothing. granted_at follows the clock."
+    },
+    {
+      "id": "0009-occurred-at-follows-the-clock",
+      "title": "occurred_at is the time of the award, in Carbon's toIso8601String form",
+      "tags": ["xp.awarded", "time"],
+      "fn": "broadcasts",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "clock", "at": "2026-12-31T23:59:59+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 1 }
+        ]
+      },
+      "notes": "+00:00, not Z, and no fractional seconds."
+    }
+  ]
+}
