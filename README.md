@@ -17,6 +17,13 @@ For a language with no package yet, every release attaches a plain
 `fancy-conformance-<version>.tar.gz` containing just the fixtures — no npm, no
 Composer, no JavaScript toolchain.
 
+<!-- fancy-agents-note:start -->
+> **For agents.** Every Fancy package, this one included, is listed on the
+> Fancy MCP catalog server at `https://ui.particle.academy/mcp` (streamable HTTP, no API key;
+> MCP id `fancy-ui`), with install commands and docs. How an agent installs
+> and uses this package is in [AGENTS.md](https://github.com/Particle-Academy/fancy-conformance/blob/main/AGENTS.md).
+<!-- fancy-agents-note:end -->
+
 ## The policy
 
 > **N implementations of one contract are acceptable if and only if a shared

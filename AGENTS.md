@@ -1,244 +1,61 @@
-# AGENTS.md — fancy-conformance
+# Using fancy-conformance — guide for agents
 
-Shared cross-language conformance fixtures. This file describes **this repo's
-code and invariants**. Process rules — publishing, kit versioning, backports —
-live in the envelope's `AGENTS.md` and are deliberately not repeated here.
+How an agent installs and uses this package in a consumer repo. What the package
+is, is in [README.md](./README.md). Notes for working ON this repo's code are in
+[CONTRIBUTING.md](./CONTRIBUTING.md).
 
-## What this repo is
+## Install
 
-Data, plus four thin loaders for it. The fixtures are the product; the loaders
-exist so a consumer does not have to hand-roll JSON reading in every repo.
+Always as a DEV dependency: it is test data plus loaders, never runtime code.
 
-```
-VERSION                  the fixture set's own semver — printed by every runner
-suites/<id>/manifest.json  what contract this suite pins, and whose behaviour is the reference
-suites/<id>/cases.json     the rows
-schema/                  JSON Schema for both of the above
-parity/                  the release-parity ledger schema + procedure
-runners/README.md        how to write a runner; the subprocess CLI contract
-src/index.ts             Node loader
-php/src/Conformance.php  PHP loader — same API shape, deliberately
-python/src/fancy_conformance/  Python loader — same again; ships the fixtures in its wheel
-rust/src/lib.rs          Rust loader — same again; reads JSON through first-party `fancy-json`
-rust/src/fixture.rs      file references for Rust: our own gunzip/inflate and SHA-256 (std has neither)
-scripts/cross-check.mjs  runs BOTH loaders and requires identical verdicts
-testdata/file-refs/      ONE set of file-reference trees every loader's tests read (generated)
+```bash
+npm install --save-dev @particle-academy/fancy-conformance
+composer require --dev particle-academy/fancy-conformance
 ```
 
-## File references (0.38.0)
+- **Node:** `>=22`. **PHP:** `^8.4`.
+- **Python is not on PyPI, and will not be.** Check this repository out at the
+  tag you pin and put `python/src` on the path (pytest `pythonpath`, or
+  `PYTHONPATH` in CI).
+- **Any other language:** every release attaches
+  `fancy-conformance-<version>.tar.gz` with just the fixtures.
 
-`{"file": "fixtures/<name>", "sha256": "<hex>"}` anywhere in a row's `input`,
-`expected` or `artifacts`. Rules, each pinned in all four loaders by the shared
-trees in `testdata/file-refs/` (`scripts/build-file-ref-testdata.py` writes
-them and `expected.json` states every verdict):
+## Find it on the Fancy MCP server
 
-- **A reference is an object whose `file` is a STRING starting `fixtures/`.**
-  Not "anything with a `file` key": the first draft said that, and the first
-  real suite broke it at once. fine-print's hostile-document row carries
-  `{"type": "launch", "file": "calc.exe"}` as MODEL DATA a writer must ignore,
-  and the loader refused the row. The `data-*` trees pin the boundary.
-- Exactly `file` and `sha256`; a flat name, no leading dot; `sha256` is the
-  digest of the RESOLVED bytes (after gunzip), so the stored compression is
-  never contract. Shape and existence at LOAD time; the digest in
-  `fixtureBytes()`, which throws on a mismatch.
-- `.gitattributes` marks fixtures `binary`. This estate checks out with
-  `core.autocrlf=true`, and an uncompressed PDF often has no NUL byte, so git
-  would otherwise guess "text" and rewrite LF. `raw.bin` in the testdata ends
-  CR LF LF to catch exactly that.
-- **The Rust loader carries its own inflate and SHA-256.** Taking a crate for
-  either would be the third-party conversation this crate exists to avoid. The
-  testdata exercises all three DEFLATE block types (stored, fixed, dynamic) and
-  the FIPS vectors; the fine-print fixtures were gzipped by PHP, so Rust
-  decoding them all is itself a cross-implementation check.
+The catalog server is `https://ui.particle.academy/mcp` (streamable HTTP, no API
+key; MCP id `fancy-ui`). This package is one registry entry, slug
+`fancy-conformance`. Find it with `search-backend-packages` (it is not a UI
+component), and get the install commands with `install-instructions`.
 
-**The Rust loader was added with `fancy-flow-rs`, for the same reason the Python
-one was.** Writing a private copy in the repo under test would have been the
-fifth time, in the repository that exists to stop exactly that. Its only
-dependency is first-party `fancy-json`, which has none of its own — so a Rust
-consumer runs the tables without a third-party approval conversation.
+## API essentials
 
-**The Python loader was added because four consumers had already written it
-themselves and their copies had diverged.** `holy-sheet-py`, `dark-slide-py`,
-`last-word-py` and `fancy-flow-py` each carried a private `tests/conformance/loader.py`;
-two of them read a case's `skip` as a scalar instead of a map keyed by language,
-so a row skipped for PHP skipped on Python too and the log still read green.
-That is this repository's own thesis failing inside its own consumers. Delete
-those copies as each repo is next touched — the promoted loader is the one that
-gets fixed.
+The same API shape in every loader:
 
-## Invariants
+| | Node | PHP (`ParticleAcademy\Conformance\Conformance`) | Python (`fancy_conformance`) |
+|---|---|---|---|
+| Run an implementation over a suite | `runTable(id, impl, { language })` | `Conformance::runTable($id, $impl, $language)` | `run_table(...)` |
+| Print the summary | `formatSummary(summary)` | `Conformance::formatSummary($summary)` | `format_summary(summary)` |
+| Load rows | `loadSuite(id)` / `loadSuiteFrom(root, id)` | `Conformance::cases($suite, $root)` | `cases(suite, root=...)` |
+| Fixture-set version | `suiteVersion()` | `Conformance::version()` | `version()` |
+| Resolve a file reference | `fixtureBytes(suite, ref)` | `Conformance::fixtureBytes(...)` | `fixture_bytes(...)` |
 
-**A skip must have a non-empty reason.** Enforced at LOAD time in every loader,
-with matching messages, asserted positively and negatively on every side. This
-is the repository's entire thesis; if it is ever relaxed, the package is
-decoration.
-
-**`skip` is a MAP keyed by language, never a scalar.** `{"php": "no PHP impl"}`
-skips PHP and nothing else. A loader reading it as a truthy value skips the row
-for *every* language and simultaneously makes the empty-reason guard unreachable,
-because a non-empty dict is never blank. Both effects are silent. Two shipped
-Python copies had exactly this bug; `python/tests/test_loader.py` now pins it
-from both directions.
-
-**A duplicate case id is a load error.** Ids appear in other repos' skip lists
-and in changelogs.
-
-**Case ids are never renumbered.** A test asserts they are unique and sorted.
-Inserting between `0003` and `0004` means `0004` and everything after it keeps
-its number and the new case goes at the end — ordering in the file is not
-chronology.
-
-**Goldens come from running the reference implementation, never from what the
-value obviously is.** `suites/shared/decimal/0003-format-1e300` is 301 digits
-and is *not* 1 followed by 300 zeros, because `number_format` prints the exact
-value of the double and the nearest double to 1e300 is not 10^300. The first
-draft of the discrimination probe asserted the round number and was wrong.
-
-**The loaders find their root by walking up to `suites/`.** Never a fixed
-`../..`, and never a path to a sibling checkout. The two parity harnesses this
-package replaces both hard-coded `../../holy-sheet/src/`, which is why they ran
-in exactly one directory layout and silently no-opped everywhere else.
-
-**Every loader takes an explicit root** (`loadSuiteFrom`, `Conformance::cases($suite, $root)`,
-`cases(suite, root=...)`)
-so the guards above are tested through the real code rather than a copy. An
-earlier draft of both test files re-implemented the guard inside the test, which
-would have asserted nothing — the exact bug this repo exists to catch, nearly
-shipped inside it.
+`impl` receives a case and returns the value compared with `expected`. Throwing
+counts as a failure, not a crash. Worked examples are in the README's "Using
+it"; the subprocess CLI contract for suites that emit documents is in
+[`runners/README.md`](./runners/README.md).
 
 ## Traps
 
-**Do not embed PHP in a JavaScript template literal.** `scripts/cross-check-driver.php`
-is a real file for this reason: a namespace separator and a regex `\d` are both
-backslashes, and the doubling rules differ. The first version got it wrong in
-two places and failed to parse. The bad outcome is the slip that still parses.
-
-**`toExponential(20)` is not an exact expansion.** It gives 21 significant
-digits and pads. Use `BigInt(v)` for an integral double.
-
-**Pest's `toContain` takes variadic needles.** `expect($x)->toContain($needle, $message)`
-looks for the message too, and fails for a reason unrelated to the assertion.
-Use `expect(condition)->toBeTrue($message)`.
-
-**On Windows, `php` from Herd is a shell shim** and cannot be spawned by Node.
-`CONFORMANCE_PHP` takes an absolute path to a real `php.exe`. It is not an opt
-out — an unset or wrong value still fails the run.
-
-## Adding a suite
-
-1. `suites/<capability>/manifest.json` — declare the contract, the reference
-   language, and every known implementation.
-2. `cases.json` — rows. Give each one a `notes` if it exists to catch something
-   specific; a case without a stated purpose gets deleted by someone later.
-3. Add discrimination tests: a faithful probe that passes everything (the
-   control — without it the mutants prove nothing), plus one mutant per hazard
-   asserting the **exact** set of ids it fails.
-
-   **`flow/graph-runs` has none, and that is a known gap rather than an
-   oversight.** The implementation under test there is an entire workflow
-   engine, which this package does not carry and should not grow. Its rows
-   therefore guard DRIFT between four runtimes but do not prove they
-   discriminate; the manifest's `notes` says so, so nobody reads its green tick
-   as the stronger claim.
-
-   **`exchange/*` and `doc-model/shared` DO have probes**, unlike the
-   `template/*` suites, because the functions are small enough to carry:
-   `tests/exchange-probe.ts` is a mutable reading of
-   `suites/exchange/SPEC.md` (a helper module, not a test file, and not
-   exported), and `tests/discrimination-exchange.test.ts` pins the control and
-   every mutant. Rows come from `scripts/build-exchange-cases.py`; edit the
-   generator, regenerate, and re-run both. A mutant whose set goes EMPTY is a
-   hazard no row catches any more: add a row, never delete the mutant.
-4. **Goldens captured from Google Sheets** (`formula/*`, for fancy-formula)
-   use `reference: "google-sheets"` with a `referenceNote` naming the capture.
-   They come ONLY from `scripts/build-formula-cases.py`, which refuses an export
-   it cannot trust; a row is never typed by hand. An empty suite does not load
-   (the Python and Rust loaders and the Node metadata test all refuse zero
-   cases), so no `formula/*` directory exists until the first capture lands.
-
-   **A per-row check cannot see lost INPUTS.** Capture v1 lost 184 input cells
-   in Sheets (out-of-order cells in a row; Sheets kept the first and dropped
-   the rest), and every affected row was still internally consistent. So the
-   generator takes the UPLOADED workbook (`--workbook`, digest-checked) and
-   requires every literal cell to come back unchanged. Never make that
-   argument optional: it is the only guard against a capture computed over the
-   wrong data. Sheets also exports a formula ERROR as `t="str"` text; it is
-   read as an error only when TYPE (16) and ERROR.TYPE agree.
-5. If the suite emits documents rather than values, use `caseFormat: "directory"`
-   and declare the normalisation in the manifest. Never byte-compare a zip
-   container as shipped — PHP writes DEFLATE with real mtimes, the JS ports
-   write STORE with a fixed 1980 date, and those files can never match.
-
-## Testing
-
-```bash
-npm test                                                   # Node loader + discrimination
-vendor/bin/pest                                            # PHP loader
-cd python && python -m pytest                              # Python loader
-cd rust && cargo test                                      # Rust loader
-CONFORMANCE_PHP=<abs path to php.exe> npm run cross-check   # Node + PHP, compared
-```
-
-All five are required CI jobs. `npm test` is NOT run with `--if-present` here:
-a green tick over an absent suite is the failure this package is about.
-
-**This section said "all four are required CI jobs" while `ci.yml` had only
-`node`, `php` and `cross-language`.** The Python loader and its 27 tests ran
-NOWHERE — a claim about coverage, in the repository whose entire argument is
-that such a claim must be a test result rather than a sentence. Both the
-`python` and `rust` jobs were added on 2026-08-23. If you add a sixth loader,
-the job is part of adding it.
-
-**The Python loader is not published to PyPI, and must not be.** This
-repository exists so the suite's own packages stay aligned; nothing outside it
-installs the fixtures. A Python consumer checks this repository out at the tag it
-pins and puts `python/src` on its path (pytest `pythonpath` in the envelope,
-`PYTHONPATH` in CI). A `publish-python` job existed from 2026-08-25 to
-2026-09-13 and failed on every tag for want of a trusted publisher; it was
-removed rather than armed, on the owner's ruling. npm and Packagist remain,
-because the TypeScript and PHP consumers install from them as a dev dependency.
-
-**`cross-check.mjs` still compares only Node and PHP.** Extending it to the
-Python loader is open work; until it lands, the Python loader is asserted by its
-own suite rather than against a peer's verdict, which is weaker and is recorded
-here so nobody reads three green ticks as a three-way comparison. For FILE
-REFERENCES the gap is narrower: all four loaders assert the same
-`testdata/file-refs/expected.json`, and cross-check additionally requires Node
-and PHP to find the same references in every real suite and resolve each to the
-same sha256.
-
-### Float comparison — CLOSED, and how
-
-This section used to record a live 3-1 split: PHP, Python and Rust compared
-floats with a scaled `1e-12` epsilon while TypeScript used exact `Object.is`, in
-a repository whose product is agreement. It ended with "pick one and make the
-other three match". Resolved in 0.10.0: **all four are exact.**
-
-**The epsilon lost because its justification was measurably false.** It was
-stated as "a golden written as `0.002` in JSON is a decimal literal, and the
-nearest double to it is not the nearest double to every language's parse of the
-same text". Measured rather than argued: `0.002` (the literal the justification
-itself named), `0.1`, `1e300`, `DBL_MAX`, the `5e-324` denormal and
-`0.30000000000000004` all parse to **bit-identical doubles** in PHP, Python and
-Node. Decimal-to-double conversion is specified, not per-implementation.
-
-What the epsilon actually did was let two runtimes that computed DIFFERENT
-values pass as equal — the one thing this package exists to catch. On a money
-row a relative `1e-12` is real money at scale.
-
-**A case that genuinely needs tolerance declares one on the row**
-(`"tolerance": 1e-9`), where a reader of the fixture can see it. A global
-epsilon is invisible: nobody reading a case can tell whether it asserts a value
-or a neighbourhood. Same principle as a skip having to state its reason.
-
-**Numbers compare by VALUE, not by JSON type.** An integer golden IS satisfied
-by a float of the same value, and that is not laxness — `shared/decimal/0008-coerce-exponent`
-requires it, because PHP's `"1e5" + 0` yields `float(100000)` against an integer
-golden. The reference language is JavaScript, which has ONE number type, so a
-golden can never encode "this must be a float"; a loader enforcing that
-distinction asserts something no golden is able to claim. An earlier draft of
-the 0.10.0 change did enforce it, and both that fixture and a Rust unit test
-caught the contradiction — the Rust test was the one that was wrong, and its
-value assertions survive unchanged and are now stronger, being exact.
-
-Proven by `npm run cross-check`: 35 cases, two loaders, identical verdicts.
+- **The four rules for a consuming repo** (README): run the suite on every push
+  and PR; a missing toolchain is a FAILURE, not a skip; print the summary every
+  time, skips included; print and assert the pinned suite version.
+- **`skip` is a map keyed by language, with a non-empty reason**:
+  `{"php": "no PHP impl"}` skips PHP only. An empty reason is a load error.
+- **Never renumber a case id.** Ids appear in other repos' skip lists and
+  changelogs.
+- **Floats compare exactly.** A row that genuinely needs tolerance declares
+  `"tolerance"` on the row; there is no global epsilon. Numbers compare by value,
+  not JSON type, so an integer golden is satisfied by an equal float.
+- **Do not write your own loader.** Four consumers did and their copies diverged
+  (two read `skip` as a scalar). Use the shipped one.
+- A new case lands here first, red, then in each implementation.
