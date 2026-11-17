@@ -1,0 +1,34 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "fun-lab/strings",
+    "title": "fun-lab: slug and default display name",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "The two string transforms laravel-fun-lab borrows from Laravel and every twin must reproduce: the slug a catalog entity is stored under (Str::slug) and the display name it gets when none is given (Str::headline). An entity set up under 'First Login' in one runtime has to be found under the same slug in another, or a shared catalog splits in two.",
+        "functions": {
+            "slug": "slug(value: string) -> string - lowercase, separator '-', ASCII-folded, '@' spelled 'at', runs of separators collapsed and trimmed.",
+            "headline": "headline(value: string) -> string - words split on spaces, '-', '_' and case changes, each capitalised, joined with one space."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are Illuminate\\Support\\Str::slug and Str::headline as installed in laravel-fun-lab's dev dependencies, written by laravel-fun-lab/tests/Conformance/ExportFixturesTest.php. Inputs are authored in fancy-conformance/scripts/fun-lab/strings.input.json.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/laravel-fun-lab",
+                "symbol": "Illuminate\\Support\\Str"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-fun-lab",
+                "symbol": "slug / headline"
+            },
+            {
+                "language": "python",
+                "package": "fancy-fun-lab",
+                "symbol": "fancy_fun_lab.strings"
+            }
+        ]
+    },
+    "cases": "cases.json"
+}

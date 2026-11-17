@@ -1,0 +1,296 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "fun-lab/strings",
+    "cases": [
+        {
+            "id": "0001-slug-already-a-slug",
+            "title": "a slug is its own slug",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "control"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "combat-xp"
+            },
+            "expected": "combat-xp"
+        },
+        {
+            "id": "0002-slug-title-case-words",
+            "title": "words are lowercased and joined with '-'",
+            "since": "0.49.0",
+            "tags": [
+                "slug"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "First Login"
+            },
+            "expected": "first-login"
+        },
+        {
+            "id": "0003-slug-underscores",
+            "title": "underscores become the separator",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "hazard"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "first_login"
+            },
+            "expected": "first-login",
+            "notes": "Str::slug turns '_' into '-'. A twin that keeps underscores stores a second entity for the same name."
+        },
+        {
+            "id": "0004-slug-surrounding-and-repeated-spaces",
+            "title": "surrounding and repeated separators collapse",
+            "since": "0.49.0",
+            "tags": [
+                "slug"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "  Combat   XP  "
+            },
+            "expected": "combat-xp"
+        },
+        {
+            "id": "0005-slug-repeated-dashes",
+            "title": "repeated and leading/trailing dashes collapse",
+            "since": "0.49.0",
+            "tags": [
+                "slug"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "-a--b-"
+            },
+            "expected": "a-b"
+        },
+        {
+            "id": "0006-slug-latin-diacritics",
+            "title": "Latin diacritics fold to ASCII",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "hazard"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "Héllo Wörld Café"
+            },
+            "expected": "hello-world-cafe"
+        },
+        {
+            "id": "0007-slug-at-sign",
+            "title": "'@' is spelled 'at'",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "hazard"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "team@home"
+            },
+            "expected": "team-at-home",
+            "notes": "Laravel's default dictionary replaces '@' with '-at-' before folding. Easy to miss and invisible until two runtimes disagree."
+        },
+        {
+            "id": "0008-slug-punctuation-dropped",
+            "title": "punctuation other than separators is dropped",
+            "since": "0.49.0",
+            "tags": [
+                "slug"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "C++ Mastery!"
+            },
+            "expected": "c-mastery"
+        },
+        {
+            "id": "0009-slug-digits-kept",
+            "title": "digits are kept",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "control"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "Level 10 Hero"
+            },
+            "expected": "level-10-hero"
+        },
+        {
+            "id": "0010-slug-camel-case-not-split",
+            "title": "a camel-case word is lowercased, not split",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "hazard"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "XPBoost"
+            },
+            "expected": "xpboost",
+            "notes": "slug does NOT split on case changes (headline does). The pair 0010/0020 catches a twin that reuses one word-splitter for both."
+        },
+        {
+            "id": "0011-slug-german-sharp-s",
+            "title": "'ß' folds to 'ss'",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "hazard"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "Straße"
+            },
+            "expected": "strasse"
+        },
+        {
+            "id": "0012-slug-empty",
+            "title": "an empty string is an empty slug",
+            "since": "0.49.0",
+            "tags": [
+                "slug"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": ""
+            },
+            "expected": ""
+        },
+        {
+            "id": "0013-slug-cjk",
+            "title": "a CJK-only value slugs to the empty string",
+            "since": "0.49.0",
+            "tags": [
+                "slug",
+                "hazard"
+            ],
+            "fn": "slug",
+            "input": {
+                "value": "日本語"
+            },
+            "expected": "",
+            "notes": "Str::slug with the default 'en' language drops CJK rather than transliterating it, so a catalog entity named only in a non-Latin script gets an empty slug. A twin that 'helpfully' transliterates, or keeps the characters, stores it under a slug PHP can never find."
+        },
+        {
+            "id": "0020-headline-camel-case-split",
+            "title": "headline splits on case changes",
+            "since": "0.49.0",
+            "tags": [
+                "headline",
+                "hazard"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "XPBoost"
+            },
+            "expected": "X P Boost"
+        },
+        {
+            "id": "0021-headline-slug",
+            "title": "a slug's words are capitalised",
+            "since": "0.49.0",
+            "tags": [
+                "headline",
+                "control"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "first-login"
+            },
+            "expected": "First Login"
+        },
+        {
+            "id": "0022-headline-underscores",
+            "title": "underscores split words",
+            "since": "0.49.0",
+            "tags": [
+                "headline"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "combat_xp_boost"
+            },
+            "expected": "Combat Xp Boost"
+        },
+        {
+            "id": "0023-headline-acronym-lowercased",
+            "title": "an all-caps word is lowercased after its first letter",
+            "since": "0.49.0",
+            "tags": [
+                "headline",
+                "hazard"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "Combat XP"
+            },
+            "expected": "Combat Xp",
+            "notes": "Str::headline('Combat XP') is 'Combat Xp', and it is what setup() names an entity set up under 'Combat XP' with no name. Surprising, and pinned so no twin 'fixes' it alone: a twin answering 'Combat XP' shows a different name for the same catalog row."
+        },
+        {
+            "id": "0024-headline-lower-camel",
+            "title": "lower camel case",
+            "since": "0.49.0",
+            "tags": [
+                "headline"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "dailyStreakBonus"
+            },
+            "expected": "Daily Streak Bonus"
+        },
+        {
+            "id": "0025-headline-digits",
+            "title": "digits stay attached to their word",
+            "since": "0.49.0",
+            "tags": [
+                "headline",
+                "hazard"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "level10-hero"
+            },
+            "expected": "Level10 Hero"
+        },
+        {
+            "id": "0026-headline-repeated-separators",
+            "title": "repeated separators do not make empty words",
+            "since": "0.49.0",
+            "tags": [
+                "headline"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "a--b__c"
+            },
+            "expected": "A B C"
+        },
+        {
+            "id": "0027-headline-accents",
+            "title": "accented letters keep their accents",
+            "since": "0.49.0",
+            "tags": [
+                "headline"
+            ],
+            "fn": "headline",
+            "input": {
+                "value": "café-crème"
+            },
+            "expected": "Café Crème"
+        }
+    ]
+}

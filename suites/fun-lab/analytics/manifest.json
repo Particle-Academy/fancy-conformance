@@ -1,0 +1,34 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "fun-lab/analytics",
+    "title": "fun-lab: the event log and analytics over it",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "What the event log records for each XP award, achievement, prize and catalog change, and the aggregates read over it: count, total, average, min, max, active users, achievement completion rate, a time series by hour / day / month / year, breakdowns by award type, awardable type and source, and the newest-first export. Keyed breakdowns are reported as lists sorted by key. The `week` interval is deliberately absent: it means a different week on each database (SQLite and MySQL count Monday-start weeks from 00, Postgres uses ISO weeks), so it has no single answer to pin.",
+        "functions": {
+            "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}, as in fun-lab/progression. An analytics step returns the aggregate it names in `agg`."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are laravel-fun-lab's own engine at 0.8.0 or later (forAwardable filtered by id, export ties broken by id) driven by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php on SQLite. Inputs are authored in fancy-conformance/scripts/fun-lab/analytics.input.json.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/laravel-fun-lab",
+                "symbol": "LaravelFunLab\\Builders\\AnalyticsBuilder"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-fun-lab",
+                "symbol": "FunLab.analytics"
+            },
+            {
+                "language": "python",
+                "package": "fancy-fun-lab",
+                "symbol": "fancy_fun_lab.FunLab.analytics"
+            }
+        ]
+    },
+    "notes": "No discrimination probes, for the reason given in fun-lab/progression.",
+    "cases": "cases.json"
+}

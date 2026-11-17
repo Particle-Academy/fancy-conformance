@@ -1,0 +1,34 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "fun-lab/progression",
+    "title": "fun-lab: catalog setup, XP awards, metric and group level progression",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "A scenario: a frozen clock, named subjects and a list of steps (setup, attach, award, grant, opt-out, clock moves, level reads), run through the engine. Expected is, per step, the step's result (or its refusal) and the events it emitted, in order. Covers upsert-by-slug setup and its validation, the XP award guards (amount, per-action cap, unknown or inactive metric, opt-out), levels claimed exactly once in ascending order with their attached achievements, weighted group XP, hasLevel and progress measured from the current level's floor.",
+        "functions": {
+            "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}. Subjects are named; awardable ids are 1, 2, 3 in listed order and types are reported by their scenario names."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are laravel-fun-lab's own engine (0.8.0 and later, with period boards on the event log and compare-and-set group levels) driven through its public API by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php. Inputs are authored in fancy-conformance/scripts/fun-lab/progression.input.json.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/laravel-fun-lab",
+                "symbol": "LaravelFunLab\\Facades\\LFL"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-fun-lab",
+                "symbol": "FunLab"
+            },
+            {
+                "language": "python",
+                "package": "fancy-fun-lab",
+                "symbol": "fancy_fun_lab.FunLab"
+            }
+        ]
+    },
+    "notes": "No discrimination probes: the implementation under test is a whole gamification engine, which this package does not carry, as with flow/graph-runs. These rows guard drift between three runtimes; the hazard rows name in their notes the wrong answer each exists to catch.",
+    "cases": "cases.json"
+}

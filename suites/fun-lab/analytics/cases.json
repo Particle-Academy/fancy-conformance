@@ -1,0 +1,1581 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "fun-lab/analytics",
+    "cases": [
+        {
+            "id": "0001-the-log-and-its-export",
+            "title": "what each award, grant and catalog change writes to the log, newest first",
+            "since": "0.49.0",
+            "tags": [
+                "log",
+                "export"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "hello"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "prize",
+                        "with": {
+                            "slug": "sticker"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 25,
+                        "reason": "quest",
+                        "source": "quests",
+                        "meta": {
+                            "quest": 7
+                        }
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "hello",
+                        "to": "ada",
+                        "reason": "welcome",
+                        "source": "onboarding"
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "sticker",
+                        "to": "ada"
+                    },
+                    {
+                        "op": "analytics",
+                        "agg": "export"
+                    },
+                    {
+                        "op": "analytics",
+                        "agg": "export",
+                        "limit": 2
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "prize",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 25,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 25,
+                                "total_xp": 25
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "hello",
+                                "source": "onboarding"
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "events": [
+                            {
+                                "event": "prize.awarded",
+                                "prize": "sticker",
+                                "source": null
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "prize"
+                            }
+                        ]
+                    },
+                    {
+                        "result": [
+                            {
+                                "id": 6,
+                                "event_type": "prize_awarded",
+                                "award_type": "prize",
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "achievement_slug": null,
+                                "amount": null,
+                                "reason": null,
+                                "source": null,
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "prize_awarded",
+                                    "award_type": "prize",
+                                    "recipient_type": "user",
+                                    "recipient_id": 1,
+                                    "award_id": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "meta": [],
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "id": 5,
+                                "event_type": "achievement_unlocked",
+                                "award_type": "achievement",
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "achievement_slug": "hello",
+                                "amount": null,
+                                "reason": "welcome",
+                                "source": "onboarding",
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "achievement_unlocked",
+                                    "award_type": "achievement",
+                                    "recipient_type": "user",
+                                    "recipient_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "hello",
+                                    "achievement_name": "Hello",
+                                    "grant_id": 1,
+                                    "reason": "welcome",
+                                    "source": "onboarding",
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "id": 4,
+                                "event_type": "xp_awarded",
+                                "award_type": "points",
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "achievement_slug": null,
+                                "amount": 25.0,
+                                "reason": "quest",
+                                "source": "quests",
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "xp_awarded",
+                                    "award_type": "points",
+                                    "recipient_type": "user",
+                                    "recipient_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "amount": 25,
+                                    "total_xp": 25,
+                                    "current_level": 1,
+                                    "reason": "quest",
+                                    "source": "quests",
+                                    "meta": {
+                                        "quest": 7
+                                    },
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "id": 3,
+                                "event_type": "catalog_mutated",
+                                "award_type": "system",
+                                "awardable_type": "system",
+                                "awardable_id": 0,
+                                "achievement_slug": "sticker",
+                                "amount": null,
+                                "reason": null,
+                                "source": null,
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "catalog_mutated",
+                                    "entity_type": "prize",
+                                    "entity_model": "LaravelFunLab\\Models\\Prize",
+                                    "entity_id": 1,
+                                    "entity_slug": "sticker",
+                                    "was_created": true,
+                                    "actor_type": null,
+                                    "actor_id": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "id": 2,
+                                "event_type": "catalog_mutated",
+                                "award_type": "system",
+                                "awardable_type": "system",
+                                "awardable_id": 0,
+                                "achievement_slug": "hello",
+                                "amount": null,
+                                "reason": null,
+                                "source": null,
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "catalog_mutated",
+                                    "entity_type": "achievement",
+                                    "entity_model": "LaravelFunLab\\Models\\Achievement",
+                                    "entity_id": 1,
+                                    "entity_slug": "hello",
+                                    "was_created": true,
+                                    "actor_type": null,
+                                    "actor_id": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "id": 1,
+                                "event_type": "catalog_mutated",
+                                "award_type": "system",
+                                "awardable_type": "system",
+                                "awardable_id": 0,
+                                "achievement_slug": "combat",
+                                "amount": null,
+                                "reason": null,
+                                "source": null,
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "catalog_mutated",
+                                    "entity_type": "gamed-metric",
+                                    "entity_model": "LaravelFunLab\\Models\\GamedMetric",
+                                    "entity_id": 1,
+                                    "entity_slug": "combat",
+                                    "was_created": true,
+                                    "actor_type": null,
+                                    "actor_id": null,
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ],
+                        "events": []
+                    },
+                    {
+                        "result": [
+                            {
+                                "id": 6,
+                                "event_type": "prize_awarded",
+                                "award_type": "prize",
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "achievement_slug": null,
+                                "amount": null,
+                                "reason": null,
+                                "source": null,
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "prize_awarded",
+                                    "award_type": "prize",
+                                    "recipient_type": "user",
+                                    "recipient_id": 1,
+                                    "award_id": 1,
+                                    "reason": null,
+                                    "source": null,
+                                    "meta": [],
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            },
+                            {
+                                "id": 5,
+                                "event_type": "achievement_unlocked",
+                                "award_type": "achievement",
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "achievement_slug": "hello",
+                                "amount": null,
+                                "reason": "welcome",
+                                "source": "onboarding",
+                                "occurred_at": "2026-11-18T12:00:00+00:00",
+                                "context": {
+                                    "event_type": "achievement_unlocked",
+                                    "award_type": "achievement",
+                                    "recipient_type": "user",
+                                    "recipient_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "hello",
+                                    "achievement_name": "Hello",
+                                    "grant_id": 1,
+                                    "reason": "welcome",
+                                    "source": "onboarding",
+                                    "occurred_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            }
+                        ],
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "Several rows share an instant under the frozen clock; export() breaks those ties on id, newest first (laravel-fun-lab 0.8.0)."
+        },
+        {
+            "id": "0002-aggregates-by-type-and-source",
+            "title": "count, total, average, min and max, filtered by award type and source",
+            "since": "0.49.0",
+            "tags": [
+                "aggregates"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "bo": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10,
+                        "source": "arena"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 30,
+                        "source": "arena"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "bo",
+                        "amount": 5,
+                        "source": "quests"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "count"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "average"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "min"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "max"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "source": "arena",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "achievement",
+                        "agg": "min"
+                    },
+                    {
+                        "op": "analytics",
+                        "agg": "count"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 40,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 30,
+                                "total_xp": 40
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 5,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 5,
+                                "total_xp": 5
+                            }
+                        ]
+                    },
+                    {
+                        "result": 3,
+                        "events": []
+                    },
+                    {
+                        "result": 45.0,
+                        "events": []
+                    },
+                    {
+                        "result": 15.0,
+                        "events": []
+                    },
+                    {
+                        "result": 5.0,
+                        "events": []
+                    },
+                    {
+                        "result": 30.0,
+                        "events": []
+                    },
+                    {
+                        "result": 40.0,
+                        "events": []
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": 4,
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0003-for-one-subject",
+            "title": "forAwardable narrows to that subject, not to its type",
+            "since": "0.49.0",
+            "tags": [
+                "filters",
+                "hazard"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "bo": "user",
+                    "acme": "team"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "bo",
+                        "amount": 20
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "bo",
+                        "amount": 30
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "acme",
+                        "amount": 40
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "forSubject": "ada",
+                        "agg": "count"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "forSubject": "bo",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "forType": "user",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "forType": "team",
+                        "agg": "count"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 20,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 20,
+                                "total_xp": 20
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 50,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 30,
+                                "total_xp": 50
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 40,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 40,
+                                "total_xp": 40
+                            }
+                        ]
+                    },
+                    {
+                        "result": 1,
+                        "events": []
+                    },
+                    {
+                        "result": 50.0,
+                        "events": []
+                    },
+                    {
+                        "result": 60.0,
+                        "events": []
+                    },
+                    {
+                        "result": 1,
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "Before laravel-fun-lab 0.8.0 forAwardable filtered by the awardable's type only, so ada's count here was 3."
+        },
+        {
+            "id": "0004-active-users-and-completion",
+            "title": "active users and achievement completion rate",
+            "since": "0.49.0",
+            "tags": [
+                "aggregates"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "bo": "user",
+                    "cy": "user",
+                    "dee": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "hello"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "bo",
+                        "amount": 10
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "cy",
+                        "amount": 10
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "hello",
+                        "to": "ada"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "activeUsers"
+                    },
+                    {
+                        "op": "analytics",
+                        "forType": "user",
+                        "agg": "activeUsers"
+                    },
+                    {
+                        "op": "analytics",
+                        "forType": "user",
+                        "achievement": "hello",
+                        "agg": "completionRate"
+                    },
+                    {
+                        "op": "analytics",
+                        "forType": "user",
+                        "agg": "completionRate"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "hello",
+                                "source": null
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            }
+                        ]
+                    },
+                    {
+                        "result": 3,
+                        "events": []
+                    },
+                    {
+                        "result": 3,
+                        "events": []
+                    },
+                    {
+                        "result": 33.33333333333333,
+                        "events": []
+                    },
+                    {
+                        "result": 0.0,
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0005-periods-and-ranges",
+            "title": "period(), since() and until() bound the rows",
+            "since": "0.49.0",
+            "tags": [
+                "periods"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2025-12-31T23:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 1
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-02T09:00:00+00:00"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 2
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-17T09:00:00+00:00"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 4
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-18T08:00:00+00:00"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 8
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-18T12:00:00+00:00"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "period": "daily",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "period": "weekly",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "period": "monthly",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "period": "yearly",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "period": "all-time",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "since": "2026-11-17T00:00:00+00:00",
+                        "agg": "total"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "until": "2026-11-17T00:00:00+00:00",
+                        "agg": "total"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 1,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 1,
+                                "total_xp": 1
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 3,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 2,
+                                "total_xp": 3
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 7,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 4,
+                                "total_xp": 7
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 15,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 8,
+                                "total_xp": 15
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": 8.0,
+                        "events": []
+                    },
+                    {
+                        "result": 12.0,
+                        "events": []
+                    },
+                    {
+                        "result": 14.0,
+                        "events": []
+                    },
+                    {
+                        "result": 14.0,
+                        "events": []
+                    },
+                    {
+                        "result": 15.0,
+                        "events": []
+                    },
+                    {
+                        "result": 12.0,
+                        "events": []
+                    },
+                    {
+                        "result": 3.0,
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0006-time-series",
+            "title": "time series by hour, day, month and year",
+            "since": "0.49.0",
+            "tags": [
+                "series"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-10-30T10:15:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 1
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-10-30T10:45:00+00:00"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 2
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-02T07:00:00+00:00"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 4
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "timeSeries",
+                        "interval": "hour"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "timeSeries",
+                        "interval": "day"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "timeSeries",
+                        "interval": "month"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "timeSeries",
+                        "interval": "year"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 1,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 1,
+                                "total_xp": 1
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 3,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 2,
+                                "total_xp": 3
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 7,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 4,
+                                "total_xp": 7
+                            }
+                        ]
+                    },
+                    {
+                        "result": [
+                            {
+                                "period": "2026-10-30 10:00:00",
+                                "count": 2,
+                                "total": 3.0
+                            },
+                            {
+                                "period": "2026-11-02 07:00:00",
+                                "count": 1,
+                                "total": 4.0
+                            }
+                        ],
+                        "events": []
+                    },
+                    {
+                        "result": [
+                            {
+                                "period": "2026-10-30",
+                                "count": 2,
+                                "total": 3.0
+                            },
+                            {
+                                "period": "2026-11-02",
+                                "count": 1,
+                                "total": 4.0
+                            }
+                        ],
+                        "events": []
+                    },
+                    {
+                        "result": [
+                            {
+                                "period": "2026-10",
+                                "count": 2,
+                                "total": 3.0
+                            },
+                            {
+                                "period": "2026-11",
+                                "count": 1,
+                                "total": 4.0
+                            }
+                        ],
+                        "events": []
+                    },
+                    {
+                        "result": [
+                            {
+                                "period": "2026",
+                                "count": 3,
+                                "total": 7.0
+                            }
+                        ],
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0007-breakdowns",
+            "title": "breakdowns by award type, awardable type and source",
+            "since": "0.49.0",
+            "tags": [
+                "breakdowns"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "acme": "team"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "hello"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10,
+                        "source": "arena"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "acme",
+                        "amount": 15
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "hello",
+                        "to": "ada",
+                        "source": "onboarding"
+                    },
+                    {
+                        "op": "analytics",
+                        "agg": "byAwardType"
+                    },
+                    {
+                        "op": "analytics",
+                        "byType": "points",
+                        "agg": "byAwardableType"
+                    },
+                    {
+                        "op": "analytics",
+                        "agg": "bySource"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 15,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 15,
+                                "total_xp": 15
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "hello",
+                                "source": "onboarding"
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            }
+                        ]
+                    },
+                    {
+                        "result": [
+                            {
+                                "key": "achievement",
+                                "count": 1,
+                                "total": 0.0
+                            },
+                            {
+                                "key": "points",
+                                "count": 2,
+                                "total": 25.0
+                            },
+                            {
+                                "key": "system",
+                                "count": 2,
+                                "total": 0.0
+                            }
+                        ],
+                        "events": []
+                    },
+                    {
+                        "result": [
+                            {
+                                "key": "team",
+                                "count": 1,
+                                "total": 15.0,
+                                "unique_awardables": 1
+                            },
+                            {
+                                "key": "user",
+                                "count": 1,
+                                "total": 10.0,
+                                "unique_awardables": 1
+                            }
+                        ],
+                        "events": []
+                    },
+                    {
+                        "result": [
+                            {
+                                "key": "arena",
+                                "count": 1,
+                                "total": 10.0
+                            },
+                            {
+                                "key": "onboarding",
+                                "count": 1,
+                                "total": 0.0
+                            },
+                            {
+                                "key": "unknown",
+                                "count": 3,
+                                "total": 15.0
+                            }
+                        ],
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0008-nothing-logged-when-the-log-is-off",
+            "title": "with the event log off, awards still land and nothing is logged",
+            "since": "0.49.0",
+            "tags": [
+                "log"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "config": {
+                    "log_to_database": false
+                },
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "analytics",
+                        "agg": "count"
+                    },
+                    {
+                        "op": "analytics",
+                        "agg": "export"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": 0,
+                        "events": []
+                    },
+                    {
+                        "result": [],
+                        "events": []
+                    }
+                ]
+            }
+        }
+    ]
+}

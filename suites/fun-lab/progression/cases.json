@@ -1,0 +1,3428 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "fun-lab/progression",
+    "cases": [
+        {
+            "id": "0001-award-below-the-first-threshold",
+            "title": "an award below level 2 creates the profile at level 1 and emits only xp.awarded",
+            "since": "0.49.0",
+            "tags": [
+                "award",
+                "control"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 50,
+                        "reason": "first blood",
+                        "source": "arena"
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 50,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 50,
+                                "total_xp": 50
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 50,
+                                "achievement_count": 0,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 50,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0002-one-award-crosses-three-levels",
+            "title": "one award crossing three levels emits three level-reached events, ascending",
+            "since": "0.49.0",
+            "tags": [
+                "levels",
+                "hazard"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 3,
+                            "xp": 200
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 4,
+                            "xp": 300
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 350
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 3
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 4
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 350,
+                            "current_level": 4
+                        },
+                        "events": [
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [],
+                                "total_xp": 350
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 3,
+                                "achievements": [],
+                                "total_xp": 350
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 4,
+                                "achievements": [],
+                                "total_xp": 350
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 350,
+                                "total_xp": 350
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 360,
+                            "current_level": 4
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 360
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "Catches a twin that announces only the highest level reached, or announces them highest first. One award, three events, in order 2, 3, 4."
+        },
+        {
+            "id": "0003-level-achievement-granted-on-crossing",
+            "title": "an achievement attached to a level is granted when the level is reached, once",
+            "since": "0.49.0",
+            "tags": [
+                "levels",
+                "achievements"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100,
+                            "name": "Apprentice"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 3,
+                            "xp": 200,
+                            "name": "Adept"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "adept",
+                            "description": "Reached Adept"
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "adept",
+                        "metricLevel": {
+                            "metric": "combat",
+                            "level": 3
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 150
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 60
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 500
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 150,
+                            "current_level": 2
+                        },
+                        "events": [
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [],
+                                "total_xp": 150
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 150,
+                                "total_xp": 150
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 210,
+                            "current_level": 3
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "adept",
+                                "source": "metric-level-progression"
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 3,
+                                "achievements": [
+                                    "adept"
+                                ],
+                                "total_xp": 210
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 60,
+                                "total_xp": 210
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 710,
+                            "current_level": 3
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 500,
+                                "total_xp": 710
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 710,
+                                "achievement_count": 1,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 710,
+                                    "current_level": 3,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [
+                                {
+                                    "grant_type": "achievement",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "adept",
+                                    "achievement_name": "Adept",
+                                    "reason": "Reached level 3: Adept",
+                                    "source": "metric-level-progression",
+                                    "meta": {
+                                        "metric_level_id": 2,
+                                        "gamed_metric_id": 1,
+                                        "level": 3
+                                    },
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "The level-reached event carries only the achievements granted on that crossing; a later award past the same level grants nothing again."
+        },
+        {
+            "id": "0004-held-achievement-is-skipped",
+            "title": "an achievement already held is skipped on crossing, not re-granted and not an error",
+            "since": "0.49.0",
+            "tags": [
+                "levels",
+                "achievements",
+                "hazard"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "veteran"
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "veteran",
+                        "metricLevel": {
+                            "metric": "combat",
+                            "level": 2
+                        }
+                    },
+                    {
+                        "op": "grant",
+                        "slug": "veteran",
+                        "to": "ada",
+                        "reason": "imported"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 100
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "success": true,
+                            "message": "Award granted successfully"
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "veteran",
+                                "source": null
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 100,
+                            "current_level": 2
+                        },
+                        "events": [
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [],
+                                "total_xp": 100
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 100,
+                                "total_xp": 100
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 100,
+                                "achievement_count": 1,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 100,
+                                    "current_level": 2,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [
+                                {
+                                    "grant_type": "achievement",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "veteran",
+                                    "achievement_name": "Veteran",
+                                    "reason": "imported",
+                                    "source": null,
+                                    "meta": null,
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "The level-reached event's achievements list is empty, and there is no second achievement.unlocked."
+        },
+        {
+            "id": "0005-level-achievement-filters",
+            "title": "a level's achievement for another awardable type, or inactive, is not granted",
+            "since": "0.49.0",
+            "tags": [
+                "levels",
+                "achievements"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "acme": "team"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "team-only",
+                            "for": "team"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "retired",
+                            "active": false
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "anyone"
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "team-only",
+                        "metricLevel": {
+                            "metric": "combat",
+                            "level": 2
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "retired",
+                        "metricLevel": {
+                            "metric": "combat",
+                            "level": 2
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "anyone",
+                        "metricLevel": {
+                            "metric": "combat",
+                            "level": 2
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 100
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "acme",
+                        "amount": 100
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    },
+                    {
+                        "op": "profile",
+                        "who": "acme"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 3
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 100,
+                            "current_level": 2
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "anyone",
+                                "source": "metric-level-progression"
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [
+                                    "anyone"
+                                ],
+                                "total_xp": 100
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 100,
+                                "total_xp": 100
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 100,
+                            "current_level": 2
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "team-only",
+                                "source": "metric-level-progression"
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            },
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "anyone",
+                                "source": "metric-level-progression"
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [
+                                    "team-only",
+                                    "anyone"
+                                ],
+                                "total_xp": 100
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 100,
+                                "total_xp": 100
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 100,
+                                "achievement_count": 1,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 100,
+                                    "current_level": 2,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [
+                                {
+                                    "grant_type": "achievement",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "achievement_id": 3,
+                                    "achievement_slug": "anyone",
+                                    "achievement_name": "Anyone",
+                                    "reason": "Reached level 2: Level 2",
+                                    "source": "metric-level-progression",
+                                    "meta": {
+                                        "metric_level_id": 1,
+                                        "gamed_metric_id": 1,
+                                        "level": 2
+                                    },
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 2,
+                                "awardable_type": "team",
+                                "awardable_id": 2,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 100,
+                                "achievement_count": 2,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 2,
+                                    "profile_id": 2,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 100,
+                                    "current_level": 2,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [
+                                {
+                                    "grant_type": "achievement",
+                                    "id": 2,
+                                    "profile_id": 2,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "team-only",
+                                    "achievement_name": "Team Only",
+                                    "reason": "Reached level 2: Level 2",
+                                    "source": "metric-level-progression",
+                                    "meta": {
+                                        "metric_level_id": 1,
+                                        "gamed_metric_id": 1,
+                                        "level": 2
+                                    },
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                },
+                                {
+                                    "grant_type": "achievement",
+                                    "id": 3,
+                                    "profile_id": 2,
+                                    "achievement_id": 3,
+                                    "achievement_slug": "anyone",
+                                    "achievement_name": "Anyone",
+                                    "reason": "Reached level 2: Level 2",
+                                    "source": "metric-level-progression",
+                                    "meta": {
+                                        "metric_level_id": 1,
+                                        "gamed_metric_id": 1,
+                                        "level": 2
+                                    },
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0006-award-amount-guards",
+            "title": "amount 0 and a negative amount are refused; the cap is inclusive",
+            "since": "0.49.0",
+            "tags": [
+                "award",
+                "guards",
+                "hazard"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "config": {
+                    "max_points_per_action": 100
+                },
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 0
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": -5
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 101
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 100
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "Amount must be greater than 0. Use ->amount(50) to set the XP amount."
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "Amount must be greater than 0. Use ->amount(50) to set the XP amount."
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "rejected",
+                            "kind": "cap_exceeded",
+                            "message": "Award amount 101 exceeds the configured per-action cap of 100."
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 100,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 100,
+                                "total_xp": 100
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 100,
+                                "achievement_count": 0,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 100,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "With a cap of 100, 100 is allowed and 101 is refused as cap_exceeded. Catches an off-by-one cap and a twin that accepts 0 as a no-op."
+        },
+        {
+            "id": "0007-unknown-and-inactive-metric",
+            "title": "an unknown metric and an inactive metric are refused",
+            "since": "0.49.0",
+            "tags": [
+                "award",
+                "guards"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "paused",
+                            "active": false
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "nope",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "award",
+                        "metric": "paused",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "GamedMetric 'nope' not found."
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "GamedMetric 'paused' is not active."
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "profile": null
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0008-opted-out-awards-refused",
+            "title": "an opted-out subject's awards are refused until they opt back in",
+            "since": "0.49.0",
+            "tags": [
+                "award",
+                "opt-out"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "optOut",
+                        "who": "ada"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "optIn",
+                        "who": "ada"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "rejected",
+                            "kind": "opted_out",
+                            "message": "Recipient has opted out of gamification."
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 20,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 20
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 20,
+                                "achievement_count": 0,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 20,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0009-opt-out-before-any-profile",
+            "title": "opting out before any activity creates an opted-out profile",
+            "since": "0.49.0",
+            "tags": [
+                "opt-out"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "optOut",
+                        "who": "ada"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "rejected",
+                            "kind": "opted_out",
+                            "message": "Recipient has opted out of gamification."
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": false,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 0,
+                                "achievement_count": 0,
+                                "prize_count": 0,
+                                "last_activity_at": null,
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [],
+                            "achievements": [],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0010-group-xp-truncates-per-metric",
+            "title": "weighted group XP truncates each metric before summing",
+            "since": "0.49.0",
+            "tags": [
+                "groups",
+                "hazard"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "crafting"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group",
+                        "with": {
+                            "slug": "power"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-metric",
+                        "with": {
+                            "group": "power",
+                            "metric": "combat",
+                            "weight": 0.5
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-metric",
+                        "with": {
+                            "group": "power",
+                            "metric": "crafting",
+                            "weight": 0.5
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-level",
+                        "with": {
+                            "group": "power",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-level",
+                        "with": {
+                            "group": "power",
+                            "level": 2,
+                            "xp": 6
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-level",
+                        "with": {
+                            "group": "power",
+                            "level": 3,
+                            "xp": 7
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 7
+                    },
+                    {
+                        "op": "award",
+                        "metric": "crafting",
+                        "to": "ada",
+                        "amount": 7
+                    },
+                    {
+                        "op": "levelInfo",
+                        "who": "ada",
+                        "group": "power"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 3,
+                        "group": "power"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 2,
+                        "group": "power"
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 3
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 7,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 7,
+                                "total_xp": 7
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 7,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "crafting",
+                                "amount": 7,
+                                "total_xp": 7
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "current_level": 2,
+                            "total_xp": 6,
+                            "next_level_threshold": 7,
+                            "progress_percentage": 0.0
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": false,
+                        "events": []
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 14,
+                                "achievement_count": 0,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 7,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                },
+                                {
+                                    "id": 2,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 2,
+                                    "gamed_metric_slug": "crafting",
+                                    "gamed_metric_name": "Crafting",
+                                    "total_xp": 7,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [],
+                            "prizes": [],
+                            "groups": [
+                                {
+                                    "group": "power",
+                                    "current_level": 2,
+                                    "total_xp": 6,
+                                    "next_level_threshold": 7,
+                                    "progress_percentage": 0.0
+                                }
+                            ]
+                        },
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "Two metrics at weight 0.5 with 7 XP each: int(3.5) + int(3.5) = 6, not int(7) = 7 and not round(3.5) * 2 = 8. Group level 3 needs 7, so a twin that sums first reports level 3 here."
+        },
+        {
+            "id": "0011-group-level-achievement",
+            "title": "a group level's achievement is granted from group progression, once",
+            "since": "0.49.0",
+            "tags": [
+                "groups",
+                "achievements"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "crafting"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group",
+                        "with": {
+                            "slug": "power"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-metric",
+                        "with": {
+                            "group": "power",
+                            "metric": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-metric",
+                        "with": {
+                            "group": "power",
+                            "metric": "crafting",
+                            "weight": 2.0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-level",
+                        "with": {
+                            "group": "power",
+                            "level": 2,
+                            "xp": 100,
+                            "name": "Strong"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "strong"
+                        }
+                    },
+                    {
+                        "op": "attach",
+                        "achievement": "strong",
+                        "groupLevel": {
+                            "group": "power",
+                            "level": 2
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 40
+                    },
+                    {
+                        "op": "award",
+                        "metric": "crafting",
+                        "to": "ada",
+                        "amount": 30
+                    },
+                    {
+                        "op": "award",
+                        "metric": "crafting",
+                        "to": "ada",
+                        "amount": 30
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 40,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 40,
+                                "total_xp": 40
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 30,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "achievement.unlocked",
+                                "achievement": "strong",
+                                "source": "metric-level-group-progression"
+                            },
+                            {
+                                "event": "award.granted",
+                                "type": "achievement"
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "crafting",
+                                "amount": 30,
+                                "total_xp": 30
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 60,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "crafting",
+                                "amount": 30,
+                                "total_xp": 60
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 100,
+                                "achievement_count": 1,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-18T12:00:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-18T12:00:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 40,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                },
+                                {
+                                    "id": 2,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 2,
+                                    "gamed_metric_slug": "crafting",
+                                    "gamed_metric_name": "Crafting",
+                                    "total_xp": 60,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [
+                                {
+                                    "grant_type": "achievement",
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "achievement_id": 1,
+                                    "achievement_slug": "strong",
+                                    "achievement_name": "Strong",
+                                    "reason": "Reached level 2: Strong",
+                                    "source": "metric-level-group-progression",
+                                    "meta": {
+                                        "metric_level_group_level_id": 1,
+                                        "metric_level_group_id": 1,
+                                        "level": 2
+                                    },
+                                    "granted_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "prizes": [],
+                            "groups": [
+                                {
+                                    "group": "power",
+                                    "current_level": 2,
+                                    "total_xp": 160,
+                                    "next_level_threshold": null,
+                                    "progress_percentage": 100.0
+                                }
+                            ]
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0012-progress-from-the-level-floor",
+            "title": "progress is measured from the current level's floor, not from zero",
+            "since": "0.49.0",
+            "tags": [
+                "levels",
+                "hazard",
+                "canon-4.8"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "bo": "user",
+                    "cy": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 3,
+                            "xp": 300
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 200
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "bo",
+                        "amount": 999
+                    },
+                    {
+                        "op": "levelInfo",
+                        "who": "ada",
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "levelInfo",
+                        "who": "bo",
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "levelInfo",
+                        "who": "cy",
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "cy",
+                        "amount": 30
+                    },
+                    {
+                        "op": "levelInfo",
+                        "who": "cy",
+                        "metric": "combat"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 3
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 200,
+                            "current_level": 2
+                        },
+                        "events": [
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [],
+                                "total_xp": 200
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 200,
+                                "total_xp": 200
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 999,
+                            "current_level": 3
+                        },
+                        "events": [
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [],
+                                "total_xp": 999
+                            },
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 3,
+                                "achievements": [],
+                                "total_xp": 999
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 999,
+                                "total_xp": 999
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "current_level": 2,
+                            "total_xp": 200,
+                            "next_level_threshold": 300,
+                            "progress_percentage": 50.0
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "current_level": 3,
+                            "total_xp": 999,
+                            "next_level_threshold": null,
+                            "progress_percentage": 100.0
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "current_level": 1,
+                            "total_xp": 0,
+                            "next_level_threshold": 100,
+                            "progress_percentage": 0.0
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 30,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 30,
+                                "total_xp": 30
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "current_level": 1,
+                            "total_xp": 30,
+                            "next_level_threshold": 100,
+                            "progress_percentage": 30.0
+                        },
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "Levels at 0, 100 and 300; 200 XP is level 2, and halfway from 100 to 300: 50.0, not 66.67 (200/300). At the top level progress is 100.0 and the next threshold null. The gamification canon's 4.8 records the UI shipping the wrong one of these once."
+        },
+        {
+            "id": "0013-has-level",
+            "title": "hasLevel by metric and by group, including undefined levels and bad arguments",
+            "since": "0.49.0",
+            "tags": [
+                "levels"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user",
+                    "bo": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group",
+                        "with": {
+                            "slug": "power"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-metric",
+                        "with": {
+                            "group": "power",
+                            "metric": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level-group-level",
+                        "with": {
+                            "group": "power",
+                            "level": 2,
+                            "xp": 50
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 120
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 2,
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 3,
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 1,
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "bo",
+                        "level": 1,
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 2,
+                        "metric": "nope"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 2,
+                        "group": "power"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 9,
+                        "group": "power"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 2
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 2,
+                        "metric": "combat",
+                        "group": "power"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level-group-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 120,
+                            "current_level": 2
+                        },
+                        "events": [
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [],
+                                "total_xp": 120
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 120,
+                                "total_xp": 120
+                            }
+                        ]
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": false,
+                        "events": []
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": false,
+                        "events": []
+                    },
+                    {
+                        "result": false,
+                        "events": []
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": false,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "Either 'metric' or 'group' must be specified for hasLevel()"
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "Only one of 'metric' or 'group' can be specified for hasLevel()"
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0014-setup-upserts-by-slug",
+            "title": "setup normalises the slug, defaults the name, and updates in place on a second call",
+            "since": "0.49.0",
+            "tags": [
+                "setup",
+                "hazard"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "Combat XP"
+                        }
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-18T13:00:00+00:00"
+                    },
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat_xp",
+                            "description": "Fighting"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat-xp",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat-xp",
+                            "level": 2,
+                            "xp": 150,
+                            "name": "Brawler"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "first_login",
+                            "icon": "star",
+                            "hidden": true,
+                            "order": 3,
+                            "metadata": {
+                                "tier": "bronze"
+                            }
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "prize",
+                        "with": {
+                            "slug": "Free Month",
+                            "type": "feature_unlock",
+                            "cost": 500,
+                            "inventory": 10
+                        }
+                    },
+                    {
+                        "op": "catalog"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": false
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": false
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "achievement",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "prize",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "slug": "combat-xp",
+                                    "name": "Combat Xp",
+                                    "description": "Fighting",
+                                    "icon": null,
+                                    "active": true,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T13:00:00+00:00"
+                                }
+                            ],
+                            "levels": [
+                                {
+                                    "id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat-xp",
+                                    "level": 2,
+                                    "xp_threshold": 150,
+                                    "name": "Brawler",
+                                    "description": null,
+                                    "created_at": "2026-11-18T13:00:00+00:00",
+                                    "updated_at": "2026-11-18T13:00:00+00:00"
+                                }
+                            ],
+                            "achievements": [
+                                {
+                                    "id": 1,
+                                    "slug": "first-login",
+                                    "name": "First Login",
+                                    "description": null,
+                                    "icon": "star",
+                                    "awardable_type": null,
+                                    "meta": {
+                                        "tier": "bronze"
+                                    },
+                                    "is_active": true,
+                                    "sort_order": 3,
+                                    "created_at": "2026-11-18T13:00:00+00:00",
+                                    "updated_at": "2026-11-18T13:00:00+00:00"
+                                }
+                            ],
+                            "prizes": [
+                                {
+                                    "id": 1,
+                                    "slug": "free-month",
+                                    "name": "Free Month",
+                                    "description": null,
+                                    "type": "feature_unlock",
+                                    "cost_in_points": 500.0,
+                                    "inventory_quantity": 10,
+                                    "remaining_inventory": 10,
+                                    "meta": null,
+                                    "is_active": true,
+                                    "sort_order": 0,
+                                    "created_at": "2026-11-18T13:00:00+00:00",
+                                    "updated_at": "2026-11-18T13:00:00+00:00"
+                                }
+                            ]
+                        },
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "'Combat XP' is stored as combat-xp named 'Combat XP'; a second setup of 'combat_xp' finds the same row (catalog.mutated created=false) rather than creating a second metric."
+        },
+        {
+            "id": "0015-setup-validation",
+            "title": "setup refuses an unknown type, a missing slug, an unknown field, a wrong type and a missing parent",
+            "since": "0.49.0",
+            "tags": [
+                "setup",
+                "guards"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "badge",
+                        "with": {
+                            "slug": "x"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "name": "No slug"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "achievement",
+                        "with": {
+                            "slug": "x",
+                            "colour": "red"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": "two",
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 100
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric",
+                        "with": {
+                            "slug": "alias-ok"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "group-level",
+                        "with": {
+                            "group": "nope",
+                            "level": 1,
+                            "xp": 0
+                        }
+                    },
+                    {
+                        "op": "catalog"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "Unknown entity type 'badge'. Valid types: achievement, gamed-metric, metric-level, metric-level-group, metric-level-group-level, metric-level-group-metric, prize"
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "LFL::setup('achievement') requires 'slug' in the 'with' array"
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "LFL::setup('achievement'): Unknown field(s): colour. Valid fields: slug, name, description, icon, for, metadata, active, hidden, order"
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "LFL::setup('metric-level'): 'level' must be int, string given"
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "GamedMetric 'combat' not found"
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "error": "invalid",
+                            "message": "MetricLevelGroup 'nope' not found"
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "slug": "alias-ok",
+                                    "name": "Alias Ok",
+                                    "description": null,
+                                    "icon": null,
+                                    "active": true,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-18T12:00:00+00:00"
+                                }
+                            ],
+                            "levels": [],
+                            "achievements": [],
+                            "prizes": []
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0016-level-one-above-zero",
+            "title": "a profile starts at level 1 even when level 1's threshold is above its XP",
+            "since": "0.49.0",
+            "tags": [
+                "levels"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 1,
+                            "xp": 50
+                        }
+                    },
+                    {
+                        "op": "setup",
+                        "a": "metric-level",
+                        "with": {
+                            "metric": "combat",
+                            "level": 2,
+                            "xp": 80
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "levelInfo",
+                        "who": "ada",
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "hasLevel",
+                        "who": "ada",
+                        "level": 1,
+                        "metric": "combat"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 70
+                    },
+                    {
+                        "op": "levelInfo",
+                        "who": "ada",
+                        "metric": "combat"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "id": 2
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "metric-level",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "current_level": 1,
+                            "total_xp": 10,
+                            "next_level_threshold": 80,
+                            "progress_percentage": 0.0
+                        },
+                        "events": []
+                    },
+                    {
+                        "result": true,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 80,
+                            "current_level": 2
+                        },
+                        "events": [
+                            {
+                                "event": "metric.level-reached",
+                                "metric": "combat",
+                                "level": 2,
+                                "achievements": [],
+                                "total_xp": 80
+                            },
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 70,
+                                "total_xp": 80
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "current_level": 2,
+                            "total_xp": 80,
+                            "next_level_threshold": null,
+                            "progress_percentage": 100.0
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0017-timestamps-follow-the-clock",
+            "title": "created_at stays and updated_at and last_activity_at follow the clock",
+            "since": "0.49.0",
+            "tags": [
+                "resources",
+                "clock"
+            ],
+            "fn": "scenario",
+            "input": {
+                "clock": "2026-11-18T12:00:00+00:00",
+                "subjects": {
+                    "ada": "user"
+                },
+                "steps": [
+                    {
+                        "op": "setup",
+                        "a": "gamed-metric",
+                        "with": {
+                            "slug": "combat"
+                        }
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 10
+                    },
+                    {
+                        "op": "clock",
+                        "at": "2026-11-19T08:30:00+00:00"
+                    },
+                    {
+                        "op": "award",
+                        "metric": "combat",
+                        "to": "ada",
+                        "amount": 5
+                    },
+                    {
+                        "op": "profile",
+                        "who": "ada"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "result": {
+                            "id": 1
+                        },
+                        "events": [
+                            {
+                                "event": "catalog.mutated",
+                                "entity": "gamed-metric",
+                                "created": true
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "total_xp": 10,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 10,
+                                "total_xp": 10
+                            }
+                        ]
+                    },
+                    {
+                        "result": null,
+                        "events": []
+                    },
+                    {
+                        "result": {
+                            "total_xp": 15,
+                            "current_level": 1
+                        },
+                        "events": [
+                            {
+                                "event": "xp.awarded",
+                                "metric": "combat",
+                                "amount": 5,
+                                "total_xp": 15
+                            }
+                        ]
+                    },
+                    {
+                        "result": {
+                            "profile": {
+                                "id": 1,
+                                "awardable_type": "user",
+                                "awardable_id": 1,
+                                "is_opted_in": true,
+                                "display_preferences": null,
+                                "visibility_settings": null,
+                                "total_xp": 15,
+                                "achievement_count": 0,
+                                "prize_count": 0,
+                                "last_activity_at": "2026-11-19T08:30:00+00:00",
+                                "created_at": "2026-11-18T12:00:00+00:00",
+                                "updated_at": "2026-11-19T08:30:00+00:00"
+                            },
+                            "metrics": [
+                                {
+                                    "id": 1,
+                                    "profile_id": 1,
+                                    "gamed_metric_id": 1,
+                                    "gamed_metric_slug": "combat",
+                                    "gamed_metric_name": "Combat",
+                                    "total_xp": 15,
+                                    "current_level": 1,
+                                    "created_at": "2026-11-18T12:00:00+00:00",
+                                    "updated_at": "2026-11-19T08:30:00+00:00"
+                                }
+                            ],
+                            "achievements": [],
+                            "prizes": [],
+                            "groups": []
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        }
+    ]
+}

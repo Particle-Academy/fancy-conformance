@@ -1,0 +1,200 @@
+{
+  "suite": "fun-lab/analytics",
+  "manifest": {
+    "title": "fun-lab: the event log and analytics over it",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+      "summary": "What the event log records for each XP award, achievement, prize and catalog change, and the aggregates read over it: count, total, average, min, max, active users, achievement completion rate, a time series by hour / day / month / year, breakdowns by award type, awardable type and source, and the newest-first export. Keyed breakdowns are reported as lists sorted by key. The `week` interval is deliberately absent: it means a different week on each database (SQLite and MySQL count Monday-start weeks from 00, Postgres uses ISO weeks), so it has no single answer to pin.",
+      "functions": {
+        "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}, as in fun-lab/progression. An analytics step returns the aggregate it names in `agg`."
+      },
+      "reference": "php",
+      "referenceNote": "Goldens are laravel-fun-lab's own engine at 0.8.0 or later (forAwardable filtered by id, export ties broken by id) driven by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php on SQLite. Inputs are authored in fancy-conformance/scripts/fun-lab/analytics.input.json.",
+      "implementations": [
+        { "language": "php", "package": "particle-academy/laravel-fun-lab", "symbol": "LaravelFunLab\\Builders\\AnalyticsBuilder" },
+        { "language": "node", "package": "@particle-academy/fancy-fun-lab", "symbol": "FunLab.analytics" },
+        { "language": "python", "package": "fancy-fun-lab", "symbol": "fancy_fun_lab.FunLab.analytics" }
+      ]
+    },
+    "notes": "No discrimination probes, for the reason given in fun-lab/progression."
+  },
+  "cases": [
+    {
+      "id": "0001-the-log-and-its-export",
+      "title": "what each award, grant and catalog change writes to the log, newest first",
+      "tags": ["log", "export"],
+      "fn": "scenario",
+      "notes": "Several rows share an instant under the frozen clock; export() breaks those ties on id, newest first (laravel-fun-lab 0.8.0).",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "hello" } },
+          { "op": "setup", "a": "prize", "with": { "slug": "sticker" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 25, "reason": "quest", "source": "quests", "meta": { "quest": 7 } },
+          { "op": "grant", "slug": "hello", "to": "ada", "reason": "welcome", "source": "onboarding" },
+          { "op": "grant", "slug": "sticker", "to": "ada" },
+          { "op": "analytics", "agg": "export" },
+          { "op": "analytics", "agg": "export", "limit": 2 }
+        ]
+      }
+    },
+    {
+      "id": "0002-aggregates-by-type-and-source",
+      "title": "count, total, average, min and max, filtered by award type and source",
+      "tags": ["aggregates"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10, "source": "arena" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 30, "source": "arena" },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 5, "source": "quests" },
+          { "op": "analytics", "byType": "points", "agg": "count" },
+          { "op": "analytics", "byType": "points", "agg": "total" },
+          { "op": "analytics", "byType": "points", "agg": "average" },
+          { "op": "analytics", "byType": "points", "agg": "min" },
+          { "op": "analytics", "byType": "points", "agg": "max" },
+          { "op": "analytics", "byType": "points", "source": "arena", "agg": "total" },
+          { "op": "analytics", "byType": "achievement", "agg": "min" },
+          { "op": "analytics", "agg": "count" }
+        ]
+      }
+    },
+    {
+      "id": "0003-for-one-subject",
+      "title": "forAwardable narrows to that subject, not to its type",
+      "tags": ["filters", "hazard"],
+      "fn": "scenario",
+      "notes": "Before laravel-fun-lab 0.8.0 forAwardable filtered by the awardable's type only, so ada's count here was 3.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user", "acme": "team" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 20 },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 30 },
+          { "op": "award", "metric": "combat", "to": "acme", "amount": 40 },
+          { "op": "analytics", "byType": "points", "forSubject": "ada", "agg": "count" },
+          { "op": "analytics", "byType": "points", "forSubject": "bo", "agg": "total" },
+          { "op": "analytics", "byType": "points", "forType": "user", "agg": "total" },
+          { "op": "analytics", "byType": "points", "forType": "team", "agg": "count" }
+        ]
+      }
+    },
+    {
+      "id": "0004-active-users-and-completion",
+      "title": "active users and achievement completion rate",
+      "tags": ["aggregates"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user", "cy": "user", "dee": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "hello" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 10 },
+          { "op": "award", "metric": "combat", "to": "cy", "amount": 10 },
+          { "op": "grant", "slug": "hello", "to": "ada" },
+          { "op": "analytics", "byType": "points", "agg": "activeUsers" },
+          { "op": "analytics", "forType": "user", "agg": "activeUsers" },
+          { "op": "analytics", "forType": "user", "achievement": "hello", "agg": "completionRate" },
+          { "op": "analytics", "forType": "user", "agg": "completionRate" }
+        ]
+      }
+    },
+    {
+      "id": "0005-periods-and-ranges",
+      "title": "period(), since() and until() bound the rows",
+      "tags": ["periods"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2025-12-31T23:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 1 },
+          { "op": "clock", "at": "2026-11-02T09:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 2 },
+          { "op": "clock", "at": "2026-11-17T09:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 4 },
+          { "op": "clock", "at": "2026-11-18T08:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 8 },
+          { "op": "clock", "at": "2026-11-18T12:00:00+00:00" },
+          { "op": "analytics", "byType": "points", "period": "daily", "agg": "total" },
+          { "op": "analytics", "byType": "points", "period": "weekly", "agg": "total" },
+          { "op": "analytics", "byType": "points", "period": "monthly", "agg": "total" },
+          { "op": "analytics", "byType": "points", "period": "yearly", "agg": "total" },
+          { "op": "analytics", "byType": "points", "period": "all-time", "agg": "total" },
+          { "op": "analytics", "byType": "points", "since": "2026-11-17T00:00:00+00:00", "agg": "total" },
+          { "op": "analytics", "byType": "points", "until": "2026-11-17T00:00:00+00:00", "agg": "total" }
+        ]
+      }
+    },
+    {
+      "id": "0006-time-series",
+      "title": "time series by hour, day, month and year",
+      "tags": ["series"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-10-30T10:15:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 1 },
+          { "op": "clock", "at": "2026-10-30T10:45:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 2 },
+          { "op": "clock", "at": "2026-11-02T07:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 4 },
+          { "op": "analytics", "byType": "points", "agg": "timeSeries", "interval": "hour" },
+          { "op": "analytics", "byType": "points", "agg": "timeSeries", "interval": "day" },
+          { "op": "analytics", "byType": "points", "agg": "timeSeries", "interval": "month" },
+          { "op": "analytics", "byType": "points", "agg": "timeSeries", "interval": "year" }
+        ]
+      }
+    },
+    {
+      "id": "0007-breakdowns",
+      "title": "breakdowns by award type, awardable type and source",
+      "tags": ["breakdowns"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "acme": "team" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "hello" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10, "source": "arena" },
+          { "op": "award", "metric": "combat", "to": "acme", "amount": 15 },
+          { "op": "grant", "slug": "hello", "to": "ada", "source": "onboarding" },
+          { "op": "analytics", "agg": "byAwardType" },
+          { "op": "analytics", "byType": "points", "agg": "byAwardableType" },
+          { "op": "analytics", "agg": "bySource" }
+        ]
+      }
+    },
+    {
+      "id": "0008-nothing-logged-when-the-log-is-off",
+      "title": "with the event log off, awards still land and nothing is logged",
+      "tags": ["log"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "config": { "log_to_database": false },
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "analytics", "agg": "count" },
+          { "op": "analytics", "agg": "export" }
+        ]
+      }
+    }
+  ]
+}

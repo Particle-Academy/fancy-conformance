@@ -1,0 +1,194 @@
+{
+  "suite": "fun-lab/grants",
+  "manifest": {
+    "title": "fun-lab: achievement and prize grants, inventory and redemption",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+      "summary": "Granting by slug: an achievement is held once per profile; a prize is repeatable until its inventory runs out; inactive entities and opted-out subjects are refused; a slug is resolved to an achievement before a prize. A refusal is a result with a message, never an exception. Prize grants move granted -> claimed -> fulfilled.",
+      "functions": {
+        "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}, as in fun-lab/progression."
+      },
+      "reference": "php",
+      "referenceNote": "Goldens are laravel-fun-lab's own engine driven through its public API by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php. Inputs are authored in fancy-conformance/scripts/fun-lab/grants.input.json.",
+      "implementations": [
+        { "language": "php", "package": "particle-academy/laravel-fun-lab", "symbol": "LaravelFunLab\\Facades\\LFL" },
+        { "language": "node", "package": "@particle-academy/fancy-fun-lab", "symbol": "FunLab" },
+        { "language": "python", "package": "fancy-fun-lab", "symbol": "fancy_fun_lab.FunLab" }
+      ]
+    },
+    "notes": "No discrimination probes, for the reason given in fun-lab/progression."
+  },
+  "cases": [
+    {
+      "id": "0001-achievement-granted-once",
+      "title": "an achievement is granted once; a second grant fails with a message",
+      "tags": ["achievements", "control"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "achievement", "with": { "slug": "first-login", "name": "First Login" } },
+          { "op": "grant", "slug": "first-login", "to": "ada", "reason": "completed onboarding", "source": "auth", "meta": { "via": "email" } },
+          { "op": "grant", "slug": "first-login", "to": "ada" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0002-unknown-slug",
+      "title": "a slug that is neither an achievement nor a prize fails",
+      "tags": ["guards"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "grant", "slug": "nothing-here", "to": "ada" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0003-inactive-entities",
+      "title": "an inactive achievement and an inactive prize are refused",
+      "tags": ["guards"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "achievement", "with": { "slug": "old-badge", "active": false } },
+          { "op": "setup", "a": "prize", "with": { "slug": "old-prize", "active": false } },
+          { "op": "grant", "slug": "old-badge", "to": "ada" },
+          { "op": "grant", "slug": "old-prize", "to": "ada" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0004-prize-inventory-runs-out",
+      "title": "a prize with inventory 2 is granted twice and refused the third time",
+      "tags": ["prizes", "inventory", "hazard"],
+      "fn": "scenario",
+      "notes": "The Nth grant of an inventory-N prize succeeds and the N+1th fails; remaining_inventory reads 0, never negative. Catches an off-by-one either way.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user", "cy": "user" },
+        "steps": [
+          { "op": "setup", "a": "prize", "with": { "slug": "golden-ticket", "type": "physical", "cost": 250.5, "inventory": 2 } },
+          { "op": "grant", "slug": "golden-ticket", "to": "ada" },
+          { "op": "catalog" },
+          { "op": "grant", "slug": "golden-ticket", "to": "bo" },
+          { "op": "grant", "slug": "golden-ticket", "to": "cy" },
+          { "op": "catalog" },
+          { "op": "profile", "who": "cy" }
+        ]
+      }
+    },
+    {
+      "id": "0005-unlimited-prize-repeatable",
+      "title": "a prize with no inventory can be granted to the same subject repeatedly",
+      "tags": ["prizes"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "prize", "with": { "slug": "sticker" } },
+          { "op": "grant", "slug": "sticker", "to": "ada", "reason": "weekly" },
+          { "op": "grant", "slug": "sticker", "to": "ada", "reason": "weekly" },
+          { "op": "catalog" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0006-opted-out-grants-refused",
+      "title": "grants to an opted-out subject fail with a message",
+      "tags": ["opt-out"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "achievement", "with": { "slug": "first-login" } },
+          { "op": "setup", "a": "prize", "with": { "slug": "sticker" } },
+          { "op": "optOut", "who": "ada" },
+          { "op": "grant", "slug": "first-login", "to": "ada" },
+          { "op": "grant", "slug": "sticker", "to": "ada" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0007-redemption-lifecycle",
+      "title": "a prize grant is claimed and then fulfilled",
+      "tags": ["prizes", "redemption"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "prize", "with": { "slug": "mug", "type": "physical" } },
+          { "op": "grant", "slug": "mug", "to": "ada" },
+          { "op": "clock", "at": "2026-11-19T09:00:00+00:00" },
+          { "op": "redeem", "grant": 1, "to": "claimed" },
+          { "op": "clock", "at": "2026-11-20T09:00:00+00:00" },
+          { "op": "redeem", "grant": 1, "to": "fulfilled" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0008-achievement-before-prize",
+      "title": "a slug that is both an achievement and a prize grants the achievement",
+      "tags": ["resolution", "hazard"],
+      "fn": "scenario",
+      "notes": "Resolution order is part of the contract: achievement first, then prize. A twin that looks prizes up first grants the wrong thing with a success result.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "prize", "with": { "slug": "champion" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "champion" } },
+          { "op": "grant", "slug": "champion", "to": "ada" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0009-hidden-achievement-grantable",
+      "title": "a hidden achievement is granted like any other",
+      "tags": ["achievements"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "achievement", "with": { "slug": "secret", "hidden": true } },
+          { "op": "grant", "slug": "secret", "to": "ada" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0010-grant-creates-the-profile",
+      "title": "a first grant creates the profile; a refused one before it does not",
+      "tags": ["profiles"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user" },
+        "steps": [
+          { "op": "setup", "a": "achievement", "with": { "slug": "hello" } },
+          { "op": "grant", "slug": "missing", "to": "ada" },
+          { "op": "profile", "who": "ada" },
+          { "op": "grant", "slug": "hello", "to": "bo" },
+          { "op": "profile", "who": "bo" }
+        ]
+      }
+    }
+  ]
+}

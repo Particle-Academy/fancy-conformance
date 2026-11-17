@@ -1,0 +1,244 @@
+{
+  "suite": "fun-lab/leaderboard",
+  "manifest": {
+    "title": "fun-lab: leaderboards",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+      "summary": "Ranked boards: by XP (alias 'points'), achievements or prizes; all-time on the profile totals, or daily / weekly (from Monday) / monthly on the XP EARNED in the period, read from the event log; per gamed metric; filtered by awardable type; opted-out profiles excluded unless asked; ties broken on profile id; take() and paginate() ranks. A period board with the event log off is refused, never returned empty.",
+      "functions": {
+        "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}, as in fun-lab/progression. A leaderboard step returns {entries: [LeaderboardEntryResource]} and, when paged, total."
+      },
+      "reference": "php",
+      "referenceNote": "Goldens are laravel-fun-lab's own engine at 0.8.0 or later (period boards on the event log) driven by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php. Inputs are authored in fancy-conformance/scripts/fun-lab/leaderboard.input.json.",
+      "implementations": [
+        { "language": "php", "package": "particle-academy/laravel-fun-lab", "symbol": "LaravelFunLab\\Builders\\LeaderboardBuilder" },
+        { "language": "node", "package": "@particle-academy/fancy-fun-lab", "symbol": "FunLab.leaderboard" },
+        { "language": "python", "package": "fancy-fun-lab", "symbol": "fancy_fun_lab.FunLab.leaderboard" }
+      ]
+    },
+    "notes": "No discrimination probes, for the reason given in fun-lab/progression."
+  },
+  "cases": [
+    {
+      "id": "0001-all-time-by-xp-with-ties",
+      "title": "all-time by XP, ties broken on profile id, ranks from 1",
+      "tags": ["all-time", "ties", "hazard"],
+      "fn": "scenario",
+      "notes": "Profile ids follow first activity, not subject order: cy acts first so cy's profile is id 1 and wins the tie with ada. Catches a twin that breaks ties on the awardable id or on name.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user", "cy": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "cy", "amount": 50 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 50 },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 80 },
+          { "op": "leaderboard", "for": "user" },
+          { "op": "leaderboard", "for": "user", "by": "points", "take": 2 }
+        ]
+      }
+    },
+    {
+      "id": "0002-by-achievements-and-prizes",
+      "title": "boards by achievement count and by prize count",
+      "tags": ["all-time"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "one" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "two" } },
+          { "op": "setup", "a": "prize", "with": { "slug": "sticker" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 500 },
+          { "op": "grant", "slug": "one", "to": "bo" },
+          { "op": "grant", "slug": "two", "to": "bo" },
+          { "op": "grant", "slug": "sticker", "to": "ada" },
+          { "op": "leaderboard", "for": "user", "by": "achievements" },
+          { "op": "leaderboard", "for": "user", "by": "prizes" }
+        ]
+      }
+    },
+    {
+      "id": "0003-opted-out-excluded-unless-asked",
+      "title": "opted-out profiles are excluded by default and included on request",
+      "tags": ["opt-out"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 90 },
+          { "op": "optOut", "who": "bo" },
+          { "op": "leaderboard", "for": "user" },
+          { "op": "leaderboard", "for": "user", "excludeOptedOut": false }
+        ]
+      }
+    },
+    {
+      "id": "0004-awardable-type-filter",
+      "title": "for() ranks one awardable type; without it every type is ranked",
+      "tags": ["types"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "acme": "team" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "award", "metric": "combat", "to": "acme", "amount": 20 },
+          { "op": "leaderboard", "for": "user" },
+          { "op": "leaderboard", "for": "team" },
+          { "op": "leaderboard" }
+        ]
+      }
+    },
+    {
+      "id": "0005-weekly-ranks-on-xp-earned-this-week",
+      "title": "a weekly board ranks on XP earned this week, not lifetime XP",
+      "tags": ["period", "hazard", "ruling-f2"],
+      "fn": "scenario",
+      "notes": "THE period ruling (laravel-fun-lab 0.8.0). A veteran with 10,000 XP from September who earns 1 XP this week ranks below a newcomer who earned 50. Before 0.8.0 the veteran scored 10,000 here, because the board summed the lifetime total of every metric touched in the period.",
+      "input": {
+        "clock": "2026-09-01T10:00:00+00:00",
+        "subjects": { "veteran": "user", "newcomer": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "veteran", "amount": 10000 },
+          { "op": "clock", "at": "2026-11-18T12:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "veteran", "amount": 1 },
+          { "op": "award", "metric": "combat", "to": "newcomer", "amount": 50 },
+          { "op": "leaderboard", "for": "user", "period": "weekly" },
+          { "op": "leaderboard", "for": "user", "period": "all-time" }
+        ]
+      }
+    },
+    {
+      "id": "0006-week-starts-monday-midnight",
+      "title": "XP earned one second before Monday 00:00 is not this week's",
+      "tags": ["period", "boundary", "hazard"],
+      "fn": "scenario",
+      "notes": "2026-11-16 is a Monday. Catches a Sunday-start week and an exclusive or off-by-one start.",
+      "input": {
+        "clock": "2026-11-15T23:59:59+00:00",
+        "subjects": { "ada": "user", "bo": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 70 },
+          { "op": "clock", "at": "2026-11-16T00:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 30 },
+          { "op": "clock", "at": "2026-11-18T12:00:00+00:00" },
+          { "op": "leaderboard", "for": "user", "period": "weekly" }
+        ]
+      }
+    },
+    {
+      "id": "0007-daily-and-monthly",
+      "title": "daily starts at today's midnight, monthly on the 1st",
+      "tags": ["period", "boundary"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-10-31T23:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user", "cy": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 40 },
+          { "op": "clock", "at": "2026-11-01T00:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 30 },
+          { "op": "clock", "at": "2026-11-18T00:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "cy", "amount": 20 },
+          { "op": "clock", "at": "2026-11-18T12:00:00+00:00" },
+          { "op": "leaderboard", "for": "user", "period": "daily" },
+          { "op": "leaderboard", "for": "user", "period": "monthly" },
+          { "op": "leaderboard", "for": "user", "period": null }
+        ]
+      }
+    },
+    {
+      "id": "0008-metric-boards",
+      "title": "a metric board ranks on that metric; with a period, on that metric's XP earned in it",
+      "tags": ["metric", "period"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-09-01T10:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user", "cy": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "crafting" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 900 },
+          { "op": "clock", "at": "2026-11-18T12:00:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 5 },
+          { "op": "award", "metric": "crafting", "to": "ada", "amount": 800 },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 40 },
+          { "op": "award", "metric": "crafting", "to": "cy", "amount": 300 },
+          { "op": "leaderboard", "for": "user", "metric": "combat" },
+          { "op": "leaderboard", "for": "user", "metric": "combat", "period": "weekly" },
+          { "op": "leaderboard", "for": "user", "metric": "crafting", "by": "achievements" },
+          { "op": "leaderboard", "for": "user", "metric": "nope" }
+        ]
+      }
+    },
+    {
+      "id": "0009-pagination",
+      "title": "pages carry the total and ranks continue from the page offset",
+      "tags": ["paging"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "a": "user", "b": "user", "c": "user", "d": "user", "e": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "a", "amount": 100 },
+          { "op": "award", "metric": "combat", "to": "b", "amount": 100 },
+          { "op": "award", "metric": "combat", "to": "c", "amount": 50 },
+          { "op": "award", "metric": "combat", "to": "d", "amount": 50 },
+          { "op": "award", "metric": "combat", "to": "e", "amount": 10 },
+          { "op": "leaderboard", "for": "user", "perPage": 2, "page": 1 },
+          { "op": "leaderboard", "for": "user", "perPage": 2, "page": 2 },
+          { "op": "leaderboard", "for": "user", "perPage": 2, "page": 3 },
+          { "op": "leaderboard", "for": "user", "perPage": 2, "page": 4 }
+        ]
+      }
+    },
+    {
+      "id": "0010-period-board-refused-without-the-log",
+      "title": "a period board with the event log off is refused; all-time still works",
+      "tags": ["period", "guards", "ruling-f2"],
+      "fn": "scenario",
+      "notes": "Refused rather than empty: the event log is the only record of when XP was earned, and an empty board reads exactly like a quiet week.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "config": { "log_to_database": false },
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "leaderboard", "for": "user", "period": "weekly" },
+          { "op": "leaderboard", "for": "user" }
+        ]
+      }
+    },
+    {
+      "id": "0011-profile-with-no-xp-on-all-time",
+      "title": "a profile with no XP (only a grant) is on the all-time board, not on a period board",
+      "tags": ["all-time", "period"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "hello" } },
+          { "op": "grant", "slug": "hello", "to": "ada" },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 5 },
+          { "op": "leaderboard", "for": "user" },
+          { "op": "leaderboard", "for": "user", "period": "weekly" }
+        ]
+      }
+    }
+  ]
+}

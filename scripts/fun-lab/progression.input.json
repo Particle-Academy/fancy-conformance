@@ -1,0 +1,378 @@
+{
+  "suite": "fun-lab/progression",
+  "manifest": {
+    "title": "fun-lab: catalog setup, XP awards, metric and group level progression",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+      "summary": "A scenario: a frozen clock, named subjects and a list of steps (setup, attach, award, grant, opt-out, clock moves, level reads), run through the engine. Expected is, per step, the step's result (or its refusal) and the events it emitted, in order. Covers upsert-by-slug setup and its validation, the XP award guards (amount, per-action cap, unknown or inactive metric, opt-out), levels claimed exactly once in ascending order with their attached achievements, weighted group XP, hasLevel and progress measured from the current level's floor.",
+      "functions": {
+        "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}. Subjects are named; awardable ids are 1, 2, 3 in listed order and types are reported by their scenario names."
+      },
+      "reference": "php",
+      "referenceNote": "Goldens are laravel-fun-lab's own engine (0.8.0 and later, with period boards on the event log and compare-and-set group levels) driven through its public API by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php. Inputs are authored in fancy-conformance/scripts/fun-lab/progression.input.json.",
+      "implementations": [
+        { "language": "php", "package": "particle-academy/laravel-fun-lab", "symbol": "LaravelFunLab\\Facades\\LFL" },
+        { "language": "node", "package": "@particle-academy/fancy-fun-lab", "symbol": "FunLab" },
+        { "language": "python", "package": "fancy-fun-lab", "symbol": "fancy_fun_lab.FunLab" }
+      ]
+    },
+    "notes": "No discrimination probes: the implementation under test is a whole gamification engine, which this package does not carry, as with flow/graph-runs. These rows guard drift between three runtimes; the hazard rows name in their notes the wrong answer each exists to catch."
+  },
+  "cases": [
+    {
+      "id": "0001-award-below-the-first-threshold",
+      "title": "an award below level 2 creates the profile at level 1 and emits only xp.awarded",
+      "tags": ["award", "control"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 50, "reason": "first blood", "source": "arena" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0002-one-award-crosses-three-levels",
+      "title": "one award crossing three levels emits three level-reached events, ascending",
+      "tags": ["levels", "hazard"],
+      "fn": "scenario",
+      "notes": "Catches a twin that announces only the highest level reached, or announces them highest first. One award, three events, in order 2, 3, 4.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 3, "xp": 200 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 4, "xp": 300 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 350 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 }
+        ]
+      }
+    },
+    {
+      "id": "0003-level-achievement-granted-on-crossing",
+      "title": "an achievement attached to a level is granted when the level is reached, once",
+      "tags": ["levels", "achievements"],
+      "fn": "scenario",
+      "notes": "The level-reached event carries only the achievements granted on that crossing; a later award past the same level grants nothing again.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100, "name": "Apprentice" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 3, "xp": 200, "name": "Adept" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "adept", "description": "Reached Adept" } },
+          { "op": "attach", "achievement": "adept", "metricLevel": { "metric": "combat", "level": 3 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 150 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 60 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 500 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0004-held-achievement-is-skipped",
+      "title": "an achievement already held is skipped on crossing, not re-granted and not an error",
+      "tags": ["levels", "achievements", "hazard"],
+      "fn": "scenario",
+      "notes": "The level-reached event's achievements list is empty, and there is no second achievement.unlocked.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100 } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "veteran" } },
+          { "op": "attach", "achievement": "veteran", "metricLevel": { "metric": "combat", "level": 2 } },
+          { "op": "grant", "slug": "veteran", "to": "ada", "reason": "imported" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 100 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0005-level-achievement-filters",
+      "title": "a level's achievement for another awardable type, or inactive, is not granted",
+      "tags": ["levels", "achievements"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "acme": "team" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100 } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "team-only", "for": "team" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "retired", "active": false } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "anyone" } },
+          { "op": "attach", "achievement": "team-only", "metricLevel": { "metric": "combat", "level": 2 } },
+          { "op": "attach", "achievement": "retired", "metricLevel": { "metric": "combat", "level": 2 } },
+          { "op": "attach", "achievement": "anyone", "metricLevel": { "metric": "combat", "level": 2 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 100 },
+          { "op": "award", "metric": "combat", "to": "acme", "amount": 100 },
+          { "op": "profile", "who": "ada" },
+          { "op": "profile", "who": "acme" }
+        ]
+      }
+    },
+    {
+      "id": "0006-award-amount-guards",
+      "title": "amount 0 and a negative amount are refused; the cap is inclusive",
+      "tags": ["award", "guards", "hazard"],
+      "fn": "scenario",
+      "notes": "With a cap of 100, 100 is allowed and 101 is refused as cap_exceeded. Catches an off-by-one cap and a twin that accepts 0 as a no-op.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "config": { "max_points_per_action": 100 },
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 0 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": -5 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 101 },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 100 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0007-unknown-and-inactive-metric",
+      "title": "an unknown metric and an inactive metric are refused",
+      "tags": ["award", "guards"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "paused", "active": false } },
+          { "op": "award", "metric": "nope", "to": "ada", "amount": 10 },
+          { "op": "award", "metric": "paused", "to": "ada", "amount": 10 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0008-opted-out-awards-refused",
+      "title": "an opted-out subject's awards are refused until they opt back in",
+      "tags": ["award", "opt-out"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "optOut", "who": "ada" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "optIn", "who": "ada" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0009-opt-out-before-any-profile",
+      "title": "opting out before any activity creates an opted-out profile",
+      "tags": ["opt-out"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "optOut", "who": "ada" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0010-group-xp-truncates-per-metric",
+      "title": "weighted group XP truncates each metric before summing",
+      "tags": ["groups", "hazard"],
+      "fn": "scenario",
+      "notes": "Two metrics at weight 0.5 with 7 XP each: int(3.5) + int(3.5) = 6, not int(7) = 7 and not round(3.5) * 2 = 8. Group level 3 needs 7, so a twin that sums first reports level 3 here.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "crafting" } },
+          { "op": "setup", "a": "metric-level-group", "with": { "slug": "power" } },
+          { "op": "setup", "a": "metric-level-group-metric", "with": { "group": "power", "metric": "combat", "weight": 0.5 } },
+          { "op": "setup", "a": "metric-level-group-metric", "with": { "group": "power", "metric": "crafting", "weight": 0.5 } },
+          { "op": "setup", "a": "metric-level-group-level", "with": { "group": "power", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level-group-level", "with": { "group": "power", "level": 2, "xp": 6 } },
+          { "op": "setup", "a": "metric-level-group-level", "with": { "group": "power", "level": 3, "xp": 7 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 7 },
+          { "op": "award", "metric": "crafting", "to": "ada", "amount": 7 },
+          { "op": "levelInfo", "who": "ada", "group": "power" },
+          { "op": "hasLevel", "who": "ada", "level": 3, "group": "power" },
+          { "op": "hasLevel", "who": "ada", "level": 2, "group": "power" },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0011-group-level-achievement",
+      "title": "a group level's achievement is granted from group progression, once",
+      "tags": ["groups", "achievements"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "crafting" } },
+          { "op": "setup", "a": "metric-level-group", "with": { "slug": "power" } },
+          { "op": "setup", "a": "metric-level-group-metric", "with": { "group": "power", "metric": "combat" } },
+          { "op": "setup", "a": "metric-level-group-metric", "with": { "group": "power", "metric": "crafting", "weight": 2.0 } },
+          { "op": "setup", "a": "metric-level-group-level", "with": { "group": "power", "level": 2, "xp": 100, "name": "Strong" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "strong" } },
+          { "op": "attach", "achievement": "strong", "groupLevel": { "group": "power", "level": 2 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 40 },
+          { "op": "award", "metric": "crafting", "to": "ada", "amount": 30 },
+          { "op": "award", "metric": "crafting", "to": "ada", "amount": 30 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    },
+    {
+      "id": "0012-progress-from-the-level-floor",
+      "title": "progress is measured from the current level's floor, not from zero",
+      "tags": ["levels", "hazard", "canon-4.8"],
+      "fn": "scenario",
+      "notes": "Levels at 0, 100 and 300; 200 XP is level 2, and halfway from 100 to 300: 50.0, not 66.67 (200/300). At the top level progress is 100.0 and the next threshold null. The gamification canon's 4.8 records the UI shipping the wrong one of these once.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user", "cy": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 1, "xp": 0 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 3, "xp": 300 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 200 },
+          { "op": "award", "metric": "combat", "to": "bo", "amount": 999 },
+          { "op": "levelInfo", "who": "ada", "metric": "combat" },
+          { "op": "levelInfo", "who": "bo", "metric": "combat" },
+          { "op": "levelInfo", "who": "cy", "metric": "combat" },
+          { "op": "award", "metric": "combat", "to": "cy", "amount": 30 },
+          { "op": "levelInfo", "who": "cy", "metric": "combat" }
+        ]
+      }
+    },
+    {
+      "id": "0013-has-level",
+      "title": "hasLevel by metric and by group, including undefined levels and bad arguments",
+      "tags": ["levels"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user", "bo": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100 } },
+          { "op": "setup", "a": "metric-level-group", "with": { "slug": "power" } },
+          { "op": "setup", "a": "metric-level-group-metric", "with": { "group": "power", "metric": "combat" } },
+          { "op": "setup", "a": "metric-level-group-level", "with": { "group": "power", "level": 2, "xp": 50 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 120 },
+          { "op": "hasLevel", "who": "ada", "level": 2, "metric": "combat" },
+          { "op": "hasLevel", "who": "ada", "level": 3, "metric": "combat" },
+          { "op": "hasLevel", "who": "ada", "level": 1, "metric": "combat" },
+          { "op": "hasLevel", "who": "bo", "level": 1, "metric": "combat" },
+          { "op": "hasLevel", "who": "ada", "level": 2, "metric": "nope" },
+          { "op": "hasLevel", "who": "ada", "level": 2, "group": "power" },
+          { "op": "hasLevel", "who": "ada", "level": 9, "group": "power" },
+          { "op": "hasLevel", "who": "ada", "level": 2 },
+          { "op": "hasLevel", "who": "ada", "level": 2, "metric": "combat", "group": "power" }
+        ]
+      }
+    },
+    {
+      "id": "0014-setup-upserts-by-slug",
+      "title": "setup normalises the slug, defaults the name, and updates in place on a second call",
+      "tags": ["setup", "hazard"],
+      "fn": "scenario",
+      "notes": "'Combat XP' is stored as combat-xp named 'Combat XP'; a second setup of 'combat_xp' finds the same row (catalog.mutated created=false) rather than creating a second metric.",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "Combat XP" } },
+          { "op": "clock", "at": "2026-11-18T13:00:00+00:00" },
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat_xp", "description": "Fighting" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat-xp", "level": 2, "xp": 100 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat-xp", "level": 2, "xp": 150, "name": "Brawler" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "first_login", "icon": "star", "hidden": true, "order": 3, "metadata": { "tier": "bronze" } } },
+          { "op": "setup", "a": "prize", "with": { "slug": "Free Month", "type": "feature_unlock", "cost": 500, "inventory": 10 } },
+          { "op": "catalog" }
+        ]
+      }
+    },
+    {
+      "id": "0015-setup-validation",
+      "title": "setup refuses an unknown type, a missing slug, an unknown field, a wrong type and a missing parent",
+      "tags": ["setup", "guards"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "badge", "with": { "slug": "x" } },
+          { "op": "setup", "a": "achievement", "with": { "name": "No slug" } },
+          { "op": "setup", "a": "achievement", "with": { "slug": "x", "colour": "red" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": "two", "xp": 100 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 100 } },
+          { "op": "setup", "a": "metric", "with": { "slug": "alias-ok" } },
+          { "op": "setup", "a": "group-level", "with": { "group": "nope", "level": 1, "xp": 0 } },
+          { "op": "catalog" }
+        ]
+      }
+    },
+    {
+      "id": "0016-level-one-above-zero",
+      "title": "a profile starts at level 1 even when level 1's threshold is above its XP",
+      "tags": ["levels"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 1, "xp": 50 } },
+          { "op": "setup", "a": "metric-level", "with": { "metric": "combat", "level": 2, "xp": 80 } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "levelInfo", "who": "ada", "metric": "combat" },
+          { "op": "hasLevel", "who": "ada", "level": 1, "metric": "combat" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 70 },
+          { "op": "levelInfo", "who": "ada", "metric": "combat" }
+        ]
+      }
+    },
+    {
+      "id": "0017-timestamps-follow-the-clock",
+      "title": "created_at stays and updated_at and last_activity_at follow the clock",
+      "tags": ["resources", "clock"],
+      "fn": "scenario",
+      "input": {
+        "clock": "2026-11-18T12:00:00+00:00",
+        "subjects": { "ada": "user" },
+        "steps": [
+          { "op": "setup", "a": "gamed-metric", "with": { "slug": "combat" } },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 10 },
+          { "op": "clock", "at": "2026-11-19T08:30:00+00:00" },
+          { "op": "award", "metric": "combat", "to": "ada", "amount": 5 },
+          { "op": "profile", "who": "ada" }
+        ]
+      }
+    }
+  ]
+}

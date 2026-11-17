@@ -10,15 +10,23 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-11-17
+
+### Added
+
+- **Five `fun-lab/*` suites, 67 rows: the gamification engine, for laravel-fun-lab and its Node and Python twins** (`@particle-academy/fancy-fun-lab`, `fancy-fun-lab`). Owner-approved 2026-11-17 (q_571dafd9); design in the envelope's `.ai/plans/fun-lab-twins.md`.
+  - `fun-lab/strings` (21): `slug()` and `headline()` as Laravel's `Str` does them, including the surprises a twin would otherwise "fix" on its own: `'@'` spelled `at`, CJK slugging to the empty string, and `headline('Combat XP')` being `'Combat Xp'`.
+  - `fun-lab/progression` (17), `fun-lab/grants` (10), `fun-lab/leaderboard` (11), `fun-lab/analytics` (8): scenarios. A frozen clock, named subjects and a list of steps go in; each step's result or refusal and the events it emitted, in order, come out. They pin levels claimed once and ascending, weighted group XP truncated per metric, progress from the level floor, prize inventory, the period boards on XP earned in the period, and the event log's rows and aggregates.
+  - **Goldens are the PHP engine's output, never typed.** `laravel-fun-lab/tests/Conformance/ExportFixturesTest.php` runs each input from `scripts/fun-lab/*.input.json` through `ScenarioRunner` (the public API only) and writes the table. Running the export found five defects in the engine, which laravel-fun-lab 0.8.0 fixes before any golden was taken: period boards ranked on lifetime XP, group levels could be claimed twice, progress went negative below level 1's threshold, `forAwardable()` ignored the id, and `export()` ties had no order.
+  - Keyed results (groups, the `by*` breakdowns) are lists sorted by key, because PHP encodes an empty map as `[]`.
+  - No discrimination probes: the implementation under test is a whole engine. The manifests say so, as `flow/graph-runs` does.
+
 ### Changed
 
 - Rebranded the display name to Fancy Dev Kit (README and package description). Package names, the npm scope, URLs and the `fancy-ui` MCP id are unchanged.
 - **Docs:** `AGENTS.md` is now the guide to using this package (install, its entries on the Fancy MCP catalog server, API essentials, traps) and ships in the package. The contributor notes moved to `CONTRIBUTING.md`, and `CLAUDE.md` is now a symlink to it. The README points to the MCP server and to `AGENTS.md`. No code changed; nothing to do.
 
 ## [0.48.0] - 2026-11-12
-
-Prepared on `main` and NOT tagged yet. The packages that run these tables pin
-`v0.48.0`, so their CI checkout fails until the tag exists.
 
 ### Added
 

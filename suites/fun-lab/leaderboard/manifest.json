@@ -1,0 +1,34 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "fun-lab/leaderboard",
+    "title": "fun-lab: leaderboards",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "Ranked boards: by XP (alias 'points'), achievements or prizes; all-time on the profile totals, or daily / weekly (from Monday) / monthly on the XP EARNED in the period, read from the event log; per gamed metric; filtered by awardable type; opted-out profiles excluded unless asked; ties broken on profile id; take() and paginate() ranks. A period board with the event log off is refused, never returned empty.",
+        "functions": {
+            "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}, as in fun-lab/progression. A leaderboard step returns {entries: [LeaderboardEntryResource]} and, when paged, total."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are laravel-fun-lab's own engine at 0.8.0 or later (period boards on the event log) driven by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php. Inputs are authored in fancy-conformance/scripts/fun-lab/leaderboard.input.json.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/laravel-fun-lab",
+                "symbol": "LaravelFunLab\\Builders\\LeaderboardBuilder"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-fun-lab",
+                "symbol": "FunLab.leaderboard"
+            },
+            {
+                "language": "python",
+                "package": "fancy-fun-lab",
+                "symbol": "fancy_fun_lab.FunLab.leaderboard"
+            }
+        ]
+    },
+    "notes": "No discrimination probes, for the reason given in fun-lab/progression.",
+    "cases": "cases.json"
+}

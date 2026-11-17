@@ -80,6 +80,11 @@ verbatim.
 | `flow/port-activation` | 12 | Which output ports a node lights and what each carries: a chosen SUBSET via `__ports`, one port via `__port` / `branch`, and the declared-port fallbacks. One row records a real disagreement as a skip rather than omitting it |
 | `flow/durable-dispatch` | 14 | How a queued run hands out nodes: one at a time by default, in declaration order, with a paused gate keeping its slot; a cap and the whole frontier only when a host asks |
 | `shared/subscription-lease` | 13 | A subscription that expires: when a renewal is due, when the lease has expired, and why a missed lease is a resync rather than a quiet re-create |
+| `fun-lab/strings` | 21 | The slug and default display name a gamification catalog entity gets, as Laravel's `Str` computes them |
+| `fun-lab/progression` | 17 | XP awards and their guards, levels claimed once in ascending order with their achievements, weighted group XP, and progress from the level floor |
+| `fun-lab/grants` | 10 | Achievements held once, prizes until their inventory runs out, refusals as results, and prize redemption |
+| `fun-lab/leaderboard` | 11 | Boards by XP, achievements or prizes, per metric, paged, with ties on profile id, and period boards on the XP earned in the period |
+| `fun-lab/analytics` | 8 | The event log's rows and the aggregates, series and breakdowns read over it |
 
 Every case carries an `id`, a `title`, the suite version it arrived in, and —
 where it exists to catch something specific — a `notes` field saying what.

@@ -1,0 +1,34 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "fun-lab/grants",
+    "title": "fun-lab: achievement and prize grants, inventory and redemption",
+    "since": "0.49.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "Granting by slug: an achievement is held once per profile; a prize is repeatable until its inventory runs out; inactive entities and opted-out subjects are refused; a slug is resolved to an achievement before a prize. A refusal is a result with a message, never an exception. Prize grants move granted -> claimed -> fulfilled.",
+        "functions": {
+            "scenario": "scenario(input: {clock, config?, subjects, steps}) -> {steps: [{result, events}]}, as in fun-lab/progression."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are laravel-fun-lab's own engine driven through its public API by tests/Conformance/ScenarioRunner.php and written by tests/Conformance/ExportFixturesTest.php. Inputs are authored in fancy-conformance/scripts/fun-lab/grants.input.json.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/laravel-fun-lab",
+                "symbol": "LaravelFunLab\\Facades\\LFL"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-fun-lab",
+                "symbol": "FunLab"
+            },
+            {
+                "language": "python",
+                "package": "fancy-fun-lab",
+                "symbol": "fancy_fun_lab.FunLab"
+            }
+        ]
+    },
+    "notes": "No discrimination probes, for the reason given in fun-lab/progression.",
+    "cases": "cases.json"
+}
