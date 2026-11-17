@@ -94,7 +94,7 @@ function hashOf(prev: string, e: Event, m: M): string {
   return sha256(`${prev}\n${canonical(body, m)}`);
 }
 
-function append(last: Event | null, e: Event, m: M): Json {
+function append(last: Event | null, e: Event, m: M): unknown {
   if (!TYPES.includes(String(e.type))) return { error: "refused" };
   const client = e.source === "client";
   if (!m.noSourceRule && ((e.source !== "server" && !client) || client !== (e.type === "page.viewed"))) return { error: "refused" };
@@ -120,7 +120,7 @@ function verifyChain(rows: Event[], m: M): Record<string, Json> {
     const data = typeof row.data === "string" ? (JSON.parse(row.data) as Json) : row.data;
     let ok = (isObject(data) || Array.isArray(data)) && row.envelope_id === envelope;
     try {
-      ok = ok && hashOf(prev, { ...row, data }, m) === row.hash;
+      ok = ok && hashOf(prev, { ...row, data: data ?? null }, m) === row.hash;
     } catch {
       ok = false;
     }
