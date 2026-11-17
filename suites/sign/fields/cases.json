@@ -1,0 +1,1330 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "sign/fields",
+    "cases": [
+        {
+            "id": "0001-fields-from-nodes",
+            "title": "document field nodes become fields in document order; each signer gets a final-page signature and date",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "control"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ]
+            },
+            "expected": {
+                "per_page": "none",
+                "fields": [
+                    {
+                        "id": "accept-sig",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "node": "accept-sig"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "accept-ini",
+                        "signer_id": "alice",
+                        "kind": "initials",
+                        "anchor": {
+                            "node": "accept-ini"
+                        },
+                        "required": false,
+                        "label": "Initial here"
+                    },
+                    {
+                        "id": "accept-date",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "node": "accept-date"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "final-signature-alice",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-alice",
+                        "signer_id": "alice",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    },
+                    {
+                        "id": "final-signature-bob",
+                        "signer_id": "bob",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-bob",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0002-fields-per-page-initials",
+            "title": "per_page initials adds ONE every-page field per signer, anchored to every_page",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "per-page"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ],
+                "settings": {
+                    "per_page": "initials"
+                }
+            },
+            "expected": {
+                "per_page": "initials",
+                "fields": [
+                    {
+                        "id": "accept-sig",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "node": "accept-sig"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "accept-ini",
+                        "signer_id": "alice",
+                        "kind": "initials",
+                        "anchor": {
+                            "node": "accept-ini"
+                        },
+                        "required": false,
+                        "label": "Initial here"
+                    },
+                    {
+                        "id": "accept-date",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "node": "accept-date"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "final-signature-alice",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-alice",
+                        "signer_id": "alice",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    },
+                    {
+                        "id": "every-page-initials-alice",
+                        "signer_id": "alice",
+                        "kind": "initials",
+                        "anchor": {
+                            "every_page": true
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "final-signature-bob",
+                        "signer_id": "bob",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-bob",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    },
+                    {
+                        "id": "every-page-initials-bob",
+                        "signer_id": "bob",
+                        "kind": "initials",
+                        "anchor": {
+                            "every_page": true
+                        },
+                        "required": true,
+                        "label": null
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0003-fields-per-page-signature",
+            "title": "per_page signature adds an every-page signature field per signer",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "per-page"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ],
+                "settings": {
+                    "per_page": "signature"
+                }
+            },
+            "expected": {
+                "per_page": "signature",
+                "fields": [
+                    {
+                        "id": "accept-sig",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "node": "accept-sig"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "accept-ini",
+                        "signer_id": "alice",
+                        "kind": "initials",
+                        "anchor": {
+                            "node": "accept-ini"
+                        },
+                        "required": false,
+                        "label": "Initial here"
+                    },
+                    {
+                        "id": "accept-date",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "node": "accept-date"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "final-signature-alice",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-alice",
+                        "signer_id": "alice",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    },
+                    {
+                        "id": "every-page-signature-alice",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "every_page": true
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "final-signature-bob",
+                        "signer_id": "bob",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-bob",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    },
+                    {
+                        "id": "every-page-signature-bob",
+                        "signer_id": "bob",
+                        "kind": "signature",
+                        "anchor": {
+                            "every_page": true
+                        },
+                        "required": true,
+                        "label": null
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0004-fields-unknown-signer",
+            "title": "a field naming a signer not on the envelope is refused",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "refusal"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    }
+                ]
+            },
+            "expected": {
+                "error": "invalid_request"
+            }
+        },
+        {
+            "id": "0005-fields-generated-id-collision",
+            "title": "a document field id that collides with a generated one is refused",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "refusal"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "final-signature-alice",
+                            "signer": "alice"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ]
+            },
+            "expected": {
+                "error": "invalid_request"
+            }
+        },
+        {
+            "id": "0006-fields-org-per-page",
+            "title": "an organisation's per_page applies to its envelope when the sender sets none",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "org"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ],
+                "org_per_page": "initials"
+            },
+            "expected": {
+                "per_page": "initials",
+                "fields": [
+                    {
+                        "id": "accept-sig",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "node": "accept-sig"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "accept-ini",
+                        "signer_id": "alice",
+                        "kind": "initials",
+                        "anchor": {
+                            "node": "accept-ini"
+                        },
+                        "required": false,
+                        "label": "Initial here"
+                    },
+                    {
+                        "id": "accept-date",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "node": "accept-date"
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "final-signature-alice",
+                        "signer_id": "alice",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-alice",
+                        "signer_id": "alice",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    },
+                    {
+                        "id": "every-page-initials-alice",
+                        "signer_id": "alice",
+                        "kind": "initials",
+                        "anchor": {
+                            "every_page": true
+                        },
+                        "required": true,
+                        "label": null
+                    },
+                    {
+                        "id": "final-signature-bob",
+                        "signer_id": "bob",
+                        "kind": "signature",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Signature"
+                    },
+                    {
+                        "id": "final-date-bob",
+                        "signer_id": "bob",
+                        "kind": "date_signed",
+                        "anchor": {
+                            "final_page": true
+                        },
+                        "required": true,
+                        "label": "Date signed"
+                    },
+                    {
+                        "id": "every-page-initials-bob",
+                        "signer_id": "bob",
+                        "kind": "initials",
+                        "anchor": {
+                            "every_page": true
+                        },
+                        "required": true,
+                        "label": null
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0007-fields-org-per-page-override-refused",
+            "title": "a sender setting per_page against the organisation is refused",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "org",
+                "refusal"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ],
+                "org_per_page": "initials",
+                "settings": {
+                    "per_page": "none"
+                }
+            },
+            "expected": {
+                "error": "invalid_request"
+            }
+        },
+        {
+            "id": "0008-fields-bad-per-page",
+            "title": "per_page outside none, initials and signature is refused",
+            "since": "0.51.0",
+            "tags": [
+                "fields",
+                "refusal"
+            ],
+            "fn": "fields",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ],
+                "settings": {
+                    "per_page": "stamp"
+                }
+            },
+            "expected": {
+                "error": "invalid_request"
+            }
+        },
+        {
+            "id": "0009-placement-one-page",
+            "title": "a short document: the fields land on page 1, the final page is page 2",
+            "since": "0.51.0",
+            "tags": [
+                "placement",
+                "control"
+            ],
+            "fn": "placement",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ]
+            },
+            "expected": {
+                "pages": 2,
+                "fields": {
+                    "accept-sig": [
+                        1
+                    ],
+                    "accept-ini": [
+                        1
+                    ],
+                    "accept-date": [
+                        1
+                    ],
+                    "final-signature-alice": [
+                        2
+                    ],
+                    "final-date-alice": [
+                        2
+                    ],
+                    "final-signature-bob": [
+                        2
+                    ],
+                    "final-date-bob": [
+                        2
+                    ]
+                }
+            }
+        },
+        {
+            "id": "0010-placement-per-page-one-authored-page",
+            "title": "per-page initials on a ONE-page document land on page 1 only, never on the final page",
+            "since": "0.51.0",
+            "tags": [
+                "placement",
+                "per-page"
+            ],
+            "fn": "placement",
+            "input": {
+                "document": {
+                    "title": "Quote",
+                    "blocks": [
+                        {
+                            "type": "heading",
+                            "level": 1,
+                            "runs": [
+                                {
+                                    "text": "Quote Q-1001"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Three widgets at 10.00 each."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "accept-sig",
+                            "signer": "alice"
+                        },
+                        {
+                            "type": "initialsField",
+                            "id": "accept-ini",
+                            "signer": "alice",
+                            "required": false,
+                            "label": "Initial here"
+                        },
+                        {
+                            "type": "dateSignedField",
+                            "id": "accept-date",
+                            "signer": "bob"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    },
+                    {
+                        "id": "bob",
+                        "name": "Bob Example",
+                        "email": "bob@example.com"
+                    }
+                ],
+                "settings": {
+                    "per_page": "initials"
+                }
+            },
+            "expected": {
+                "pages": 2,
+                "fields": {
+                    "accept-sig": [
+                        1
+                    ],
+                    "accept-ini": [
+                        1
+                    ],
+                    "accept-date": [
+                        1
+                    ],
+                    "final-signature-alice": [
+                        2
+                    ],
+                    "final-date-alice": [
+                        2
+                    ],
+                    "every-page-initials-alice": [
+                        1
+                    ],
+                    "final-signature-bob": [
+                        2
+                    ],
+                    "final-date-bob": [
+                        2
+                    ],
+                    "every-page-initials-bob": [
+                        1
+                    ]
+                }
+            },
+            "notes": "The edge the plan names: at one authored page, a port that counts the final page as authored puts a mark on it."
+        },
+        {
+            "id": "0011-placement-per-page-long",
+            "title": "per-page initials on a multi-page document land on every authored page and not on the final one",
+            "since": "0.51.0",
+            "tags": [
+                "placement",
+                "per-page"
+            ],
+            "fn": "placement",
+            "input": {
+                "document": {
+                    "title": "Terms",
+                    "blocks": [
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 1: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 1: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 1: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 1: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 1: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 1: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 2: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 2: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 2: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 2: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 2: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 2: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 3: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 3: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 3: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 3: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 3: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 3: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 4: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 4: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 4: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 4: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 4: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 4: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 5: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 5: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 5: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 5: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 5: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 5: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 6: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 6: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 6: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 6: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 6: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 6: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 7: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 7: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 7: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 7: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 7: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 7: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 8: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 8: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 8: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 8: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 8: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 8: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 9: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 9: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 9: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 9: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 9: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 9: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 10: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 10: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 10: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 10: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 10: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 10: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 11: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 11: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 11: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 11: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 11: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 11: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 12: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 12: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 12: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 12: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 12: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 12: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 13: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 13: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 13: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 13: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 13: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 13: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 14: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 14: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 14: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 14: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 14: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 14: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 15: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 15: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 15: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 15: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 15: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 15: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 16: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 16: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 16: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 16: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 16: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 16: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 17: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 17: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 17: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 17: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 17: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 17: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 18: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 18: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 18: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 18: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 18: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 18: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 19: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 19: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 19: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 19: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 19: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 19: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 20: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 20: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 20: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 20: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 20: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 20: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 21: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 21: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 21: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 21: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 21: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 21: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 22: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 22: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 22: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 22: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 22: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 22: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 23: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 23: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 23: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 23: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 23: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 23: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "paragraph",
+                            "runs": [
+                                {
+                                    "text": "Clause 24: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 24: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 24: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 24: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 24: the supplier delivers the goods described in the schedule, on the dates agreed in writing. Clause 24: the supplier delivers the goods described in the schedule, on the dates agreed in writing. "
+                                }
+                            ]
+                        },
+                        {
+                            "type": "signatureField",
+                            "id": "end-sig",
+                            "signer": "alice"
+                        }
+                    ]
+                },
+                "signers": [
+                    {
+                        "id": "alice",
+                        "name": "Alice Example",
+                        "email": "alice@example.com"
+                    }
+                ],
+                "settings": {
+                    "per_page": "initials"
+                }
+            },
+            "expected": {
+                "pages": 6,
+                "fields": {
+                    "end-sig": [
+                        5
+                    ],
+                    "final-signature-alice": [
+                        6
+                    ],
+                    "final-date-alice": [
+                        6
+                    ],
+                    "every-page-initials-alice": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ]
+                }
+            }
+        }
+    ]
+}

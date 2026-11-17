@@ -1,0 +1,31 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "sign/otp",
+    "title": "fancy-sign: email one-time codes, their storage, their state transitions and the closed error-code set",
+    "since": "0.51.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "Codes are six digits, stored only as HMAC-SHA256(app key, \"envelope|signer|purpose|code\"). Purposes view and accept are separate. A code expires after ttl_seconds (600), is consumed on use, and locks after max_attempts (5) wrong tries; a wrong try puts it back with one more attempt; a new request replaces the previous code. Sends are rate-limited per signer and purpose (5 per hour) and per IP. On the wire, an unknown, expired or wrong code is otp_invalid; only otp_locked is distinct. The otp.failed event records the precise reason (otp_unknown, otp_expired, otp_wrong). The accept code is checked LAST in sign, so a request refused for another reason burns nothing. See SPEC.md.",
+        "functions": {
+            "errorCodes": "errorCodes() -> {code: HTTP status}, the closed SignErrorCode set",
+            "codeDigest": "codeDigest({app_key, envelope_id, signer_id, purpose, code}) -> lowercase hex",
+            "scenario": "scenario({config?, steps}) -> {steps: [{op, result, events: [{type, source, data?}]}]}; data only for otp.* and link.* events. Steps: send | request {purpose, withSession?} | verify {code} | consent | open | advance {seconds} | sign {code}. A code is right (latest mailed), stale (the one before), wrong, view (the view code sent to sign) or six literal digits. One signer, alice, and a frozen clock."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are particle-academy/fancy-sign's Signing service on its in-memory repository with a frozen clock and a capturing mailer, written by fancy-sign-php/tests/Conformance/Export.php.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/fancy-sign",
+                "symbol": "FancySign\\Signing"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-sign",
+                "symbol": "(fancy-sign-js, planned)"
+            }
+        ]
+    },
+    "notes": "The scenario rows pin the redaction (one wire code, three recorded reasons), purpose binding, consumption, replacement, locking and the ceremony order. codeDigest is probed in tests/discrimination-sign.test.ts; the scenarios are not, because they need the whole service.",
+    "cases": "cases.json"
+}

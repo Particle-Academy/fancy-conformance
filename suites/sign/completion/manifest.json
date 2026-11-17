@@ -1,0 +1,35 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "sign/completion",
+    "title": "fancy-sign: the completion record, its fsig_v1_ token, the Ed25519 seal and verify()",
+    "since": "0.51.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "The completion record has a CLOSED key set (type, version, envelope_id, as_sent_sha256, as_sent_bytes, final_sha256, signers, chain_head, nonce, key_id; signers carry id, name, email, signed_at, method, otp_seq, consent_seq). Its canonical bytes are sign/chain's canonical JSON of those keys only. token = \"fsig_v1_\" + sha256(canonical). seal = base64 Ed25519 detached signature of the canonical bytes (deterministic, so pinned). key_id = the first 16 hex characters of sha256(raw public key). verify(final, record, events?) stops at the first failure: completion_invalid, token_mismatch, seal_invalid, final_hash_mismatch, prefix_mismatch, chain_broken, chain_head_mismatch. See SPEC.md.",
+        "functions": {
+            "publicKey": "publicKey(seed) -> base64 Ed25519 public key for a 32-byte hex seed",
+            "keyId": "keyId(public_key) -> 16 lowercase hex characters",
+            "canonical": "canonical(record) -> string, the bytes the token hashes and the seal signs",
+            "token": "token(record) -> \"fsig_v1_\" + 64 hex",
+            "seal": "seal(record, seed) -> base64 signature",
+            "wellFormed": "wellFormed(record) -> bool",
+            "verify": "verify({pdf_base64, completion, events?, public_keys}) -> {ok, reason, checks: {seal, token, final_hash, prefix, chain}}; a check not reached is null"
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are particle-academy/fancy-sign's Completion, Ed25519 (ext-sodium) and Verifier, written by fancy-sign-php/tests/Conformance/Export.php. The seed is fixed test data, never a real key. The PDFs are short synthetic byte strings: verify() checks hashes and a byte prefix and never parses PDF syntax.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/fancy-sign",
+                "symbol": "FancySign\\Verify\\Verifier"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-sign",
+                "symbol": "(fancy-sign-js, planned)"
+            }
+        ]
+    },
+    "notes": "tests/discrimination-sign.test.ts verifies these rows with node:crypto alone (Ed25519 via crypto.sign(null, ...)), which is the claim the plan makes for the Node port: standard library only.",
+    "cases": "cases.json"
+}

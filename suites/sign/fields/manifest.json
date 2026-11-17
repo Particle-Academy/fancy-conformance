@@ -1,0 +1,30 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "sign/fields",
+    "title": "fancy-sign: the fields an envelope carries, and the page each one lands on",
+    "since": "0.51.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "From a last-word document with signing field nodes (signatureField, initialsField, dateSignedField), the signers and the settings: the document's fields in document order, then per signer a final-page signature (final-signature-{id}) and date (final-date-{id}), then, when per_page is initials or signature, ONE every-page field per signer (every-page-{kind}-{id}). An organisation's per_page wins and a sender who contradicts it is refused. After send, every-page fields land on the authored pages 1..N and NEVER on the generated final page. See SPEC.md.",
+        "functions": {
+            "fields": "fields({document, signers, settings?, org_per_page?}) -> {per_page, fields: [{id, signer_id, kind, anchor, required, label}]} | {error: SignErrorCode}",
+            "placement": "placement({document, signers, settings?}) -> {pages, fields: {field id: [page, ...]}}"
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are particle-academy/fancy-sign's Signing::create and send, with fine-print's layout, written by fancy-sign-php/tests/Conformance/Export.php. Only page NUMBERS are pinned, never rects or PDF bytes: rects are floats and the bytes depend on the platform's zlib.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/fancy-sign",
+                "symbol": "FancySign\\Signing::create"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-sign",
+                "symbol": "(fancy-sign-js, planned; placement needs the fine-print-js writer)"
+            }
+        ]
+    },
+    "notes": "No discrimination probe: the placement half needs a PDF layout engine, which this package does not carry. Row 0010 is the edge the plan names (one authored page: a port counting the final page as authored puts a mark on it).",
+    "cases": "cases.json"
+}

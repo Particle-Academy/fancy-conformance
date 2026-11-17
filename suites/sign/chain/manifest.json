@@ -1,0 +1,32 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "sign/chain",
+    "title": "fancy-sign: canonical JSON and the per-envelope hash-chained audit trail",
+    "since": "0.51.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "One append-only chain per envelope, change-council's scheme with envelope_id in place of change_id. hash = sha256(prev_hash + \"\\n\" + canonical({seq, envelope_id, at, type, actor, source, ip, user_agent, data})), genesis 64 zeros. Canonical JSON: keys sorted by UTF-8 byte order, recursively; list order kept; no whitespace; slashes, non-ASCII and U+2028/U+2029 unescaped; floats refused; empty data is the empty object. The event set is closed and only page.viewed may have source client. verify() reads raw rows and names the first problem: sequence_gap, broken_link or hash_mismatch. See SPEC.md.",
+        "functions": {
+            "canonical": "canonical(value, objects?) -> string | {error: \"refused\"}. `objects` lists the dot paths whose empty value is an OBJECT (a JSON decoder may not keep {} and [] apart).",
+            "hash": "hash(prev_hash, event) -> lowercase hex sha256. Missing ip, user_agent are null; missing data is {}.",
+            "append": "append(last | null, event) -> the stored event {envelope_id, seq, at, type, actor, source, ip, user_agent, data, prev_hash, hash} | {error: \"refused\"} for a type outside the closed set or a source the type may not have.",
+            "verify": "verify(rows) -> {ok, checked, head, seq?, problem?}. `data` may be an object or a JSON string."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are particle-academy/fancy-sign's own output (EventChain, CanonicalJson), written by fancy-sign-php/tests/Conformance/Export.php; its DriftTest fails if a re-export moves a byte. Each row is run through a JSON round trip first, as a loader hands it over.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/fancy-sign",
+                "symbol": "FancySign\\Chain\\EventChain"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-sign",
+                "symbol": "(fancy-sign-js, planned)"
+            }
+        ]
+    },
+    "notes": "tests/discrimination-sign.test.ts holds a faithful Node reading of SPEC.md and the mutants a port would plausibly be (UTF-16 key order, escaped slashes, [] for empty data, a missing broken_link check). Each mutant names the exact rows that catch it.",
+    "cases": "cases.json"
+}

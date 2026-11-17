@@ -10,6 +10,19 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-11-18
+
+### Added
+
+- **Four `sign/*` suites, 73 rows: fancy-sign, simple electronic signatures** (CC-fancy-0036 phase 1). Normative text in `suites/sign/SPEC.md`.
+  - `sign/chain` (26): canonical JSON (keys in UTF-8 byte order, slashes and non-ASCII raw, U+2028/U+2029 raw, floats refused, empty data as `{}`), the chain hash, `append` with the closed event set and the source rule (only `page.viewed` may come from the client), and `verify` naming `sequence_gap`, `broken_link` or `hash_mismatch`.
+  - `sign/completion` (20): the `fsig_v1_` completion record's closed key set, its token, the deterministic Ed25519 seal of a fixed test seed, the key id, and `verify()` with each of its seven named failures.
+  - `sign/fields` (11): the field list an envelope carries (document nodes, the final-page signature and date per signer, one per-page mark per signer, an organisation's per-page setting winning over a sender's) and the page each field lands on. A per-page mark is never on the final page, including on a one-page document.
+  - `sign/otp` (16): the stored code digest, the closed `SignErrorCode` set with HTTP statuses, and scenarios pinning one wire code (`otp_invalid`) over three recorded reasons, purpose binding, consumption, replacement, locking, rate limits, and the ceremony order.
+  - **Goldens are particle-academy/fancy-sign's output**, written by `fancy-sign-php/tests/Conformance/Export.php`; its DriftTest fails if a re-export moves a byte. Only page numbers are pinned for placement, never rects or PDF bytes.
+  - `tests/discrimination-sign.test.ts`: a Node reading of the SPEC with `node:crypto` only, which passes every chain, completion and digest row, and ten mutants a port would plausibly be (UTF-16 key order, escaped slashes, printed floats, `[]` for empty data, no source rule, no link check, a token over unsorted JSON, no prefix check, any envelope's chain, a digest without the purpose), each failing an exact set of rows.
+  - **Consumer action:** none. Existing suites are unchanged.
+
 ## [0.50.0] - 2026-11-17
 
 ### Added

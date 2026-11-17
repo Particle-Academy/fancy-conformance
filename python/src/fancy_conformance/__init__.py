@@ -37,7 +37,7 @@ from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any, Literal
 
-__version__ = "0.50.0"
+__version__ = "0.51.0"
 
 Language = Literal["php", "node", "rust", "python", "go"]
 

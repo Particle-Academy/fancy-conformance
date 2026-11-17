@@ -1,0 +1,1265 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "sign/chain",
+    "cases": [
+        {
+            "id": "0001-canonical-sorts-keys",
+            "title": "object keys are sorted, recursively; list order is kept",
+            "since": "0.51.0",
+            "tags": [
+                "canonical",
+                "control"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "b": 1,
+                    "a": {
+                        "z": [
+                            3,
+                            1,
+                            2
+                        ],
+                        "y": true
+                    },
+                    "c": null
+                }
+            },
+            "expected": "{\"a\":{\"y\":true,\"z\":[3,1,2]},\"b\":1,\"c\":null}"
+        },
+        {
+            "id": "0002-canonical-no-escapes",
+            "title": "no whitespace; slashes and non-ASCII are written as they are, never escaped",
+            "since": "0.51.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "url": "https://example.com/a/b",
+                    "name": "Zoë Ångström",
+                    "yen": "¥100"
+                }
+            },
+            "expected": "{\"name\":\"Zoë Ångström\",\"url\":\"https://example.com/a/b\",\"yen\":\"¥100\"}"
+        },
+        {
+            "id": "0003-canonical-line-separators",
+            "title": "U+2028 and U+2029 are written raw, as JSON.stringify writes them",
+            "since": "0.51.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "text": "one\u2028two\u2029three"
+                }
+            },
+            "expected": "{\"text\":\"one\u2028two\u2029three\"}",
+            "notes": "PHP escapes these by default; JSON.stringify does not. The flag JSON_UNESCAPED_LINE_TERMINATORS makes the two agree."
+        },
+        {
+            "id": "0004-canonical-control-escapes",
+            "title": "control characters, quotes and backslashes are escaped the JSON way",
+            "since": "0.51.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "s": "tab\there \"quoted\" back\\slash newline\n"
+                }
+            },
+            "expected": "{\"s\":\"tab\\there \\\"quoted\\\" back\\\\slash newline\\n\"}"
+        },
+        {
+            "id": "0005-canonical-byte-order-keys",
+            "title": "keys sort by UTF-8 BYTES: \"Z\" < \"a\" < \"\\u{00E9}\" < \"\\u{FF61}\" < an astral key",
+            "since": "0.51.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "😀": 5,
+                    "｡": 4,
+                    "é": 3,
+                    "a": 2,
+                    "Z": 1
+                }
+            },
+            "expected": "{\"Z\":1,\"a\":2,\"é\":3,\"｡\":4,\"😀\":5}",
+            "notes": "Discriminates a port that sorts with the default JavaScript comparison (UTF-16 code units), which puts the astral key (a surrogate pair, 0xD83D...) BEFORE U+FF61."
+        },
+        {
+            "id": "0006-canonical-refuses-float",
+            "title": "a float is refused, because PHP and JavaScript do not print floats the same way",
+            "since": "0.51.0",
+            "tags": [
+                "canonical",
+                "refusal"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "amount": 10.5
+                }
+            },
+            "expected": {
+                "error": "refused"
+            }
+        },
+        {
+            "id": "0007-canonical-empty-object",
+            "title": "an empty object stays {} and an empty list stays []",
+            "since": "0.51.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "data": [],
+                    "list": []
+                },
+                "objects": [
+                    "data"
+                ]
+            },
+            "expected": "{\"data\":{},\"list\":[]}",
+            "notes": "JSON decoders in PHP lose the difference; `objects` names the paths that are objects."
+        },
+        {
+            "id": "0008-canonical-integers-and-literals",
+            "title": "integers, booleans and null print as JSON literals",
+            "since": "0.51.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "value": {
+                    "n": -42,
+                    "big": 9007199254740991,
+                    "t": true,
+                    "f": false,
+                    "z": null
+                }
+            },
+            "expected": "{\"big\":9007199254740991,\"f\":false,\"n\":-42,\"t\":true,\"z\":null}"
+        },
+        {
+            "id": "0009-hash-first-event",
+            "title": "hash = sha256(prev_hash + \"\\n\" + canonical({seq, envelope_id, at, type, actor, source, ip, user_agent, data})), from the genesis of 64 zeros",
+            "since": "0.51.0",
+            "tags": [
+                "hash",
+                "control"
+            ],
+            "fn": "hash",
+            "input": {
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "event": {
+                    "seq": 1,
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "type": "envelope.created",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null,
+                    "data": {
+                        "title": "Quote Q-1001"
+                    }
+                }
+            },
+            "expected": "d4c82048244f4bb1b213e7d1650cb299623009cd1b1a2c0226a3795f4d514b5e"
+        },
+        {
+            "id": "0010-hash-empty-data",
+            "title": "empty data hashes as an empty OBJECT, {}",
+            "since": "0.51.0",
+            "tags": [
+                "hash"
+            ],
+            "fn": "hash",
+            "input": {
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "event": {
+                    "data": {},
+                    "seq": 1,
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "type": "envelope.created",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+            "notes": "A port that hashes [] for empty data agrees with nothing PHP wrote."
+        },
+        {
+            "id": "0011-hash-with-ip-and-agent",
+            "title": "the IP and user agent are inside the hash",
+            "since": "0.51.0",
+            "tags": [
+                "hash"
+            ],
+            "fn": "hash",
+            "input": {
+                "prev_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+                "event": {
+                    "seq": 2,
+                    "type": "otp.sent",
+                    "actor": "signer:alice",
+                    "ip": "192.0.2.10",
+                    "user_agent": "Mozilla/5.0 (X11)",
+                    "data": {
+                        "purpose": "view"
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "source": "server"
+                }
+            },
+            "expected": "22f5355b67fcf2a7265661c6724855bb41d831008a978c958f209e305d99bc2d"
+        },
+        {
+            "id": "0012-hash-client-source",
+            "title": "a client-reported page view hashes its source",
+            "since": "0.51.0",
+            "tags": [
+                "hash"
+            ],
+            "fn": "hash",
+            "input": {
+                "prev_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+                "event": {
+                    "seq": 7,
+                    "type": "page.viewed",
+                    "actor": "signer:alice",
+                    "source": "client",
+                    "ip": "192.0.2.10",
+                    "data": {
+                        "page": 1,
+                        "ms": 2500
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "user_agent": null
+                }
+            },
+            "expected": "c0e7a3527bbdd2893747679802c791b7e1771dbe1af610a4dc0486f759b9780b"
+        },
+        {
+            "id": "0013-append-first",
+            "title": "the first event has seq 1 and the genesis as prev_hash",
+            "since": "0.51.0",
+            "tags": [
+                "append",
+                "control"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "envelope.created",
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null,
+                    "data": {}
+                }
+            },
+            "expected": {
+                "envelope_id": "01JD0000000000000000000000",
+                "seq": 1,
+                "at": "2026-11-18T12:00:00Z",
+                "type": "envelope.created",
+                "actor": "user:1",
+                "source": "server",
+                "ip": null,
+                "user_agent": null,
+                "data": {},
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+            }
+        },
+        {
+            "id": "0014-append-next",
+            "title": "the next event takes seq + 1 and the previous hash",
+            "since": "0.51.0",
+            "tags": [
+                "append"
+            ],
+            "fn": "append",
+            "input": {
+                "last": {
+                    "envelope_id": "01JD0000000000000000000000",
+                    "seq": 1,
+                    "at": "2026-11-18T12:00:00Z",
+                    "type": "envelope.created",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null,
+                    "data": {},
+                    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                    "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                },
+                "event": {
+                    "type": "envelope.sent",
+                    "data": {
+                        "pages": 2
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "envelope_id": "01JD0000000000000000000000",
+                "seq": 2,
+                "at": "2026-11-18T12:00:00Z",
+                "type": "envelope.sent",
+                "actor": "user:1",
+                "source": "server",
+                "ip": null,
+                "user_agent": null,
+                "data": {
+                    "pages": 2
+                },
+                "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                "hash": "98b3c85870547619f2d5f159d82e63f2e880dfb84d930aa951645802b9220b7f"
+            }
+        },
+        {
+            "id": "0015-append-refuses-unknown-type",
+            "title": "a type outside the closed event set is refused",
+            "since": "0.51.0",
+            "tags": [
+                "append",
+                "refusal"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "signer.teleported",
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null,
+                    "data": {}
+                }
+            },
+            "expected": {
+                "error": "refused"
+            }
+        },
+        {
+            "id": "0016-append-refuses-server-page-view",
+            "title": "page.viewed must come from the client: a server page view is refused",
+            "since": "0.51.0",
+            "tags": [
+                "append",
+                "refusal"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "page.viewed",
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "actor": "user:1",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null,
+                    "data": {}
+                }
+            },
+            "expected": {
+                "error": "refused"
+            }
+        },
+        {
+            "id": "0017-append-refuses-client-signature",
+            "title": "every event but page.viewed is server-observed: a client signer.signed is refused",
+            "since": "0.51.0",
+            "tags": [
+                "append",
+                "refusal"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "signer.signed",
+                    "source": "client",
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "actor": "user:1",
+                    "ip": null,
+                    "user_agent": null,
+                    "data": {}
+                }
+            },
+            "expected": {
+                "error": "refused"
+            },
+            "notes": "The evidence rule: a browser can claim it showed a page, never that someone signed."
+        },
+        {
+            "id": "0018-verify-intact",
+            "title": "an intact chain verifies and reports its head",
+            "since": "0.51.0",
+            "tags": [
+                "verify",
+                "control"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": true,
+                "checked": 6,
+                "head": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+            }
+        },
+        {
+            "id": "0019-verify-empty",
+            "title": "an empty chain is intact, with the genesis as its head",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": []
+            },
+            "expected": {
+                "ok": true,
+                "checked": 0,
+                "head": "0000000000000000000000000000000000000000000000000000000000000000"
+            }
+        },
+        {
+            "id": "0020-verify-sequence-gap",
+            "title": "a missing row is a sequence_gap at the seq found",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "checked": 2,
+                "head": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                "seq": 4,
+                "problem": "sequence_gap"
+            }
+        },
+        {
+            "id": "0021-verify-broken-link",
+            "title": "a prev_hash that is not the previous hash is a broken_link",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "checked": 3,
+                "head": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                "seq": 4,
+                "problem": "broken_link"
+            }
+        },
+        {
+            "id": "0022-verify-tampered-data",
+            "title": "changed data is a hash_mismatch at that row",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 3
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "checked": 1,
+                "head": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                "seq": 2,
+                "problem": "hash_mismatch"
+            }
+        },
+        {
+            "id": "0023-verify-tampered-ip",
+            "title": "a changed IP address is a hash_mismatch",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "198.51.100.1",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "checked": 4,
+                "head": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                "seq": 5,
+                "problem": "hash_mismatch"
+            }
+        },
+        {
+            "id": "0024-verify-data-as-json-string",
+            "title": "data read raw from a store as a JSON string verifies the same",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": "{\"as_sent_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"pages\":2}",
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": true,
+                "checked": 6,
+                "head": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+            }
+        },
+        {
+            "id": "0025-verify-other-envelope",
+            "title": "a row from another envelope's chain fails (hash_mismatch or broken_link, never ok)",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f"
+                    },
+                    {
+                        "envelope_id": "01JD1111111111111111111111",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "2dd81a32c6895c18799e32406bc5f9ebcaa377a3b9770f56d761855b3d91724d",
+                        "hash": "9aef69314ac5501d781d869c69a049378aa7a641ac1bd00d604a47ceb84c0b64"
+                    },
+                    {
+                        "envelope_id": "01JD1111111111111111111111",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9aef69314ac5501d781d869c69a049378aa7a641ac1bd00d604a47ceb84c0b64",
+                        "hash": "d1fcb550dd1068045dcb70d89c78840cc5108183749d927a1a9ce96c9baab153"
+                    },
+                    {
+                        "envelope_id": "01JD1111111111111111111111",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "d1fcb550dd1068045dcb70d89c78840cc5108183749d927a1a9ce96c9baab153",
+                        "hash": "22ea63b615b48a9d2abf15f8285c48555e1beb0f65490b500f869d4d1184ae20"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "checked": 3,
+                "head": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                "seq": 4,
+                "problem": "broken_link"
+            }
+        },
+        {
+            "id": "0026-verify-rehashed-row",
+            "title": "rewriting a row and recomputing ITS hash breaks the link to the next row",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "rows": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "reminder.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "3ba09b5ae801859cff2c28d21b88610290293740cc5036109a0b55078fa3a2e4"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "checked": 3,
+                "head": "3ba09b5ae801859cff2c28d21b88610290293740cc5036109a0b55078fa3a2e4",
+                "seq": 4,
+                "problem": "broken_link"
+            }
+        }
+    ]
+}

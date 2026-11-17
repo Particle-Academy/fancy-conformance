@@ -1,0 +1,1734 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "sign/otp",
+    "cases": [
+        {
+            "id": "0001-error-codes",
+            "title": "the closed set of wire error codes and their HTTP statuses",
+            "since": "0.51.0",
+            "tags": [
+                "errors",
+                "control"
+            ],
+            "fn": "errorCodes",
+            "input": {},
+            "expected": {
+                "invalid_request": 422,
+                "not_found": 404,
+                "forbidden": 403,
+                "link_invalid": 404,
+                "otp_invalid": 422,
+                "otp_locked": 423,
+                "otp_rate_limited": 429,
+                "session_required": 401,
+                "consent_required": 409,
+                "not_viewed": 409,
+                "fields_incomplete": 422,
+                "mark_invalid": 422,
+                "envelope_not_open": 409,
+                "envelope_not_draft": 409,
+                "already_signed": 409,
+                "already_declined": 409,
+                "step_up_required": 401,
+                "limit_exceeded": 429
+            },
+            "notes": "otp_unknown, otp_expired and otp_wrong are NOT here: on the wire they are all otp_invalid (the precise reason is in the otp.failed event)."
+        },
+        {
+            "id": "0002-code-digest",
+            "title": "a code is stored as HMAC-SHA256(app key, \"envelope|signer|purpose|code\"), lowercase hex",
+            "since": "0.51.0",
+            "tags": [
+                "digest",
+                "control"
+            ],
+            "fn": "codeDigest",
+            "input": {
+                "app_key": "conformance-app-key-0123456789ab",
+                "envelope_id": "01JD0000000000000000000000",
+                "signer_id": "alice",
+                "purpose": "view",
+                "code": "042137"
+            },
+            "expected": "0e5371f966204be07643ded8ce27b905b8cd50cd8f724812ab41a9e694ee5998"
+        },
+        {
+            "id": "0003-code-digest-purpose-bound",
+            "title": "the same code for accept digests differently: purposes cannot stand in for each other",
+            "since": "0.51.0",
+            "tags": [
+                "digest"
+            ],
+            "fn": "codeDigest",
+            "input": {
+                "app_key": "conformance-app-key-0123456789ab",
+                "envelope_id": "01JD0000000000000000000000",
+                "signer_id": "alice",
+                "purpose": "accept",
+                "code": "042137"
+            },
+            "expected": "ab50497e91a965e249f11ccc4ec333d8ab98429f27c13b510a16bdb37c4b2c4c"
+        },
+        {
+            "id": "0004-view-right-code",
+            "title": "request a view code and verify it: link.opened once, otp.sent, otp.verified, a session",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "control"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0005-view-wrong-code-redacted",
+            "title": "a wrong code answers otp_invalid; the event records otp_wrong",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "redaction"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "And the right code still works after one wrong guess: a wrong guess puts the code back with one more attempt."
+        },
+        {
+            "id": "0006-view-expired-redacted",
+            "title": "a code past its 10 minutes answers otp_invalid; the event records otp_expired",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "redaction"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "advance",
+                        "seconds": 600
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "advance",
+                        "result": {
+                            "advanced": 600
+                        },
+                        "events": []
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_expired"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0007-view-replay-redacted",
+            "title": "a code is consumed on use: the same code again answers otp_invalid, recorded as otp_unknown",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "redaction"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_unknown"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "The second verify sends the SAME code that already opened a session (no new code was requested in between)."
+        },
+        {
+            "id": "0008-view-locks-after-max-attempts",
+            "title": "the fifth wrong code locks: otp_locked (distinct on the wire) and an otp.locked event",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "lock"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_locked",
+                            "status": 423
+                        },
+                        "events": [
+                            {
+                                "type": "otp.locked",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_locked",
+                            "status": 423
+                        },
+                        "events": []
+                    }
+                ]
+            },
+            "notes": "Once locked, even the right code answers otp_locked, until a new code is requested."
+        },
+        {
+            "id": "0009-view-new-code-replaces-old",
+            "title": "a new code replaces the previous one: the earlier code no longer verifies",
+            "since": "0.51.0",
+            "tags": [
+                "scenario"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "stale"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0010-send-rate-limit",
+            "title": "a sixth code request in the window is otp_rate_limited",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "limits"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "error": "otp_rate_limited",
+                            "status": 429
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0011-limits-are-settings",
+            "title": "every limit is a setting: max_attempts 2 locks on the second wrong code",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "limits"
+            ],
+            "fn": "scenario",
+            "input": {
+                "config": {
+                    "otp": {
+                        "max_attempts": 2
+                    }
+                },
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "wrong"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "error": "otp_locked",
+                            "status": 423
+                        },
+                        "events": [
+                            {
+                                "type": "otp.locked",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0012-accept-needs-session",
+            "title": "an accept code is only sent inside a signer session",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "accept"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "accept",
+                        "withSession": false
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "error": "session_required",
+                            "status": 401
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0013-accept-signs",
+            "title": "a fresh accept code signs: otp.verified for accept, then the signing events",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "accept",
+                "control"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "consent"
+                    },
+                    {
+                        "op": "open"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "accept"
+                    },
+                    {
+                        "op": "sign",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "consent",
+                        "result": {
+                            "status": "pending"
+                        },
+                        "events": [
+                            {
+                                "type": "consent.accepted",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "open",
+                        "result": {
+                            "opened": true
+                        },
+                        "events": [
+                            {
+                                "type": "document.opened",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "sign",
+                        "result": {
+                            "status": "signed"
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "mark.adopted",
+                                "source": "server"
+                            },
+                            {
+                                "type": "signer.signed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "seal.applied",
+                                "source": "server"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0014-accept-view-code-refused",
+            "title": "the view code cannot accept: otp_invalid, and nothing is signed",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "accept"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "consent"
+                    },
+                    {
+                        "op": "open"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "accept"
+                    },
+                    {
+                        "op": "sign",
+                        "code": "view"
+                    },
+                    {
+                        "op": "sign",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "consent",
+                        "result": {
+                            "status": "pending"
+                        },
+                        "events": [
+                            {
+                                "type": "consent.accepted",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "open",
+                        "result": {
+                            "opened": true
+                        },
+                        "events": [
+                            {
+                                "type": "document.opened",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "sign",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept",
+                                    "reason": "otp_wrong"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "sign",
+                        "result": {
+                            "status": "signed"
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "mark.adopted",
+                                "source": "server"
+                            },
+                            {
+                                "type": "signer.signed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "seal.applied",
+                                "source": "server"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "Purpose binding. The refused attempt costs the accept code one attempt, and the right accept code still signs."
+        },
+        {
+            "id": "0015-accept-without-request",
+            "title": "signing with no accept code ever sent is otp_invalid (otp_unknown in the event)",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "accept"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "consent"
+                    },
+                    {
+                        "op": "open"
+                    },
+                    {
+                        "op": "sign",
+                        "code": "123456"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "consent",
+                        "result": {
+                            "status": "pending"
+                        },
+                        "events": [
+                            {
+                                "type": "consent.accepted",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "open",
+                        "result": {
+                            "opened": true
+                        },
+                        "events": [
+                            {
+                                "type": "document.opened",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "sign",
+                        "result": {
+                            "error": "otp_invalid",
+                            "status": 422
+                        },
+                        "events": [
+                            {
+                                "type": "otp.failed",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept",
+                                    "reason": "otp_unknown"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0016-sign-before-consent",
+            "title": "the ceremony order holds: signing before consent is consent_required and burns no code",
+            "since": "0.51.0",
+            "tags": [
+                "scenario",
+                "order"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "accept"
+                    },
+                    {
+                        "op": "sign",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "sign",
+                        "result": {
+                            "error": "consent_required",
+                            "status": 409
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,1682 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "sign/completion",
+    "cases": [
+        {
+            "id": "0001-public-key-from-seed",
+            "title": "the Ed25519 public key (base64) of the fixed test seed",
+            "since": "0.51.0",
+            "tags": [
+                "seal",
+                "control"
+            ],
+            "fn": "publicKey",
+            "input": {
+                "seed": "0707070707070707070707070707070707070707070707070707070707070707"
+            },
+            "expected": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+        },
+        {
+            "id": "0002-key-id",
+            "title": "key_id = the first 16 hex characters of sha256(raw public key)",
+            "since": "0.51.0",
+            "tags": [
+                "seal"
+            ],
+            "fn": "keyId",
+            "input": {
+                "public_key": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+            },
+            "expected": "fe812c12f3ab4ce6"
+        },
+        {
+            "id": "0003-canonical-record",
+            "title": "the canonical bytes: the record's closed key set only, keys sorted, no token or seal",
+            "since": "0.51.0",
+            "tags": [
+                "token"
+            ],
+            "fn": "canonical",
+            "input": {
+                "record": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw==",
+                    "extra": "ignored"
+                }
+            },
+            "expected": "{\"as_sent_bytes\":40,\"as_sent_sha256\":\"585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db\",\"chain_head\":\"9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0\",\"envelope_id\":\"01JD2222222222222222222222\",\"final_sha256\":\"a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f\",\"key_id\":\"fe812c12f3ab4ce6\",\"nonce\":\"00112233445566778899aabbccddeeff\",\"signers\":[{\"consent_seq\":3,\"email\":\"zoe@example.com\",\"id\":\"alice\",\"method\":\"otp\",\"name\":\"Zoë Example\",\"otp_seq\":5,\"signed_at\":\"2026-11-18T12:05:00Z\"}],\"type\":\"fancy-sign.completion\",\"version\":1}",
+            "notes": "A key outside Completion::KEYS never enters the bytes the token hashes and the seal signs."
+        },
+        {
+            "id": "0004-token",
+            "title": "token = \"fsig_v1_\" + sha256(canonical bytes)",
+            "since": "0.51.0",
+            "tags": [
+                "token",
+                "control"
+            ],
+            "fn": "token",
+            "input": {
+                "record": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6"
+                }
+            },
+            "expected": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb"
+        },
+        {
+            "id": "0005-seal",
+            "title": "seal = base64 Ed25519 detached signature over the canonical bytes; deterministic, so the bytes are pinned",
+            "since": "0.51.0",
+            "tags": [
+                "seal",
+                "control"
+            ],
+            "fn": "seal",
+            "input": {
+                "record": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6"
+                },
+                "seed": "0707070707070707070707070707070707070707070707070707070707070707"
+            },
+            "expected": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+        },
+        {
+            "id": "0006-well-formed",
+            "title": "a complete version-1 record is well formed",
+            "since": "0.51.0",
+            "tags": [
+                "shape"
+            ],
+            "fn": "wellFormed",
+            "input": {
+                "record": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                }
+            },
+            "expected": true
+        },
+        {
+            "id": "0007-not-well-formed-extra-key",
+            "title": "an extra key makes a record not well formed",
+            "since": "0.51.0",
+            "tags": [
+                "shape"
+            ],
+            "fn": "wellFormed",
+            "input": {
+                "record": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw==",
+                    "password": "x"
+                }
+            },
+            "expected": false,
+            "notes": "The closed key set is what stops anything credential-shaped riding along in a sealed record."
+        },
+        {
+            "id": "0008-not-well-formed-missing-key",
+            "title": "a missing key makes a record not well formed",
+            "since": "0.51.0",
+            "tags": [
+                "shape"
+            ],
+            "fn": "wellFormed",
+            "input": {
+                "record": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                }
+            },
+            "expected": false
+        },
+        {
+            "id": "0009-not-well-formed-signer-key",
+            "title": "a signer entry with a key outside its closed set is refused",
+            "since": "0.51.0",
+            "tags": [
+                "shape"
+            ],
+            "fn": "wellFormed",
+            "input": {
+                "record": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3,
+                            "ip": "192.0.2.10"
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                }
+            },
+            "expected": false
+        },
+        {
+            "id": "0010-verify-ok",
+            "title": "the final PDF, its sealed record and its events verify",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                },
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": true,
+                "reason": null,
+                "checks": {
+                    "seal": true,
+                    "token": true,
+                    "final_hash": true,
+                    "prefix": true,
+                    "chain": true
+                }
+            }
+        },
+        {
+            "id": "0011-verify-ok-without-events",
+            "title": "without events the chain check is skipped (null), and the rest passes",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "events": null,
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                }
+            },
+            "expected": {
+                "ok": true,
+                "reason": null,
+                "checks": {
+                    "seal": true,
+                    "token": true,
+                    "final_hash": true,
+                    "prefix": true,
+                    "chain": null
+                }
+            }
+        },
+        {
+            "id": "0012-verify-completion-invalid",
+            "title": "a record that is not well formed is completion_invalid",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "completion": {
+                    "type": "something.else",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                },
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "reason": "completion_invalid",
+                "checks": {
+                    "seal": null,
+                    "token": null,
+                    "final_hash": null,
+                    "prefix": null,
+                    "chain": null
+                }
+            }
+        },
+        {
+            "id": "0013-verify-token-mismatch",
+            "title": "a record changed after sealing is token_mismatch",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Mallory",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                },
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "reason": "token_mismatch",
+                "checks": {
+                    "token": false,
+                    "seal": null,
+                    "final_hash": null,
+                    "prefix": null,
+                    "chain": null
+                }
+            }
+        },
+        {
+            "id": "0014-verify-seal-invalid",
+            "title": "a changed record with a RECOMPUTED token is seal_invalid",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Mallory",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_d0cd21e7b29544865d4928587ca3b8fba155cc5e5b19bce58aad154bcaebb7c5",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                },
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "reason": "seal_invalid",
+                "checks": {
+                    "seal": false,
+                    "token": true,
+                    "final_hash": null,
+                    "prefix": null,
+                    "chain": null
+                }
+            },
+            "notes": "Recomputing the token is the forger's obvious move; only the seal stops it."
+        },
+        {
+            "id": "0015-verify-seal-unknown-key",
+            "title": "a key_id with no published key is seal_invalid",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "public_keys": {
+                    "0000000000000000": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                },
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "reason": "seal_invalid",
+                "checks": {
+                    "seal": false,
+                    "token": true,
+                    "final_hash": null,
+                    "prefix": null,
+                    "chain": null
+                }
+            }
+        },
+        {
+            "id": "0016-verify-final-hash-mismatch",
+            "title": "a different final PDF is final_hash_mismatch",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCiUgb25lIG1vcmUgdXBkYXRlCg==",
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                },
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "reason": "final_hash_mismatch",
+                "checks": {
+                    "final_hash": false,
+                    "seal": true,
+                    "token": true,
+                    "prefix": null,
+                    "chain": null
+                }
+            }
+        },
+        {
+            "id": "0017-verify-prefix-mismatch",
+            "title": "a sealed record whose as-sent hash is not the prefix of the final PDF is prefix_mismatch",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "663777e4128ce866383a4571baa48e0860d3cdce3498f133604c99eae9fe71ca",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_8881ce903a31c8923a9a7240cce31108d91ea3548458bc92af2973d9efd7f95a",
+                    "seal": "MY586KB3vD4ISwLw08Gzi3FfsorEWbLPOB831XGkwPtUw6NEvQUe66lGrJ4Gm4+Mq188qpUiQacoG7L/rF4yCw=="
+                },
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                },
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ]
+            },
+            "expected": {
+                "ok": false,
+                "reason": "prefix_mismatch",
+                "checks": {
+                    "prefix": false,
+                    "seal": true,
+                    "token": true,
+                    "final_hash": true,
+                    "chain": null
+                }
+            }
+        },
+        {
+            "id": "0018-verify-chain-broken",
+            "title": "events that do not form an intact chain are chain_broken",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "tampered": "yes"
+                        },
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b",
+                        "hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "db3725052231f5ddddfaad093b5ff563ec6d5fcc8946895f47e53a164358526f",
+                        "hash": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0"
+                    }
+                ],
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                }
+            },
+            "expected": {
+                "ok": false,
+                "reason": "chain_broken",
+                "checks": {
+                    "chain": false,
+                    "seal": true,
+                    "token": true,
+                    "final_hash": true,
+                    "prefix": true
+                }
+            }
+        },
+        {
+            "id": "0019-verify-chain-other-envelope",
+            "title": "an intact chain of ANOTHER envelope is chain_broken",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "events": [
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "80712614825075a18b07a346dce2f5a857fa2389d018d930f1c60904dac95d95",
+                        "hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "fe854cdd37066bbe9447b38bfaec25a9c872b6172d19cf01e075e2d2f51ce3d1",
+                        "hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "ce4b3c4d924e4bc32f6ffe251941ac14db410fb8239f4719b801d8cba152bb8f",
+                        "hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 5,
+                        "at": "2026-11-18T12:00:04Z",
+                        "type": "otp.sent",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "250f743c3e429e70e612807186485075d3ff0bb484fd5316c1dcebedfcb72c25",
+                        "hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd"
+                    },
+                    {
+                        "envelope_id": "01JD0000000000000000000000",
+                        "seq": 6,
+                        "at": "2026-11-18T12:00:05Z",
+                        "type": "otp.verified",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {
+                            "purpose": "view"
+                        },
+                        "prev_hash": "285c07221be610606ce109981a1b5460ecc014404de4521a98124b24719bfedd",
+                        "hash": "908792b2bde71ec9f6e8e95f48b0bdbfbfb61514a1851485b723b551dbfd1d2b"
+                    }
+                ],
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                }
+            },
+            "expected": {
+                "ok": false,
+                "reason": "chain_broken",
+                "checks": {
+                    "chain": false,
+                    "seal": true,
+                    "token": true,
+                    "final_hash": true,
+                    "prefix": true
+                }
+            }
+        },
+        {
+            "id": "0020-verify-chain-head-mismatch",
+            "title": "an intact chain that never reached the sealed head is chain_head_mismatch",
+            "since": "0.51.0",
+            "tags": [
+                "verify"
+            ],
+            "fn": "verify",
+            "input": {
+                "events": [
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 1,
+                        "at": "2026-11-18T12:00:00Z",
+                        "type": "envelope.created",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                        "hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 2,
+                        "at": "2026-11-18T12:00:01Z",
+                        "type": "envelope.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {
+                            "as_sent_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                            "pages": 2
+                        },
+                        "prev_hash": "3177512e3a76a2342c190f05729cfd37fb0e259ca0c112c1a5b0272043d9b521",
+                        "hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 3,
+                        "at": "2026-11-18T12:00:02Z",
+                        "type": "email.sent",
+                        "actor": "user:1",
+                        "source": "server",
+                        "ip": null,
+                        "user_agent": null,
+                        "data": {},
+                        "prev_hash": "5c107c815bfe8bd65611029867775a34ec665858ddf374af9df7d76471b1e178",
+                        "hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4"
+                    },
+                    {
+                        "envelope_id": "01JD2222222222222222222222",
+                        "seq": 4,
+                        "at": "2026-11-18T12:00:03Z",
+                        "type": "link.opened",
+                        "actor": "signer:alice",
+                        "source": "server",
+                        "ip": "192.0.2.10",
+                        "user_agent": "Conformance/1",
+                        "data": {},
+                        "prev_hash": "4bef98ccb7ebc1f14a143ca446304dc4ad85bd36f42b59d75d1ecccc010376e4",
+                        "hash": "9ed8ab06132b2a68854107e4d59f81ced8138bffaf8af21ffd19a9e5e805f65b"
+                    }
+                ],
+                "pdf_base64": "JVBERi0xLjcKJSBhcy1zZW50IGRvY3VtZW50IGJ5dGVzCiUlRU9GCiUgaW5jcmVtZW50YWwgdXBkYXRlIHdpdGggdGhlIG1hcmtzCiUlRU9GCg==",
+                "completion": {
+                    "type": "fancy-sign.completion",
+                    "version": 1,
+                    "envelope_id": "01JD2222222222222222222222",
+                    "as_sent_sha256": "585641621b0f061b436df9d90379e69af435e1a1f4b15489f679f380cbc1f5db",
+                    "as_sent_bytes": 40,
+                    "final_sha256": "a38c721ac5373ae908a88d0ed81c390df594b6905eeae8e1ae2af2ceba57bf7f",
+                    "signers": [
+                        {
+                            "id": "alice",
+                            "name": "Zoë Example",
+                            "email": "zoe@example.com",
+                            "signed_at": "2026-11-18T12:05:00Z",
+                            "method": "otp",
+                            "otp_seq": 5,
+                            "consent_seq": 3
+                        }
+                    ],
+                    "chain_head": "9e975cf0191d690c092afd271223b57fedf547f462351451ef8b169d784d79c0",
+                    "nonce": "00112233445566778899aabbccddeeff",
+                    "key_id": "fe812c12f3ab4ce6",
+                    "token": "fsig_v1_e7f77d1393860ec9f57e7a90f1f04576d2a9affd81d7304acc86df8dc0e388fb",
+                    "seal": "w9Dh425/Cr8v0gWGIkSkJVWrLJHtyDFXSdwK4MKOA78QXfMIIjw9fMRbo+BmovKFjgH0zVXctDwC9oU8XWIqCw=="
+                },
+                "public_keys": {
+                    "fe812c12f3ab4ce6": "6kpsY+KcUgq+9VB7Ey7F+ZVHdq6+vnuSQh7qaRRG0iw="
+                }
+            },
+            "expected": {
+                "ok": false,
+                "reason": "chain_head_mismatch",
+                "checks": {
+                    "chain": false,
+                    "seal": true,
+                    "token": true,
+                    "final_hash": true,
+                    "prefix": true
+                }
+            }
+        }
+    ]
+}
