@@ -1825,6 +1825,577 @@
         ]
       },
       "notes": "`$value` is not a path segment for the profile (an implementation that added it would refuse the text as a forbidden field), and the binding is scoped to the splice."
+    },
+    {
+      "id": "0026-spread-without-value",
+      "title": "$spread on an object without $value is DIRECTIVE_INVALID at $spread",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "tags",
+                "$spread": true,
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ item }}"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_INVALID",
+            "path": "/document/blocks/0/$spread"
+          }
+        ]
+      },
+      "notes": "There is no group to spread. The object is otherwise an ordinary $each, so its run is inspected with the binding and is fine."
+    },
+    {
+      "id": "0027-spread-takes-only-true",
+      "title": "$spread takes exactly true: false, a string or a number is DIRECTIVE_INVALID, and $value is then not inspected",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "tags",
+                "$spread": false,
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ nope }}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "$each": "tags",
+                "$spread": "yes",
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ nope }}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "$each": "tags",
+                "$spread": 1,
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ nope }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_INVALID",
+            "path": "/document/blocks/0/$spread"
+          },
+          {
+            "code": "DIRECTIVE_INVALID",
+            "path": "/document/blocks/1/$spread"
+          },
+          {
+            "code": "DIRECTIVE_INVALID",
+            "path": "/document/blocks/2/$spread"
+          }
+        ]
+      },
+      "notes": "An absent $spread is the one spelling of a plain splice, so `false` is refused rather than meaning it. The undeclared `nope` is not also reported: one error, not a cascade (as 0022)."
+    },
+    {
+      "id": "0028-spread-value-not-an-array",
+      "title": "A spread whose $value is not an array is DIRECTIVE_SPREAD_NOT_ARRAY at $value, and its content is not inspected",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "tags",
+                "$spread": true,
+                "$value": {
+                  "type": "paragraph",
+                  "runs": [
+                    {
+                      "text": "{{ nope }}"
+                    }
+                  ]
+                }
+              },
+              {
+                "$each": "tags",
+                "$spread": true,
+                "$value": "{{ item }}"
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_SPREAD_NOT_ARRAY",
+            "path": "/document/blocks/0/$value"
+          },
+          {
+            "code": "DIRECTIVE_SPREAD_NOT_ARRAY",
+            "path": "/document/blocks/1/$value"
+          }
+        ]
+      },
+      "notes": "Known statically: $value is written literally in the template. No row uses an empty OBJECT here: PHP decodes {} and [] alike."
+    },
+    {
+      "id": "0029-spread-elements-are-matched-at-the-parent-path",
+      "title": "Each element of a spread is matched by the spread's own path (blocks.*), never blocks.*.<i>",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "tags",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "code",
+                    "text": "{{ item }}"
+                  },
+                  {
+                    "type": "image",
+                    "src": "{{ item }}"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "TOKEN_IMAGE_FIELD",
+            "path": "/document/blocks/0/$value/1/src"
+          }
+        ]
+      },
+      "notes": "A code block's text is a text field at blocks.*.text, and an image src is an image field. Matched one level too deep, both would be TOKEN_FORBIDDEN_FIELD instead."
+    },
+    {
+      "id": "0030-spread-elements-take-directives",
+      "title": "A $-key on a spread element is a directive (it is an array element), and sees the spread's binding; the binding ends with the spread",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "tags",
+                "$spread": true,
+                "$value": [
+                  {
+                    "$if": "!$first && item !== subtitle",
+                    "type": "pageBreak"
+                  },
+                  {
+                    "$each": "tags",
+                    "$as": "t",
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ item }}{{ t }}{{ $index }}"
+                      }
+                    ]
+                  },
+                  {
+                    "$foo": 1,
+                    "type": "hr"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ item }}"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_UNKNOWN",
+            "path": "/document/blocks/0/$value/2/$foo"
+          },
+          {
+            "code": "TOKEN_UNDECLARED",
+            "path": "/document/blocks/1/runs/0/text"
+          }
+        ]
+      },
+      "notes": "Unlike the top of a plain splice's $value (0024), a spread element IS an element of the parent array, so a condition belongs on it and is not DIRECTIVE_MISPLACED."
+    },
+    {
+      "id": "0031-spread-issue-order",
+      "title": "A spread reports its $ keys, then its other keys, then each element of $value in order",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ nope }}"
+                      }
+                    ]
+                  },
+                  {
+                    "$if": "nope3",
+                    "type": "hr"
+                  }
+                ],
+                "extra": 1,
+                "$spread": true,
+                "$each": "tags",
+                "$if": "nope2"
+              }
+            ]
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "DIRECTIVE_UNDECLARED",
+            "path": "/document/blocks/0/$if"
+          },
+          {
+            "code": "DIRECTIVE_SPLICE_KEY",
+            "path": "/document/blocks/0/extra"
+          },
+          {
+            "code": "TOKEN_UNDECLARED",
+            "path": "/document/blocks/0/$value/0/runs/0/text"
+          },
+          {
+            "code": "DIRECTIVE_UNDECLARED",
+            "path": "/document/blocks/0/$value/1/$if"
+          }
+        ]
+      },
+      "notes": "SPEC 8 and 11, as 0024 for a splice."
     }
   ]
 }

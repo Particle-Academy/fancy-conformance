@@ -1,7 +1,7 @@
 {
   "$schema": "../../../schema/suite-manifest.schema.json",
   "suite": "template/directives",
-  "title": "JSON directives: $each, $as, $if and the $value splice",
+  "title": "JSON directives: $each, $as, $if, the $value splice and $spread",
   "since": "0.35.0",
   "caseFormat": "table",
   "cases": "cases.json",
@@ -25,6 +25,7 @@
     "NO DISCRIMINATION PROBES IN THIS REPOSITORY, the same known gap as flow/graph-runs: the implementation under test is a template engine, which this package does not carry. These rows guard DRIFT between runtimes; that they DISCRIMINATE is shown by fancy-template's sabotage pass (each bound and guard broken in turn, a row going red), not by anything here.",
     "Structure is never text syntax (plan section 2). A directive is a key on an array element and is removed from the output.",
     "A TOKEN reading an absent variable throws (resolve 0009); a CONDITION asking whether one is there does not (0007). Both are deliberate and they are the same rule seen from two sides.",
-    "0016-0024 (0.36.0): the $value splice, `{ $each, $as?, $if?, $value }`, which repeats ANY value -- a holy-sheet row, a cell, a string -- where $each alone can only repeat an object. Its bounds are in template/limits 0023-0029 and its static errors in template/inspect 0022-0025."
+    "0016-0024 (0.36.0): the $value splice, `{ $each, $as?, $if?, $value }`, which repeats ANY value -- a holy-sheet row, a cell, a string -- where $each alone can only repeat an object. Its bounds are in template/limits 0023-0029 and its static errors in template/inspect 0022-0025.",
+    "0025-0033 (0.54.0): $spread, `{ $each, $as?, $if?, $spread: true, $value: [...] }`, which splices a GROUP of siblings per item flat into the parent array (a page break, a heading, a table and a subtotal per pricing model). 0026 pins the nesting a plain array splice produces; 0033 is the end-to-end quote that fancy-template's PHP leg also writes through fine-print. Bounds in template/limits 0030-0035, static errors in template/inspect 0026-0031."
   ]
 }

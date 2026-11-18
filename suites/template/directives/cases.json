@@ -2221,6 +2221,1520 @@
         "path": "/document/sheets/0/rows/0/$value/1"
       },
       "notes": "A JSON Pointer into the TEMPLATE (SPEC 6), never an index into the expanded output: the second copy fails, and its path is the one cell the author wrote."
+    },
+    {
+      "id": "0025-spread-splices-a-group-flat",
+      "title": "$spread: true splices every element of $value into the parent array, per item, in order",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Before"
+                  }
+                ]
+              },
+              {
+                "$each": "people",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "{{ item.name }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "Score {{ item.score }}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "After"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Before"
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Score 91"
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Charles"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Score 42"
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Mary"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Score 77"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "After"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The repeating section of a document (owner-approved document builder, q_52d2323e): a heading and its paragraph per person, as siblings. One $each per sibling would give every heading first; a splice without $spread nests (0026)."
+    },
+    {
+      "id": "0026-array-value-without-spread-nests",
+      "title": "Without $spread, an array $value is ONE element: the parent gets nested arrays",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Before"
+                  }
+                ]
+              },
+              {
+                "$each": "people",
+                "$value": [
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "{{ item.name }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "Score {{ item.score }}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "After"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Before"
+                }
+              ]
+            },
+            [
+              {
+                "type": "heading",
+                "level": 2,
+                "runs": [
+                  {
+                    "text": "Ada"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Score 91"
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "type": "heading",
+                "level": 2,
+                "runs": [
+                  {
+                    "text": "Charles"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Score 42"
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "type": "heading",
+                "level": 2,
+                "runs": [
+                  {
+                    "text": "Mary"
+                  }
+                ]
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Score 77"
+                  }
+                ]
+              }
+            ],
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "After"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Unchanged since 0.36.0 and pinned here as the contrast: `$value` is the element (SPEC 8), and fine-print refuses a block that is an array. This is the output a consumer reported, and the reason $spread exists."
+    },
+    {
+      "id": "0027-spread-page-break-not-before-the-first",
+      "title": "An element of a spread with `$if: \"!$first\"` reads the SPREAD's $first: a page break between items, not before the first",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "people",
+                "$spread": true,
+                "$value": [
+                  {
+                    "$if": "!$first",
+                    "type": "pageBreak"
+                  },
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "{{ item.name }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak"
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Charles"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak"
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Mary"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "fancy-expr: `unary := \"!\" primary` and `$first` is a `\"$\" IDENT` segment. An element with only $if is not a loop, so the innermost loop is the spread (as in 0012). `$index > 0` is the same condition."
+    },
+    {
+      "id": "0028-spread-if-on-the-spread-in-any-key-order",
+      "title": "$if on the spread itself drops a whole group, whatever order $value, $if, $spread and $each are written in",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$value": [
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "{{ item.name }}"
+                      }
+                    ]
+                  }
+                ],
+                "$if": "item.score >= 50",
+                "$spread": true,
+                "$each": "people"
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            },
+            {
+              "name": "Mary",
+              "score": 77
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Ada"
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Mary"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "As 0020 for a splice: JSON key order is not something an author should have to get right."
+    },
+    {
+      "id": "0029-spread-over-an-empty-array-produces-nothing",
+      "title": "A spread over an empty array, or with an empty $value, produces nothing",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Before"
+                  }
+                ]
+              },
+              {
+                "$each": "people",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "{{ item.name }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "Score {{ item.score }}"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "$each": "people",
+                "$spread": true,
+                "$value": []
+              },
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "After"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": []
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Before"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "After"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Present and empty is not absent (0006). An empty $value is allowed: a group whose every element is conditional can be empty too."
+    },
+    {
+      "id": "0030-spread-inside-spread-is-flat",
+      "title": "A spread inside a spread splices into the same parent; each $index is its own loop's",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "rows": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "rows",
+                "$as": "row",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "Row {{ $index }}"
+                      }
+                    ]
+                  },
+                  {
+                    "$each": "row",
+                    "$as": "cell",
+                    "$spread": true,
+                    "$value": [
+                      {
+                        "type": "paragraph",
+                        "runs": [
+                          {
+                            "text": "{{ $index }}{{ cell }}"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "hr"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "rows": [
+            [
+              "a",
+              "b"
+            ],
+            [
+              "c"
+            ]
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Row 0"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "0a"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1b"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Row 1"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "0c"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            }
+          ]
+        }
+      },
+      "notes": "An element of a spread is an element of the parent array, so it may itself be a spread (SPEC 8), and nothing nests."
+    },
+    {
+      "id": "0031-spread-holy-sheet-rows",
+      "title": "A spread of holy-sheet rows: two rows per item, each matched as a row",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "holy-sheet",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "sheets": [
+              {
+                "name": "S",
+                "rows": [
+                  {
+                    "$each": "people",
+                    "$spread": true,
+                    "$value": [
+                      [
+                        "{{ item.name }}"
+                      ],
+                      [
+                        "{{ item.score }}"
+                      ]
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 91
+            },
+            {
+              "name": "Charles",
+              "score": 42
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "sheets": [
+            {
+              "name": "S",
+              "rows": [
+                [
+                  {
+                    "value": "Ada"
+                  }
+                ],
+                [
+                  91
+                ],
+                [
+                  {
+                    "value": "Charles"
+                  }
+                ],
+                [
+                  42
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "Each element is matched by the spread's own path, sheets.*.rows.*: a name is wrapped, a whole-token number stays a number (SPEC 9)."
+    },
+    {
+      "id": "0032-spread-error-path-points-into-value",
+      "title": "An error inside a spread element is reported at its template path, through $value",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "people": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "score": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "title": {
+              "type": "string"
+            },
+            "showNotes": {
+              "type": "boolean"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "people",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "{{ item.name }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "Score {{ item.score }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "people": [
+            {
+              "name": "Ada",
+              "score": 1
+            },
+            {
+              "name": "Charles"
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_MISSING",
+        "path": "/document/blocks/0/$value/1/runs/0/text"
+      },
+      "notes": "The second item's paragraph fails. The path is the one the author wrote, never an index into the flattened output."
+    },
+    {
+      "id": "0033-spread-quote-end-to-end",
+      "title": "A quote with two pricing models: a page per model, each with a heading, a lines table and a subtotal",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "directives"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "customer": {
+              "type": "string",
+              "required": true
+            },
+            "models": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "required": true
+                  },
+                  "lines": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "desc": {
+                          "type": "string",
+                          "required": true
+                        },
+                        "qty": {
+                          "type": "integer",
+                          "required": true
+                        },
+                        "amount": {
+                          "type": "integer",
+                          "required": true
+                        }
+                      }
+                    }
+                  },
+                  "subtotal": {
+                    "type": "integer",
+                    "required": true
+                  }
+                }
+              }
+            }
+          },
+          "document": {
+            "page": {
+              "footer": {
+                "right": "Page {page} of {pages}"
+              }
+            },
+            "blocks": [
+              {
+                "type": "heading",
+                "level": 1,
+                "runs": [
+                  {
+                    "text": "Quote for {{ customer }}"
+                  }
+                ]
+              },
+              {
+                "$each": "models",
+                "$as": "model",
+                "$spread": true,
+                "$value": [
+                  {
+                    "$if": "!$first",
+                    "type": "pageBreak"
+                  },
+                  {
+                    "type": "heading",
+                    "level": 2,
+                    "runs": [
+                      {
+                        "text": "{{ model.name }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "table",
+                    "widths": [
+                      60,
+                      15,
+                      25
+                    ],
+                    "rows": [
+                      {
+                        "header": true,
+                        "cells": [
+                          {
+                            "blocks": [
+                              {
+                                "type": "paragraph",
+                                "runs": [
+                                  {
+                                    "text": "Item"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "blocks": [
+                              {
+                                "type": "paragraph",
+                                "runs": [
+                                  {
+                                    "text": "Qty"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "blocks": [
+                              {
+                                "type": "paragraph",
+                                "runs": [
+                                  {
+                                    "text": "Amount"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "$each": "model.lines",
+                        "$as": "line",
+                        "cells": [
+                          {
+                            "blocks": [
+                              {
+                                "type": "paragraph",
+                                "runs": [
+                                  {
+                                    "text": "{{ line.desc }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "blocks": [
+                              {
+                                "type": "paragraph",
+                                "runs": [
+                                  {
+                                    "text": "{{ line.qty }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "blocks": [
+                              {
+                                "type": "paragraph",
+                                "runs": [
+                                  {
+                                    "text": "{{ line.amount | money:USD }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "Subtotal: {{ model.subtotal | money:USD }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "customer": "Acme",
+          "models": [
+            {
+              "name": "Starter",
+              "lines": [
+                {
+                  "desc": "Seats",
+                  "qty": 5,
+                  "amount": 50000
+                },
+                {
+                  "desc": "Onboarding",
+                  "qty": 1,
+                  "amount": 120000
+                }
+              ],
+              "subtotal": 170000
+            },
+            {
+              "name": "Growth",
+              "lines": [
+                {
+                  "desc": "Seats",
+                  "qty": 20,
+                  "amount": 180000
+                }
+              ],
+              "subtotal": 180000
+            }
+          ]
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "page": {
+            "footer": {
+              "right": "Page {page} of {pages}"
+            }
+          },
+          "blocks": [
+            {
+              "type": "heading",
+              "level": 1,
+              "runs": [
+                {
+                  "text": "Quote for Acme"
+                }
+              ]
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Starter"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "widths": [
+                60,
+                15,
+                25
+              ],
+              "rows": [
+                {
+                  "header": true,
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Item"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Qty"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Amount"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Seats"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "5"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "$500.00"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Onboarding"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "1"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "$1,200.00"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Subtotal: $1,700.00"
+                }
+              ]
+            },
+            {
+              "type": "pageBreak"
+            },
+            {
+              "type": "heading",
+              "level": 2,
+              "runs": [
+                {
+                  "text": "Growth"
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "widths": [
+                60,
+                15,
+                25
+              ],
+              "rows": [
+                {
+                  "header": true,
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Item"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Qty"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Amount"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "cells": [
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "Seats"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "20"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "blocks": [
+                        {
+                          "type": "paragraph",
+                          "runs": [
+                            {
+                              "text": "$1,800.00"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Subtotal: $1,800.00"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "The END-TO-END row. A spread per model, a page break not before the first, and a table whose rows are an $each nested inside a spread element ($first there would be the line loop's). fancy-template's PHP leg renders this exact row and writes it through fine-print, which must validate it, lint it with no error and read back two pages. The footer is the author's own {page}: a literal, never a value."
     }
   ]
 }

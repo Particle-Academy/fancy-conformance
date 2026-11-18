@@ -11954,6 +11954,431 @@
         "path": "/document/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0/$value/blocks/0"
       },
       "notes": "Without the bound a splice would be a way round the one $each has."
+    },
+    {
+      "id": "0030-spread-iterations-count-items-not-elements",
+      "title": "A spread of 2 elements over exactly limits.iterations items renders",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "xs",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ item }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hr"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2,
+            3
+          ]
+        },
+        "options": {
+          "limits": {
+            "iterations": 3
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "2"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "3"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            }
+          ]
+        }
+      },
+      "notes": "One iteration per element of $each, as for a splice: 3 items of a group of 2 is 3 iterations, not 6. An implementation counting spliced elements fails here."
+    },
+    {
+      "id": "0031-spread-iterations-over",
+      "title": "One more item is RENDER_TOO_MANY_ITERATIONS at the spread's $each",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "xs",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ item }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hr"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "options": {
+          "limits": {
+            "iterations": 3
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "RENDER_TOO_MANY_ITERATIONS",
+        "path": "/document/blocks/0/$each"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0032-spread-output-nodes-at-limit",
+      "title": "A spread output of exactly limits.outputNodes values renders: neither the spread object nor its $value array counts",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "xs",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ item }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hr"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2
+          ]
+        },
+        "options": {
+          "limits": {
+            "outputNodes": 16
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "1"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            },
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "2"
+                }
+              ]
+            },
+            {
+              "type": "hr"
+            }
+          ]
+        }
+      },
+      "notes": "16 values, computed from SPEC 10 on the OUTPUT. An implementation that counted $value's array once per item fails here."
+    },
+    {
+      "id": "0033-spread-output-nodes-over",
+      "title": "One fewer allowed is RENDER_TOO_MANY_NODES",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "xs",
+                "$spread": true,
+                "$value": [
+                  {
+                    "type": "paragraph",
+                    "runs": [
+                      {
+                        "text": "{{ item }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hr"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2
+          ]
+        },
+        "options": {
+          "limits": {
+            "outputNodes": 15
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "RENDER_TOO_MANY_NODES",
+        "path": ""
+      },
+      "notes": "An implementation that did not count spread elements at all passes 0032 and fails here."
+    },
+    {
+      "id": "0034-spread-element-directive-depth-at-limit",
+      "title": "A spread whose element carries $if is two directive levels, and renders at limits.directiveDepth 2",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "xs",
+                "$spread": true,
+                "$value": [
+                  {
+                    "$if": "!$first",
+                    "type": "hr"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2
+          ]
+        },
+        "options": {
+          "limits": {
+            "directiveDepth": 2
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "hr"
+            }
+          ]
+        }
+      },
+      "notes": "The spread is one directive object; an element carrying a directive is one more (SPEC 8)."
+    },
+    {
+      "id": "0035-spread-element-directive-depth-over",
+      "title": "The same template at limits.directiveDepth 1 is DIRECTIVE_TOO_DEEP at the element",
+      "since": "0.54.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "xs": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "$each": "xs",
+                "$spread": true,
+                "$value": [
+                  {
+                    "$if": "!$first",
+                    "type": "hr"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "data": {
+          "xs": [
+            1,
+            2
+          ]
+        },
+        "options": {
+          "limits": {
+            "directiveDepth": 1
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "DIRECTIVE_TOO_DEEP",
+        "path": "/document/blocks/0/$value/0"
+      },
+      "notes": "Without this, a spread element's directives would sit outside the bound every other directive is under."
     }
   ]
 }

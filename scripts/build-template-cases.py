@@ -227,6 +227,8 @@ class Suite:
 # Rows added for the `$value` splice and the plain-notes ruling (owner, 2026-10-27).
 SPLICE = "0.36.0"
 BAND_FIELDS = "0.44.0"
+# `$spread`: a group of siblings per item, spliced flat (document builder, q_52d2323e).
+SPREAD = "0.54.0"
 
 # ---------------------------------------------------------------------------
 # template/tokenize
@@ -1619,6 +1621,231 @@ def directives_suite() -> Suite:
         "A JSON Pointer into the TEMPLATE (SPEC 6), never an index into the expanded output: the second copy fails, and its path is the one cell the author wrote.",
         since=SPLICE,
     )
+
+    # -- $spread: a group of siblings per item, spliced flat (0.54.0) -------
+    def heading(text: str, level: int = 2) -> dict[str, Any]:
+        return {"type": "heading", "level": level, "runs": [{"text": text}]}
+
+    group = [heading("{{ item.name }}"), para("Score {{ item.score }}")]
+
+    def group_out(*people_: tuple[str, int]) -> list[Any]:
+        out: list[Any] = []
+        for name, score in people_:
+            out += [heading(name), para(f"Score {score}")]
+        return out
+
+    everyone = (("Ada", 91), ("Charles", 42), ("Mary", 77))
+    s.render(
+        "0025-spread-splices-a-group-flat",
+        "$spread: true splices every element of $value into the parent array, per item, in order",
+        env(doc(para("Before"), {"$each": "people", "$spread": True, "$value": group}, para("After")), people),
+        data,
+        ok_doc(doc(para("Before"), *group_out(*everyone), para("After"))),
+        "The repeating section of a document (owner-approved document builder, q_52d2323e): a heading and its paragraph per person, as siblings. One $each per sibling would give every heading first; a splice without $spread nests (0026).",
+        since=SPREAD,
+    )
+    s.render(
+        "0026-array-value-without-spread-nests",
+        "Without $spread, an array $value is ONE element: the parent gets nested arrays",
+        env(doc(para("Before"), {"$each": "people", "$value": group}, para("After")), people),
+        data,
+        ok_doc(doc(para("Before"), *[group_out(p) for p in everyone], para("After"))),
+        "Unchanged since 0.36.0 and pinned here as the contrast: `$value` is the element (SPEC 8), and fine-print refuses a block that is an array. This is the output a consumer reported, and the reason $spread exists.",
+        since=SPREAD,
+    )
+    s.render(
+        "0027-spread-page-break-not-before-the-first",
+        'An element of a spread with `$if: "!$first"` reads the SPREAD\'s $first: a page break between items, not before the first',
+        env(
+            doc({"$each": "people", "$spread": True, "$value": [{"$if": "!$first", "type": "pageBreak"}, heading("{{ item.name }}")]}),
+            people,
+        ),
+        data,
+        ok_doc(doc(heading("Ada"), {"type": "pageBreak"}, heading("Charles"), {"type": "pageBreak"}, heading("Mary"))),
+        "fancy-expr: `unary := \"!\" primary` and `$first` is a `\"$\" IDENT` segment. An element with only $if is not a loop, so the innermost loop is the spread (as in 0012). `$index > 0` is the same condition.",
+        since=SPREAD,
+    )
+    s.render(
+        "0028-spread-if-on-the-spread-in-any-key-order",
+        "$if on the spread itself drops a whole group, whatever order $value, $if, $spread and $each are written in",
+        env(
+            doc({"$value": [heading("{{ item.name }}")], "$if": "item.score >= 50", "$spread": True, "$each": "people"}),
+            people,
+        ),
+        data,
+        ok_doc(doc(heading("Ada"), heading("Mary"))),
+        "As 0020 for a splice: JSON key order is not something an author should have to get right.",
+        since=SPREAD,
+    )
+    s.render(
+        "0029-spread-over-an-empty-array-produces-nothing",
+        "A spread over an empty array, or with an empty $value, produces nothing",
+        env(
+            doc(
+                para("Before"),
+                {"$each": "people", "$spread": True, "$value": group},
+                {"$each": "people", "$spread": True, "$value": []},
+                para("After"),
+            ),
+            people,
+        ),
+        {"people": []},
+        ok_doc(doc(para("Before"), para("After"))),
+        "Present and empty is not absent (0006). An empty $value is allowed: a group whose every element is conditional can be empty too.",
+        since=SPREAD,
+    )
+    s.render(
+        "0030-spread-inside-spread-is-flat",
+        "A spread inside a spread splices into the same parent; each $index is its own loop's",
+        env(
+            doc(
+                {
+                    "$each": "rows",
+                    "$as": "row",
+                    "$spread": True,
+                    "$value": [
+                        heading("Row {{ $index }}"),
+                        {"$each": "row", "$as": "cell", "$spread": True, "$value": [para("{{ $index }}{{ cell }}"), {"type": "hr"}]},
+                    ],
+                }
+            ),
+            grid,
+        ),
+        {"rows": [["a", "b"], ["c"]]},
+        ok_doc(
+            doc(
+                heading("Row 0"),
+                para("0a"),
+                {"type": "hr"},
+                para("1b"),
+                {"type": "hr"},
+                heading("Row 1"),
+                para("0c"),
+                {"type": "hr"},
+            )
+        ),
+        "An element of a spread is an element of the parent array, so it may itself be a spread (SPEC 8), and nothing nests.",
+        since=SPREAD,
+    )
+    s.render(
+        "0031-spread-holy-sheet-rows",
+        "A spread of holy-sheet rows: two rows per item, each matched as a row",
+        hs_env({"$each": "people", "$spread": True, "$value": [["{{ item.name }}"], ["{{ item.score }}"]]}),
+        {"people": [{"name": "Ada", "score": 91}, {"name": "Charles", "score": 42}]},
+        ok_doc(rows_doc([{"value": "Ada"}], [91], [{"value": "Charles"}], [42])),
+        "Each element is matched by the spread's own path, sheets.*.rows.*: a name is wrapped, a whole-token number stays a number (SPEC 9).",
+        since=SPREAD,
+    )
+    s.render(
+        "0032-spread-error-path-points-into-value",
+        "An error inside a spread element is reported at its template path, through $value",
+        env(doc({"$each": "people", "$spread": True, "$value": group}), people),
+        {"people": [{"name": "Ada", "score": 1}, {"name": "Charles"}]},
+        err("TEMPLATE_MISSING", "/document/blocks/0/$value/1/runs/0/text"),
+        "The second item's paragraph fails. The path is the one the author wrote, never an index into the flattened output.",
+        since=SPREAD,
+    )
+
+    # The end-to-end row: fancy-template's PHP leg renders THIS template and
+    # writes it through fine-print (php/tests/QuoteSpreadFinePrintTest.php).
+    def cell(text: str) -> dict[str, Any]:
+        return {"blocks": [para(text)]}
+
+    quote_vars = {
+        "customer": S(required=True),
+        "models": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": S(required=True),
+                    "lines": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "desc": S(required=True),
+                                "qty": {"type": "integer", "required": True},
+                                "amount": {"type": "integer", "required": True},
+                            },
+                        },
+                    },
+                    "subtotal": {"type": "integer", "required": True},
+                },
+            },
+        },
+    }
+    footer = {"footer": {"right": "Page {page} of {pages}"}}
+    header_row = {"header": True, "cells": [cell("Item"), cell("Qty"), cell("Amount")]}
+    quote = env(
+        doc(
+            heading("Quote for {{ customer }}", 1),
+            {
+                "$each": "models",
+                "$as": "model",
+                "$spread": True,
+                "$value": [
+                    {"$if": "!$first", "type": "pageBreak"},
+                    heading("{{ model.name }}"),
+                    {
+                        "type": "table",
+                        "widths": [60, 15, 25],
+                        "rows": [
+                            header_row,
+                            {
+                                "$each": "model.lines",
+                                "$as": "line",
+                                "cells": [cell("{{ line.desc }}"), cell("{{ line.qty }}"), cell("{{ line.amount | money:USD }}")],
+                            },
+                        ],
+                    },
+                    para("Subtotal: {{ model.subtotal | money:USD }}"),
+                ],
+            },
+            page=footer,
+        ),
+        quote_vars,
+    )
+    quote_data = {
+        "customer": "Acme",
+        "models": [
+            {
+                "name": "Starter",
+                "lines": [{"desc": "Seats", "qty": 5, "amount": 50000}, {"desc": "Onboarding", "qty": 1, "amount": 120000}],
+                "subtotal": 170000,
+            },
+            {"name": "Growth", "lines": [{"desc": "Seats", "qty": 20, "amount": 180000}], "subtotal": 180000},
+        ],
+    }
+
+    def table_out(*lines: tuple[str, str, str]) -> dict[str, Any]:
+        return {
+            "type": "table",
+            "widths": [60, 15, 25],
+            "rows": [header_row, *[{"cells": [cell(a), cell(b), cell(c)]} for a, b, c in lines]],
+        }
+
+    s.render(
+        "0033-spread-quote-end-to-end",
+        "A quote with two pricing models: a page per model, each with a heading, a lines table and a subtotal",
+        quote,
+        quote_data,
+        ok_doc(
+            doc(
+                heading("Quote for Acme", 1),
+                heading("Starter"),
+                table_out(("Seats", "5", "$500.00"), ("Onboarding", "1", "$1,200.00")),
+                para("Subtotal: $1,700.00"),
+                {"type": "pageBreak"},
+                heading("Growth"),
+                table_out(("Seats", "20", "$1,800.00")),
+                para("Subtotal: $1,800.00"),
+                page=footer,
+            )
+        ),
+        "The END-TO-END row. A spread per model, a page break not before the first, and a table whose rows are an $each nested inside a spread element ($first there would be the line loop's). fancy-template's PHP leg renders this exact row and writes it through fine-print, which must validate it, lint it with no error and read back two pages. The footer is the author's own {page}: a literal, never a value.",
+        since=SPREAD,
+    )
     return s
 
 
@@ -1962,6 +2189,80 @@ def limits_suite() -> Suite:
         err("DIRECTIVE_TOO_DEEP", "/document/blocks/0" + "/$value/blocks/0" * 8),
         "Without the bound a splice would be a way round the one $each has.",
         since=SPLICE,
+    )
+
+    # -- $spread obeys the splice's bounds (0.54.0) ------------------------
+    pair = [para("{{ item }}"), {"type": "hr"}]
+    spread = env(doc({"$each": "xs", "$spread": True, "$value": pair}), nums)
+
+    def pairs_out(*xs: int) -> dict[str, Any]:
+        out: list[Any] = []
+        for x in xs:
+            out += [para(str(x)), {"type": "hr"}]
+        return doc(*out)
+
+    s.render(
+        "0030-spread-iterations-count-items-not-elements",
+        "A spread of 2 elements over exactly limits.iterations items renders",
+        spread,
+        {"xs": [1, 2, 3]},
+        ok_doc(pairs_out(1, 2, 3)),
+        "One iteration per element of $each, as for a splice: 3 items of a group of 2 is 3 iterations, not 6. An implementation counting spliced elements fails here.",
+        options={"limits": {"iterations": 3}},
+        since=SPREAD,
+    )
+    s.render(
+        "0031-spread-iterations-over",
+        "One more item is RENDER_TOO_MANY_ITERATIONS at the spread's $each",
+        spread,
+        {"xs": [1, 2, 3, 4]},
+        err("RENDER_TOO_MANY_ITERATIONS", "/document/blocks/0/$each"),
+        "",
+        options={"limits": {"iterations": 3}},
+        since=SPREAD,
+    )
+    spread_out = pairs_out(1, 2)
+    spread_nodes = output_nodes(spread_out)
+    s.render(
+        "0032-spread-output-nodes-at-limit",
+        "A spread output of exactly limits.outputNodes values renders: neither the spread object nor its $value array counts",
+        spread,
+        {"xs": [1, 2]},
+        ok_doc(spread_out),
+        f"{spread_nodes} values, computed from SPEC 10 on the OUTPUT. An implementation that counted $value's array once per item fails here.",
+        options={"limits": {"outputNodes": spread_nodes}},
+        since=SPREAD,
+    )
+    s.render(
+        "0033-spread-output-nodes-over",
+        "One fewer allowed is RENDER_TOO_MANY_NODES",
+        spread,
+        {"xs": [1, 2]},
+        err("RENDER_TOO_MANY_NODES", ""),
+        "An implementation that did not count spread elements at all passes 0032 and fails here.",
+        options={"limits": {"outputNodes": spread_nodes - 1}},
+        since=SPREAD,
+    )
+    guarded = env(doc({"$each": "xs", "$spread": True, "$value": [{"$if": "!$first", "type": "hr"}]}), nums)
+    s.render(
+        "0034-spread-element-directive-depth-at-limit",
+        "A spread whose element carries $if is two directive levels, and renders at limits.directiveDepth 2",
+        guarded,
+        {"xs": [1, 2]},
+        ok_doc(doc({"type": "hr"})),
+        "The spread is one directive object; an element carrying a directive is one more (SPEC 8).",
+        options={"limits": {"directiveDepth": 2}},
+        since=SPREAD,
+    )
+    s.render(
+        "0035-spread-element-directive-depth-over",
+        "The same template at limits.directiveDepth 1 is DIRECTIVE_TOO_DEEP at the element",
+        guarded,
+        {"xs": [1, 2]},
+        err("DIRECTIVE_TOO_DEEP", "/document/blocks/0/$value/0"),
+        "Without this, a spread element's directives would sit outside the bound every other directive is under.",
+        options={"limits": {"directiveDepth": 1}},
+        since=SPREAD,
     )
     return s
 
@@ -2812,6 +3113,116 @@ def inspect_suite() -> Suite:
         ],
         "`$value` is not a path segment for the profile (an implementation that added it would refuse the text as a forbidden field), and the binding is scoped to the splice.",
     )
+
+    def ins_spread(id_: str, title: str, template: Any, issues: list[tuple[str, str]], notes: str) -> None:
+        s.add(
+            id_,
+            title,
+            "inspect",
+            {"template": template},
+            {"issues": [{"code": c, "path": p} for c, p in issues]},
+            notes,
+            since=SPREAD,
+        )
+
+    ins_spread(
+        "0026-spread-without-value",
+        "$spread on an object without $value is DIRECTIVE_INVALID at $spread",
+        env(doc({"$each": "tags", "$spread": True, "type": "paragraph", "runs": [{"text": "{{ item }}"}]}), CERT_VARS),
+        [("DIRECTIVE_INVALID", "/document/blocks/0/$spread")],
+        "There is no group to spread. The object is otherwise an ordinary $each, so its run is inspected with the binding and is fine.",
+    )
+    ins_spread(
+        "0027-spread-takes-only-true",
+        "$spread takes exactly true: false, a string or a number is DIRECTIVE_INVALID, and $value is then not inspected",
+        env(
+            doc(
+                {"$each": "tags", "$spread": False, "$value": [para("{{ nope }}")]},
+                {"$each": "tags", "$spread": "yes", "$value": [para("{{ nope }}")]},
+                {"$each": "tags", "$spread": 1, "$value": [para("{{ nope }}")]},
+            ),
+            CERT_VARS,
+        ),
+        [
+            ("DIRECTIVE_INVALID", "/document/blocks/0/$spread"),
+            ("DIRECTIVE_INVALID", "/document/blocks/1/$spread"),
+            ("DIRECTIVE_INVALID", "/document/blocks/2/$spread"),
+        ],
+        "An absent $spread is the one spelling of a plain splice, so `false` is refused rather than meaning it. The undeclared `nope` is not also reported: one error, not a cascade (as 0022).",
+    )
+    ins_spread(
+        "0028-spread-value-not-an-array",
+        "A spread whose $value is not an array is DIRECTIVE_SPREAD_NOT_ARRAY at $value, and its content is not inspected",
+        env(
+            doc(
+                {"$each": "tags", "$spread": True, "$value": para("{{ nope }}")},
+                {"$each": "tags", "$spread": True, "$value": "{{ item }}"},
+            ),
+            CERT_VARS,
+        ),
+        [
+            ("DIRECTIVE_SPREAD_NOT_ARRAY", "/document/blocks/0/$value"),
+            ("DIRECTIVE_SPREAD_NOT_ARRAY", "/document/blocks/1/$value"),
+        ],
+        "Known statically: $value is written literally in the template. No row uses an empty OBJECT here: PHP decodes {} and [] alike.",
+    )
+    ins_spread(
+        "0029-spread-elements-are-matched-at-the-parent-path",
+        "Each element of a spread is matched by the spread's own path (blocks.*), never blocks.*.<i>",
+        env(
+            doc({"$each": "tags", "$spread": True, "$value": [{"type": "code", "text": "{{ item }}"}, {"type": "image", "src": "{{ item }}"}]}),
+            CERT_VARS,
+        ),
+        [("TOKEN_IMAGE_FIELD", "/document/blocks/0/$value/1/src")],
+        "A code block's text is a text field at blocks.*.text, and an image src is an image field. Matched one level too deep, both would be TOKEN_FORBIDDEN_FIELD instead.",
+    )
+    ins_spread(
+        "0030-spread-elements-take-directives",
+        "A $-key on a spread element is a directive (it is an array element), and sees the spread's binding; the binding ends with the spread",
+        env(
+            doc(
+                {
+                    "$each": "tags",
+                    "$spread": True,
+                    "$value": [
+                        {"$if": "!$first && item !== subtitle", "type": "pageBreak"},
+                        {"$each": "tags", "$as": "t", "type": "paragraph", "runs": [{"text": "{{ item }}{{ t }}{{ $index }}"}]},
+                        {"$foo": 1, "type": "hr"},
+                    ],
+                },
+                para("{{ item }}"),
+            ),
+            CERT_VARS,
+        ),
+        [
+            ("DIRECTIVE_UNKNOWN", "/document/blocks/0/$value/2/$foo"),
+            ("TOKEN_UNDECLARED", "/document/blocks/1/runs/0/text"),
+        ],
+        "Unlike the top of a plain splice's $value (0024), a spread element IS an element of the parent array, so a condition belongs on it and is not DIRECTIVE_MISPLACED.",
+    )
+    ins_spread(
+        "0031-spread-issue-order",
+        "A spread reports its $ keys, then its other keys, then each element of $value in order",
+        env(
+            doc(
+                {
+                    "$value": [para("{{ nope }}"), {"$if": "nope3", "type": "hr"}],
+                    "extra": 1,
+                    "$spread": True,
+                    "$each": "tags",
+                    "$if": "nope2",
+                }
+            ),
+            CERT_VARS,
+        ),
+        [
+            ("DIRECTIVE_UNDECLARED", "/document/blocks/0/$if"),
+            ("DIRECTIVE_SPLICE_KEY", "/document/blocks/0/extra"),
+            ("TOKEN_UNDECLARED", "/document/blocks/0/$value/0/runs/0/text"),
+            ("DIRECTIVE_UNDECLARED", "/document/blocks/0/$value/1/$if"),
+        ],
+        "SPEC 8 and 11, as 0024 for a splice.",
+    )
     return s
 
 
@@ -2862,7 +3273,7 @@ CONTRACTS: dict[str, tuple[str, dict[str, str], list[str]]] = {
         ],
     ),
     "template/directives": (
-        "JSON directives: $each, $as, $if and the $value splice",
+        "JSON directives: $each, $as, $if, the $value splice and $spread",
         {
             "render": "render(template, data, options?) -> { ok: true, document } | { ok: false, code, path }",
         },
@@ -2870,6 +3281,7 @@ CONTRACTS: dict[str, tuple[str, dict[str, str], list[str]]] = {
             "Structure is never text syntax (plan section 2). A directive is a key on an array element and is removed from the output.",
             "A TOKEN reading an absent variable throws (resolve 0009); a CONDITION asking whether one is there does not (0007). Both are deliberate and they are the same rule seen from two sides.",
             "0016-0024 (0.36.0): the $value splice, `{ $each, $as?, $if?, $value }`, which repeats ANY value -- a holy-sheet row, a cell, a string -- where $each alone can only repeat an object. Its bounds are in template/limits 0023-0029 and its static errors in template/inspect 0022-0025.",
+            "0025-0033 (0.54.0): $spread, `{ $each, $as?, $if?, $spread: true, $value: [...] }`, which splices a GROUP of siblings per item flat into the parent array (a page break, a heading, a table and a subtotal per pricing model). 0026 pins the nesting a plain array splice produces; 0033 is the end-to-end quote that fancy-template's PHP leg also writes through fine-print. Bounds in template/limits 0030-0035, static errors in template/inspect 0026-0031.",
         ],
     ),
     "template/limits": (

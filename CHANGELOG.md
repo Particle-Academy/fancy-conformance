@@ -10,6 +10,16 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.54.0] - 2026-11-18
+
+### Added
+
+- **`$spread` for fancy-template: a group of siblings per item, spliced flat** (document builder, owner-approved q_52d2323e, "repeating sections"). `{ "$each": ..., "$spread": true, "$value": [ ... ] }` splices every element of `$value` into the parent array per item, so a quote can repeat a page break, a heading, a lines table and a subtotal per pricing model. fancy-template SPEC.md section 8.
+  - `template/directives` 0025-0033 (9 rows): flat order, `"!$first"` on an element reads the spread's `$first`, `$if` on the spread in any key order, empty arrays, a spread inside a spread, holy-sheet rows, the error path through `$value`, and **0033, an end-to-end quote** (two models, a page per model) that fancy-template's PHP leg also writes through fine-print. 0026 pins the nesting a plain array splice still produces.
+  - `template/limits` 0030-0035 (6 rows): iterations count items, not spliced elements; neither the spread object nor its `$value` array is an output node; an element's own directive counts toward `directiveDepth`.
+  - `template/inspect` 0026-0031 (6 rows): `$spread` without `$value` and `$spread` other than `true` are `DIRECTIVE_INVALID`, a non-array `$value` is the new `DIRECTIVE_SPREAD_NOT_ARRAY`, elements are matched at the spread's own path, a `$`-key on an element is a directive, and issue order.
+- **Consumer action:** none. No existing row changed. A template runner that does not implement `$spread` fails the new rows rather than skipping them.
+
 ## [0.53.0] - 2026-11-18
 
 ### Added
