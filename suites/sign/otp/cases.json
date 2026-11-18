@@ -1792,6 +1792,664 @@
                 "message": "This link is not valid.",
                 "requestId": "req-0003"
             }
+        },
+        {
+            "id": "0020-changes-then-sign",
+            "title": "a signer asks for changes and can still sign: signer.requested_changes {text}, then the signing events",
+            "since": "0.53.0",
+            "tags": [
+                "scenario",
+                "requested-changes"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "consent"
+                    },
+                    {
+                        "op": "open"
+                    },
+                    {
+                        "op": "changes",
+                        "text": "  Please itemise the delivery.  "
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "accept"
+                    },
+                    {
+                        "op": "sign",
+                        "code": "right"
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "consent",
+                        "result": {
+                            "status": "pending"
+                        },
+                        "events": [
+                            {
+                                "type": "consent.accepted",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "open",
+                        "result": {
+                            "opened": true
+                        },
+                        "events": [
+                            {
+                                "type": "document.opened",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "changes",
+                        "result": {
+                            "changes_requested": 1
+                        },
+                        "events": [
+                            {
+                                "type": "signer.requested_changes",
+                                "source": "server",
+                                "data": {
+                                    "text": "Please itemise the delivery."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "sign",
+                        "result": {
+                            "status": "signed"
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "mark.adopted",
+                                "source": "server"
+                            },
+                            {
+                                "type": "signer.signed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "seal.applied",
+                                "source": "server"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "notes": "The text is trimmed before it is chained."
+        },
+        {
+            "id": "0021-changes-need-the-view-code",
+            "title": "asking for changes needs a session, as decline does",
+            "since": "0.53.0",
+            "tags": [
+                "scenario",
+                "requested-changes"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "changes",
+                        "text": "Change it."
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "changes",
+                        "result": {
+                            "error": "session_required",
+                            "status": 401
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0022-changes-over-the-cap",
+            "title": "the cap is a setting: max_change_requests 1 refuses the second request with limit_exceeded (429)",
+            "since": "0.53.0",
+            "tags": [
+                "scenario",
+                "requested-changes",
+                "limits"
+            ],
+            "fn": "scenario",
+            "input": {
+                "config": {
+                    "max_change_requests": 1
+                },
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "changes",
+                        "text": "First."
+                    },
+                    {
+                        "op": "changes",
+                        "text": "Second."
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "changes",
+                        "result": {
+                            "changes_requested": 1
+                        },
+                        "events": [
+                            {
+                                "type": "signer.requested_changes",
+                                "source": "server",
+                                "data": {
+                                    "text": "First."
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "changes",
+                        "result": {
+                            "error": "limit_exceeded",
+                            "status": 429
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0023-changes-text-required",
+            "title": "an empty message is invalid_request and records nothing",
+            "since": "0.53.0",
+            "tags": [
+                "scenario",
+                "requested-changes"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "changes",
+                        "text": "   "
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "changes",
+                        "result": {
+                            "error": "invalid_request",
+                            "status": 422
+                        },
+                        "events": []
+                    }
+                ]
+            }
+        },
+        {
+            "id": "0024-changes-after-signing",
+            "title": "after the last signature completes the envelope, asking for changes is envelope_not_open",
+            "since": "0.53.0",
+            "tags": [
+                "scenario",
+                "requested-changes"
+            ],
+            "fn": "scenario",
+            "input": {
+                "steps": [
+                    {
+                        "op": "send"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "view"
+                    },
+                    {
+                        "op": "verify",
+                        "code": "right"
+                    },
+                    {
+                        "op": "consent"
+                    },
+                    {
+                        "op": "open"
+                    },
+                    {
+                        "op": "request",
+                        "purpose": "accept"
+                    },
+                    {
+                        "op": "sign",
+                        "code": "right"
+                    },
+                    {
+                        "op": "changes",
+                        "text": "Too late."
+                    }
+                ]
+            },
+            "expected": {
+                "steps": [
+                    {
+                        "op": "send",
+                        "result": {
+                            "status": "sent"
+                        },
+                        "events": [
+                            {
+                                "type": "envelope.created",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.sent",
+                                "source": "server"
+                            },
+                            {
+                                "type": "email.sent",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "link.opened",
+                                "source": "server",
+                                "data": {}
+                            },
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "verify",
+                        "result": {
+                            "session": true
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "view"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "consent",
+                        "result": {
+                            "status": "pending"
+                        },
+                        "events": [
+                            {
+                                "type": "consent.accepted",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "open",
+                        "result": {
+                            "opened": true
+                        },
+                        "events": [
+                            {
+                                "type": "document.opened",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "request",
+                        "result": {
+                            "sent": true,
+                            "expires_in": 600
+                        },
+                        "events": [
+                            {
+                                "type": "otp.sent",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "op": "sign",
+                        "result": {
+                            "status": "signed"
+                        },
+                        "events": [
+                            {
+                                "type": "otp.verified",
+                                "source": "server",
+                                "data": {
+                                    "purpose": "accept"
+                                }
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "field.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "mark.adopted",
+                                "source": "server"
+                            },
+                            {
+                                "type": "signer.signed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "envelope.completed",
+                                "source": "server"
+                            },
+                            {
+                                "type": "seal.applied",
+                                "source": "server"
+                            }
+                        ]
+                    },
+                    {
+                        "op": "changes",
+                        "result": {
+                            "error": "envelope_not_open",
+                            "status": 409
+                        },
+                        "events": []
+                    }
+                ]
+            }
         }
     ]
 }

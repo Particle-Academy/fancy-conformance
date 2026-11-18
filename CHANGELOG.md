@@ -10,6 +10,13 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-11-18
+
+### Added
+
+- **Requests for changes (fancy-sign 0.3.0, owner-approved q_8c180eab).** `signer.requested_changes` joins the closed event set: `sign/chain` 0032-0033 (accepted from the server with its text, refused from the client), and `sign/otp` scenarios 0020-0024 with a new step, `changes {text}`: a request keeps the envelope open and the signer still signs, it needs the view code, the cap is a setting (`max_change_requests`, `limit_exceeded` over it), the text is required, and after the last signature it is `envelope_not_open`. `suites/sign/SPEC.md` section 4b. The node:crypto probe knows the new type.
+- **Consumer action:** none. No existing row changed; a runner without the `changes` step should run it or name it as not run.
+
 ### Changed
 
 - **CI: the lab-certificate gate verifies against the lab's rotated key list.**

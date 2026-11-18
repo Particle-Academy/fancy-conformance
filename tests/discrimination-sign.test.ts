@@ -51,7 +51,7 @@ const GENESIS = "0".repeat(64);
 const TYPES = [
   "envelope.created", "envelope.sent", "email.sent", "link.opened", "otp.sent", "otp.verified", "otp.failed",
   "otp.locked", "consent.accepted", "document.opened", "page.viewed", "field.completed", "mark.adopted",
-  "signer.signed", "signer.declined", "reminder.sent", "envelope.completed", "envelope.voided", "envelope.expired",
+  "signer.signed", "signer.declined", "signer.requested_changes", "reminder.sent", "envelope.completed", "envelope.voided", "envelope.expired",
   "document.downloaded", "seal.applied",
 ];
 const KEYS = ["type", "version", "envelope_id", "as_sent_sha256", "as_sent_bytes", "final_sha256", "signers", "chain_head", "nonce", "key_id"];
@@ -271,7 +271,7 @@ function run(suite: string, fn: string, input: Record<string, Json>, m: M): unkn
   }
 }
 
-const PROBED: Record<string, number> = { "sign/chain": 31, "sign/completion": 20, "sign/otp": 19 };
+const PROBED: Record<string, number> = { "sign/chain": 33, "sign/completion": 20, "sign/otp": 24 };
 
 /** The ids (suite/NNNN) this implementation FAILS, over the probed functions. */
 function failing(m: M = {}): string[] {
@@ -303,7 +303,7 @@ test("the control probes every row of sign/chain and sign/completion, and sign/o
       if (run(suite, String(c.fn), c.input as Record<string, Json>, {}) !== undefined) probed++;
     }
   }
-  assert.equal(probed, 31 + 20 + 2 + 3);
+  assert.equal(probed, 33 + 20 + 2 + 3);
 });
 
 test("sorting keys by UTF-16 code units fails exactly the byte-order row", () => {
@@ -326,8 +326,8 @@ test("hashing empty data as [] fails every row whose chain holds an event with n
   assert.deepEqual(failing({ emptyDataAsList: true }), MUTANT_EMPTY_DATA);
 });
 
-test("admitting any source fails exactly the two source-rule rows", () => {
-  assert.deepEqual(failing({ noSourceRule: true }), ["chain/0016", "chain/0017"]);
+test("admitting any source fails exactly the three source-rule rows", () => {
+  assert.deepEqual(failing({ noSourceRule: true }), ["chain/0016", "chain/0017", "chain/0033"]);
 });
 
 test("skipping the link check fails exactly the broken-link rows", () => {

@@ -1392,6 +1392,75 @@
                 "head": "dfd138c8c030cce708e752149a8c06997b5c6ac13521e0cb22ea68e950d3345d"
             },
             "notes": "The raw-store form: data as the JSON text a database column holds. A reader that decodes it into a list computes another hash."
+        },
+        {
+            "id": "0032-append-requested-changes",
+            "title": "signer.requested_changes is in the closed set, server-observed, with its text",
+            "since": "0.53.0",
+            "tags": [
+                "append",
+                "requested-changes"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "signer.requested_changes",
+                    "actor": "signer:alice",
+                    "data": {
+                        "text": "Please itemise the delivery."
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "envelope_id": "01JD0000000000000000000000",
+                "seq": 1,
+                "at": "2026-11-18T12:00:00Z",
+                "type": "signer.requested_changes",
+                "actor": "signer:alice",
+                "source": "server",
+                "ip": null,
+                "user_agent": null,
+                "data": {
+                    "text": "Please itemise the delivery."
+                },
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "hash": "ebe0d7e2e27e7e82253e9575fe218b4decb66b545a60f6456972128f2379d2ad"
+            }
+        },
+        {
+            "id": "0033-append-refuses-client-requested-changes",
+            "title": "a request for changes reported by the client is refused: the server observes it",
+            "since": "0.53.0",
+            "tags": [
+                "append",
+                "refusal",
+                "requested-changes"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "signer.requested_changes",
+                    "actor": "signer:alice",
+                    "source": "client",
+                    "data": {
+                        "text": "x"
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "error": "refused"
+            }
         }
     ]
 }

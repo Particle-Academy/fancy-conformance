@@ -108,6 +108,20 @@ item `{error: <code>, message}` and the top-level `message` equal to the item's;
 every other code is the top-level `error`. A client reads the fancy-sign code
 from the item on a 422 and from `error` otherwise.
 
+## 4b. Requests for changes (`sign/chain` append, `sign/otp` scenario, 0.53.0)
+
+- `signer.requested_changes` is in the closed event set, server-observed, with
+  `data: {text}`: the signer's message, trimmed, 1 to `max_decline_reason`
+  (1000) characters, required.
+- It needs the signer's session (after the view code), as decline does, and is
+  refused once the signer has signed or declined, or once the envelope is no
+  longer open (`envelope_not_open`).
+- It does NOT end the envelope: the signer can still sign or decline.
+- A signer may ask at most `max_change_requests` (5) times per envelope; the
+  next is `limit_exceeded` (429). Every limit is a setting.
+- Scenario op: `changes {text}`, answering `{changes_requested: n}`. The
+  scenario includes `data` for this event as it does for `otp.*` and `link.*`.
+
 ## 5. Fields (`sign/fields`)
 
 - Document field nodes become fields in document order, with `anchor: {node}`.
