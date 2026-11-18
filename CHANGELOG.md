@@ -10,9 +10,11 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.55.1] - 2026-11-18
+
 ### Added
 
-- **The Python loader publishes to PyPI** as `fancy-conformance` (import `fancy_conformance`), with attestations, via OIDC trusted publishing on the `pypi` environment. The wheel carries the fixtures; CI refuses a wheel that does not, and installs it into a clean venv to prove `suites_root()` resolves `suites/http` from site-packages. No fixture or API change.
+- **The Python loader publishes to PyPI** as `fancy-conformance` (import `fancy_conformance`), with attestations, via OIDC trusted publishing on the `pypi` environment. Owner-approved in q_46d6a7bb, reversing the 2026-09-13 ruling that removed the PyPI job. The wheel carries the fixtures; CI refuses a wheel that does not, and installs it into a clean venv to prove `suites_root()` resolves `suites/http` from site-packages. No fixture or API change.
 - **Consumer action:** none for npm and Packagist consumers. A Python consumer may replace its pinned checkout with `pip install fancy-conformance`.
 
 ## [0.55.0] - 2026-11-18

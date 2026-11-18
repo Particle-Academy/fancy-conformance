@@ -198,7 +198,8 @@ the job is part of adding it.
 A `publish-python` job existed from 2026-08-25 to 2026-09-13 and failed on every
 tag for want of a trusted publisher; it was removed rather than armed, because
 at the time no consumer installed the fixtures from PyPI. It was restored on
-2026-11-18 when one needed to, and this time the PyPI pending publisher
+2026-11-18 when one needed to, on the owner's approval (q_46d6a7bb, reversing
+the 2026-09-13 ruling), and this time the PyPI pending publisher
 (environment `pypi`) is registered before the first tag. `build-python` runs
 `python/scripts/check_artifacts.py` and then installs the wheel into a clean venv
 and requires `suites_root()` to resolve `suites/http` inside site-packages, so a
