@@ -229,6 +229,28 @@ SPLICE = "0.36.0"
 BAND_FIELDS = "0.44.0"
 # `$spread`: a group of siblings per item, spliced flat (document builder, q_52d2323e).
 SPREAD = "0.54.0"
+# The `editor` envelope key: a builder's own source, carried and never read (q_b83ac35f).
+EDITOR = "0.55.0"
+
+
+def with_editor(template: dict[str, Any], editor: Any) -> dict[str, Any]:
+    """The envelope with an `editor` entry, written last."""
+    return {**template, "editor": editor}
+
+
+# What a builder writes there: tokens, `$`-keys and undeclared names, none of
+# which the template engine may read.
+BUILDER_SOURCE = {
+    "kind": "fancy-template-ui",
+    "version": 1,
+    "tree": {
+        "blocks": [
+            {"$each": "nope", "id": "b1", "kind": "heading", "text": "{{ nope | bogus }}"},
+            {"$if": "((", "id": "b2", "kind": "hostBlock", "props": {"src": "{{ logo }}"}},
+        ]
+    },
+    "page": {"footer": {"right": "{{ unclosed"}},
+}
 
 # ---------------------------------------------------------------------------
 # template/tokenize
@@ -1638,7 +1660,12 @@ def directives_suite() -> Suite:
     s.render(
         "0025-spread-splices-a-group-flat",
         "$spread: true splices every element of $value into the parent array, per item, in order",
-        env(doc(para("Before"), {"$each": "people", "$spread": True, "$value": group}, para("After")), people),
+        env(
+            doc(
+                para("Before"), {"$each": "people", "$spread": True, "$value": group}, para("After")
+            ),
+            people,
+        ),
         data,
         ok_doc(doc(para("Before"), *group_out(*everyone), para("After"))),
         "The repeating section of a document (owner-approved document builder, q_52d2323e): a heading and its paragraph per person, as siblings. One $each per sibling would give every heading first; a splice without $spread nests (0026).",
@@ -1657,19 +1684,40 @@ def directives_suite() -> Suite:
         "0027-spread-page-break-not-before-the-first",
         'An element of a spread with `$if: "!$first"` reads the SPREAD\'s $first: a page break between items, not before the first',
         env(
-            doc({"$each": "people", "$spread": True, "$value": [{"$if": "!$first", "type": "pageBreak"}, heading("{{ item.name }}")]}),
+            doc(
+                {
+                    "$each": "people",
+                    "$spread": True,
+                    "$value": [{"$if": "!$first", "type": "pageBreak"}, heading("{{ item.name }}")],
+                }
+            ),
             people,
         ),
         data,
-        ok_doc(doc(heading("Ada"), {"type": "pageBreak"}, heading("Charles"), {"type": "pageBreak"}, heading("Mary"))),
-        "fancy-expr: `unary := \"!\" primary` and `$first` is a `\"$\" IDENT` segment. An element with only $if is not a loop, so the innermost loop is the spread (as in 0012). `$index > 0` is the same condition.",
+        ok_doc(
+            doc(
+                heading("Ada"),
+                {"type": "pageBreak"},
+                heading("Charles"),
+                {"type": "pageBreak"},
+                heading("Mary"),
+            )
+        ),
+        'fancy-expr: `unary := "!" primary` and `$first` is a `"$" IDENT` segment. An element with only $if is not a loop, so the innermost loop is the spread (as in 0012). `$index > 0` is the same condition.',
         since=SPREAD,
     )
     s.render(
         "0028-spread-if-on-the-spread-in-any-key-order",
         "$if on the spread itself drops a whole group, whatever order $value, $if, $spread and $each are written in",
         env(
-            doc({"$value": [heading("{{ item.name }}")], "$if": "item.score >= 50", "$spread": True, "$each": "people"}),
+            doc(
+                {
+                    "$value": [heading("{{ item.name }}")],
+                    "$if": "item.score >= 50",
+                    "$spread": True,
+                    "$each": "people",
+                }
+            ),
             people,
         ),
         data,
@@ -1705,7 +1753,12 @@ def directives_suite() -> Suite:
                     "$spread": True,
                     "$value": [
                         heading("Row {{ $index }}"),
-                        {"$each": "row", "$as": "cell", "$spread": True, "$value": [para("{{ $index }}{{ cell }}"), {"type": "hr"}]},
+                        {
+                            "$each": "row",
+                            "$as": "cell",
+                            "$spread": True,
+                            "$value": [para("{{ $index }}{{ cell }}"), {"type": "hr"}],
+                        },
                     ],
                 }
             ),
@@ -1730,7 +1783,13 @@ def directives_suite() -> Suite:
     s.render(
         "0031-spread-holy-sheet-rows",
         "A spread of holy-sheet rows: two rows per item, each matched as a row",
-        hs_env({"$each": "people", "$spread": True, "$value": [["{{ item.name }}"], ["{{ item.score }}"]]}),
+        hs_env(
+            {
+                "$each": "people",
+                "$spread": True,
+                "$value": [["{{ item.name }}"], ["{{ item.score }}"]],
+            }
+        ),
         {"people": [{"name": "Ada", "score": 91}, {"name": "Charles", "score": 42}]},
         ok_doc(rows_doc([{"value": "Ada"}], [91], [{"value": "Charles"}], [42])),
         "Each element is matched by the spread's own path, sheets.*.rows.*: a name is wrapped, a whole-token number stays a number (SPEC 9).",
@@ -1795,7 +1854,11 @@ def directives_suite() -> Suite:
                             {
                                 "$each": "model.lines",
                                 "$as": "line",
-                                "cells": [cell("{{ line.desc }}"), cell("{{ line.qty }}"), cell("{{ line.amount | money:USD }}")],
+                                "cells": [
+                                    cell("{{ line.desc }}"),
+                                    cell("{{ line.qty }}"),
+                                    cell("{{ line.amount | money:USD }}"),
+                                ],
                             },
                         ],
                     },
@@ -1811,10 +1874,17 @@ def directives_suite() -> Suite:
         "models": [
             {
                 "name": "Starter",
-                "lines": [{"desc": "Seats", "qty": 5, "amount": 50000}, {"desc": "Onboarding", "qty": 1, "amount": 120000}],
+                "lines": [
+                    {"desc": "Seats", "qty": 5, "amount": 50000},
+                    {"desc": "Onboarding", "qty": 1, "amount": 120000},
+                ],
                 "subtotal": 170000,
             },
-            {"name": "Growth", "lines": [{"desc": "Seats", "qty": 20, "amount": 180000}], "subtotal": 180000},
+            {
+                "name": "Growth",
+                "lines": [{"desc": "Seats", "qty": 20, "amount": 180000}],
+                "subtotal": 180000,
+            },
         ],
     }
 
@@ -2243,7 +2313,9 @@ def limits_suite() -> Suite:
         options={"limits": {"outputNodes": spread_nodes - 1}},
         since=SPREAD,
     )
-    guarded = env(doc({"$each": "xs", "$spread": True, "$value": [{"$if": "!$first", "type": "hr"}]}), nums)
+    guarded = env(
+        doc({"$each": "xs", "$spread": True, "$value": [{"$if": "!$first", "type": "hr"}]}), nums
+    )
     s.render(
         "0034-spread-element-directive-depth-at-limit",
         "A spread whose element carries $if is two directive levels, and renders at limits.directiveDepth 2",
@@ -2263,6 +2335,84 @@ def limits_suite() -> Suite:
         "Without this, a spread element's directives would sit outside the bound every other directive is under.",
         options={"limits": {"directiveDepth": 1}},
         since=SPREAD,
+    )
+
+    # -- the `editor` envelope key (0.55.0) ----------------------------------
+    named = env(doc(para("Hi {{ name }}")), v)
+    big_source = {"kind": "fancy-template-ui", "version": 1, "tree": "x" * 400}
+    with_source = with_editor(named, big_source)
+    source_bytes = template_bytes(big_source)
+    s.render(
+        "0036-editor-bytes-at-limit",
+        "An editor of exactly limits.editorBytes renders, and the output is the document alone",
+        with_source,
+        {"name": "A"},
+        ok_doc(doc(para("Hi A"))),
+        f"{source_bytes} bytes: every string in the VALUE of editor, keys included (SPEC 10), not the `editor` key itself.",
+        options={"limits": {"editorBytes": source_bytes}},
+        since=EDITOR,
+    )
+    s.render(
+        "0037-editor-bytes-over",
+        "One byte under the editor's size is TEMPLATE_EDITOR_TOO_LARGE at /editor",
+        with_source,
+        {"name": "A"},
+        err("TEMPLATE_EDITOR_TOO_LARGE", "/editor"),
+        "Its own bound and its own code, so a host can tell a builder source that grew too large from a document that did.",
+        options={"limits": {"editorBytes": source_bytes - 1}},
+        since=EDITOR,
+    )
+    s.render(
+        "0038-editor-is-not-in-template-bytes",
+        "templateBytes excludes the editor entry: a template whose document fits renders, however large its editor",
+        with_source,
+        {"name": "A"},
+        ok_doc(doc(para("Hi A"))),
+        f"templateBytes {template_bytes(named)} is the envelope WITHOUT editor; with it the envelope is {template_bytes(with_source)} bytes. Counting it twice would let a builder's source eat the document's budget.",
+        options={"limits": {"templateBytes": template_bytes(named)}},
+        since=EDITOR,
+    )
+    s.render(
+        "0039-template-bytes-before-editor-bytes",
+        "Over both size bounds: TEMPLATE_TOO_LARGE, checked first",
+        with_source,
+        {"name": "A"},
+        err("TEMPLATE_TOO_LARGE", ""),
+        "SPEC 10's order: depth, templateBytes, editorBytes, tokens.",
+        options={"limits": {"templateBytes": template_bytes(named) - 1, "editorBytes": 0}},
+        since=EDITOR,
+    )
+    s.render(
+        "0040-editor-bytes-before-tokens",
+        "Over editorBytes and tokens: TEMPLATE_EDITOR_TOO_LARGE, checked before tokens",
+        with_source,
+        {"name": "A"},
+        err("TEMPLATE_EDITOR_TOO_LARGE", "/editor"),
+        "",
+        options={"limits": {"editorBytes": 0, "tokens": 0}},
+        since=EDITOR,
+    )
+    s.render(
+        "0041-editor-bytes-measured-whatever-it-holds",
+        "A non-object editor over the limit is TEMPLATE_EDITOR_TOO_LARGE, not TEMPLATE_SHAPE",
+        with_editor(named, "y" * 20),
+        {"name": "A"},
+        err("TEMPLATE_EDITOR_TOO_LARGE", "/editor"),
+        "The size bound stops inspect before the shape is looked at, as templateBytes does for the whole envelope.",
+        options={"limits": {"editorBytes": 19}},
+        since=EDITOR,
+    )
+    nested_source = {"a": {"b": {"c": {"d": {"e": {"f": 1}}}}}}
+    deep = with_editor(env(doc(para("x")), {}), nested_source)
+    s.render(
+        "0042-depth-applies-inside-editor",
+        "The depth bound applies inside editor: it is part of the envelope",
+        deep,
+        {},
+        err("TEMPLATE_TOO_DEEP", first_container_above(deep, 6)),
+        f"limits.depth 6. The document reaches level {deepest_level(deep['document']) + 1}; editor/a/b/c/d/e is level 7. Opaque means never READ, not unbounded.",
+        options={"limits": {"depth": 6}},
+        since=EDITOR,
     )
     return s
 
@@ -3114,7 +3264,9 @@ def inspect_suite() -> Suite:
         "`$value` is not a path segment for the profile (an implementation that added it would refuse the text as a forbidden field), and the binding is scoped to the splice.",
     )
 
-    def ins_spread(id_: str, title: str, template: Any, issues: list[tuple[str, str]], notes: str) -> None:
+    def ins_spread(
+        id_: str, title: str, template: Any, issues: list[tuple[str, str]], notes: str
+    ) -> None:
         s.add(
             id_,
             title,
@@ -3128,7 +3280,17 @@ def inspect_suite() -> Suite:
     ins_spread(
         "0026-spread-without-value",
         "$spread on an object without $value is DIRECTIVE_INVALID at $spread",
-        env(doc({"$each": "tags", "$spread": True, "type": "paragraph", "runs": [{"text": "{{ item }}"}]}), CERT_VARS),
+        env(
+            doc(
+                {
+                    "$each": "tags",
+                    "$spread": True,
+                    "type": "paragraph",
+                    "runs": [{"text": "{{ item }}"}],
+                }
+            ),
+            CERT_VARS,
+        ),
         [("DIRECTIVE_INVALID", "/document/blocks/0/$spread")],
         "There is no group to spread. The object is otherwise an ordinary $each, so its run is inspected with the binding and is fine.",
     )
@@ -3170,7 +3332,16 @@ def inspect_suite() -> Suite:
         "0029-spread-elements-are-matched-at-the-parent-path",
         "Each element of a spread is matched by the spread's own path (blocks.*), never blocks.*.<i>",
         env(
-            doc({"$each": "tags", "$spread": True, "$value": [{"type": "code", "text": "{{ item }}"}, {"type": "image", "src": "{{ item }}"}]}),
+            doc(
+                {
+                    "$each": "tags",
+                    "$spread": True,
+                    "$value": [
+                        {"type": "code", "text": "{{ item }}"},
+                        {"type": "image", "src": "{{ item }}"},
+                    ],
+                }
+            ),
             CERT_VARS,
         ),
         [("TOKEN_IMAGE_FIELD", "/document/blocks/0/$value/1/src")],
@@ -3186,7 +3357,12 @@ def inspect_suite() -> Suite:
                     "$spread": True,
                     "$value": [
                         {"$if": "!$first && item !== subtitle", "type": "pageBreak"},
-                        {"$each": "tags", "$as": "t", "type": "paragraph", "runs": [{"text": "{{ item }}{{ t }}{{ $index }}"}]},
+                        {
+                            "$each": "tags",
+                            "$as": "t",
+                            "type": "paragraph",
+                            "runs": [{"text": "{{ item }}{{ t }}{{ $index }}"}],
+                        },
                         {"$foo": 1, "type": "hr"},
                     ],
                 },
@@ -3222,6 +3398,41 @@ def inspect_suite() -> Suite:
             ("DIRECTIVE_UNDECLARED", "/document/blocks/0/$value/1/$if"),
         ],
         "SPEC 8 and 11, as 0024 for a splice.",
+    )
+
+    def ins_editor(
+        id_: str, title: str, template: Any, issues: list[tuple[str, str]], notes: str
+    ) -> None:
+        s.add(
+            id_,
+            title,
+            "inspect",
+            {"template": template},
+            {"issues": [{"code": c, "path": p} for c, p in issues]},
+            notes,
+            since=EDITOR,
+        )
+
+    ins_editor(
+        "0032-editor-is-opaque",
+        "Nothing in editor is read: tokens, filters, $-keys and undeclared names there raise no issue",
+        with_editor(clean, BUILDER_SOURCE),
+        [],
+        "A bad filter, an undeclared name, an unclosed token, a $each over nothing and a $if that does not parse: each would be an issue in document. The builder owns editor's shape (SPEC 2).",
+    )
+    ins_editor(
+        "0033-editor-must-be-an-object",
+        "An editor that is a list is TEMPLATE_SHAPE at /editor",
+        with_editor(clean, ["a"]),
+        [("TEMPLATE_SHAPE", "/editor")],
+        "A non-empty list: PHP decodes an EMPTY list and an empty object alike, so no row asks about `[]`.",
+    )
+    ins_editor(
+        "0034-editor-string-is-not-an-object",
+        "An editor that is a string is TEMPLATE_SHAPE at /editor, in written envelope order",
+        {"fancyTemplate": 1, "editor": "source", "writer": "nope", "document": doc()},
+        [("TEMPLATE_SHAPE", "/editor"), ("TEMPLATE_WRITER", "/writer")],
+        "Envelope keys are reported in written order (SPEC 11).",
     )
     return s
 
@@ -3313,6 +3524,7 @@ CONTRACTS: dict[str, tuple[str, dict[str, str], list[str]]] = {
         },
         [
             "Issues are listed in document order (SPEC 11), so the list is comparable byte for byte across runtimes.",
+            "0026-0031 (0.54.0): $spread's static errors. 0032-0034 (0.55.0): the opaque `editor` envelope key, never read and an object; its bounds are template/limits 0036-0042.",
         ],
     ),
 }

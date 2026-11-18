@@ -10,6 +10,15 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.55.0] - 2026-11-18
+
+### Added
+
+- **The `editor` envelope key for fancy-template** (document builder, owner-approved q_b83ac35f). An optional object holding a visual builder's own source, opaque to `inspect` and `render`, bounded on its own by the new `limits.editorBytes` (default 262144) with `TEMPLATE_EDITOR_TOO_LARGE` at `/editor`. fancy-template SPEC.md sections 2 and 10.
+  - `template/inspect` 0032-0034 (3 rows): tokens, filters, `$`-keys and undeclared names inside `editor` raise nothing; a list or a string is `TEMPLATE_SHAPE` at `/editor`.
+  - `template/limits` 0036-0042 (7 rows): `editorBytes` at and over the limit, `templateBytes` excludes the `editor` entry, the order (templateBytes, then editorBytes, then tokens), a non-object over the limit is still the size code, and `depth` applies inside it.
+- **Consumer action:** none. No existing row changed. A runner's `options.limits` must accept `editorBytes`.
+
 ## [0.54.0] - 2026-11-18
 
 ### Added

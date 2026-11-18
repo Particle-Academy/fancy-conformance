@@ -2396,6 +2396,216 @@
         ]
       },
       "notes": "SPEC 8 and 11, as 0024 for a splice."
+    },
+    {
+      "id": "0032-editor-is-opaque",
+      "title": "Nothing in editor is read: tokens, filters, $-keys and undeclared names there raise no issue",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ recipientName }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": {
+            "kind": "fancy-template-ui",
+            "version": 1,
+            "tree": {
+              "blocks": [
+                {
+                  "$each": "nope",
+                  "id": "b1",
+                  "kind": "heading",
+                  "text": "{{ nope | bogus }}"
+                },
+                {
+                  "$if": "((",
+                  "id": "b2",
+                  "kind": "hostBlock",
+                  "props": {
+                    "src": "{{ logo }}"
+                  }
+                }
+              ]
+            },
+            "page": {
+              "footer": {
+                "right": "{{ unclosed"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "issues": []
+      },
+      "notes": "A bad filter, an undeclared name, an unclosed token, a $each over nothing and a $if that does not parse: each would be an issue in document. The builder owns editor's shape (SPEC 2)."
+    },
+    {
+      "id": "0033-editor-must-be-an-object",
+      "title": "An editor that is a list is TEMPLATE_SHAPE at /editor",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "recipientName": {
+              "type": "string",
+              "required": true,
+              "maxLength": 200,
+              "example": "Ada Lovelace"
+            },
+            "programName": {
+              "type": "string",
+              "required": true,
+              "example": "Analytical Engines"
+            },
+            "subtitle": {
+              "type": "string"
+            },
+            "issuer": {
+              "type": "string",
+              "default": "Particle Academy"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "program": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "required": true
+                },
+                "hours": {
+                  "type": "integer",
+                  "default": 10
+                }
+              }
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "{{ recipientName }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": [
+            "a"
+          ]
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "TEMPLATE_SHAPE",
+            "path": "/editor"
+          }
+        ]
+      },
+      "notes": "A non-empty list: PHP decodes an EMPTY list and an empty object alike, so no row asks about `[]`."
+    },
+    {
+      "id": "0034-editor-string-is-not-an-object",
+      "title": "An editor that is a string is TEMPLATE_SHAPE at /editor, in written envelope order",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "inspect"
+      ],
+      "fn": "inspect",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "editor": "source",
+          "writer": "nope",
+          "document": {
+            "blocks": []
+          }
+        }
+      },
+      "expected": {
+        "issues": [
+          {
+            "code": "TEMPLATE_SHAPE",
+            "path": "/editor"
+          },
+          {
+            "code": "TEMPLATE_WRITER",
+            "path": "/writer"
+          }
+        ]
+      },
+      "notes": "Envelope keys are reported in written order (SPEC 11)."
     }
   ]
 }

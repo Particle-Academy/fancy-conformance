@@ -12379,6 +12379,390 @@
         "path": "/document/blocks/0/$value/0"
       },
       "notes": "Without this, a spread element's directives would sit outside the bound every other directive is under."
+    },
+    {
+      "id": "0036-editor-bytes-at-limit",
+      "title": "An editor of exactly limits.editorBytes renders, and the output is the document alone",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Hi {{ name }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": {
+            "kind": "fancy-template-ui",
+            "version": 1,
+            "tree": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        "data": {
+          "name": "A"
+        },
+        "options": {
+          "limits": {
+            "editorBytes": 432
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Hi A"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "432 bytes: every string in the VALUE of editor, keys included (SPEC 10), not the `editor` key itself."
+    },
+    {
+      "id": "0037-editor-bytes-over",
+      "title": "One byte under the editor's size is TEMPLATE_EDITOR_TOO_LARGE at /editor",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Hi {{ name }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": {
+            "kind": "fancy-template-ui",
+            "version": 1,
+            "tree": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        "data": {
+          "name": "A"
+        },
+        "options": {
+          "limits": {
+            "editorBytes": 431
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_EDITOR_TOO_LARGE",
+        "path": "/editor"
+      },
+      "notes": "Its own bound and its own code, so a host can tell a builder source that grew too large from a document that did."
+    },
+    {
+      "id": "0038-editor-is-not-in-template-bytes",
+      "title": "templateBytes excludes the editor entry: a template whose document fits renders, however large its editor",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Hi {{ name }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": {
+            "kind": "fancy-template-ui",
+            "version": 1,
+            "tree": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        "data": {
+          "name": "A"
+        },
+        "options": {
+          "limits": {
+            "templateBytes": 100
+          }
+        }
+      },
+      "expected": {
+        "ok": true,
+        "document": {
+          "blocks": [
+            {
+              "type": "paragraph",
+              "runs": [
+                {
+                  "text": "Hi A"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "notes": "templateBytes 100 is the envelope WITHOUT editor; with it the envelope is 538 bytes. Counting it twice would let a builder's source eat the document's budget."
+    },
+    {
+      "id": "0039-template-bytes-before-editor-bytes",
+      "title": "Over both size bounds: TEMPLATE_TOO_LARGE, checked first",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Hi {{ name }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": {
+            "kind": "fancy-template-ui",
+            "version": 1,
+            "tree": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        "data": {
+          "name": "A"
+        },
+        "options": {
+          "limits": {
+            "templateBytes": 99,
+            "editorBytes": 0
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_TOO_LARGE",
+        "path": ""
+      },
+      "notes": "SPEC 10's order: depth, templateBytes, editorBytes, tokens."
+    },
+    {
+      "id": "0040-editor-bytes-before-tokens",
+      "title": "Over editorBytes and tokens: TEMPLATE_EDITOR_TOO_LARGE, checked before tokens",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Hi {{ name }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": {
+            "kind": "fancy-template-ui",
+            "version": 1,
+            "tree": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        "data": {
+          "name": "A"
+        },
+        "options": {
+          "limits": {
+            "editorBytes": 0,
+            "tokens": 0
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_EDITOR_TOO_LARGE",
+        "path": "/editor"
+      },
+      "notes": ""
+    },
+    {
+      "id": "0041-editor-bytes-measured-whatever-it-holds",
+      "title": "A non-object editor over the limit is TEMPLATE_EDITOR_TOO_LARGE, not TEMPLATE_SHAPE",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {
+            "name": {
+              "type": "string"
+            }
+          },
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "Hi {{ name }}"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": "yyyyyyyyyyyyyyyyyyyy"
+        },
+        "data": {
+          "name": "A"
+        },
+        "options": {
+          "limits": {
+            "editorBytes": 19
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_EDITOR_TOO_LARGE",
+        "path": "/editor"
+      },
+      "notes": "The size bound stops inspect before the shape is looked at, as templateBytes does for the whole envelope."
+    },
+    {
+      "id": "0042-depth-applies-inside-editor",
+      "title": "The depth bound applies inside editor: it is part of the envelope",
+      "since": "0.55.0",
+      "tags": [
+        "template",
+        "limits"
+      ],
+      "fn": "render",
+      "input": {
+        "template": {
+          "fancyTemplate": 1,
+          "writer": "fine-print",
+          "variables": {},
+          "document": {
+            "blocks": [
+              {
+                "type": "paragraph",
+                "runs": [
+                  {
+                    "text": "x"
+                  }
+                ]
+              }
+            ]
+          },
+          "editor": {
+            "a": {
+              "b": {
+                "c": {
+                  "d": {
+                    "e": {
+                      "f": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "data": {},
+        "options": {
+          "limits": {
+            "depth": 6
+          }
+        }
+      },
+      "expected": {
+        "ok": false,
+        "code": "TEMPLATE_TOO_DEEP",
+        "path": "/editor/a/b/c/d/e"
+      },
+      "notes": "limits.depth 6. The document reaches level 6; editor/a/b/c/d/e is level 7. Opaque means never READ, not unbounded."
     }
   ]
 }
