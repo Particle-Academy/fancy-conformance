@@ -14,9 +14,11 @@ composer require --dev particle-academy/fancy-conformance
 ```
 
 - **Node:** `>=22`. **PHP:** `^8.4`.
-- **Python is not on PyPI, and will not be.** Check this repository out at the
-  tag you pin and put `python/src` on the path (pytest `pythonpath`, or
-  `PYTHONPATH` in CI).
+- **Python:** `pip install fancy-conformance` (from 0.55.1; import
+  `fancy_conformance`, `>=3.11`). The wheel carries the fixtures, so
+  `suites_root()` finds them inside the installed package. Checking this
+  repository out at a pinned tag and putting `python/src` on the path still
+  works.
 - **Any other language:** every release attaches
   `fancy-conformance-<version>.tar.gz` with just the fixtures.
 

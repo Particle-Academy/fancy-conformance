@@ -5,9 +5,12 @@ the third one, alongside `src/index.ts` (Node) and `php/src/Conformance.php`
 (PHP), and deliberately the same shape so a reviewer comparing three CI logs is
 comparing like with like.
 
-**Not on PyPI, and it will not be.** This repository is the suite's own alignment
-tool. A Python consumer checks it out at the tag it pins and puts `python/src` on
-its path:
+**On PyPI from 0.55.1** as `fancy-conformance` (`pip install fancy-conformance`,
+import `fancy_conformance`). The wheel carries `suites/`, `schema/` and `VERSION`,
+so an installed package needs no checkout beside it.
+
+A consumer can still check this repository out at the tag it pins and put
+`python/src` on its path:
 
 ```bash
 # CI: check out Particle-Academy/fancy-conformance at `ref: v<pinned>` into

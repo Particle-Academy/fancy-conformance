@@ -180,14 +180,105 @@ jobs:
           # multi-line run: block is PowerShell and rm -rf is not a command.
           node -e "require('node:fs').rmSync('.third-party-allowlist',{recursive:true,force:true})"
 
-  # No PyPI job, deliberately (2026-09-13). This repository is the suite's own
-  # alignment tool, not a product: nobody outside it installs the fixtures. A
-  # Python consumer checks this repository out at the tag it pins (see
-  # runners/README.md) and puts python/src on its path, so a PyPI leg would
-  # publish to nobody. It existed from 2026-08-25 and failed on every tag
-  # (no trusted publisher), which read as a broken release rather than an
-  # unneeded one. npm and Packagist stay: the TypeScript and PHP consumers
-  # install the fixtures from those registries as a dev dependency.
+  # PyPI (restored 2026-11-18). A Python consumer now installs the fixtures
+  # from PyPI, the way the TypeScript and PHP consumers install them from npm
+  # and Packagist. The 2026-08-25 to 2026-09-13 job failed on every tag for want
+  # of a trusted publisher; this one is armed by a PyPI pending publisher on
+  # environment `pypi` BEFORE its first tag. Build and publish are separate jobs
+  # so `id-token: write` is never held by the job that executes build code.
+  build-python:
+    name: Build the Python distributions
+    needs: guard
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.x"
+
+      # Same gate as the npm job, repeated here because this job does not wait
+      # for that one: a wheel must not reach PyPI for an undocumented version.
+      - name: Changelog entry for this tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          FIRST=$(grep -E '^## ' CHANGELOG.md | grep -viE '^## +\[?unreleased\]?' | head -1)
+          if ! printf '%s' "$FIRST" | grep -qE "^## +\[?v?${VERSION}\]?"; then
+            echo "::error::CHANGELOG.md's newest version heading is '${FIRST}', not ${VERSION}."
+            exit 1
+          fi
+
+      # The wheel carries VERSION as data and pyproject declares its own
+      # version; a disagreement would publish a distribution whose metadata and
+      # self-reported fixture set name different releases.
+      - name: Python version matches the tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          FILE_VERSION="$(cat VERSION | tr -d '[:space:]')"
+          grep -q "^version = \"${VERSION}\"$" python/pyproject.toml || {
+            echo "::error::python/pyproject.toml version does not match tag ${GITHUB_REF_NAME}."
+            exit 1
+          }
+          if [ "$FILE_VERSION" != "$VERSION" ]; then
+            echo "::error::tag ${VERSION}, VERSION ${FILE_VERSION} -- they must agree."
+            exit 1
+          fi
+          echo "Version ${VERSION} agrees across the tag, VERSION and python/pyproject.toml."
+
+      # `--sdist --wheel` explicitly. Bare `python -m build` builds the wheel FROM
+      # the sdist, and the wheel's force-include of ../suites reaches outside
+      # python/, which an unpacked sdist does not have.
+      - name: Build
+        working-directory: python
+        run: |
+          python -m pip install --upgrade build
+          python -m build --sdist --wheel
+
+      # The fixtures ARE the product. A wheel that builds cleanly with an empty
+      # _data/ is the silent failure force-include outside python/ invites.
+      - name: The artifacts carry the fixture tree
+        working-directory: python
+        run: python scripts/check_artifacts.py
+
+      # And prove it the way a consumer meets it: install the wheel into a clean
+      # venv, from a directory with no checkout in it, and resolve suites/http
+      # through the installed package rather than a walk up to this repository.
+      - name: An installed wheel finds its own suites
+        run: |
+          python -m venv "$RUNNER_TEMP/wheel-venv"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pip install python/dist/*.whl
+          cd "$RUNNER_TEMP"
+          env -u FANCY_CONFORMANCE_ROOT "$RUNNER_TEMP/wheel-venv/bin/python" -c "import sys, fancy_conformance as f; r = f.suites_root(); print('suites_root:', r); sys.exit(0 if (r / 'suites' / 'http').is_dir() and 'site-packages' in str(r) else 1)"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: python-dists
+          path: python/dist/
+
+  publish-python:
+    name: Publish to PyPI
+    needs: [build-python, lab-certificate]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/fancy-conformance
+    permissions:
+      id-token: write        # mandatory for Trusted Publishing; there is no token
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: python-dists
+          path: dist/
+      # Pinned by SHA, not by tag: a mutable reference in exactly this position
+      # is what the April 2026 supply-chain compromises exploited.
+      # v1.14.2 -- no `password:` (that is the point), attestations default on;
+      # stated anyway so a later default change cannot drop them silently.
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
+        with:
+          attestations: true
 
   publish:
     needs: [guard, lab-certificate]

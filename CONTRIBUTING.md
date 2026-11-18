@@ -194,14 +194,16 @@ that such a claim must be a test result rather than a sentence. Both the
 `python` and `rust` jobs were added on 2026-08-23. If you add a sixth loader,
 the job is part of adding it.
 
-**The Python loader is not published to PyPI, and must not be.** This
-repository exists so the suite's own packages stay aligned; nothing outside it
-installs the fixtures. A Python consumer checks this repository out at the tag it
-pins and puts `python/src` on its path (pytest `pythonpath` in the envelope,
-`PYTHONPATH` in CI). A `publish-python` job existed from 2026-08-25 to
-2026-09-13 and failed on every tag for want of a trusted publisher; it was
-removed rather than armed, on the owner's ruling. npm and Packagist remain,
-because the TypeScript and PHP consumers install from them as a dev dependency.
+**The Python loader publishes to PyPI as `fancy-conformance`, from 0.55.1.**
+A `publish-python` job existed from 2026-08-25 to 2026-09-13 and failed on every
+tag for want of a trusted publisher; it was removed rather than armed, because
+at the time no consumer installed the fixtures from PyPI. It was restored on
+2026-11-18 when one needed to, and this time the PyPI pending publisher
+(environment `pypi`) is registered before the first tag. `build-python` runs
+`python/scripts/check_artifacts.py` and then installs the wheel into a clean venv
+and requires `suites_root()` to resolve `suites/http` inside site-packages, so a
+wheel with an empty `_data/` cannot reach PyPI. Checking the repository out at a
+pinned tag with `python/src` on the path still works.
 
 **`cross-check.mjs` still compares only Node and PHP.** Extending it to the
 Python loader is open work; until it lands, the Python loader is asserted by its
