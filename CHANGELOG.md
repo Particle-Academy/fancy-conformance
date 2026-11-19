@@ -10,6 +10,8 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.56.0] - 2026-11-19
+
 ### Added
 
 - `sign/otp` `0001-error-codes`: the closed set gains `not_your_turn` (409),
