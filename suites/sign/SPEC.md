@@ -51,7 +51,8 @@ hash = sha256_hex(prev_hash + "\n" + canonical({seq, envelope_id, at, type, acto
   `signer.requested_changes` (section 4b), `reminder.sent`,
   `envelope.completed`, `envelope.voided`, `envelope.expired`,
   `document.downloaded`, `seal.applied`, and from 0.57.0 (data mode, section
-  6.2) `document.rendered` and `signature.sealed`.
+  6.2) `document.rendered` and `signature.sealed`, and from 0.58.0
+  `document.finalized`.
 - `source` is `client` for `page.viewed` and `document.rendered` and `server`
   for every other type; any other pairing is refused. A browser may claim it
   showed a page or a rendering, never that someone signed.
@@ -193,6 +194,14 @@ as written; row `0006` discriminates.
   hash to the host's `data_sha256`, at create or update, or the `data_sha256`
   sent with sign differs) and `data_external_reference` (422: under the optional
   `last-word` profile, an image not inlined as a `data:` URI).
+- `document.finalized` (from 0.58.0) is server-observed:
+  `{final_sha256, final_bytes}`, the hash and length of the final PDF the host
+  made from the data, registered once after completion. The package never
+  receives the PDF. A client `document.finalized` is refused.
+- `sign/otp` `errorCodes` gains (from 0.58.0) `envelope_not_completed` (409: a
+  final registered before every signer has signed) and `final_already_attached`
+  (409: a different final for an envelope that already has one; the same hash
+  and length again is idempotent).
 
 The signature record, the version-2 completion and their verifier are pinned by
 the reference package's own suite, not by rows here yet.

@@ -69,7 +69,7 @@ const TYPES = [
   "envelope.created", "envelope.sent", "email.sent", "link.opened", "otp.sent", "otp.verified", "otp.failed",
   "otp.locked", "consent.accepted", "document.opened", "page.viewed", "field.completed", "mark.adopted",
   "signer.signed", "signer.declined", "signer.requested_changes", "reminder.sent", "envelope.completed", "envelope.voided", "envelope.expired",
-  "document.downloaded", "seal.applied", "document.rendered", "signature.sealed",
+  "document.downloaded", "seal.applied", "document.rendered", "signature.sealed", "document.finalized",
 ];
 /** The client-sourced claims; every other type is server-observed. */
 const CLIENT_TYPES = ["page.viewed", "document.rendered"];
@@ -359,7 +359,7 @@ function run(suite: string, fn: string, input: Record<string, Json>, m: M): unkn
   }
 }
 
-const PROBED: Record<string, number> = { "sign/chain": 37, "sign/completion": 20, "sign/data": 13, "sign/otp": 24 };
+const PROBED: Record<string, number> = { "sign/chain": 39, "sign/completion": 20, "sign/data": 13, "sign/otp": 24 };
 
 /** The ids (suite/NNNN) this implementation FAILS, over the probed functions. */
 function failing(m: M = {}): string[] {
@@ -391,7 +391,7 @@ test("the control probes every row of sign/chain, sign/completion and sign/data,
       if (run(suite, String(c.fn), c.input as Record<string, Json>, {}) !== undefined) probed++;
     }
   }
-  assert.equal(probed, 37 + 20 + 13 + 2 + 3);
+  assert.equal(probed, 39 + 20 + 13 + 2 + 3);
 });
 
 test("sorting keys by UTF-16 code units fails exactly the two byte-order rows", () => {
@@ -414,9 +414,10 @@ test("hashing empty data as [] fails every row whose chain holds an event with n
   assert.deepEqual(failing({ emptyDataAsList: true }), MUTANT_EMPTY_DATA);
 });
 
-test("admitting any source fails exactly the five source-rule rows", () => {
+test("admitting any source fails exactly the six source-rule rows", () => {
   // 0035 and 0037 (0.57.0): a server document.rendered, a client signature.sealed.
-  assert.deepEqual(failing({ noSourceRule: true }), ["chain/0016", "chain/0017", "chain/0033", "chain/0035", "chain/0037"]);
+  // 0039 (0.58.0): a client document.finalized.
+  assert.deepEqual(failing({ noSourceRule: true }), ["chain/0016", "chain/0017", "chain/0033", "chain/0035", "chain/0037", "chain/0039"]);
 });
 
 test("skipping the link check fails exactly the broken-link rows", () => {

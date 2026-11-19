@@ -1610,6 +1610,79 @@
             "expected": {
                 "error": "refused"
             }
+        },
+        {
+            "id": "0038-append-document-finalized",
+            "title": "document.finalized records the host's final PDF hash and length, server-observed",
+            "since": "0.58.0",
+            "tags": [
+                "append",
+                "data-mode"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "document.finalized",
+                    "actor": "user:1",
+                    "data": {
+                        "final_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "final_bytes": 48213
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "envelope_id": "01JD0000000000000000000000",
+                "seq": 1,
+                "at": "2026-11-18T12:00:00Z",
+                "type": "document.finalized",
+                "actor": "user:1",
+                "source": "server",
+                "ip": null,
+                "user_agent": null,
+                "data": {
+                    "final_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "final_bytes": 48213
+                },
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "hash": "efc1c60d6a7586c9be3c1ab510c9df58d89b4f9dcccb908d0d84cce2c544bc21"
+            },
+            "notes": "Data mode, after completion: attachFinal. The package never reads or stores the PDF."
+        },
+        {
+            "id": "0039-append-refuses-client-document-finalized",
+            "title": "a client document.finalized is refused",
+            "since": "0.58.0",
+            "tags": [
+                "append",
+                "refusal",
+                "data-mode"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "document.finalized",
+                    "actor": "user:1",
+                    "source": "client",
+                    "data": {
+                        "final_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "final_bytes": 48213
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "error": "refused"
+            }
         }
     ]
 }

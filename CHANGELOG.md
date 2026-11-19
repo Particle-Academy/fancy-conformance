@@ -10,6 +10,28 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.58.0] - 2026-11-19
+
+### Added
+
+- `sign/chain` 0038-0039 (2 rows): `document.finalized` joins the closed event
+  set as a SERVER event, `{final_sha256, final_bytes}`, the hash and length of
+  the final PDF a data-mode host registers once after completion
+  (fancy-sign 0.7.0, `Signing::attachFinal`, CC-fancy-0052). A client
+  `document.finalized` is refused. SPEC sections 2 and 6.2. Goldens are
+  fancy-sign-php's own export at `89a412a`.
+
+### Changed
+
+- `sign/otp` `0001-error-codes`: the closed set gains `envelope_not_completed`
+  and `final_already_attached` (both 409). SPEC section 6.2.
+- `tests/discrimination-sign.test.ts`: the faithful reading knows
+  `document.finalized`, and the any-source mutant is now pinned to six rows
+  (0039 added).
+- **Consumer action:** a fancy-sign port adds `document.finalized`
+  (server only) to its closed event set and the two error codes. No existing
+  row changed.
+
 ## [0.57.0] - 2026-11-19
 
 ### Added
