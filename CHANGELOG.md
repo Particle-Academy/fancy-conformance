@@ -10,6 +10,10 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Changed
+
+- CI: re-pin org third-party allowlist to 2614224
+
 ## [0.55.1] - 2026-11-18
 
 ### Added
