@@ -10,6 +10,8 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.57.0] - 2026-11-19
+
 ### Added
 
 - **`sign/data`** (13 rows, new suite): `fsig-data-1`, the canonical byte form
