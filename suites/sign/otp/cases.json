@@ -31,7 +31,9 @@
                 "already_declined": 409,
                 "step_up_required": 401,
                 "limit_exceeded": 429,
-                "not_your_turn": 409
+                "not_your_turn": 409,
+                "data_hash_mismatch": 422,
+                "data_external_reference": 422
             },
             "notes": "otp_unknown, otp_expired and otp_wrong are NOT here: on the wire they are all otp_invalid (the precise reason is in the otp.failed event)."
         },

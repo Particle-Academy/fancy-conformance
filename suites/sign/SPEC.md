@@ -2,16 +2,16 @@
 
 CC-fancy-0036, phase 1 (SES). Design: `.ai/plans/fancy-sign.md` in the envelope,
 sections 5.3 (codes), 5.4 (chain), 5.6 (seal and completion), 5.2 (fields). This
-file is what the four `sign/*` suites are written from. The goldens are the PHP
+file is what the five `sign/*` suites are written from. The goldens are the PHP
 package's output (`particle-academy/fancy-sign`), exported by
 `fancy-sign-php/tests/Conformance/Export.php`; a port never regenerates them.
 
 | Package | Language | Runs |
 |---|---|---|
-| `particle-academy/fancy-sign` | php | all four suites (the reference) |
+| `particle-academy/fancy-sign` | php | all five suites (the reference) |
 | `@particle-academy/fancy-sign` (`fancy-sign-js`) | node | planned. `sign/fields` `placement` needs the fine-print-js writer |
 
-`tests/discrimination-sign.test.ts` is a Node reading of sections 1 to 3 with
+`tests/discrimination-sign.test.ts` is a Node reading of sections 1 to 3 and 6.1 with
 `node:crypto` only, plus the mutants a port would plausibly be.
 
 ## 1. Canonical JSON (`sign/chain` `canonical`)
@@ -47,12 +47,14 @@ hash = sha256_hex(prev_hash + "\n" + canonical({seq, envelope_id, at, type, acto
 - The event set is closed: `envelope.created`, `envelope.sent`, `email.sent`,
   `link.opened`, `otp.sent`, `otp.verified`, `otp.failed`, `otp.locked`,
   `consent.accepted`, `document.opened`, `page.viewed`, `field.completed`,
-  `mark.adopted`, `signer.signed`, `signer.declined`, `reminder.sent`,
+  `mark.adopted`, `signer.signed`, `signer.declined`,
+  `signer.requested_changes` (section 4b), `reminder.sent`,
   `envelope.completed`, `envelope.voided`, `envelope.expired`,
-  `document.downloaded`, `seal.applied`.
-- `source` is `client` for `page.viewed` and `server` for every other type; any
-  other pairing is refused. A browser may claim it showed a page, never that
-  someone signed.
+  `document.downloaded`, `seal.applied`, and from 0.57.0 (data mode, section
+  6.2) `document.rendered` and `signature.sealed`.
+- `source` is `client` for `page.viewed` and `document.rendered` and `server`
+  for every other type; any other pairing is refused. A browser may claim it
+  showed a page or a rendering, never that someone signed.
 - `verify(rows)` walks in order and stops at the first problem, reporting
   `checked` (rows that passed), `head` (the last good hash, the genesis if none)
   and the failing row's `seq`:
@@ -143,3 +145,54 @@ from the item on a 422 and from `error` otherwise.
   sender's different value is `invalid_request`.
 - After send, an every-page field lands on pages 1..N, N the last authored page,
   and never on the generated final page, at any page count.
+
+## 6. Data mode (`sign/data`, 0.57.0, CC-fancy-0052)
+
+An envelope with `settings.mode: "data"` signs the HOST's data, an opaque JSON
+object, instead of a PDF the package renders. Design: `.ai/plans/fancy-sign-data-mode.md`
+in the envelope.
+
+### 6.1 The canonical form `fsig-data-1` (`sign/data` `canonical`)
+
+Section 1, every bullet, with these differences only:
+
+1. **The top level must be an object** (`{}` is allowed). Anything else is refused.
+2. **Numbers** are read as IEEE-754 doubles, then:
+   - integral and `|x| <= 2^53 - 1`: a decimal integer. `12.0`, `1E2` and
+     `-0.0` print `12`, `100` and `0`.
+   - integral and `|x| > 2^53 - 1`: **refused**. `9007199254740993` parses to
+     a different double in some runtimes than the text says, so two runtimes
+     would hash different numbers. This also refuses `1e21`.
+   - non-integral: ECMAScript `Number::toString(x)` (ECMA-262 section
+     6.1.6.1.20), the shortest digits that round-trip, which is RFC 8785 section
+     3.2.2.3. The exponent form appears only below `1e-6` (`1e-7`, `-1.5e-9`),
+     never as PHP writes it (`1.0e-7`).
+   - NaN and the infinities cannot come through JSON; a runtime holding one
+     refuses it.
+3. **Strings and keys** must be well-formed Unicode; a lone surrogate is refused.
+4. Floats stay **refused everywhere else**: chain events, completion and
+   signature records and marks keep section 1 exactly.
+
+`data_sha256` is the lowercase hex sha256 of the UTF-8 bytes and `data_bytes`
+their length, with no prefix: any host recomputes it from its own data.
+
+The input is JSON TEXT, so a row tests the decoder as well. A runtime whose
+decoder loses `{}` against `[]`, or `{"0": "a"}` against `["a"]` (PHP with
+`assoc: true`), must decode with objects kept as objects. Keys sort by UTF-8
+bytes, not by UTF-16 code units, which is where this form departs from RFC 8785
+as written; row `0006` discriminates.
+
+### 6.2 Events and codes
+
+- `document.rendered` is a CLIENT claim (`source: client`), like `page.viewed`:
+  `{data_sha256, renderer, pages}`, which presentation the signer's browser says
+  it showed. `renderer` is the host's own string (template and release).
+- `signature.sealed` is server-observed: `{signer_id, token, key_id}`, a
+  signature record's token on the chain right after the `signer.signed` it seals.
+- `sign/otp` `errorCodes` gains `data_hash_mismatch` (422: the data does not
+  hash to the host's `data_sha256`, at create or update, or the `data_sha256`
+  sent with sign differs) and `data_external_reference` (422: under the optional
+  `last-word` profile, an image not inlined as a `data:` URI).
+
+The signature record, the version-2 completion and their verifier are pinned by
+the reference package's own suite, not by rows here yet.

@@ -1,0 +1,243 @@
+{
+    "$schema": "../../../schema/case-table.schema.json",
+    "suite": "sign/data",
+    "cases": [
+        {
+            "id": "0001-canonical-sorts-keys",
+            "title": "keys sorted, list order kept, no whitespace",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "control"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"b\": 1, \"a\": [true, null, \"x\"]}"
+            },
+            "expected": {
+                "canonical": "{\"a\":[true,null,\"x\"],\"b\":1}",
+                "sha256": "54a65415ad370228851a1da4b31b6fd42dc58b19a50d35cae759325f7388ce64",
+                "bytes": 27
+            },
+            "notes": "Plan vector d0001: keys sorted, list order kept, no whitespace."
+        },
+        {
+            "id": "0002-canonical-floats",
+            "title": "non-integral numbers print as ECMAScript Number::toString (shortest round trip)",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "numbers"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"lineHeight\": 1.15, \"size\": 10.5, \"letterSpacing\": -0.25, \"ratio\": 0.1, \"third\": 0.3333333333333333}"
+            },
+            "expected": {
+                "canonical": "{\"letterSpacing\":-0.25,\"lineHeight\":1.15,\"ratio\":0.1,\"size\":10.5,\"third\":0.3333333333333333}",
+                "sha256": "98b86554ecebe2970f99b56d2e50d5f1689b5dc3b303386611f9686b239f8a35",
+                "bytes": 92
+            },
+            "notes": "Plan vector d0002: non-integral numbers print as ECMAScript Number::toString (shortest round trip)."
+        },
+        {
+            "id": "0003-canonical-integral-numbers",
+            "title": "an integral number prints as an integer whatever its source form; -0 is 0",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "numbers"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"a\": 12.0, \"b\": -0.0, \"c\": 1E2, \"d\": 9007199254740991}"
+            },
+            "expected": {
+                "canonical": "{\"a\":12,\"b\":0,\"c\":100,\"d\":9007199254740991}",
+                "sha256": "85d4d2b2857c8324f03f9014cefab788061bb711e98e90907094bbe230c06773",
+                "bytes": 43
+            },
+            "notes": "Plan vector d0003: an integral number prints as an integer whatever its source form; -0 is 0."
+        },
+        {
+            "id": "0004-canonical-exponent-form",
+            "title": "below 1e-6 the exponent form, as ECMAScript prints it (1e-7, never 1.0e-7)",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "numbers"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"tiny\": 0.0000001, \"edge\": 0.000001, \"neg\": -1.5e-9}"
+            },
+            "expected": {
+                "canonical": "{\"edge\":0.000001,\"neg\":-1.5e-9,\"tiny\":1e-7}",
+                "sha256": "6d8d77e96e1c2c242f29df0eabf3b65efeb63d38180abec7e4f19c3429199239",
+                "bytes": 43
+            },
+            "notes": "Plan vector d0004: below 1e-6 the exponent form, as ECMAScript prints it."
+        },
+        {
+            "id": "0005-canonical-objects-stay-objects",
+            "title": "an object is an object whatever its keys; {} and [] stay apart",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "index-keys"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"meta\": {}, \"blocks\": [], \"cells\": {\"0\": \"a\", \"1\": \"b\"}}"
+            },
+            "expected": {
+                "canonical": "{\"blocks\":[],\"cells\":{\"0\":\"a\",\"1\":\"b\"},\"meta\":{}}",
+                "sha256": "12d7181d17c7f0d3c62cfd50a803e3409a22b2224ad34b780250824128b774b8",
+                "bytes": 49
+            },
+            "notes": "Plan vector d0005: an object is an object whatever its keys; {} and [] stay apart."
+        },
+        {
+            "id": "0006-canonical-byte-order-and-escapes",
+            "title": "UTF-8 byte order for keys; slash, non-ASCII and U+2028 raw; controls escaped",
+            "since": "0.57.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"\\ue000\": 1, \"\\ud83d\\ude00\": 2, \"\\u00e9\": 3, \"z\": \"a/b\\u2028c\\u0001d\\n\\\"q\\\"\"}"
+            },
+            "expected": {
+                "canonical": "{\"z\":\"a/b\u2028c\\u0001d\\n\\\"q\\\"\",\"é\":3,\"\":1,\"😀\":2}",
+                "sha256": "899c1d56db1bd28d53bbfa9829ef466c8796c2add39a7bbc066f47b22caf130c",
+                "bytes": 53
+            },
+            "notes": "Plan vector d0006: UTF-8 byte order for keys; slash, non-ASCII and U+2028 raw; controls escaped."
+        },
+        {
+            "id": "0007-canonical-quote-data",
+            "title": "opaque host data: a quote as the host stores it, floats and nested arrays",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "control"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"quote\": \"Q-1001\", \"currency\": \"USD\", \"customer\": {\"name\": \"Pat Buyer\", \"tags\": []}, \"lines\": [{\"sku\": \"W-1\", \"qty\": 2, \"unit\": 612.5, \"discount\": 0.05}, {\"sku\": \"S-9\", \"qty\": 1, \"unit\": 25, \"options\": {}}], \"tax_rate\": 0.0825, \"totals\": {\"net\": 1250, \"tax\": 103.125}, \"terms\": [\"Net 30\", \"Valid 14 days\"]}"
+            },
+            "expected": {
+                "canonical": "{\"currency\":\"USD\",\"customer\":{\"name\":\"Pat Buyer\",\"tags\":[]},\"lines\":[{\"discount\":0.05,\"qty\":2,\"sku\":\"W-1\",\"unit\":612.5},{\"options\":{},\"qty\":1,\"sku\":\"S-9\",\"unit\":25}],\"quote\":\"Q-1001\",\"tax_rate\":0.0825,\"terms\":[\"Net 30\",\"Valid 14 days\"],\"totals\":{\"net\":1250,\"tax\":103.125}}",
+                "sha256": "9f3a6327d5c426994325ae9037518f595c604153944915a21236aa728e9ed2a9",
+                "bytes": 272
+            },
+            "notes": "Plan vector d0007: opaque host data: a quote as the host stores it, floats and nested arrays."
+        },
+        {
+            "id": "0008-refuses-unsafe-integer",
+            "title": "refused: an integral number outside the safe-integer range",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "refusal"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"n\": 9007199254740993}"
+            },
+            "expected": {
+                "error": "refused"
+            },
+            "notes": "Plan vector d0008: refused: an integral number outside the safe-integer range."
+        },
+        {
+            "id": "0009-refuses-unsafe-integral-float",
+            "title": "refused: an integral number written as a float beyond 2^53",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "refusal"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"n\": 1e21}"
+            },
+            "expected": {
+                "error": "refused"
+            },
+            "notes": "Plan vector d0009: refused: an integral number written as a float beyond 2^53."
+        },
+        {
+            "id": "0010-refuses-lone-surrogate",
+            "title": "refused: a lone surrogate",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "refusal"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"s\": \"\\ud800\"}"
+            },
+            "expected": {
+                "error": "refused"
+            },
+            "notes": "Plan vector d0010: refused: a lone surrogate."
+        },
+        {
+            "id": "0011-refuses-non-object",
+            "title": "refused: the top level is not an object",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "refusal"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "[1, 2]"
+            },
+            "expected": {
+                "error": "refused"
+            },
+            "notes": "Plan vector d0011: refused: the top level is not an object."
+        },
+        {
+            "id": "0012-canonical-nested-arrays",
+            "title": "nested arrays of arrays with floats, mixed with objects and nulls",
+            "since": "0.57.0",
+            "tags": [
+                "canonical",
+                "numbers"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{\"grid\": [[0.5, 1, [2.25, []]], [{}, null, -3.75]], \"weights\": [[0.1, 0.2], [0.30000000000000004]]}"
+            },
+            "expected": {
+                "canonical": "{\"grid\":[[0.5,1,[2.25,[]]],[{},null,-3.75]],\"weights\":[[0.1,0.2],[0.30000000000000004]]}",
+                "sha256": "64dcfd3985bebbc4edae7655cbadaf5078ea5d02c204f780e39dab41ba51d597",
+                "bytes": 88
+            },
+            "notes": "Plan vector d0012: nested arrays of arrays with floats, mixed with objects and nulls."
+        },
+        {
+            "id": "0013-canonical-empty-object",
+            "title": "the empty object is valid data",
+            "since": "0.57.0",
+            "tags": [
+                "canonical"
+            ],
+            "fn": "canonical",
+            "input": {
+                "text": "{}"
+            },
+            "expected": {
+                "canonical": "{}",
+                "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+                "bytes": 2
+            },
+            "notes": "Plan vector d0013: the empty object is valid data."
+        }
+    ]
+}

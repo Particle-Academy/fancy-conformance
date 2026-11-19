@@ -1,0 +1,29 @@
+{
+    "$schema": "../../../schema/suite-manifest.schema.json",
+    "suite": "sign/data",
+    "title": "fancy-sign data mode: fsig-data-1, the canonical byte form of the data a data-mode envelope signs",
+    "since": "0.57.0",
+    "caseFormat": "table",
+    "contract": {
+        "summary": "fsig-data-1 is sign/chain canonical JSON (SPEC section 1) with one change: a non-integral number prints as ECMAScript Number::toString (RFC 8785 section 3.2.2.3) instead of being refused. The top level must be an object ({} allowed). An integral number prints as an integer (12.0 is 12, -0.0 is 0) and is refused beyond 2^53 - 1. Keys sort by UTF-8 byte order; slash, non-ASCII and U+2028/U+2029 are raw; a lone surrogate is refused. data_sha256 is the lowercase hex sha256 of the UTF-8 bytes, data_bytes their length. Inputs are JSON TEXT, so the decoder is part of what is tested. See SPEC.md section 6.",
+        "functions": {
+            "canonical": "canonical({text}) -> {canonical, sha256, bytes} | {error: \"refused\"}. `text` is the data as JSON text; a runtime must decode it keeping {} and [] (and {\"0\": x} and [x]) apart."
+        },
+        "reference": "php",
+        "referenceNote": "Goldens are particle-academy/fancy-sign's own output (FancySign\\Data\\CanonicalDocument), written by fancy-sign-php/tests/Conformance/Export.php from the thirteen CC-fancy-0052 plan vectors. Before the package existed the same thirteen hashes were computed by two independent design sketches (Node and PHP); the package reproduces all of them.",
+        "implementations": [
+            {
+                "language": "php",
+                "package": "particle-academy/fancy-sign",
+                "symbol": "FancySign\\Data\\CanonicalDocument"
+            },
+            {
+                "language": "node",
+                "package": "@particle-academy/fancy-sign-ui",
+                "symbol": "(./data canonicalData, planned)"
+            }
+        ]
+    },
+    "notes": "tests/discrimination-sign.test.ts holds a faithful Node reading of SPEC section 6.1 and the mutants a port would plausibly be: PHP's own float form, floats refused, UTF-16 key order, an assoc decode, -0 printed as -0, float noise rounded, unsafe integers accepted, escaped slashes or U+2028, and {} refused. Each mutant names the exact rows that catch it.",
+    "cases": "cases.json"
+}

@@ -86,8 +86,9 @@ verbatim.
 | `fun-lab/leaderboard` | 11 | Boards by XP, achievements or prizes, per metric, paged, with ties on profile id, and period boards on the XP earned in the period |
 | `fun-lab/analytics` | 8 | The event log's rows and the aggregates, series and breakdowns read over it |
 | `fun-lab/events` | 9 | The broadcast payloads of `xp.awarded`, `metric.level-reached`, `achievement.unlocked` and `prize.awarded`, key for key, as Echo delivers them |
-| `sign/chain` | 33 | fancy-sign's canonical JSON (UTF-8 byte-order keys, floats refused) and the per-envelope hash chain: hash, append (closed event set, client only for `page.viewed`), verify |
+| `sign/chain` | 37 | fancy-sign's canonical JSON (UTF-8 byte-order keys, floats refused) and the per-envelope hash chain: hash, append (closed event set, client only for `page.viewed` and `document.rendered`), verify |
 | `sign/completion` | 20 | The `fsig_v1_` completion record: closed key set, token, deterministic Ed25519 seal, key id, and `verify()`'s seven named failures |
+| `sign/data` | 13 | `fsig-data-1`, the canonical bytes of a data-mode envelope's data: sign/chain canonical JSON with non-integral numbers printed as ECMAScript does, unsafe integers, lone surrogates and non-objects refused |
 | `sign/fields` | 11 | The fields an envelope carries (document nodes, final page, per-page marks, the organisation's setting) and the page each lands on, never the final page for a per-page mark |
 | `sign/otp` | 24 | One-time codes: the stored digest, purpose binding, expiry, consumption, replacement, locking, rate limits, the ceremony order, the closed error-code set, refusals as the kit-wide error envelope, and requests for changes |
 

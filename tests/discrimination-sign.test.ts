@@ -43,6 +43,23 @@ type M = {
   indexKeysAsList?: boolean;
   /** A 422 keeps its own code at the top level instead of validation_failed + one item. */
   flat422?: boolean;
+  // ---- sign/data (fsig-data-1, SPEC section 6.1). utf16Keys and escapeSlashes apply there too.
+  /** Numbers as PHP's json_encode prints them: 1.0e-7, and 12.0 / -0.0 / 100.0 for an integral float literal. */
+  dataPhpFloat?: boolean;
+  /** Refuse non-integral numbers, as sign/chain canonical JSON does. */
+  dataRefuseFloats?: boolean;
+  /** Decode as PHP's assoc mode does: {} becomes [], an object keyed "0".."n-1" becomes a list. */
+  dataAssoc?: boolean;
+  /** Print negative zero as -0. */
+  dataNegZero?: boolean;
+  /** Round to 15 significant digits, so 0.30000000000000004 prints 0.3. */
+  dataRound?: boolean;
+  /** Accept integers beyond 2^53 - 1. */
+  dataUnsafe?: boolean;
+  /** Escape U+2028 (PHP's json_encode default). */
+  dataEscapeLineSep?: boolean;
+  /** Refuse the empty object as data. */
+  dataRefuseEmpty?: boolean;
 };
 
 type Json = null | boolean | number | string | Json[] | { [k: string]: Json };
@@ -52,8 +69,10 @@ const TYPES = [
   "envelope.created", "envelope.sent", "email.sent", "link.opened", "otp.sent", "otp.verified", "otp.failed",
   "otp.locked", "consent.accepted", "document.opened", "page.viewed", "field.completed", "mark.adopted",
   "signer.signed", "signer.declined", "signer.requested_changes", "reminder.sent", "envelope.completed", "envelope.voided", "envelope.expired",
-  "document.downloaded", "seal.applied",
+  "document.downloaded", "seal.applied", "document.rendered", "signature.sealed",
 ];
+/** The client-sourced claims; every other type is server-observed. */
+const CLIENT_TYPES = ["page.viewed", "document.rendered"];
 const KEYS = ["type", "version", "envelope_id", "as_sent_sha256", "as_sent_bytes", "final_sha256", "signers", "chain_head", "nonce", "key_id"];
 const SIGNER_KEYS = ["id", "name", "email", "signed_at", "method", "otp_seq", "consent_seq"];
 
@@ -106,7 +125,7 @@ function hashOf(prev: string, e: Event, m: M): string {
 function append(last: Event | null, e: Event, m: M): unknown {
   if (!TYPES.includes(String(e.type))) return { error: "refused" };
   const client = e.source === "client";
-  if (!m.noSourceRule && ((e.source !== "server" && !client) || client !== (e.type === "page.viewed"))) return { error: "refused" };
+  if (!m.noSourceRule && ((e.source !== "server" && !client) || client !== CLIENT_TYPES.includes(String(e.type)))) return { error: "refused" };
   const seq = last ? Number(last.seq) + 1 : 1;
   const prev = last ? String(last.hash) : GENESIS;
   const full: Event = { ip: null, user_agent: null, data: {}, ...e, seq };
@@ -231,6 +250,73 @@ function envelope(i: Record<string, Json>, m: M): Json {
   return { error: code, message, requestId: String(i.request_id) };
 }
 
+// ------------------------------------------------------------ sign/data: fsig-data-1
+
+const MAX_SAFE = 9007199254740991;
+
+/** A number with the source text it was written as (JSON.parse source text access). */
+class Num {
+  constructor(readonly v: number, readonly src: string) {}
+}
+
+/** PHP's json_encode (serialize_precision -1, PRESERVE_ZERO_FRACTION) for a double: the mutant. */
+function phpNumber(x: number, src: string): string {
+  if (Number.isInteger(x)) return /[.eE]/.test(src) ? `${Object.is(x, -0) ? "-0" : String(x)}.0` : String(x);
+  if (Math.abs(x) < 1e-4) {
+    const [mant, exp] = x.toExponential().split("e");
+    return `${mant!.includes(".") ? mant : `${mant}.0`}e${exp!.replace("+", "")}`;
+  }
+  return String(x);
+}
+
+function dataEncode(v: unknown, m: M): string {
+  if (v instanceof Num) {
+    const x = v.v;
+    if (Number.isInteger(x)) {
+      if (Math.abs(x) > MAX_SAFE && !m.dataUnsafe) throw new Refused("unsafe integer");
+      if (m.dataPhpFloat) return phpNumber(x, v.src);
+      if (m.dataNegZero && Object.is(x, -0)) return "-0";
+      return Math.abs(x) > MAX_SAFE ? BigInt(x).toString() : String(x === 0 ? 0 : x);
+    }
+    if (m.dataRefuseFloats) throw new Refused("float");
+    if (m.dataPhpFloat) return phpNumber(x, v.src);
+    if (m.dataRound) return String(Number(x.toPrecision(15)));
+    return String(x);
+  }
+  if (typeof v === "string") {
+    if (!(v as unknown as { isWellFormed(): boolean }).isWellFormed()) throw new Refused("lone surrogate");
+    let s = JSON.stringify(v);
+    if (m.escapeSlashes) s = s.replace(/\//g, "\\/");
+    if (m.dataEscapeLineSep) s = s.split(String.fromCharCode(0x2028)).join("\\u2028");
+    return s;
+  }
+  if (v === null || typeof v === "boolean") return JSON.stringify(v);
+  if (Array.isArray(v)) return `[${v.map((x) => dataEncode(x, m)).join(",")}]`;
+  const obj = v as Record<string, unknown>;
+  const keys = Object.keys(obj);
+  if (m.dataAssoc) {
+    if (keys.length === 0) return "[]";
+    if (keys.every((k, i) => k === String(i))) return dataEncode(keys.map((k) => obj[k]), m);
+  }
+  keys.sort(m.utf16Keys ? undefined : byteOrder);
+  return `{${keys.map((k) => `${dataEncode(k, m)}:${dataEncode(obj[k], m)}`).join(",")}}`;
+}
+
+/** canonical({text}) -> {canonical, sha256, bytes} | {error: "refused"}: SPEC section 6.1. */
+function dataCanonical(text: string, m: M): Json {
+  try {
+    const value: unknown = JSON.parse(text, (_k, v: unknown, ctx?: { source?: string }) =>
+      typeof v === "number" ? new Num(v, String(ctx?.source ?? v)) : v);
+    if (value === null || typeof value !== "object" || Array.isArray(value) || value instanceof Num) throw new Refused("top level");
+    if (m.dataRefuseEmpty && Object.keys(value).length === 0) throw new Refused("empty");
+    const canonical = dataEncode(value, m);
+    return { canonical, sha256: sha256(canonical), bytes: Buffer.byteLength(canonical, "utf8") };
+  } catch (e) {
+    if (e instanceof Refused || e instanceof SyntaxError) return { error: "refused" };
+    throw e;
+  }
+}
+
 // ------------------------------------------------------------ the runner
 
 function run(suite: string, fn: string, input: Record<string, Json>, m: M): unknown {
@@ -266,12 +352,14 @@ function run(suite: string, fn: string, input: Record<string, Json>, m: M): unkn
       return codeDigest(input, m);
     case "sign/otp envelope":
       return envelope(input, m);
+    case "sign/data canonical":
+      return dataCanonical(String(input.text), m);
     default:
       return undefined;
   }
 }
 
-const PROBED: Record<string, number> = { "sign/chain": 33, "sign/completion": 20, "sign/otp": 24 };
+const PROBED: Record<string, number> = { "sign/chain": 37, "sign/completion": 20, "sign/data": 13, "sign/otp": 24 };
 
 /** The ids (suite/NNNN) this implementation FAILS, over the probed functions. */
 function failing(m: M = {}): string[] {
@@ -296,25 +384,25 @@ test("THE CONTROL: a faithful Node reading passes every probed row", () => {
   assert.deepEqual(failing(), [], "the control fails a row, so every mutant below proves nothing");
 });
 
-test("the control probes every row of sign/chain and sign/completion, and sign/otp's codeDigest and envelope rows", () => {
+test("the control probes every row of sign/chain, sign/completion and sign/data, and sign/otp's codeDigest and envelope rows", () => {
   let probed = 0;
   for (const suite of Object.keys(PROBED)) {
     for (const c of loadSuite(suite).cases) {
       if (run(suite, String(c.fn), c.input as Record<string, Json>, {}) !== undefined) probed++;
     }
   }
-  assert.equal(probed, 33 + 20 + 2 + 3);
+  assert.equal(probed, 37 + 20 + 13 + 2 + 3);
 });
 
-test("sorting keys by UTF-16 code units fails exactly the byte-order row", () => {
-  assert.deepEqual(failing({ utf16Keys: true }), ["chain/0005"]);
+test("sorting keys by UTF-16 code units fails exactly the two byte-order rows", () => {
+  assert.deepEqual(failing({ utf16Keys: true }), ["chain/0005", "data/0006"]);
 });
 
 test("escaping slashes fails the no-escapes row and every hash over a user agent with a slash in it", () => {
   // Every real user agent has a slash ("Mozilla/5.0"), so this mistake breaks
   // most real chains, not just one canonical row.
   assert.deepEqual(failing({ escapeSlashes: true }), [
-    "chain/0002", "chain/0011", "chain/0018", "chain/0023", "chain/0024", "completion/0010", "completion/0020",
+    "chain/0002", "chain/0011", "chain/0018", "chain/0023", "chain/0024", "completion/0010", "completion/0020", "data/0006",
   ]);
 });
 
@@ -326,8 +414,9 @@ test("hashing empty data as [] fails every row whose chain holds an event with n
   assert.deepEqual(failing({ emptyDataAsList: true }), MUTANT_EMPTY_DATA);
 });
 
-test("admitting any source fails exactly the three source-rule rows", () => {
-  assert.deepEqual(failing({ noSourceRule: true }), ["chain/0016", "chain/0017", "chain/0033"]);
+test("admitting any source fails exactly the five source-rule rows", () => {
+  // 0035 and 0037 (0.57.0): a server document.rendered, a client signature.sealed.
+  assert.deepEqual(failing({ noSourceRule: true }), ["chain/0016", "chain/0017", "chain/0033", "chain/0035", "chain/0037"]);
 });
 
 test("skipping the link check fails exactly the broken-link rows", () => {
@@ -357,6 +446,49 @@ test("writing index-keyed objects as lists fails exactly the index-key rows", ()
 
 test("a flat 422 fails exactly the 422 envelope row", () => {
   assert.deepEqual(failing({ flat422: true }), ["otp/0017"]);
+});
+
+// ---- sign/data (fsig-data-1): the mutants of the CC-fancy-0052 plan, section 2.4.
+
+test("the data probe reads JSON source text (JSON.parse source access), or the PHP-float mutant proves nothing", () => {
+  let seen = "";
+  JSON.parse("[12.0]", (_k, v: unknown, ctx?: { source?: string }) => {
+    if (typeof v === "number") seen = String(ctx?.source);
+    return v;
+  });
+  assert.equal(seen, "12.0");
+});
+
+test("PHP's own float form (1.0e-7; 12.0 under PRESERVE_ZERO_FRACTION) fails the integral and exponent rows", () => {
+  assert.deepEqual(failing({ dataPhpFloat: true }), ["data/0003", "data/0004"]);
+});
+
+test("refusing floats (sign/chain canonical JSON as is) fails every row with a non-integral number", () => {
+  assert.deepEqual(failing({ dataRefuseFloats: true }), ["data/0002", "data/0004", "data/0007", "data/0012"]);
+});
+
+test("an assoc decode fails every row with an empty or index-keyed object", () => {
+  assert.deepEqual(failing({ dataAssoc: true }), ["data/0005", "data/0007", "data/0012", "data/0013"]);
+});
+
+test("printing -0 fails exactly the integral-number row", () => {
+  assert.deepEqual(failing({ dataNegZero: true }), ["data/0003"]);
+});
+
+test("rounding float noise away fails the nested-arrays row", () => {
+  assert.deepEqual(failing({ dataRound: true }), ["data/0002", "data/0012"]);
+});
+
+test("accepting unsafe integers fails exactly the two unsafe-integer rows", () => {
+  assert.deepEqual(failing({ dataUnsafe: true }), ["data/0008", "data/0009"]);
+});
+
+test("escaping U+2028 fails exactly the escapes row", () => {
+  assert.deepEqual(failing({ dataEscapeLineSep: true }), ["data/0006"]);
+});
+
+test("refusing the empty object fails exactly the empty-object row", () => {
+  assert.deepEqual(failing({ dataRefuseEmpty: true }), ["data/0013"]);
 });
 
 // Sets derived by running each mutant once and reading every id against its

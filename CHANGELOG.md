@@ -10,6 +10,36 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- **`sign/data`** (13 rows, new suite): `fsig-data-1`, the canonical byte form
+  of the data a fancy-sign data-mode envelope signs (CC-fancy-0052,
+  fancy-sign 0.7.0). It is `sign/chain` canonical JSON with one change: a
+  non-integral number prints as ECMAScript `Number::toString` (RFC 8785 section
+  3.2.2.3) instead of being refused. Unsafe integers, lone surrogates and a
+  non-object top level are refused. Inputs are JSON text. SPEC section 6.1.
+  The thirteen hashes were computed by two independent design sketches before
+  the package existed; the goldens are the package's own output and reproduce
+  every one.
+- `sign/chain` 0034-0037 (4 rows): `document.rendered` joins the closed event
+  set as a CLIENT claim (accepted from the client, refused from the server),
+  and `signature.sealed` as a server event (refused from the client). SPEC
+  section 2 and 6.2. The SPEC's event list also gains `signer.requested_changes`,
+  which the rows had carried since 0.53.0 but the list had not.
+- `tests/discrimination-sign.test.ts`: a Node reading of section 6.1 and nine
+  mutants (PHP's float form, floats refused, an assoc decode, `-0`, rounded
+  float noise, unsafe integers accepted, an escaped U+2028, `{}` refused, and
+  the existing UTF-16 key order and escaped slashes), each pinned to the exact
+  rows that catch it.
+
+### Changed
+
+- `sign/otp` `0001-error-codes`: the closed set gains `data_hash_mismatch` and
+  `data_external_reference` (both 422). SPEC section 6.2.
+- **Consumer action:** a fancy-sign port adds the two event types to its closed
+  set (`document.rendered` client-only) and the two error codes. No other
+  existing row changed.
+
 ## [0.56.0] - 2026-11-19
 
 ### Added

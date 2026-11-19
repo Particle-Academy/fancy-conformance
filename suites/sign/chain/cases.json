@@ -1461,6 +1461,155 @@
             "expected": {
                 "error": "refused"
             }
+        },
+        {
+            "id": "0034-append-document-rendered-client",
+            "title": "document.rendered is a client claim: accepted with source client",
+            "since": "0.57.0",
+            "tags": [
+                "append",
+                "data-mode"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "document.rendered",
+                    "actor": "signer:alice",
+                    "source": "client",
+                    "data": {
+                        "data_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+                        "renderer": "host quote-v7 @ host-app 2026.11.19",
+                        "pages": 2
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "envelope_id": "01JD0000000000000000000000",
+                "seq": 1,
+                "at": "2026-11-18T12:00:00Z",
+                "type": "document.rendered",
+                "actor": "signer:alice",
+                "source": "client",
+                "ip": null,
+                "user_agent": null,
+                "data": {
+                    "data_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+                    "renderer": "host quote-v7 @ host-app 2026.11.19",
+                    "pages": 2
+                },
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "hash": "6db310c9da5b0dee5f64f8d11d386c18c919b38b575146e7a5606c3fd20445fd"
+            },
+            "notes": "Which presentation the signer's browser says it showed (data mode). A claim, like page.viewed."
+        },
+        {
+            "id": "0035-append-refuses-server-document-rendered",
+            "title": "document.rendered from the server is refused: only the browser makes that claim",
+            "since": "0.57.0",
+            "tags": [
+                "append",
+                "refusal",
+                "data-mode"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "document.rendered",
+                    "actor": "signer:alice",
+                    "data": {
+                        "data_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+                        "renderer": "host quote-v7 @ host-app 2026.11.19",
+                        "pages": 2
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "error": "refused"
+            }
+        },
+        {
+            "id": "0036-append-signature-sealed",
+            "title": "signature.sealed puts a signature record's token on the chain, server-observed",
+            "since": "0.57.0",
+            "tags": [
+                "append",
+                "data-mode"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "signature.sealed",
+                    "actor": "signer:alice",
+                    "data": {
+                        "signer_id": "alice",
+                        "token": "fsig_sig_v1_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "key_id": "0123456789abcdef"
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "source": "server",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "envelope_id": "01JD0000000000000000000000",
+                "seq": 1,
+                "at": "2026-11-18T12:00:00Z",
+                "type": "signature.sealed",
+                "actor": "signer:alice",
+                "source": "server",
+                "ip": null,
+                "user_agent": null,
+                "data": {
+                    "signer_id": "alice",
+                    "token": "fsig_sig_v1_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "key_id": "0123456789abcdef"
+                },
+                "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+                "hash": "209d08b4f928630e807e44eed509c933ac9255d24d280e9e7710a1c1c2523301"
+            }
+        },
+        {
+            "id": "0037-append-refuses-client-signature-sealed",
+            "title": "a client signature.sealed is refused",
+            "since": "0.57.0",
+            "tags": [
+                "append",
+                "refusal",
+                "data-mode"
+            ],
+            "fn": "append",
+            "input": {
+                "last": null,
+                "event": {
+                    "type": "signature.sealed",
+                    "actor": "signer:alice",
+                    "source": "client",
+                    "data": {
+                        "signer_id": "alice"
+                    },
+                    "envelope_id": "01JD0000000000000000000000",
+                    "at": "2026-11-18T12:00:00Z",
+                    "ip": null,
+                    "user_agent": null
+                }
+            },
+            "expected": {
+                "error": "refused"
+            }
         }
     ]
 }
