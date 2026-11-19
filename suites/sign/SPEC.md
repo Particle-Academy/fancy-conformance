@@ -122,6 +122,16 @@ from the item on a 422 and from `error` otherwise.
 - Scenario op: `changes {text}`, answering `{changes_requested: n}`. The
   scenario includes `data` for this event as it does for `otp.*` and `link.*`.
 
+## 4c. Signing order (`sign/otp` `errorCodes`, CC-fancy-0051)
+
+- `settings.order` is `parallel` (the default, unchanged) or `sequential`.
+  Under `sequential` only the lowest-order group of unsigned signers is
+  invited; the others are `waiting` and have no link.
+- A link opened by a `waiting` signer is refused before anything is shown or
+  recorded: `not_your_turn` (409), a top-level `error` like every non-422 code.
+- The behaviour itself is pinned by the reference package's own suite, not by
+  rows here yet; only the closed code set changed.
+
 ## 5. Fields (`sign/fields`)
 
 - Document field nodes become fields in document order, with `anchor: {node}`.

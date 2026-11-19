@@ -10,6 +10,13 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- `sign/otp` `0001-error-codes`: the closed set gains `not_your_turn` (409),
+  a signer opening a link before their group is invited under fancy-sign's
+  `settings.order: sequential` (CC-fancy-0051). SPEC section 4c. A port must
+  add the code; no other row changed.
+
 ### Changed
 
 - CI: re-pin org third-party allowlist to 2614224

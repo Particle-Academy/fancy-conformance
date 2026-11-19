@@ -30,7 +30,8 @@
                 "already_signed": 409,
                 "already_declined": 409,
                 "step_up_required": 401,
-                "limit_exceeded": 429
+                "limit_exceeded": 429,
+                "not_your_turn": 409
             },
             "notes": "otp_unknown, otp_expired and otp_wrong are NOT here: on the wire they are all otp_invalid (the precise reason is in the otp.failed event)."
         },
