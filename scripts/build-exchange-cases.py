@@ -4667,9 +4667,9 @@ def doc_model_suite() -> Suite:
                     "pageBreak",
                     "hr",
                 ],
-                lw=["chart"],
+                lw=["chart", "toc"],
             ),
-            "Deliberate delta: fine-print draws no charts yet.",
+            "Deliberate delta: fine-print draws no charts yet, and has no table-of-contents field (last-word's toc block, from its bookmarks/fields release).",
         ),
         (
             "0006-run",
@@ -4692,8 +4692,9 @@ def doc_model_suite() -> Suite:
                     "letterSpacing",
                     "footnote",
                 ],
+                lw=["bookmark", "field"],
             ),
-            'A run may carry a footnote ({text: "", footnote: {blocks}}). SHARED since fine-print\'s mixed-pages release, which draws it (owner: "it should not be losing the footnote").',
+            'Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release); fine-print has neither yet. A run may carry a footnote ({text: "", footnote: {blocks}}). SHARED since fine-print\'s mixed-pages release, which draws it (owner: "it should not be losing the footnote").',
         ),
         (
             "0007-paragraph",

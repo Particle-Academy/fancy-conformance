@@ -127,11 +127,12 @@
           "table"
         ],
         "lastWordOnly": [
-          "chart"
+          "chart",
+          "toc"
         ],
         "finePrintOnly": []
       },
-      "notes": "Deliberate delta: fine-print draws no charts yet."
+      "notes": "Deliberate delta: fine-print draws no charts yet, and has no table-of-contents field (last-word's toc block, from its bookmarks/fields release)."
     },
     {
       "id": "0006-run",
@@ -161,10 +162,13 @@
           "text",
           "underline"
         ],
-        "lastWordOnly": [],
+        "lastWordOnly": [
+          "bookmark",
+          "field"
+        ],
         "finePrintOnly": []
       },
-      "notes": "A run may carry a footnote ({text: \"\", footnote: {blocks}}). SHARED since fine-print's mixed-pages release, which draws it (owner: \"it should not be losing the footnote\")."
+      "notes": "Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release); fine-print has neither yet. A run may carry a footnote ({text: \"\", footnote: {blocks}}). SHARED since fine-print's mixed-pages release, which draws it (owner: \"it should not be losing the footnote\")."
     },
     {
       "id": "0007-paragraph",

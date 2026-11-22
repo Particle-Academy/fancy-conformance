@@ -10,6 +10,21 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.59.0] - 2026-11-22
+
+### Changed
+
+- **BREAKING for last-word pins:** `doc-model/shared` 0005-block-types now lists
+  `toc` in `lastWordOnly`, and 0006-run lists `bookmark` and `field` in
+  `lastWordOnly`. These are last-word's table-of-contents block and its Word
+  bookmark and body-field run properties, from its bookmarks/fields release
+  (Particle-Academy/last-word#7, a docx-parity row). fine-print has none of
+  them yet, so both are deliberate deltas. **What to do:** last-word bumps its
+  pin to 0.59.0 in the same change that ships those fields. A last-word still
+  on 0.58.0 keeps passing, and fine-print is unaffected. The faithful probe
+  (`tests/exchange-probe.ts`) and the generator (`scripts/build-exchange-cases.py`)
+  moved together, and every doc-model mutant keeps its exact failing set.
+
 ## [0.58.0] - 2026-11-19
 
 ### Added
