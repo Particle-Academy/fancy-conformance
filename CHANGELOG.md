@@ -10,6 +10,18 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.60.0] - 2026-11-22
+
+### Changed
+
+- **BREAKING for last-word pins:** `doc-model/shared` 0001-document lists
+  `comments` in `lastWordOnly` (top-level review comments), and 0006-run adds
+  `comments` beside `bookmark` and `field` (the ids of comments anchored on a
+  run). Both come from last-word's comments release
+  (Particle-Academy/last-word#8). fine-print has no comments, so these are
+  deliberate deltas. **What to do:** last-word bumps its pin to 0.60.0 in the
+  change that ships comments. A last-word on 0.59.0 keeps passing.
+
 ## [0.59.0] - 2026-11-22
 
 ### Changed

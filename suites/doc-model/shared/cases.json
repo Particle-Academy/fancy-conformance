@@ -22,10 +22,12 @@
           "page",
           "title"
         ],
-        "lastWordOnly": [],
+        "lastWordOnly": [
+          "comments"
+        ],
         "finePrintOnly": []
       },
-      "notes": "meta ({author}) is SHARED since fine-print's mixed-pages release: it writes the PDF's Author and an {author} band token from it."
+      "notes": "Deliberate delta: last-word documents carry top-level review comments (Word comments, from its comments release); fine-print has none yet. meta ({author}) is SHARED since fine-print's mixed-pages release: it writes the PDF's Author and an {author} band token from it."
     },
     {
       "id": "0002-page",
@@ -164,11 +166,12 @@
         ],
         "lastWordOnly": [
           "bookmark",
+          "comments",
           "field"
         ],
         "finePrintOnly": []
       },
-      "notes": "Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release); fine-print has neither yet. A run may carry a footnote ({text: \"\", footnote: {blocks}}). SHARED since fine-print's mixed-pages release, which draws it (owner: \"it should not be losing the footnote\")."
+      "notes": "Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release) and comments (the ids of review comments anchored on the run, from its comments release); fine-print has none yet. A run may carry a footnote ({text: \"\", footnote: {blocks}}). SHARED since fine-print's mixed-pages release, which draws it (owner: \"it should not be losing the footnote\")."
     },
     {
       "id": "0007-paragraph",

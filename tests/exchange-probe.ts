@@ -1879,7 +1879,8 @@ function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<strin
   if (m.lastWordNoBreakPage) lw.pageBreak = ["type"];
   if (m.lastWordNoBandDistances) lw.pageMargins = ["top", "right", "bottom", "left"];
   lw.blockTypes!.push("chart", "toc");
-  lw.run!.push("bookmark", "field");
+  lw.run!.push("bookmark", "field", "comments");
+  lw.document!.push("comments");
   if (!m.lastWordNoFootnote) lw.run!.push("footnote");
   if (!m.lastWordNoMeta) lw.document!.push("meta");
   if (!m.lastWordNoPageVariants) lw.page!.push("firstHeader", "firstFooter", "evenHeader", "evenFooter");

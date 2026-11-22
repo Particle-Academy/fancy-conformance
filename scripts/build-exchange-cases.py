@@ -4613,8 +4613,8 @@ def doc_model_suite() -> Suite:
             "0001-document",
             "Document properties",
             "document",
-            fields(["title", "blocks", "page", "defaultFont", "defaultSize", "meta"]),
-            "meta ({author}) is SHARED since fine-print's mixed-pages release: it writes the PDF's Author and an {author} band token from it.",
+            fields(["title", "blocks", "page", "defaultFont", "defaultSize", "meta"], lw=["comments"]),
+            "Deliberate delta: last-word documents carry top-level review comments (Word comments, from its comments release); fine-print has none yet. meta ({author}) is SHARED since fine-print's mixed-pages release: it writes the PDF's Author and an {author} band token from it.",
         ),
         (
             "0002-page",
@@ -4692,9 +4692,9 @@ def doc_model_suite() -> Suite:
                     "letterSpacing",
                     "footnote",
                 ],
-                lw=["bookmark", "field"],
+                lw=["bookmark", "comments", "field"],
             ),
-            'Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release); fine-print has neither yet. A run may carry a footnote ({text: "", footnote: {blocks}}). SHARED since fine-print\'s mixed-pages release, which draws it (owner: "it should not be losing the footnote").',
+            'Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release) and comments (the ids of review comments anchored on the run, from its comments release); fine-print has none yet. A run may carry a footnote ({text: "", footnote: {blocks}}). SHARED since fine-print\'s mixed-pages release, which draws it (owner: "it should not be losing the footnote").',
         ),
         (
             "0007-paragraph",
