@@ -4613,7 +4613,10 @@ def doc_model_suite() -> Suite:
             "0001-document",
             "Document properties",
             "document",
-            fields(["title", "blocks", "page", "defaultFont", "defaultSize", "meta"], lw=["comments"]),
+            fields(
+                ["title", "blocks", "page", "defaultFont", "defaultSize", "meta"],
+                lw=["comments"],
+            ),
             "Deliberate delta: last-word documents carry top-level review comments (Word comments, from its comments release); fine-print has none yet. meta ({author}) is SHARED since fine-print's mixed-pages release: it writes the PDF's Author and an {author} band token from it.",
         ),
         (
