@@ -224,6 +224,7 @@ list.
 | `quote-flattened` | approximated | a quote's blocks were lifted out of it |
 | `structure-not-recovered` | approximated | a PDF page was read as text only |
 | `typed-as-text` | approximated | a typed value (number, bool, date, datetime, error) became display text |
+| `tracked-change` | approximated | a tracked insertion or deletion (a last-word `revision`) was not carried as a revision; its text was kept or removed as the reader resolved it |
 
 ## 6. Display strings
 

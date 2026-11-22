@@ -4147,7 +4147,12 @@ APPROXIMATED = [
     "quote-flattened",
     "structure-not-recovered",
     "typed-as-text",
+    # Appended, never sorted in: a case id is never renumbered, so a new kind
+    # takes the next unused id at the END of the run (0033, fancy-conformance 0.61.0).
+    "tracked-change",
 ]
+# Kinds added after the suite's first release; a missing kind is SINCE.
+KIND_SINCE = {"tracked-change": "0.61.0"}
 
 
 def report_kinds_suite() -> Suite:
@@ -4159,7 +4164,12 @@ def report_kinds_suite() -> Suite:
         n += 1
     for kind in APPROXIMATED:
         s.add(
-            f"{n:04d}-{kind}", f"{kind} is an approximated kind", f, {"kind": kind}, "approximated"
+            f"{n:04d}-{kind}",
+            f"{kind} is an approximated kind",
+            f,
+            {"kind": kind},
+            "approximated",
+            since=KIND_SINCE.get(kind),
         )
         n += 1
     for cid, kind, note in [
@@ -4595,6 +4605,16 @@ PARAGRAPH_PROPS = [
 ]
 
 
+def revision_note(what: str) -> str:
+    """The deliberate delta from last-word's tracked-changes release."""
+    return (
+        f"Deliberate delta: last-word {what} carry revision (a tracked change on the"
+        " paragraph mark, from its tracked-changes release). fine-print does not render"
+        " revisions: it refuses one with revision_unsupported, or accepts it in"
+        " validateAndRepair."
+    )
+
+
 def doc_model_suite() -> Suite:
     s = Suite("doc-model/shared")
     f = "compare"
@@ -4695,30 +4715,30 @@ def doc_model_suite() -> Suite:
                     "letterSpacing",
                     "footnote",
                 ],
-                lw=["bookmark", "comments", "field"],
+                lw=["bookmark", "comments", "field", "revision"],
             ),
-            'Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release) and comments (the ids of review comments anchored on the run, from its comments release); fine-print has none yet. A run may carry a footnote ({text: "", footnote: {blocks}}). SHARED since fine-print\'s mixed-pages release, which draws it (owner: "it should not be losing the footnote").',
+            'Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release), comments (the ids of review comments anchored on the run, from its comments release) and revision (a tracked insertion or deletion, from its tracked-changes release); fine-print has none yet. fine-print does not render revisions: it refuses one with revision_unsupported, or accepts it in validateAndRepair. A run may carry a footnote ({text: "", footnote: {blocks}}). SHARED since fine-print\'s mixed-pages release, which draws it (owner: "it should not be losing the footnote").',
         ),
         (
             "0007-paragraph",
             "Paragraph properties",
             "paragraph",
-            fields(["type", "runs", *PARAGRAPH_PROPS]),
-            None,
+            fields(["type", "runs", *PARAGRAPH_PROPS], lw=["revision"]),
+            revision_note("paragraphs"),
         ),
         (
             "0008-heading",
             "Heading properties",
             "heading",
-            fields(["type", "level", "runs", *PARAGRAPH_PROPS]),
-            None,
+            fields(["type", "level", "runs", *PARAGRAPH_PROPS], lw=["revision"]),
+            revision_note("headings"),
         ),
         (
             "0009-list-item",
             "List item properties",
             "listItem",
-            fields(["runs", "children", *PARAGRAPH_PROPS]),
-            None,
+            fields(["runs", "children", *PARAGRAPH_PROPS], lw=["revision"]),
+            revision_note("list items"),
         ),
         (
             "0010-table",

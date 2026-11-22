@@ -10,6 +10,30 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-11-22
+
+### Changed
+
+- **BREAKING for pins:** `exchange/report-kinds` adds the closed-list kind
+  `tracked-change`, classified as `approximated`, as the NEW row
+  `0033-tracked-change` (appended; no existing id moved). It is what a reader
+  files when a tracked insertion or deletion is not carried as a revision.
+  **What to do:** every implementation of the report-kinds closed list
+  (last-word, holy-sheet, dark-slide, fine-print and their ports) adds
+  `tracked-change` to its approximated kinds in the change that bumps its pin to
+  0.61.0. An implementation staying on 0.60.0 keeps passing. `suites/exchange/SPEC.md`
+  section 5.1 lists it.
+- **BREAKING for last-word pins:** `doc-model/shared` 0006-run adds `revision`
+  to `lastWordOnly` beside `bookmark`, `comments` and `field`, and
+  0007-paragraph, 0008-heading and 0009-list-item each gain `lastWordOnly:
+  ["revision"]`. These come from last-word's tracked-changes release
+  (Particle-Academy/last-word#9). They are deliberate deltas: fine-print does
+  not render revisions; it refuses one with `revision_unsupported`, or accepts
+  it in `validateAndRepair`. **What to do:** last-word bumps its pin to 0.61.0
+  in the change that ships tracked changes; on 0.60.0 it keeps passing.
+  fine-print's field sets are unchanged. The faithful probe and the generator
+  moved together, and every mutant keeps its exact failing set.
+
 ## [0.60.0] - 2026-11-22
 
 ### Changed

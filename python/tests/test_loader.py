@@ -408,7 +408,7 @@ EXCHANGE_COUNTS = {
     "exchange/number-display": 44,
     "exchange/policy": 25,
     "exchange/range": 51,
-    "exchange/report-kinds": 40,
+    "exchange/report-kinds": 41,
     "exchange/to-dark-slide": 13,
     "exchange/to-fine-print": 11,
     "exchange/to-holy-sheet": 9,

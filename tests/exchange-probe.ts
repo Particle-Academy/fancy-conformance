@@ -79,7 +79,7 @@ export const DROPPED = [
 export const APPROXIMATED = [
   "cell-truncated", "chart-as-table", "code-as-text", "csv-escaped", "format-approximated", "formula-as-value",
   "formula-uncomputed", "header-rows-flattened", "layout-not-preserved", "markup-as-text", "merge-flattened",
-  "merge-unread", "quote-flattened", "structure-not-recovered", "typed-as-text",
+  "merge-unread", "quote-flattened", "structure-not-recovered", "typed-as-text", "tracked-change",
 ];
 
 export function classifyKind(kind: string, m: Mutations = {}): string | null {
@@ -1879,7 +1879,11 @@ function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<strin
   if (m.lastWordNoBreakPage) lw.pageBreak = ["type"];
   if (m.lastWordNoBandDistances) lw.pageMargins = ["top", "right", "bottom", "left"];
   lw.blockTypes!.push("chart", "toc");
-  lw.run!.push("bookmark", "field", "comments");
+  lw.run!.push("bookmark", "field", "comments", "revision");
+  // last-word's tracked-changes release; fine-print refuses or repairs a revision.
+  lw.paragraph!.push("revision");
+  lw.heading!.push("revision");
+  lw.listItem!.push("revision");
   lw.document!.push("comments");
   if (!m.lastWordNoFootnote) lw.run!.push("footnote");
   if (!m.lastWordNoMeta) lw.document!.push("meta");

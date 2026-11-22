@@ -167,11 +167,12 @@
         "lastWordOnly": [
           "bookmark",
           "comments",
-          "field"
+          "field",
+          "revision"
         ],
         "finePrintOnly": []
       },
-      "notes": "Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release) and comments (the ids of review comments anchored on the run, from its comments release); fine-print has none yet. A run may carry a footnote ({text: \"\", footnote: {blocks}}). SHARED since fine-print's mixed-pages release, which draws it (owner: \"it should not be losing the footnote\")."
+      "notes": "Deliberate delta: last-word runs carry bookmark and field (Word bookmarks and body fields, from its bookmarks/fields release), comments (the ids of review comments anchored on the run, from its comments release) and revision (a tracked insertion or deletion, from its tracked-changes release); fine-print has none yet. fine-print does not render revisions: it refuses one with revision_unsupported, or accepts it in validateAndRepair. A run may carry a footnote ({text: \"\", footnote: {blocks}}). SHARED since fine-print's mixed-pages release, which draws it (owner: \"it should not be losing the footnote\")."
     },
     {
       "id": "0007-paragraph",
@@ -198,9 +199,12 @@
           "spaceBefore",
           "type"
         ],
-        "lastWordOnly": [],
+        "lastWordOnly": [
+          "revision"
+        ],
         "finePrintOnly": []
-      }
+      },
+      "notes": "Deliberate delta: last-word paragraphs carry revision (a tracked change on the paragraph mark, from its tracked-changes release). fine-print does not render revisions: it refuses one with revision_unsupported, or accepts it in validateAndRepair."
     },
     {
       "id": "0008-heading",
@@ -228,9 +232,12 @@
           "spaceBefore",
           "type"
         ],
-        "lastWordOnly": [],
+        "lastWordOnly": [
+          "revision"
+        ],
         "finePrintOnly": []
-      }
+      },
+      "notes": "Deliberate delta: last-word headings carry revision (a tracked change on the paragraph mark, from its tracked-changes release). fine-print does not render revisions: it refuses one with revision_unsupported, or accepts it in validateAndRepair."
     },
     {
       "id": "0009-list-item",
@@ -257,9 +264,12 @@
           "spaceAfter",
           "spaceBefore"
         ],
-        "lastWordOnly": [],
+        "lastWordOnly": [
+          "revision"
+        ],
         "finePrintOnly": []
-      }
+      },
+      "notes": "Deliberate delta: last-word list items carry revision (a tracked change on the paragraph mark, from its tracked-changes release). fine-print does not render revisions: it refuses one with revision_unsupported, or accepts it in validateAndRepair."
     },
     {
       "id": "0010-table",

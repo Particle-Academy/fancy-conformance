@@ -419,6 +419,19 @@
       "expected": "approximated"
     },
     {
+      "id": "0033-tracked-change",
+      "title": "tracked-change is an approximated kind",
+      "since": "0.61.0",
+      "tags": [
+        "report-kinds"
+      ],
+      "fn": "classifyKind",
+      "input": {
+        "kind": "tracked-change"
+      },
+      "expected": "approximated"
+    },
+    {
       "id": "0101-unknown",
       "title": "'secret' is not a kind",
       "since": "0.37.0",
