@@ -10,6 +10,21 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.62.0] - 2026-11-22
+
+### Changed
+
+- **BREAKING for last-word pins:** `doc-model/shared` 0002-page lists `columns`
+  in `lastWordOnly`, and 0005-block-types adds `columnBreak`. Both come from
+  last-word's columns release (Particle-Academy/last-word#12); fine-print draws
+  a single column, so these are deliberate deltas. `last-word/docx-constructs`
+  0092-read-file-section-starts has a new golden, produced by running that
+  branch's `Agent::read` on `fixtures/section-starts.docx`. Continuous section
+  breaks and column changes now read as a `pageBreak` with `page.start` or
+  `page.columns`, where 0.61.0 left them out. **What to do:** last-word bumps
+  its pin to 0.62.0 in the change that ships columns. A last-word on 0.61.0
+  keeps passing.
+
 ## [0.61.0] - 2026-11-22
 
 ### Changed

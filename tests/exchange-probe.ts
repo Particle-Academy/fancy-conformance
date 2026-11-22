@@ -1878,7 +1878,8 @@ function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<strin
   if (m.finePrintNoBreakPage) fp.pageBreak = ["type"];
   if (m.lastWordNoBreakPage) lw.pageBreak = ["type"];
   if (m.lastWordNoBandDistances) lw.pageMargins = ["top", "right", "bottom", "left"];
-  lw.blockTypes!.push("chart", "toc");
+  lw.blockTypes!.push("chart", "toc", "columnBreak");
+  lw.page!.push("columns");
   lw.run!.push("bookmark", "field", "comments", "revision");
   // last-word's tracked-changes release; fine-print refuses or repairs a revision.
   lw.paragraph!.push("revision");

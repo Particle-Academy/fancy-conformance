@@ -10729,12 +10729,24 @@
             ]
           },
           {
+            "type": "pageBreak",
+            "page": {
+              "start": "continuous"
+            }
+          },
+          {
             "type": "paragraph",
             "runs": [
               {
                 "text": "continuous, same page: no break, reported"
               }
             ]
+          },
+          {
+            "type": "pageBreak",
+            "page": {
+              "start": "continuous"
+            }
           },
           {
             "type": "paragraph",
@@ -10797,6 +10809,9 @@
               "orientation": "portrait",
               "margins": {
                 "top": 72
+              },
+              "columns": {
+                "count": 2
               }
             }
           },
@@ -10811,7 +10826,10 @@
           {
             "type": "pageBreak",
             "page": {
-              "orientation": "landscape"
+              "orientation": "landscape",
+              "columns": {
+                "count": 1
+              }
             }
           },
           {
@@ -10839,17 +10857,7 @@
         ],
         "unrepresented": [
           {
-            "where": "/blocks/1",
-            "kind": "layout-not-preserved",
-            "count": 1
-          },
-          {
-            "where": "/blocks/2",
-            "kind": "layout-not-preserved",
-            "count": 1
-          },
-          {
-            "where": "/blocks/5",
+            "where": "/blocks/3",
             "kind": "layout-not-preserved",
             "count": 1
           },
@@ -10864,12 +10872,12 @@
             "count": 1
           },
           {
-            "where": "/blocks/11",
+            "where": "/blocks/13",
             "kind": "layout-not-preserved",
             "count": 1
           },
           {
-            "where": "/blocks/13",
+            "where": "/blocks/15",
             "kind": "layout-not-preserved",
             "count": 1
           }

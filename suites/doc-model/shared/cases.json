@@ -54,10 +54,12 @@
           "orientation",
           "size"
         ],
-        "lastWordOnly": [],
+        "lastWordOnly": [
+          "columns"
+        ],
         "finePrintOnly": []
       },
-      "notes": "Owner decision 11: last-word gains page.background and page.border. This row FAILS for last-word until it does; that is the point. First-page and even-page bands are SHARED since fine-print's mixed-pages release."
+      "notes": "Deliberate delta: last-word pages carry text columns (from its columns release); fine-print draws one column. Owner decision 11: last-word gains page.background and page.border. This row FAILS for last-word until it does; that is the point. First-page and even-page bands are SHARED since fine-print's mixed-pages release."
     },
     {
       "id": "0003-page-border",
@@ -130,6 +132,7 @@
         ],
         "lastWordOnly": [
           "chart",
+          "columnBreak",
           "toc"
         ],
         "finePrintOnly": []
