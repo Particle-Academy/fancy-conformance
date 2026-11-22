@@ -120,7 +120,7 @@ $display = function (array $in) use ($formatFloat, $symbols, $percentOf): string
 };
 
 $dropped = ['cell-style-dropped', 'chart', 'comment', 'composite-element', 'embedded-object', 'hidden-column', 'hidden-element', 'hidden-row', 'hidden-sheet', 'hidden-slide', 'image', 'link', 'nested-block', 'non-table-item', 'run-style-dropped', 'shape', 'table-clipped'];
-$approximated = ['cell-truncated', 'chart-as-table', 'code-as-text', 'csv-escaped', 'format-approximated', 'formula-as-value', 'formula-uncomputed', 'header-rows-flattened', 'layout-not-preserved', 'markup-as-text', 'merge-flattened', 'merge-unread', 'quote-flattened', 'structure-not-recovered', 'typed-as-text'];
+$approximated = ['cell-truncated', 'chart-as-table', 'code-as-text', 'csv-escaped', 'format-approximated', 'formula-as-value', 'formula-uncomputed', 'header-rows-flattened', 'layout-not-preserved', 'markup-as-text', 'merge-flattened', 'merge-unread', 'quote-flattened', 'structure-not-recovered', 'typed-as-text', 'tracked-change'];
 
 $classifyKind = fn (string $kind): ?string => in_array($kind, $dropped, true) ? 'dropped' : (in_array($kind, $approximated, true) ? 'approximated' : null);
 
