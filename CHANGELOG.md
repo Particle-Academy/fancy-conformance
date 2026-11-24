@@ -10,6 +10,8 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.63.0] - 2026-11-24
+
 ### Added
 
 - `doc-model/shared` pins last-word's text boxes and shapes and the shared
