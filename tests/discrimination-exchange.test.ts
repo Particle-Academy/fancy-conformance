@@ -166,6 +166,16 @@ const MUTANTS: Array<[string, string, string, string[]]> = [
   ["doc-model/shared", "last-word with no header or footer distance", "lastWordNoBandDistances", ["0016"]],
   ["doc-model/shared", "the link rule converged (a deliberate delta erased)", "linkConverged", ["0101"]],
   ["doc-model/shared", "the size rule converged (a deliberate delta erased)", "sizeConverged", ["0102"]],
+  ["doc-model/shared", "fine-print accepting shape", "finePrintShape", ["0005"]],
+  [
+    "doc-model/shared",
+    "last-word before its text boxes and shapes release",
+    "lastWordNoShapes",
+    ["0005", "0017", "0018", "0019", "0020", "0021", "0107", "0108", "0109", "0110", "0111", "0112", "0113", "0114", "0115"],
+  ],
+  ["doc-model/shared", "an anchor with no allowOverlap", "lastWordNoAllowOverlap", ["0018"]],
+  ["doc-model/shared", "the wrap named front, not inFront", "anchorWrapFront", ["0107"]],
+  ["doc-model/shared", "anchor offsets in EMU, not points", "anchorOffsetEmu", ["0108", "0109"]],
   // doc-model/page-refusal
   ["doc-model/page-refusal", "a repairer rewriting a break to bare {type} and reporting ok", "repairStripsPage", ["0003"]],
   ["doc-model/page-refusal", "last-word still refusing page, as before DOCX stage 2", "lastWordStage1", ["0001", "0002", "0003", "0004", "0010", "0011", "0012", "0013", "0014", "0015", "0016", "0017", "0018", "0019", "0020", "0033", "0034", "0035"]],

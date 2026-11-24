@@ -176,7 +176,7 @@ it('loads the exchange suites and doc-model/shared, every row with a declared fu
     // this loader is the failure this catches. Move them with the suites.
     $expected = [
         'doc-model/page-refusal' => 21,
-        'doc-model/shared' => 22,
+        'doc-model/shared' => 36,
         'exchange/content' => 56,
         'exchange/csv' => 12,
         'exchange/from-dark-slide' => 18,

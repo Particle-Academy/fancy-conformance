@@ -10,6 +10,47 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- `doc-model/shared` pins last-word's text boxes and shapes and the shared
+  anchor model (Particle-Academy/last-word#13), as 14 NEW rows (appended; no
+  existing id moved), each `since: 0.63.0`:
+  - compare rows `0017-shape`, `0018-anchor`, `0019-anchor-horizontal`,
+    `0020-anchor-vertical` and `0021-shape-outline`. Every field is
+    `lastWordOnly`: fine-print has no shape and no anchor yet, so its half of
+    each is empty.
+  - constraint rows `0107` to `0115`: the agreed names and units, so anchored
+    pictures (CC-fancy-0055) cannot drift from them. `anchor.wrap` names
+    `inFront` (not `front`); `anchor.horizontal` / `vertical` `offset` is points
+    within -1584 to 1584; both `relativeTo` and `align` enums; `shape.widthPx` /
+    `heightPx` are px at 96 dpi, 0 to 2112. fine-print's half of each is `{}`.
+- `suites/exchange/SPEC.md` section 15 lists the shape and anchor deltas and the
+  renderer contract both packages agreed with the anchor model: a renderer that
+  cannot place a floating drawing draws it inline and reports
+  `layout-not-preserved`; one that cannot draw a `shape` draws its `blocks` and
+  reports `shape`; dropping the text is a bug. No row exercises a renderer
+  against that contract yet.
+- Discrimination mutants for the new rows: fine-print accepting `shape` (fails
+  0005), last-word before shapes (fails 0005, 0017 to 0021 and 0107 to 0115), an
+  anchor with no `allowOverlap` (0018), the wrap named `front` (0107), and offsets
+  in EMU (0108, 0109).
+
+### Changed
+
+- **BREAKING for pins (last-word, fine-print, last-word-py):** `doc-model/shared`
+  0005-block-types lists `shape` in `lastWordOnly` beside `chart`,
+  `columnBreak` and `toc`. And every consumer resolves a row's `def` through a
+  closed lookup (PHP `match`, a Python dict), so the new rows throw
+  `UnhandledMatchError` / `KeyError` until it learns the new names. **What to
+  do:** in the change that bumps the pin, add arms for the compare defs `shape`,
+  `shapeOutline`, `anchor`, `anchorHorizontal`, `anchorVertical` and the
+  constraint paths `anchor.wrap`, `anchor.{horizontal,vertical}.{offset,relativeTo,align}`,
+  `shape.widthPx`, `shape.heightPx`. last-word reads them from its schema
+  (`$defs.anchor`, the `shape` block and its `outline`); fine-print, which has
+  neither, maps each compare def to an empty property set and each constraint
+  to `[]`. A consumer staying on 0.62.0 keeps passing. The four loaders' pinned
+  row count for `doc-model/shared` moves from 22 to 36.
+
 ## [0.62.0] - 2026-11-22
 
 ### Changed

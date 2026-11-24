@@ -403,7 +403,7 @@ fn the_exchange_suites_load_with_exact_counts() {
     // loader is the failure this catches. Move the numbers with the suites.
     let expected: [(&str, usize); 17] = [
         ("doc-model/page-refusal", 21),
-        ("doc-model/shared", 22),
+        ("doc-model/shared", 36),
         ("exchange/content", 56),
         ("exchange/csv", 12),
         ("exchange/from-dark-slide", 18),

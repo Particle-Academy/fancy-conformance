@@ -397,7 +397,7 @@ def test_every_shipped_table_suite_loads(tmp_path: Path) -> None:
 
 EXCHANGE_COUNTS = {
     "doc-model/page-refusal": 21,
-    "doc-model/shared": 22,
+    "doc-model/shared": 36,
     "exchange/content": 56,
     "exchange/csv": 12,
     "exchange/from-dark-slide": 18,

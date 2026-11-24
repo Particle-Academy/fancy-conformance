@@ -31,6 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent / "suites"
 SINCE = "0.37.0"
 SINCE_MIXED_PAGES = "0.44.0"
 SINCE_MIXED_DOCX = "0.45.0"
+SINCE_SHAPES = "0.63.0"
 SUITE_SINCE = {"doc-model/page-refusal": SINCE_MIXED_PAGES}
 SPEC = "suites/exchange/SPEC.md"
 
@@ -4677,7 +4678,7 @@ def doc_model_suite() -> Suite:
         ),
         (
             "0005-block-types",
-            "Block types: chart is last-word's alone",
+            "Block types: chart, columnBreak, shape and toc are last-word's alone",
             "blockTypes",
             fields(
                 [
@@ -4691,9 +4692,9 @@ def doc_model_suite() -> Suite:
                     "pageBreak",
                     "hr",
                 ],
-                lw=["chart", "columnBreak", "toc"],
+                lw=["chart", "columnBreak", "shape", "toc"],
             ),
-            "Deliberate delta: fine-print draws no charts yet, and has no table-of-contents field (last-word's toc block, from its bookmarks/fields release).",
+            "Deliberate delta: fine-print draws no charts yet, has no table-of-contents field (last-word's toc block, from its bookmarks/fields release), draws one column (columnBreak, from its columns release), and has no shapes or text boxes (last-word's shape block, from its text boxes and shapes release). The shared renderer contract for a shape it cannot draw: draw its blocks as ordinary blocks and report shape; dropping the text is a bug.",
         ),
         (
             "0006-run",
@@ -4788,6 +4789,64 @@ def doc_model_suite() -> Suite:
         "Had no row until stage 2, though both writers read margins.header and margins.footer since their first-page band releases.",
         since=SINCE_MIXED_DOCX,
     )
+    # last-word's text boxes and shapes release (Particle-Academy/last-word#13).
+    # The anchor is SHARED with Fancy's anchored pictures (CC-fancy-0055), so its
+    # field set and units are pinned here before a second drawing takes it.
+    shapes: list[tuple[str, str, str, Any, str | None]] = [
+        (
+            "0017-shape",
+            "shape: a drawing shape, or a text box when it has blocks",
+            "shape",
+            fields(
+                [],
+                lw=[
+                    "type",
+                    "geometry",
+                    "widthPx",
+                    "heightPx",
+                    "fill",
+                    "outline",
+                    "flipH",
+                    "flipV",
+                    "anchor",
+                    "verticalAlign",
+                    "alt",
+                    "blocks",
+                ],
+            ),
+            "Deliberate delta until fine-print draws shapes: it has no shape block, so its field set is empty. Sizes are px at 96 dpi, as image.widthPx / heightPx.",
+        ),
+        (
+            "0018-anchor",
+            "anchor: where a floating drawing sits and how text wraps it",
+            "anchor",
+            fields([], lw=["horizontal", "vertical", "wrap", "allowOverlap"]),
+            "The anchor model agreed between last-word and Fancy before either built it, and shared with anchored pictures (CC-fancy-0055). allowOverlap is in the model (true by default). Absent, a drawing is inline. fine-print has none yet: a renderer that cannot place a floating drawing draws it inline at its paragraph and reports layout-not-preserved.",
+        ),
+        (
+            "0019-anchor-horizontal",
+            "anchor.horizontal: relativeTo, then offset or align",
+            "anchorHorizontal",
+            fields([], lw=["relativeTo", "offset", "align"]),
+            "offset and align are never both set; that is a validation rule, not a field-set one.",
+        ),
+        (
+            "0020-anchor-vertical",
+            "anchor.vertical: relativeTo, then offset or align",
+            "anchorVertical",
+            fields([], lw=["relativeTo", "offset", "align"]),
+            None,
+        ),
+        (
+            "0021-shape-outline",
+            "shape.outline: color, width, dash style and arrowheads",
+            "shapeOutline",
+            fields([], lw=["color", "width", "style", "headEnd", "tailEnd"]),
+            "width is points, as border.width.",
+        ),
+    ]
+    for cid, title, d, exp, note in shapes:
+        s.add(cid, title, f, {"def": d}, exp, note, since=SINCE_SHAPES)
     cons: list[tuple[str, str, str, Any, str | None]] = [
         (
             "0101-run-link",
@@ -4852,6 +4911,85 @@ def doc_model_suite() -> Suite:
     ]
     for cid, title, d, exp, note in cons:
         s.add(cid, title, "constraint", {"def": d}, exp, note)
+    # The anchor's agreed units and names, as keywords. fine-print declares
+    # nothing at these paths yet, so its half is {}.
+    offset_pt = {"type": "number", "minimum": -1584, "maximum": 1584}
+    size_px = {"type": "number", "minimum": 0, "maximum": 2112}
+    shape_cons: list[tuple[str, str, str, Any, str | None]] = [
+        (
+            "0107-anchor-wrap",
+            "anchor.wrap: inFront, not front",
+            "anchor.wrap",
+            {"enum": ["square", "tight", "through", "topAndBottom", "behind", "inFront"]},
+            "Agreed name: inFront (Fancy's decision when the anchor model was accepted). behind and inFront are the two wrapNone cases.",
+        ),
+        (
+            "0108-anchor-horizontal-offset",
+            "anchor.horizontal.offset is points, at most 22in either way",
+            "anchor.horizontal.offset",
+            offset_pt,
+            "Agreed unit: points for offsets, px for size. 1584pt is 22in, the same bound as the 2112px size cap (0114).",
+        ),
+        (
+            "0109-anchor-vertical-offset",
+            "anchor.vertical.offset is points, at most 22in either way",
+            "anchor.vertical.offset",
+            offset_pt,
+            None,
+        ),
+        (
+            "0110-anchor-horizontal-relative-to",
+            "anchor.horizontal.relativeTo",
+            "anchor.horizontal.relativeTo",
+            {"enum": ["page", "margin", "column", "character"]},
+            None,
+        ),
+        (
+            "0111-anchor-vertical-relative-to",
+            "anchor.vertical.relativeTo",
+            "anchor.vertical.relativeTo",
+            {"enum": ["page", "margin", "paragraph", "line"]},
+            None,
+        ),
+        (
+            "0112-anchor-horizontal-align",
+            "anchor.horizontal.align",
+            "anchor.horizontal.align",
+            {"enum": ["left", "center", "right", "inside", "outside"]},
+            None,
+        ),
+        (
+            "0113-anchor-vertical-align",
+            "anchor.vertical.align",
+            "anchor.vertical.align",
+            {"enum": ["top", "center", "bottom", "inside", "outside"]},
+            None,
+        ),
+        (
+            "0114-shape-width-px",
+            "shape.widthPx is px at 96 dpi, 0 to 22in",
+            "shape.widthPx",
+            size_px,
+            "Agreed unit: px for size, as image.widthPx. 0 is allowed by the schema for a line; an area shape with a zero side is a validation refusal, not a keyword.",
+        ),
+        (
+            "0115-shape-height-px",
+            "shape.heightPx is px at 96 dpi, 0 to 22in",
+            "shape.heightPx",
+            size_px,
+            None,
+        ),
+    ]
+    for cid, title, d, lw_kw, note in shape_cons:
+        s.add(
+            cid,
+            title,
+            "constraint",
+            {"def": d},
+            {"lastWord": lw_kw, "finePrint": {}},
+            note,
+            since=SINCE_SHAPES,
+        )
     return s
 
 

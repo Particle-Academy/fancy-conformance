@@ -707,7 +707,9 @@ drift and fails a row:
 
 | Definition | last-word only | fine-print only | Why |
 |---|---|---|---|
-| block types | `chart` | | fine-print draws no charts yet |
+| block types | `chart`, `columnBreak`, `shape`, `toc` | | fine-print draws no charts, one column, no shapes or text boxes, and no table of contents yet |
+| `shape`, `shape.outline` | every field | | last-word's text boxes and shapes (last-word#13); sizes px at 96 dpi, outline width points |
+| `anchor`, `anchor.horizontal`, `anchor.vertical` | every field | | the floating-drawing model, shared with anchored pictures (CC-fancy-0055); offsets points within ±1584, `wrap` names `behind` / `inFront` |
 | `run.link` | any string | `^(https?://|mailto:)` | a PDF link is an action |
 | `run.size`, `defaultSize`, `band.size` | `exclusiveMinimum: 0` | `minimum: 1` (run, defaultSize also `maximum: 400`) | text under 1pt reads as hidden text |
 | `page.size` | | | identical enum |
@@ -722,6 +724,13 @@ is the point.
 
 `pageBreak.page` and `page.margins` are SHARED: last-word writes and reads a break's
 `page` since DOCX stage 2 (0.45.0).
+
+A renderer that does not support a `shape` or an `anchor` yet must not lose text.
+One that cannot place a floating drawing draws it inline at its paragraph and
+reports `layout-not-preserved`; one that cannot draw a `shape` draws its `blocks`
+as ordinary blocks and reports `shape`. Dropping the text is a bug. This is the
+contract both packages agreed with the anchor model; `doc-model/shared` pins the
+field sets only, and no row yet exercises a renderer against it.
 
 `doc-model/page-refusal` holds what both writers refuse and must not lose, as messages
 (the same bytes in both, paths left out because Node's are JSON Pointers) and

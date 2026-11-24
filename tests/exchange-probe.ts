@@ -1894,6 +1894,18 @@ function schemas(m: Mutations): { lw: Record<string, string[]>; fp: Record<strin
     lw.pageBorder = [];
   }
   if (m.finePrintChart) fp.blockTypes!.push("chart");
+  // last-word's text boxes and shapes release (last-word#13). fine-print has no
+  // shape and no anchor, so its side of every one of these is absent.
+  if (!m.lastWordNoShapes) {
+    lw.blockTypes!.push("shape");
+    lw.shape = ["type", "geometry", "widthPx", "heightPx", "fill", "outline", "flipH", "flipV", "anchor", "verticalAlign", "alt", "blocks"];
+    lw.shapeOutline = ["color", "width", "style", "headEnd", "tailEnd"];
+    lw.anchor = ["horizontal", "vertical", "wrap"];
+    if (!m.lastWordNoAllowOverlap) lw.anchor.push("allowOverlap");
+    lw.anchorHorizontal = ["relativeTo", "offset", "align"];
+    lw.anchorVertical = ["relativeTo", "offset", "align"];
+  }
+  if (m.finePrintShape) fp.blockTypes!.push("shape");
   return { lw, fp };
 }
 
@@ -1912,6 +1924,28 @@ export function docModelConstraint(def: string, m: Mutations = {}): J {
   const c = structuredClone(BASE_CONSTRAINTS);
   if (m.linkConverged) c.lastWord["run.link"] = c.finePrint["run.link"];
   if (m.sizeConverged) c.finePrint["run.size"] = c.lastWord["run.size"];
+  if (!m.lastWordNoShapes) {
+    // The anchor's agreed names and units: inFront, offsets in points, sizes in px.
+    const offset = m.anchorOffsetEmu
+      ? { type: "number", minimum: -20116800, maximum: 20116800 }
+      : { type: "number", minimum: -1584, maximum: 1584 };
+    const sizePx = { type: "number", minimum: 0, maximum: 2112 };
+    const shapeKeywords: Record<string, J> = {
+      "anchor.wrap": { enum: ["square", "tight", "through", "topAndBottom", "behind", m.anchorWrapFront ? "front" : "inFront"] },
+      "anchor.horizontal.offset": offset,
+      "anchor.vertical.offset": offset,
+      "anchor.horizontal.relativeTo": { enum: ["page", "margin", "column", "character"] },
+      "anchor.vertical.relativeTo": { enum: ["page", "margin", "paragraph", "line"] },
+      "anchor.horizontal.align": { enum: ["left", "center", "right", "inside", "outside"] },
+      "anchor.vertical.align": { enum: ["top", "center", "bottom", "inside", "outside"] },
+      "shape.widthPx": sizePx,
+      "shape.heightPx": sizePx,
+    };
+    for (const [path, kw] of Object.entries(shapeKeywords)) {
+      c.lastWord[path] = kw;
+      c.finePrint[path] = {};
+    }
+  }
   return { lastWord: c.lastWord[def], finePrint: c.finePrint[def] };
 }
 

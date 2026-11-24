@@ -109,7 +109,7 @@
     },
     {
       "id": "0005-block-types",
-      "title": "Block types: chart is last-word's alone",
+      "title": "Block types: chart, columnBreak, shape and toc are last-word's alone",
       "since": "0.37.0",
       "tags": [
         "shared"
@@ -133,11 +133,12 @@
         "lastWordOnly": [
           "chart",
           "columnBreak",
+          "shape",
           "toc"
         ],
         "finePrintOnly": []
       },
-      "notes": "Deliberate delta: fine-print draws no charts yet, and has no table-of-contents field (last-word's toc block, from its bookmarks/fields release)."
+      "notes": "Deliberate delta: fine-print draws no charts yet, has no table-of-contents field (last-word's toc block, from its bookmarks/fields release), draws one column (columnBreak, from its columns release), and has no shapes or text boxes (last-word's shape block, from its text boxes and shapes release). The shared renderer contract for a shape it cannot draw: draw its blocks as ordinary blocks and report shape; dropping the text is a bug."
     },
     {
       "id": "0006-run",
@@ -441,6 +442,127 @@
       "notes": "Had no row until stage 2, though both writers read margins.header and margins.footer since their first-page band releases."
     },
     {
+      "id": "0017-shape",
+      "title": "shape: a drawing shape, or a text box when it has blocks",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "shape"
+      },
+      "expected": {
+        "both": [],
+        "lastWordOnly": [
+          "alt",
+          "anchor",
+          "blocks",
+          "fill",
+          "flipH",
+          "flipV",
+          "geometry",
+          "heightPx",
+          "outline",
+          "type",
+          "verticalAlign",
+          "widthPx"
+        ],
+        "finePrintOnly": []
+      },
+      "notes": "Deliberate delta until fine-print draws shapes: it has no shape block, so its field set is empty. Sizes are px at 96 dpi, as image.widthPx / heightPx."
+    },
+    {
+      "id": "0018-anchor",
+      "title": "anchor: where a floating drawing sits and how text wraps it",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "anchor"
+      },
+      "expected": {
+        "both": [],
+        "lastWordOnly": [
+          "allowOverlap",
+          "horizontal",
+          "vertical",
+          "wrap"
+        ],
+        "finePrintOnly": []
+      },
+      "notes": "The anchor model agreed between last-word and Fancy before either built it, and shared with anchored pictures (CC-fancy-0055). allowOverlap is in the model (true by default). Absent, a drawing is inline. fine-print has none yet: a renderer that cannot place a floating drawing draws it inline at its paragraph and reports layout-not-preserved."
+    },
+    {
+      "id": "0019-anchor-horizontal",
+      "title": "anchor.horizontal: relativeTo, then offset or align",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "anchorHorizontal"
+      },
+      "expected": {
+        "both": [],
+        "lastWordOnly": [
+          "align",
+          "offset",
+          "relativeTo"
+        ],
+        "finePrintOnly": []
+      },
+      "notes": "offset and align are never both set; that is a validation rule, not a field-set one."
+    },
+    {
+      "id": "0020-anchor-vertical",
+      "title": "anchor.vertical: relativeTo, then offset or align",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "anchorVertical"
+      },
+      "expected": {
+        "both": [],
+        "lastWordOnly": [
+          "align",
+          "offset",
+          "relativeTo"
+        ],
+        "finePrintOnly": []
+      }
+    },
+    {
+      "id": "0021-shape-outline",
+      "title": "shape.outline: color, width, dash style and arrowheads",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "compare",
+      "input": {
+        "def": "shapeOutline"
+      },
+      "expected": {
+        "both": [],
+        "lastWordOnly": [
+          "color",
+          "headEnd",
+          "style",
+          "tailEnd",
+          "width"
+        ],
+        "finePrintOnly": []
+      },
+      "notes": "width is points, as border.width."
+    },
+    {
       "id": "0101-run-link",
       "title": "run.link: any string in last-word, http/https/mailto in fine-print",
       "since": "0.37.0",
@@ -579,6 +701,208 @@
             "a4"
           ]
         }
+      }
+    },
+    {
+      "id": "0107-anchor-wrap",
+      "title": "anchor.wrap: inFront, not front",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "anchor.wrap"
+      },
+      "expected": {
+        "lastWord": {
+          "enum": [
+            "square",
+            "tight",
+            "through",
+            "topAndBottom",
+            "behind",
+            "inFront"
+          ]
+        },
+        "finePrint": {}
+      },
+      "notes": "Agreed name: inFront (Fancy's decision when the anchor model was accepted). behind and inFront are the two wrapNone cases."
+    },
+    {
+      "id": "0108-anchor-horizontal-offset",
+      "title": "anchor.horizontal.offset is points, at most 22in either way",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "anchor.horizontal.offset"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "number",
+          "minimum": -1584,
+          "maximum": 1584
+        },
+        "finePrint": {}
+      },
+      "notes": "Agreed unit: points for offsets, px for size. 1584pt is 22in, the same bound as the 2112px size cap (0114)."
+    },
+    {
+      "id": "0109-anchor-vertical-offset",
+      "title": "anchor.vertical.offset is points, at most 22in either way",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "anchor.vertical.offset"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "number",
+          "minimum": -1584,
+          "maximum": 1584
+        },
+        "finePrint": {}
+      }
+    },
+    {
+      "id": "0110-anchor-horizontal-relative-to",
+      "title": "anchor.horizontal.relativeTo",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "anchor.horizontal.relativeTo"
+      },
+      "expected": {
+        "lastWord": {
+          "enum": [
+            "page",
+            "margin",
+            "column",
+            "character"
+          ]
+        },
+        "finePrint": {}
+      }
+    },
+    {
+      "id": "0111-anchor-vertical-relative-to",
+      "title": "anchor.vertical.relativeTo",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "anchor.vertical.relativeTo"
+      },
+      "expected": {
+        "lastWord": {
+          "enum": [
+            "page",
+            "margin",
+            "paragraph",
+            "line"
+          ]
+        },
+        "finePrint": {}
+      }
+    },
+    {
+      "id": "0112-anchor-horizontal-align",
+      "title": "anchor.horizontal.align",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "anchor.horizontal.align"
+      },
+      "expected": {
+        "lastWord": {
+          "enum": [
+            "left",
+            "center",
+            "right",
+            "inside",
+            "outside"
+          ]
+        },
+        "finePrint": {}
+      }
+    },
+    {
+      "id": "0113-anchor-vertical-align",
+      "title": "anchor.vertical.align",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "anchor.vertical.align"
+      },
+      "expected": {
+        "lastWord": {
+          "enum": [
+            "top",
+            "center",
+            "bottom",
+            "inside",
+            "outside"
+          ]
+        },
+        "finePrint": {}
+      }
+    },
+    {
+      "id": "0114-shape-width-px",
+      "title": "shape.widthPx is px at 96 dpi, 0 to 22in",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "shape.widthPx"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2112
+        },
+        "finePrint": {}
+      },
+      "notes": "Agreed unit: px for size, as image.widthPx. 0 is allowed by the schema for a line; an area shape with a zero side is a validation refusal, not a keyword."
+    },
+    {
+      "id": "0115-shape-height-px",
+      "title": "shape.heightPx is px at 96 dpi, 0 to 22in",
+      "since": "0.63.0",
+      "tags": [
+        "shared"
+      ],
+      "fn": "constraint",
+      "input": {
+        "def": "shape.heightPx"
+      },
+      "expected": {
+        "lastWord": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2112
+        },
+        "finePrint": {}
       }
     }
   ]
