@@ -1329,6 +1329,139 @@
         }
       },
       "expected": []
+    },
+    {
+      "id": "0015-a-warning-inside-a-for-each-lane-reaches-the-run-per-item",
+      "title": "A warning a node emits inside a for_each item lane reaches the run once per item, its nodeId re-addressed as <for_each id>/<index>/<node id>: the lane is not a separate run whose events can be dropped.",
+      "since": "0.65.0",
+      "tags": [
+        "routing",
+        "branch",
+        "for-each",
+        "lane-events",
+        "warns"
+      ],
+      "input": {
+        "schema": {
+          "$schema": "https://particle.academy/schemas/workflow/v1.json",
+          "version": 1,
+          "graph": {
+            "nodes": [
+              {
+                "id": "t",
+                "kind": "manual_trigger",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "id": "each",
+                "kind": "for_each",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "source": "{{ $json.rows }}"
+                }
+              },
+              {
+                "id": "br",
+                "kind": "branch",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "condition": "{{ in.flag }}"
+                }
+              },
+              {
+                "id": "yes",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "true side"
+                }
+              },
+              {
+                "id": "no",
+                "kind": "log",
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "config": {
+                  "message": "false side"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "id": "e1",
+                "source": "t",
+                "target": "each"
+              },
+              {
+                "id": "e2",
+                "source": "each",
+                "target": "br",
+                "sourceHandle": "item"
+              },
+              {
+                "id": "e3",
+                "source": "br",
+                "target": "yes",
+                "sourceHandle": "true"
+              },
+              {
+                "id": "e4",
+                "source": "br",
+                "target": "no",
+                "sourceHandle": "false"
+              }
+            ]
+          }
+        },
+        "initialInputs": {
+          "t": {
+            "rows": [
+              {
+                "id": 1
+              },
+              {
+                "id": 2
+              }
+            ]
+          }
+        }
+      },
+      "expected": [
+        {
+          "nodeId": "each/0/br",
+          "message": "Node br took the \"false\" port because `condition` resolved to NOTHING — the path in.flag names no field on this node's inputs. That is not the same as a false condition: the route was decided by an absent value rather than by the data.",
+          "detail": {
+            "node": "br",
+            "configKey": "condition",
+            "path": "in.flag",
+            "tookPort": "false"
+          }
+        },
+        {
+          "nodeId": "each/1/br",
+          "message": "Node br took the \"false\" port because `condition` resolved to NOTHING — the path in.flag names no field on this node's inputs. That is not the same as a false condition: the route was decided by an absent value rather than by the data.",
+          "detail": {
+            "node": "br",
+            "configKey": "condition",
+            "path": "in.flag",
+            "tookPort": "false"
+          }
+        }
+      ]
     }
   ]
 }

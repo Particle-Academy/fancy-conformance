@@ -24,6 +24,7 @@
     "ABSENT IS NOT NULL. 0003 resolves to null and is silent; 0001 does not resolve and warns. An implementation that tests the resolved VALUE instead of asking whether the path RESOLVED fails 0003.",
     "SORTED BY MESSAGE, NOT EMISSION ORDER. Undelivered-edge warnings are emitted as each target is reached in topological order, and runtimes may break ties between same-depth nodes differently. Ordering is `flow/graph-runs`' question; this table asks which warnings a run produces.",
     "THE NEAR-MISS NOTE (0012) comes from the source kind's declared output shape: a handle that equals a field path of that shape is an agent naming a field where a port belongs, and the message says how to read the field instead. It needs the shape, which every runtime's builtin `for_each` declares.",
-    "There is NO discrimination probe for this suite, for the same reason as `flow/graph-runs`: the implementation under test is a whole workflow engine, which this package does not carry."
+    "There is NO discrimination probe for this suite, for the same reason as `flow/graph-runs`: the implementation under test is a whole workflow engine, which this package does not carry.",
+    "Row 0015 pins that a for_each item lane is not a separate run whose events can be dropped: a lane node's warning reaches the run once per item, nodeId re-addressed as <for_each id>/<index>/<node id>, detail.node lane-local. The durable Coordinators do not forward lane events yet, so the row is expected red on them (see CHANGELOG)."
   ]
 }

@@ -10,6 +10,23 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- `flow/run-diagnostics` row `0015` (appended; no existing id or golden moved):
+  a warning a node emits inside a `for_each` item lane reaches the run once per
+  item, its `nodeId` re-addressed as `<for_each id>/<index>/<node id>` (the rule
+  of fancy-flow-php's `RunEvent::forParent`), while `detail.node` keeps the
+  lane-local id. Golden from fancy-flow-php. Before 2026-11-25 the Node, Python
+  and Rust engines dropped every event inside a lane; their fixes are on main.
+  Known divergences this row exposes, measured against each engine's main:
+  - single-process: PHP, Node and Rust pass. Python also warns that edge `e3`
+    (`br` -> `yes` on `true`) is undelivered, once per item: its lane appears to
+    run without the kind registry that tells it `branch` can publish `true`.
+  - durable: every Coordinator records nothing for this row (Node, Python, Rust,
+    and fancy-flow-php's `per_node` driver); only PHP's `single` driver passes.
+  An engine adopting this version should expect those rows red until fixed, and
+  its pinned row count moves from 14 to 15.
+
 ## [0.64.0] - 2026-11-24
 
 ### Added
