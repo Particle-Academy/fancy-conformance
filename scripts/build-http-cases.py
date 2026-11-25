@@ -1903,21 +1903,39 @@ def request_guards(holy_sheet_src: str) -> None:
     rl(
         "message-length-public-override",
         "A public error's own maxMessageLength lets one message through whole",
-        {"kind": "public", "status": 400, "error": "rows_refused", "message": eight, "maxMessageLength": 1000},
+        {
+            "kind": "public",
+            "status": 400,
+            "error": "rows_refused",
+            "message": eight,
+            "maxMessageLength": 1000,
+        },
         refused(400, env("rows_refused", eight)),
         notes="The route keeps its 300; only this error is longer.",
     )
     rl(
         "message-length-override-smaller",
         "A per-error override may also be smaller than the setting",
-        {"kind": "public", "status": 400, "error": "rows_refused", "message": eight, "maxMessageLength": 100},
+        {
+            "kind": "public",
+            "status": 400,
+            "error": "rows_refused",
+            "message": eight,
+            "maxMessageLength": 100,
+        },
         refused(400, env("rows_refused", cut(eight, 100))),
         limits={"maxMessageLength": 1000},
     )
     rl(
         "message-length-override-capped",
         "A per-error override over 4000 counts as 4000",
-        {"kind": "public", "status": 400, "error": "rows_refused", "message": many, "maxMessageLength": 100000},
+        {
+            "kind": "public",
+            "status": 400,
+            "error": "rows_refused",
+            "message": many,
+            "maxMessageLength": 100000,
+        },
         refused(400, env("rows_refused", cut(many, 4000))),
         notes="The hard bound: no setting or override sends more than 4000 code points.",
     )
@@ -1927,7 +1945,12 @@ def request_guards(holy_sheet_src: str) -> None:
         {
             "kind": "failed",
             "errors": [
-                {"field": "rows", "error": "rows_refused", "message": eight, "maxMessageLength": 1000},
+                {
+                    "field": "rows",
+                    "error": "rows_refused",
+                    "message": eight,
+                    "maxMessageLength": 1000,
+                },
                 {"field": "note", "message": eight},
             ],
         },
@@ -1939,7 +1962,12 @@ def request_guards(holy_sheet_src: str) -> None:
         ),
     )
     lines = [f"Row {i} has a quantity below the minimum of 1." for i in range(1, 9)]
-    noisy = (chr(10) + chr(9)).join(lines[:4]) + chr(0) + chr(0x85) + (chr(13) + chr(10)).join(lines[4:])
+    noisy = (
+        (chr(10) + chr(9)).join(lines[:4])
+        + chr(0)
+        + chr(0x85)
+        + (chr(13) + chr(10)).join(lines[4:])
+    )
     rl(
         "message-length-controls-at-4000",
         "At the 4000 bound, control characters are still stripped",
