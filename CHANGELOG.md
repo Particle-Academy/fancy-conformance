@@ -10,6 +10,8 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+## [0.64.0] - 2026-11-24
+
 ### Added
 
 - `http/request-guards` pins a configurable length for public error messages
