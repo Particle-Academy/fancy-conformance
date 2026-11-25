@@ -7,7 +7,7 @@
   "required": ["error", "message", "requestId"],
   "properties": {
     "error": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-    "message": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "message": { "type": "string", "minLength": 1, "maxLength": 4000 },
     "field": { "type": "string" },
     "limit": { "$ref": "#/$defs/limit" },
     "errors": {
@@ -18,7 +18,7 @@
         "required": ["error", "message"],
         "properties": {
           "error": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
-          "message": { "type": "string", "minLength": 1, "maxLength": 300 },
+          "message": { "type": "string", "minLength": 1, "maxLength": 4000 },
           "field": { "type": "string" },
           "limit": { "$ref": "#/$defs/limit" }
         },

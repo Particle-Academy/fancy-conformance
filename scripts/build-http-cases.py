@@ -1848,6 +1848,133 @@ def request_guards(holy_sheet_src: str) -> None:
         ),
     )
 
+    # --- render: the message length (CC-fancy-0063, SPEC 3.1 and 4.0)
+    # Appended after every earlier row, so no id moves. The long messages are
+    # data-built refusals, one sentence per rejected row, the case that asked
+    # for the setting. The truncated goldens are the spec's rule applied to an
+    # ASCII string: the first max - 1 code points, then U+2026.
+    def rows_sentence(n: int) -> str:
+        return " ".join(f"Row {i} has a quantity below the minimum of 1." for i in range(1, n + 1))
+
+    def cut(text: str, mx: int) -> str:
+        return text if len(text) <= mx else text[: mx - 1] + chr(0x2026)
+
+    eight = rows_sentence(8)
+    many = rows_sentence(95)
+    assert 300 < len(eight) < 1000, len(eight)
+    assert len(many) > 4000, len(many)
+    since_limit = "0.64.0"
+
+    def rl(
+        slug: str,
+        title: str,
+        throw: dict[str, object],
+        expected: object,
+        *,
+        limits: dict[str, object] | None = None,
+        **extra: object,
+    ) -> None:
+        inp: dict[str, object] = {"throw": throw}
+        if limits is not None:
+            inp["limits"] = limits
+        t.add(slug, title, "render", inp, expected, since=since_limit, **extra)
+
+    rl(
+        "message-length-default",
+        "With no setting a long 4xx message still truncates at 300",
+        {"kind": "http", "status": 400, "message": eight},
+        refused(400, env("bad_request", cut(eight, 300))),
+        notes="The default is unchanged: an app that sets nothing gets exactly what it got before.",
+    )
+    rl(
+        "message-length-setting",
+        "maxMessageLength raises the limit for a 4xx message",
+        {"kind": "http", "status": 400, "message": eight},
+        refused(400, env("bad_request", eight)),
+        limits={"maxMessageLength": 1000},
+    )
+    rl(
+        "message-length-setting-validation",
+        "maxMessageLength applies to framework validation items",
+        {"kind": "validation", "errors": [{"field": "rows", "message": eight}]},
+        v422([{"error": "invalid", "message": eight, "field": "rows"}]),
+        limits={"maxMessageLength": 1000},
+    )
+    rl(
+        "message-length-public-override",
+        "A public error's own maxMessageLength lets one message through whole",
+        {"kind": "public", "status": 400, "error": "rows_refused", "message": eight, "maxMessageLength": 1000},
+        refused(400, env("rows_refused", eight)),
+        notes="The route keeps its 300; only this error is longer.",
+    )
+    rl(
+        "message-length-override-smaller",
+        "A per-error override may also be smaller than the setting",
+        {"kind": "public", "status": 400, "error": "rows_refused", "message": eight, "maxMessageLength": 100},
+        refused(400, env("rows_refused", cut(eight, 100))),
+        limits={"maxMessageLength": 1000},
+    )
+    rl(
+        "message-length-override-capped",
+        "A per-error override over 4000 counts as 4000",
+        {"kind": "public", "status": 400, "error": "rows_refused", "message": many, "maxMessageLength": 100000},
+        refused(400, env("rows_refused", cut(many, 4000))),
+        notes="The hard bound: no setting or override sends more than 4000 code points.",
+    )
+    rl(
+        "message-length-failed-items",
+        "An item's override is its own; its sibling keeps the route's limit",
+        {
+            "kind": "failed",
+            "errors": [
+                {"field": "rows", "error": "rows_refused", "message": eight, "maxMessageLength": 1000},
+                {"field": "note", "message": eight},
+            ],
+        },
+        v422(
+            [
+                {"error": "rows_refused", "message": eight, "field": "rows"},
+                {"error": "invalid", "message": cut(eight, 300), "field": "note"},
+            ]
+        ),
+    )
+    lines = [f"Row {i} has a quantity below the minimum of 1." for i in range(1, 9)]
+    noisy = (chr(10) + chr(9)).join(lines[:4]) + chr(0) + chr(0x85) + (chr(13) + chr(10)).join(lines[4:])
+    rl(
+        "message-length-controls-at-4000",
+        "At the 4000 bound, control characters are still stripped",
+        {"kind": "http", "status": 400, "message": noisy},
+        refused(400, env("bad_request", eight)),
+        limits={"maxMessageLength": 4000},
+        notes="There is no opt-out from sanitising: only the length changes.",
+    )
+    trace = (
+        "Traceback (most recent call last):"
+        + chr(10)
+        + chr(10).join(
+            f'  File "/srv/app/releases/20261124/app/imports/rows.py", line {i}, in check_row_{i}'
+            for i in range(1, 13)
+        )
+        + chr(10)
+        + "psycopg.errors.UndefinedTable: relation prod.users does not exist"
+    )
+    assert len(trace) > 300, len(trace)
+    rl(
+        "message-length-crash-at-4000",
+        "At the 4000 bound, a crash is still the fixed 500",
+        {"kind": "crash", "message": trace},
+        refused(500, env("server_error", "Something went wrong on our side." + REF)),
+        limits={"maxMessageLength": 4000},
+        notes="Runners also assert the exception text appears NOWHERE in the response bytes.",
+    )
+    rl(
+        "message-length-5xx-at-4000",
+        "At the 4000 bound, a non-public 5xx still never uses its message",
+        {"kind": "http", "status": 503, "message": trace},
+        refused(503, env("unavailable", "The service is unavailable right now." + REF)),
+        limits={"maxMessageLength": 4000},
+    )
+
     write_json(
         d / "cases.json",
         {
@@ -1871,8 +1998,8 @@ def request_guards(holy_sheet_src: str) -> None:
                 "functions": {
                     "guard": "guard({headers, body, limits?, config?}) -> {pass, requestId?} | "
                     "{status, headers, body, bodyRead?}",
-                    "render": "render({throw, config?, headers?}) -> {status, headers, body} | "
-                    "{passthrough, status}",
+                    "render": "render({throw, limits?, config?, headers?}) -> {status, headers, "
+                    "body} | {passthrough, status}",
                     "workbookLimits": "workbookLimits(limits) -> holy-sheet limits",
                     "workbook": "workbook({limits, file, field}) -> {pass} | {status, headers, "
                     "body}",
@@ -1891,7 +2018,8 @@ def request_guards(holy_sheet_src: str) -> None:
                 "by running fancy-holy-sheet 0.13.2 from the envelope's sibling "
                 "checkout; everything else is typed from the spec. "
                 "tests/http-probe.ts passes every row but the workbook ones, "
-                "which need holy-sheet.",
+                "which need holy-sheet. The message-length rows (since 0.64.0, "
+                "CC-fancy-0063) were added the same way, from SPEC 3.1 and 4.0.",
                 "implementations": [
                     {
                         "language": "php",

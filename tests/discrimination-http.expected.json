@@ -76,13 +76,33 @@
   ],
   "echoCrash": [
     "req:0061",
-    "req:0062"
+    "req:0062",
+    "req:0097"
   ],
   "echoHttp5xx": [
     "req:0060",
-    "req:0078"
+    "req:0078",
+    "req:0098"
   ],
   "noPartFloor": [
     "req:0081"
+  ],
+  "fixedMessageLength": [
+    "req:0090",
+    "req:0091",
+    "req:0092",
+    "req:0093",
+    "req:0094",
+    "req:0095",
+    "req:0096"
+  ],
+  "uncappedOverride": [
+    "req:0094"
+  ],
+  "overrideLeaks": [
+    "req:0095"
+  ],
+  "rawWhenRaised": [
+    "req:0096"
   ]
 }

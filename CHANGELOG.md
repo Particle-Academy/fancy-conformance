@@ -10,6 +10,37 @@ promising otherwise until 1.0.
 
 ## [Unreleased]
 
+### Added
+
+- `http/request-guards` pins a configurable length for public error messages
+  (CC-fancy-0063), as 10 NEW render rows `0089` to `0098` (appended; no existing
+  id moved), each `since: 0.64.0`. SPEC section 3.1 adds the `maxMessageLength`
+  setting (default 300, so nothing changes for an app that does not set it; a
+  value over 4000 is refused when the settings are built), and new section 4.0
+  says which limit a message gets: the error's own `maxMessageLength` on a
+  `public` error or a `failed` item, capped at 4000, else the route's setting.
+  The rows cover the unchanged default, the setting on a 4xx and on framework
+  validation, the per-error override larger and smaller than the setting, the
+  4000 cap on an override, an item's override not reaching its sibling, and, at
+  the 4000 bound, control characters still stripped, a crash still the fixed
+  500 and a non-public 5xx still never using its message.
+- A `failed` render kind (SPEC 4.7): the package's own `ValidationFailed`, whose
+  items carry their own codes, in both the Laravel and the Python guard.
+  `render` rows may now carry `input.limits`.
+- Discrimination mutants for the new rows: a fixed 300 that ignores the setting
+  and the override (fails 0090 to 0096), an uncapped override (0094), an item's
+  override leaking to the items after it (0095), and skipping the control
+  characters when the limit is raised (0096). `echoCrash` and `echoHttp5xx` also
+  fail the new 0097 and 0098.
+
+### Changed
+
+- `envelope.schema.json`: `message` (top level and in `errors` items) may be up
+  to 4000 characters, was 300. **Packages that ship a byte copy of the schema
+  must take the new copy when they move their pin**; their pin tests fail until
+  they do. Nothing else in the schema moved, and a 300-character message still
+  validates.
+
 ## [0.63.0] - 2026-11-24
 
 ### Added

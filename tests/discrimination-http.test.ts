@@ -82,6 +82,10 @@ test("every mutation the probe knows is pinned", () => {
     "echoCrash",
     "echoHttp5xx",
     "noPartFloor",
+    "fixedMessageLength",
+    "uncappedOverride",
+    "overrideLeaks",
+    "rawWhenRaised",
   ];
   assert.deepEqual(Object.keys(MUTANTS).sort(), [...known].sort());
 });
@@ -117,5 +121,6 @@ test("the validator itself refuses what the schema forbids", async () => {
   assert.ok(validate(schema, { ...ok, retryAfter: 1.5 }).length > 0);
   assert.ok(validate(schema, { ...ok, errors: [] }).length > 0);
   assert.ok(validate(schema, { ...ok, limit: { name: "maxRows" } }).length > 0);
-  assert.ok(validate(schema, { ...ok, message: "x".repeat(301) }).length > 0);
+  assert.ok(validate(schema, { ...ok, message: "x".repeat(4001) }).length > 0, "4000 is the hard bound (SPEC 3.1)");
+  assert.deepEqual(validate(schema, { ...ok, message: "x".repeat(4000) }), []);
 });

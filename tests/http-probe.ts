@@ -343,8 +343,12 @@ export const DEFAULTS = {
   maxListLength: 10000,
   maxErrors: 20,
   finiteNumbers: true,
+  maxMessageLength: 300,
   workbook: { maxRows: 100000, maxColumns: 1000, maxCells: 100000 },
 };
+
+/** SPEC 3.1 and 4.0: no setting or override sends more than this. */
+export const MESSAGE_CEILING = 4000;
 
 export function settings(limits: J = {}): typeof DEFAULTS {
   return { ...DEFAULTS, ...limits, workbook: { ...DEFAULTS.workbook, ...(limits.workbook ?? {}) } };
@@ -631,6 +635,20 @@ export function render(input: J, m: Mutations = {}): J {
     envelope(status, { ...body, requestId: rid }, ridName, extra);
   const crash = () => env(500, { error: "server_error", message: serverSentence(500, null, rid, m) });
 
+  // section 4.0: the route's maxMessageLength, or the error's own, capped.
+  const route: number = m.fixedMessageLength ? 300 : settings(input.limits).maxMessageLength;
+  const own = (x: J, fallback: number): number => {
+    if (m.fixedMessageLength || !isInt(x) || x < 1) return fallback;
+    return m.uncappedOverride ? x : Math.min(x, MESSAGE_CEILING);
+  };
+  const clean = (text: string, max: number): string => {
+    if (m.rawWhenRaised && max > 300) {
+      const cps = Array.from(text);
+      return cps.length > max ? cps.slice(0, max - 1).join("") + "…" : text;
+    }
+    return sanitise(text, max, m);
+  };
+
   switch (t.kind) {
     case "response":
       if (m.rewrites409) return env(t.status, { error: statusEntry(t.status)[0], message: statusEntry(t.status)[1] });
@@ -638,14 +656,28 @@ export function render(input: J, m: Mutations = {}): J {
     case "crash":
       return m.echoCrash ? env(500, { error: "server_error", message: sanitise(t.message) }) : crash();
     case "validation":
-      return v422(t.errors.map((e: J) => ({ error: "invalid", message: sanitise(e.message, 300, m), field: e.field })), rid, ridName);
+      return v422(t.errors.map((e: J) => ({ error: "invalid", message: clean(e.message, route), field: e.field })), rid, ridName);
+    case "failed": {
+      let leaked: number | null = null;
+      const items = t.errors.map((e: J) => {
+        const max = own(e.maxMessageLength, m.overrideLeaks && leaked !== null ? leaked : route);
+        if (isInt(e.maxMessageLength)) leaked = max;
+        const item: J = {
+          error: typeof e.error === "string" && CODE.test(e.error) ? e.error : "invalid",
+          message: clean(String(e.message ?? ""), max) || statusEntry(422)[1],
+        };
+        if (typeof e.field === "string" && e.field !== "") item.field = e.field;
+        return item;
+      });
+      return v422(items, rid, ridName);
+    }
     case "workbook": {
       const limit = { name: t.limit, max: t.max, actual: t.actual };
       return env(413, { error: "workbook_too_large", message: workbookTooLarge(limit, m), limit });
     }
     case "public": {
       if (!CODE.test(t.error)) return crash();
-      const body: J = { error: t.error, message: sanitise(t.message, 300, m) };
+      const body: J = { error: t.error, message: clean(t.message, own(t.maxMessageLength, route)) };
       const extra: Record<string, string> = {};
       if (isInt(t.retryAfter)) {
         body.retryAfter = t.retryAfter;
@@ -656,7 +688,7 @@ export function render(input: J, m: Mutations = {}): J {
     case "http": {
       const status: number = t.status;
       const [code, fallback] = statusEntry(status);
-      const msg = typeof t.message === "string" ? sanitise(t.message, 300, m) : "";
+      const msg = typeof t.message === "string" ? clean(t.message, route) : "";
       const ra = header(t.headers ?? {}, "retry-after");
       const retry = ra !== undefined && /^[0-9]{1,10}$/.test(ra.trim()) ? Number(ra.trim()) : null;
       const extra: Record<string, string> = retry === null ? {} : { "retry-after": String(retry) };

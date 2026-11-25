@@ -23,7 +23,7 @@ Implementations:
 | Member | Rule |
 |---|---|
 | `error` | Required. Matches `^[a-z][a-z0-9_]{0,63}$`. |
-| `message` | Required. One plain sentence, section 5 rules applied. Never exception text (section 4.4). |
+| `message` | Required. One plain sentence, section 5 rules applied. Never exception text (section 4.4). At most 4000 code points; 300 unless the app raised the limit (section 4.0). |
 | `field` | Optional. Dotted path (section 3.3) of the one field at fault. Never on a 422 (it uses `errors`). |
 | `limit` | Optional. `{name, max, actual?}`, integers, the limit that refused the request. |
 | `errors` | Present on every 422 and only on a 422, at least one item. Item: `{error, message, field?, limit?}`. |
@@ -116,12 +116,19 @@ Per route, every one configurable (names identical in every port):
 | `maxListLength` | 10000 |
 | `maxErrors` | 20 |
 | `finiteNumbers` | true |
+| `maxMessageLength` | 300 |
 | `workbook.maxRows` | 100000 |
 | `workbook.maxColumns` | 1000 |
 | `workbook.maxCells` | 100000 |
 
 The `upload` profile is the defaults with `maxBodyBytes` 10485760. App-wide:
 `requestIdHeader` (`x-request-id`) and `trustIncomingRequestId` (false).
+
+**`maxMessageLength`** (CC-fancy-0063) is the most code points a message the
+renderer takes from the application may keep (section 4.0). It is a positive
+integer **no greater than 4000**: a larger value is refused when the settings are
+built, like any other bad value, so a misconfiguration cannot send unbounded text.
+It changes the length and nothing else.
 
 A row's `input.limits` overrides the defaults key by key; `input.config` sets the app-wide two.
 
@@ -189,9 +196,30 @@ One pass over the bytes. No tree is built, nothing recurses, no regex.
 | `http` `{status, message?, headers?}` | `abort()` / `HttpException` | `starlette.exceptions.HTTPException` (fancy `HttpError(public=false)` when Starlette is absent) |
 | `crash` `{message}` | `RuntimeException` | `RuntimeError` |
 | `validation` `{errors: [{field, message}]}` | `ValidationException::withMessages` | FastAPI `RequestValidationError`, `loc = ("body", *segments)`, digit segments as ints |
-| `public` `{status, error, message, retryAfter?}` | the package's `HttpError` with `public: true` | the same |
+| `public` `{status, error, message, retryAfter?, maxMessageLength?}` | the package's `HttpError` with `public: true` | the same |
 | `workbook` `{limit, max, actual}` | holy-sheet `ReadLimitExceeded` (a read limit) or `ArchiveRefused::overLimit` (an archive limit) | the same classes in `holy_sheet.exceptions` |
 | `response` `{status, headers}` | the app RETURNS this response | the same |
+| `failed` `{errors: [{field?, message, error?, maxMessageLength?}]}` | the package's `ValidationFailed` | the package's `ValidationFailed` (both branches) |
+
+A render row's `input.limits` sets the route's limits, as for `guard`; only
+`maxMessageLength` affects rendering.
+
+### 4.0 Message length
+
+Every message the renderer takes from the application (an `http` 4xx message, a
+`validation` or `failed` item, a `public` message) is `sanitise(text, max)`, where
+`max` is:
+
+- the error's own `maxMessageLength` when it carries one (`public`, and each
+  `failed` item), **capped at 4000**: a larger value counts as 4000. It may be
+  larger or smaller than the route's setting, and applies to that error or item
+  alone;
+- otherwise the route's `maxMessageLength` (3.1), 300 by default.
+
+**Nothing but the length changes.** Control characters still become spaces at any
+length (2.3), a message still over `max` still truncates with U+2026, a crash is
+still the fixed 500 (4.2), and a non-public 5xx still never uses its message
+(4.1), whatever the setting.
 
 ### 4.1 `http`
 
@@ -228,6 +256,14 @@ exception's own text is never used, even though holy-sheet's is safe.
 
 Returned unchanged: status, body and headers. Only the request-id header is added.
 This is how Inertia's bare 409 and its `X-Inertia-Location` 409 survive.
+
+### 4.7 `failed`
+
+The package's own 422, whose items carry their own codes. A 422; each item is
+`{error, message, field?}` in the order given: `error` is the item's code when it
+matches the code pattern (section 1), else `invalid`; `message` is sanitised under
+4.0, and an empty one becomes the 422 default sentence; `field` is kept when it is
+a non-empty string.
 
 ## 5. Workbook limits (fns `workbookLimits`, `workbook`)
 

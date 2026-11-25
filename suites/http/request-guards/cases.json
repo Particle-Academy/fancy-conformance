@@ -2495,6 +2495,317 @@
           "requestId": "$generated"
         }
       }
+    },
+    {
+      "id": "0089-message-length-default",
+      "title": "With no setting a long 4xx message still truncates at 300",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "http",
+          "status": 400,
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1."
+        }
+      },
+      "expected": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "bad_request",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below th\u2026",
+          "requestId": "$generated"
+        }
+      },
+      "notes": "The default is unchanged: an app that sets nothing gets exactly what it got before."
+    },
+    {
+      "id": "0090-message-length-setting",
+      "title": "maxMessageLength raises the limit for a 4xx message",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "http",
+          "status": 400,
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1."
+        },
+        "limits": {
+          "maxMessageLength": 1000
+        }
+      },
+      "expected": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "bad_request",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+          "requestId": "$generated"
+        }
+      }
+    },
+    {
+      "id": "0091-message-length-setting-validation",
+      "title": "maxMessageLength applies to framework validation items",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "validation",
+          "errors": [
+            {
+              "field": "rows",
+              "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1."
+            }
+          ]
+        },
+        "limits": {
+          "maxMessageLength": 1000
+        }
+      },
+      "expected": {
+        "status": 422,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "validation_failed",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+          "errors": [
+            {
+              "error": "invalid",
+              "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+              "field": "rows"
+            }
+          ],
+          "requestId": "$generated"
+        }
+      }
+    },
+    {
+      "id": "0092-message-length-public-override",
+      "title": "A public error's own maxMessageLength lets one message through whole",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "public",
+          "status": 400,
+          "error": "rows_refused",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+          "maxMessageLength": 1000
+        }
+      },
+      "expected": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "rows_refused",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+          "requestId": "$generated"
+        }
+      },
+      "notes": "The route keeps its 300; only this error is longer."
+    },
+    {
+      "id": "0093-message-length-override-smaller",
+      "title": "A per-error override may also be smaller than the setting",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "public",
+          "status": 400,
+          "error": "rows_refused",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+          "maxMessageLength": 100
+        },
+        "limits": {
+          "maxMessageLength": 1000
+        }
+      },
+      "expected": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "rows_refused",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has\u2026",
+          "requestId": "$generated"
+        }
+      }
+    },
+    {
+      "id": "0094-message-length-override-capped",
+      "title": "A per-error override over 4000 counts as 4000",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "public",
+          "status": 400,
+          "error": "rows_refused",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1. Row 9 has a quantity below the minimum of 1. Row 10 has a quantity below the minimum of 1. Row 11 has a quantity below the minimum of 1. Row 12 has a quantity below the minimum of 1. Row 13 has a quantity below the minimum of 1. Row 14 has a quantity below the minimum of 1. Row 15 has a quantity below the minimum of 1. Row 16 has a quantity below the minimum of 1. Row 17 has a quantity below the minimum of 1. Row 18 has a quantity below the minimum of 1. Row 19 has a quantity below the minimum of 1. Row 20 has a quantity below the minimum of 1. Row 21 has a quantity below the minimum of 1. Row 22 has a quantity below the minimum of 1. Row 23 has a quantity below the minimum of 1. Row 24 has a quantity below the minimum of 1. Row 25 has a quantity below the minimum of 1. Row 26 has a quantity below the minimum of 1. Row 27 has a quantity below the minimum of 1. Row 28 has a quantity below the minimum of 1. Row 29 has a quantity below the minimum of 1. Row 30 has a quantity below the minimum of 1. Row 31 has a quantity below the minimum of 1. Row 32 has a quantity below the minimum of 1. Row 33 has a quantity below the minimum of 1. Row 34 has a quantity below the minimum of 1. Row 35 has a quantity below the minimum of 1. Row 36 has a quantity below the minimum of 1. Row 37 has a quantity below the minimum of 1. Row 38 has a quantity below the minimum of 1. Row 39 has a quantity below the minimum of 1. Row 40 has a quantity below the minimum of 1. Row 41 has a quantity below the minimum of 1. Row 42 has a quantity below the minimum of 1. Row 43 has a quantity below the minimum of 1. Row 44 has a quantity below the minimum of 1. Row 45 has a quantity below the minimum of 1. Row 46 has a quantity below the minimum of 1. Row 47 has a quantity below the minimum of 1. Row 48 has a quantity below the minimum of 1. Row 49 has a quantity below the minimum of 1. Row 50 has a quantity below the minimum of 1. Row 51 has a quantity below the minimum of 1. Row 52 has a quantity below the minimum of 1. Row 53 has a quantity below the minimum of 1. Row 54 has a quantity below the minimum of 1. Row 55 has a quantity below the minimum of 1. Row 56 has a quantity below the minimum of 1. Row 57 has a quantity below the minimum of 1. Row 58 has a quantity below the minimum of 1. Row 59 has a quantity below the minimum of 1. Row 60 has a quantity below the minimum of 1. Row 61 has a quantity below the minimum of 1. Row 62 has a quantity below the minimum of 1. Row 63 has a quantity below the minimum of 1. Row 64 has a quantity below the minimum of 1. Row 65 has a quantity below the minimum of 1. Row 66 has a quantity below the minimum of 1. Row 67 has a quantity below the minimum of 1. Row 68 has a quantity below the minimum of 1. Row 69 has a quantity below the minimum of 1. Row 70 has a quantity below the minimum of 1. Row 71 has a quantity below the minimum of 1. Row 72 has a quantity below the minimum of 1. Row 73 has a quantity below the minimum of 1. Row 74 has a quantity below the minimum of 1. Row 75 has a quantity below the minimum of 1. Row 76 has a quantity below the minimum of 1. Row 77 has a quantity below the minimum of 1. Row 78 has a quantity below the minimum of 1. Row 79 has a quantity below the minimum of 1. Row 80 has a quantity below the minimum of 1. Row 81 has a quantity below the minimum of 1. Row 82 has a quantity below the minimum of 1. Row 83 has a quantity below the minimum of 1. Row 84 has a quantity below the minimum of 1. Row 85 has a quantity below the minimum of 1. Row 86 has a quantity below the minimum of 1. Row 87 has a quantity below the minimum of 1. Row 88 has a quantity below the minimum of 1. Row 89 has a quantity below the minimum of 1. Row 90 has a quantity below the minimum of 1. Row 91 has a quantity below the minimum of 1. Row 92 has a quantity below the minimum of 1. Row 93 has a quantity below the minimum of 1. Row 94 has a quantity below the minimum of 1. Row 95 has a quantity below the minimum of 1.",
+          "maxMessageLength": 100000
+        }
+      },
+      "expected": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "rows_refused",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1. Row 9 has a quantity below the minimum of 1. Row 10 has a quantity below the minimum of 1. Row 11 has a quantity below the minimum of 1. Row 12 has a quantity below the minimum of 1. Row 13 has a quantity below the minimum of 1. Row 14 has a quantity below the minimum of 1. Row 15 has a quantity below the minimum of 1. Row 16 has a quantity below the minimum of 1. Row 17 has a quantity below the minimum of 1. Row 18 has a quantity below the minimum of 1. Row 19 has a quantity below the minimum of 1. Row 20 has a quantity below the minimum of 1. Row 21 has a quantity below the minimum of 1. Row 22 has a quantity below the minimum of 1. Row 23 has a quantity below the minimum of 1. Row 24 has a quantity below the minimum of 1. Row 25 has a quantity below the minimum of 1. Row 26 has a quantity below the minimum of 1. Row 27 has a quantity below the minimum of 1. Row 28 has a quantity below the minimum of 1. Row 29 has a quantity below the minimum of 1. Row 30 has a quantity below the minimum of 1. Row 31 has a quantity below the minimum of 1. Row 32 has a quantity below the minimum of 1. Row 33 has a quantity below the minimum of 1. Row 34 has a quantity below the minimum of 1. Row 35 has a quantity below the minimum of 1. Row 36 has a quantity below the minimum of 1. Row 37 has a quantity below the minimum of 1. Row 38 has a quantity below the minimum of 1. Row 39 has a quantity below the minimum of 1. Row 40 has a quantity below the minimum of 1. Row 41 has a quantity below the minimum of 1. Row 42 has a quantity below the minimum of 1. Row 43 has a quantity below the minimum of 1. Row 44 has a quantity below the minimum of 1. Row 45 has a quantity below the minimum of 1. Row 46 has a quantity below the minimum of 1. Row 47 has a quantity below the minimum of 1. Row 48 has a quantity below the minimum of 1. Row 49 has a quantity below the minimum of 1. Row 50 has a quantity below the minimum of 1. Row 51 has a quantity below the minimum of 1. Row 52 has a quantity below the minimum of 1. Row 53 has a quantity below the minimum of 1. Row 54 has a quantity below the minimum of 1. Row 55 has a quantity below the minimum of 1. Row 56 has a quantity below the minimum of 1. Row 57 has a quantity below the minimum of 1. Row 58 has a quantity below the minimum of 1. Row 59 has a quantity below the minimum of 1. Row 60 has a quantity below the minimum of 1. Row 61 has a quantity below the minimum of 1. Row 62 has a quantity below the minimum of 1. Row 63 has a quantity below the minimum of 1. Row 64 has a quantity below the minimum of 1. Row 65 has a quantity below the minimum of 1. Row 66 has a quantity below the minimum of 1. Row 67 has a quantity below the minimum of 1. Row 68 has a quantity below the minimum of 1. Row 69 has a quantity below the minimum of 1. Row 70 has a quantity below the minimum of 1. Row 71 has a quantity below the minimum of 1. Row 72 has a quantity below the minimum of 1. Row 73 has a quantity below the minimum of 1. Row 74 has a quantity below the minimum of 1. Row 75 has a quantity below the minimum of 1. Row 76 has a quantity below the minimum of 1. Row 77 has a quantity below the minimum of 1. Row 78 has a quantity below the minimum of 1. Row 79 has a quantity below the minimum of 1. Row 80 has a quantity below the minimum of 1. Row 81 has a quantity below the minimum of 1. Row 82 has a quantity below the minimum of 1. Row 83 has a quantity below the minimum of 1. Row 84 has a quantity below the minimum of 1. Row 85 has a quantity below the minimum of 1. Row 86 has a quantity below the minimum of 1. Row 87 has a quantity below the minimum of 1. Row 88\u2026",
+          "requestId": "$generated"
+        }
+      },
+      "notes": "The hard bound: no setting or override sends more than 4000 code points."
+    },
+    {
+      "id": "0095-message-length-failed-items",
+      "title": "An item's override is its own; its sibling keeps the route's limit",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "failed",
+          "errors": [
+            {
+              "field": "rows",
+              "error": "rows_refused",
+              "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+              "maxMessageLength": 1000
+            },
+            {
+              "field": "note",
+              "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1."
+            }
+          ]
+        }
+      },
+      "expected": {
+        "status": 422,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "validation_failed",
+          "message": "2 fields need attention.",
+          "errors": [
+            {
+              "error": "rows_refused",
+              "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+              "field": "rows"
+            },
+            {
+              "error": "invalid",
+              "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below th\u2026",
+              "field": "note"
+            }
+          ],
+          "requestId": "$generated"
+        }
+      }
+    },
+    {
+      "id": "0096-message-length-controls-at-4000",
+      "title": "At the 4000 bound, control characters are still stripped",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "http",
+          "status": 400,
+          "message": "Row 1 has a quantity below the minimum of 1.\n\tRow 2 has a quantity below the minimum of 1.\n\tRow 3 has a quantity below the minimum of 1.\n\tRow 4 has a quantity below the minimum of 1.\u0000\u0085Row 5 has a quantity below the minimum of 1.\r\nRow 6 has a quantity below the minimum of 1.\r\nRow 7 has a quantity below the minimum of 1.\r\nRow 8 has a quantity below the minimum of 1."
+        },
+        "limits": {
+          "maxMessageLength": 4000
+        }
+      },
+      "expected": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "bad_request",
+          "message": "Row 1 has a quantity below the minimum of 1. Row 2 has a quantity below the minimum of 1. Row 3 has a quantity below the minimum of 1. Row 4 has a quantity below the minimum of 1. Row 5 has a quantity below the minimum of 1. Row 6 has a quantity below the minimum of 1. Row 7 has a quantity below the minimum of 1. Row 8 has a quantity below the minimum of 1.",
+          "requestId": "$generated"
+        }
+      },
+      "notes": "There is no opt-out from sanitising: only the length changes."
+    },
+    {
+      "id": "0097-message-length-crash-at-4000",
+      "title": "At the 4000 bound, a crash is still the fixed 500",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "crash",
+          "message": "Traceback (most recent call last):\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 1, in check_row_1\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 2, in check_row_2\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 3, in check_row_3\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 4, in check_row_4\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 5, in check_row_5\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 6, in check_row_6\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 7, in check_row_7\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 8, in check_row_8\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 9, in check_row_9\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 10, in check_row_10\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 11, in check_row_11\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 12, in check_row_12\npsycopg.errors.UndefinedTable: relation prod.users does not exist"
+        },
+        "limits": {
+          "maxMessageLength": 4000
+        }
+      },
+      "expected": {
+        "status": 500,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "server_error",
+          "message": "Something went wrong on our side. If it keeps happening, quote reference $generated.",
+          "requestId": "$generated"
+        }
+      },
+      "notes": "Runners also assert the exception text appears NOWHERE in the response bytes."
+    },
+    {
+      "id": "0098-message-length-5xx-at-4000",
+      "title": "At the 4000 bound, a non-public 5xx still never uses its message",
+      "since": "0.64.0",
+      "fn": "render",
+      "input": {
+        "throw": {
+          "kind": "http",
+          "status": 503,
+          "message": "Traceback (most recent call last):\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 1, in check_row_1\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 2, in check_row_2\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 3, in check_row_3\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 4, in check_row_4\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 5, in check_row_5\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 6, in check_row_6\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 7, in check_row_7\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 8, in check_row_8\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 9, in check_row_9\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 10, in check_row_10\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 11, in check_row_11\n  File \"/srv/app/releases/20261124/app/imports/rows.py\", line 12, in check_row_12\npsycopg.errors.UndefinedTable: relation prod.users does not exist"
+        },
+        "limits": {
+          "maxMessageLength": 4000
+        }
+      },
+      "expected": {
+        "status": 503,
+        "headers": {
+          "content-type": "application/json",
+          "x-request-id": "$generated"
+        },
+        "body": {
+          "error": "unavailable",
+          "message": "The service is unavailable right now. If it keeps happening, quote reference $generated.",
+          "requestId": "$generated"
+        }
+      }
     }
   ]
 }
